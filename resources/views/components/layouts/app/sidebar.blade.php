@@ -55,6 +55,18 @@
                     </flux:navlist.group>
                 @endif
 
+                @if (auth()->user()->can('session.view'))
+                    <flux:navlist.group :heading="__('List')" class="grid">
+                        @if (auth()->user()->can('session.view') ||
+                        auth()->user()->can('session.create') ||
+                        auth()->user()->can('session.edit') ||
+                        auth()->user()->can('session.delete') ||
+                        auth()->user()->can('session.disconnect'))
+                            <flux:navlist.item icon="phone" :href="route('sessions.index')" :current="request()->routeIs('sessions.*')" wire:navigate>{{ __('Sessions') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
+
                 <flux:navlist.group :heading="__('Tool')" class="grid">
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
                         <flux:navlist.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup & Restore') }}</flux:navlist.item>

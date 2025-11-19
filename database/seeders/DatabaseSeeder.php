@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             CompanyLicenseSeeder::class,
             DefaultBackupScheduleSeeder::class,
             UserSeeder::class,
+            SessionSeeder::class,
         ]);
     }
 }

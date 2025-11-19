@@ -16,6 +16,11 @@ use App\Livewire\Settings\Password;
 use App\Livewire\Company\CompanyEdit;
 use App\Livewire\Company\CompanyShow;
 use App\Livewire\Settings\Appearance;
+use App\Livewire\Sessions\SessionsIndex;
+use App\Livewire\Sessions\SessionsCreate;
+use App\Livewire\Sessions\SessionsEdit;
+use App\Livewire\Sessions\SessionsShow;
+use App\Livewire\Sessions\SessionsAudit;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
 
@@ -64,6 +69,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('roles/create', RoleCreate::class)->name('roles.create')->middleware(['permission:role.create']);
     Route::get('roles/{role}/edit', RoleEdit::class)->name('roles.edit')->middleware(['permission:role.edit']);
     Route::get('roles/{role}', RoleShow::class)->name('roles.show')->middleware(['permission:role.view']);
+
+    Route::get('sessions', SessionsIndex::class)->name('sessions.index')->middleware(['permission:session.view|session.create|session.edit|session.delete']);
+    Route::get('sessions/audit', SessionsAudit::class)->name('sessions.audit')->middleware(['permission:session.view']);
+    Route::get('sessions/create', SessionsCreate::class)->name('sessions.create')->middleware(['permission:session.create']);
+    Route::get('sessions/{session}/edit', SessionsEdit::class)->name('sessions.edit')->middleware(['permission:session.edit']);
+    Route::get('sessions/{session}', SessionsShow::class)->name('sessions.show')->middleware(['permission:session.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
