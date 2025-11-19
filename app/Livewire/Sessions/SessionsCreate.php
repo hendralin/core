@@ -6,12 +6,11 @@ use App\Models\Session;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Request;
 
 #[Title('Create Session')]
 class SessionsCreate extends Component

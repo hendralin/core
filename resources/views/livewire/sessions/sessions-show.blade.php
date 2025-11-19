@@ -59,7 +59,33 @@
                         WhatsApp API Information
                     </flux:heading>
 
-                    <div class="space-y-4">
+                    <div class="space-y-4">                        
+                        @if(isset($sessionData['me']))
+                        <!-- Profile Picture Section -->
+                        @if($profilePicture)
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="shrink-0">
+                                <img src="{{ $profilePicture }}" alt="Profile Picture" class="w-16 h-16 rounded-full border-2 border-gray-200 dark:border-gray-700 object-cover">
+                            </div>
+                            <div>
+                                <flux:text class="text-lg font-semibold">{{ $sessionData['me']['pushName'] ?? 'N/A' }}</flux:text>
+                                <flux:text class="text-sm text-gray-600 dark:text-gray-400">{{ isset($sessionData['me']['id']) ? substr($sessionData['me']['id'], 0, -5) : 'N/A' }}</flux:text>
+                            </div>
+                        </div>
+                        @else
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">WhatsApp Number</flux:text>
+                                <flux:text class="text-lg font-semibold">{{ isset($sessionData['me']['id']) ? substr($sessionData['me']['id'], 0, -5) : 'N/A' }}</flux:text>
+                            </div>
+                            <div>
+                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Display Name</flux:text>
+                                <flux:text class="text-lg font-semibold">{{ $sessionData['me']['pushName'] ?? 'N/A' }}</flux:text>
+                            </div>
+                        </div>
+                        @endif
+                        @endif
+
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">API Status</flux:text>
@@ -94,20 +120,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        @if(isset($sessionData['me']))
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">WhatsApp Number</flux:text>
-                                <flux:text class="text-lg font-semibold">{{ isset($sessionData['me']['id']) ? substr($sessionData['me']['id'], 0, -5) : 'N/A' }}</flux:text>
-                            </div>
-                            <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Display Name</flux:text>
-                                <flux:text class="text-lg font-semibold">{{ $sessionData['me']['pushName'] ?? 'N/A' }}</flux:text>
-                            </div>
-                        </div>
-                        @endif
-
+                        
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Engine</flux:text>

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Request;
 
 #[Title('Session Details')]
@@ -17,6 +18,7 @@ class SessionsShow extends Component
     public Session $session;
     public $sessionData = null;
     public $qrCodeImage = null;
+    public $profilePicture = null;
 
     public function mount(Session $session)
     {
@@ -35,6 +37,7 @@ class SessionsShow extends Component
 
             if ($response->successful()) {
                 $this->sessionData = $response->json();
+                $this->fetchProfilePicture();
             } else {
                 Log::warning('Failed to fetch session data from WAHA API', [
                     'session_id' => $this->session->session_id,
@@ -42,12 +45,44 @@ class SessionsShow extends Component
                     'response' => $response->body(),
                 ]);
                 $this->sessionData = null;
+                $this->profilePicture = null;
             }
         } catch (\Exception $e) {
             Log::error('Error fetching session data from WAHA API: ' . $e->getMessage(), [
                 'session_id' => $this->session->session_id,
             ]);
             $this->sessionData = null;
+            $this->profilePicture = null;
+        }
+    }
+
+    public function fetchProfilePicture()
+    {
+        if (isset($this->sessionData['me']['id'])) {
+            $profileCacheKey = 'profile_picture_' . $this->sessionData['me']['id'];
+            $this->profilePicture = Cache::remember($profileCacheKey, now()->addMinutes(15), function () {
+                try {
+                    $contactId = urlencode($this->sessionData['me']['id']);
+                    $sessionName = $this->session->session_id;
+
+                    $profileResponse = Http::withHeaders([
+                        'accept' => '*/*',
+                        'X-Api-Key' => env('WAHA_API_KEY'),
+                    ])->get(env('WAHA_API_URL') . "/api/contacts/profile-picture?contactId={$contactId}&refresh=false&session={$sessionName}");
+
+                    if ($profileResponse->successful()) {
+                        // API returns JSON with profilePictureURL field
+                        $profileData = $profileResponse->json();
+                        return $profileData['profilePictureURL'] ?? null;
+                    }
+                    return null;
+                } catch (\Exception $e) {
+                    Log::warning('Failed to get profile picture for session ' . $this->session->session_id . ': ' . $e->getMessage());
+                    return null;
+                }
+            });
+        } else {
+            $this->profilePicture = null;
         }
     }
 

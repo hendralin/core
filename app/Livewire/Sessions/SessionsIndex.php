@@ -7,12 +7,12 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
+use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Livewire\WithoutUrlPagination;
+use Illuminate\Support\Facades\Request;
 
 #[Title('Sessions')]
 class SessionsIndex extends Component
@@ -39,8 +39,6 @@ class SessionsIndex extends Component
         $this->clearPage();
     }
 
-
-
     public function updatingSearch()
     {
         $this->clearPage();
@@ -55,7 +53,6 @@ class SessionsIndex extends Component
     {
         $this->setPage($page);
     }
-
     public function clearPage()
     {
         $this->resetPage();
@@ -78,7 +75,6 @@ class SessionsIndex extends Component
         } else {
             $this->sortDirection = 'asc';
         }
-
         $this->sortField = $field;
     }
 
@@ -96,7 +92,6 @@ class SessionsIndex extends Component
                 session()->flash('error', 'No session selected for deletion.');
                 return;
             }
-
             // Session exists in database
             $session = Session::find($sessionId);
 
@@ -118,7 +113,6 @@ class SessionsIndex extends Component
                     session()->flash('error', 'Failed to delete session from WAHA API: ' . $e->getMessage());
                     return;
                 }
-
                 DB::transaction(function () use ($session) {
                     // Log activity before deletion
                     activity()
@@ -153,65 +147,6 @@ class SessionsIndex extends Component
             } else {
                 session()->flash('error', $e->getMessage());
             }
-        }
-    }
-
-
-    public function connectSession($id)
-    {
-        try {
-            if ($id) {
-                // Session exists in database
-                $session = Session::find($id);
-                if ($session) {
-                    // Log activity
-                    activity()
-                        ->performedOn($session)
-                        ->causedBy(Auth::user())
-                        ->withProperties([
-                            'ip' => Request::ip(),
-                            'user_agent' => Request::userAgent(),
-                        ])
-                        ->log('initiated WAHA session connection');
-                }
-            } else {
-                // Session only exists in API
-                Log::info('Attempted to connect session that is not in database');
-            }
-
-            session()->flash('success', 'Session connection initiated.');
-        } catch (\Exception $e) {
-            Log::error('connectSession error: ' . $e->getMessage());
-            session()->flash('error', 'Failed to connect session: ' . $e->getMessage());
-        }
-    }
-
-    public function disconnectSession($id)
-    {
-        try {
-            if ($id) {
-                // Session exists in database
-                $session = Session::find($id);
-                if ($session) {
-                    // Log activity
-                    activity()
-                        ->performedOn($session)
-                        ->causedBy(Auth::user())
-                        ->withProperties([
-                            'ip' => Request::ip(),
-                            'user_agent' => Request::userAgent(),
-                        ])
-                        ->log('disconnected WAHA session');
-                }
-            } else {
-                // Session only exists in API
-                Log::info('Attempted to disconnect session that is not in database');
-            }
-
-            session()->flash('success', 'Session disconnected.');
-        } catch (\Exception $e) {
-            Log::error('disconnectSession error: ' . $e->getMessage());
-            session()->flash('error', 'Failed to disconnect session: ' . $e->getMessage());
         }
     }
 
@@ -292,7 +227,6 @@ class SessionsIndex extends Component
                                 }
                             });
                         }
-
                         // Merge API data with database data
                         $sessionData = [
                             'id' => $dbSession->id,
@@ -354,7 +288,6 @@ class SessionsIndex extends Component
                 $sessions->push((object) $sessionData);
             }
         }
-
         // Apply filtering
         if ($this->search) {
             $sessions = $sessions->filter(function ($session) {
@@ -362,13 +295,11 @@ class SessionsIndex extends Component
                        str_contains(strtolower($session->session_id), strtolower($this->search));
             });
         }
-
         if ($this->statusFilter !== '') {
             $sessions = $sessions->filter(function ($session) {
                 return $session->status === $this->statusFilter;
             });
         }
-
         // Apply sorting
         $sessions = $sessions->sortBy($this->sortField, SORT_REGULAR, $this->sortDirection === 'desc');
 
