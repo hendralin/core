@@ -62,30 +62,22 @@
     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Search -->
-            <div>
-                <label for="audit-search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Search Activities
-                </label>
-                <input type="text"
-                       id="audit-search"
-                       wire:model.live.debounce.300ms="search"
-                       placeholder="Search activities..."
-                       class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
+            <flux:input
+                wire:model.live.debounce.300ms="search"
+                label="Search Activities"
+                placeholder="Search activities..." clearable />
 
             <!-- Role Filter -->
             <div>
                 <label for="role-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Role
                 </label>
-                <select id="role-filter"
-                        wire:model.live="selectedRole"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Roles</option>
+                <flux:select wire:model.live="selectedRole">
+                    <flux:select.option value="">All Roles</flux:select.option>
                     @foreach($roles as $role)
-                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                        <flux:select.option value="{{ $role->id }}">{{ $role->name }}</flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
 
             <!-- Per Page -->
@@ -93,18 +85,16 @@
                 <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Show
                 </label>
-                <select id="per-page"
-                        wire:model.live="perPage"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <flux:select wire:model.live="perPage" placeholder="Select per page...">
                     @foreach($this->perPageOptions as $option)
-                        <option value="{{ $option }}">{{ $option }} per page</option>
+                        <flux:select.option value="{{ $option }}">{{ $option }} per page</flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
 
             <!-- Clear Filters -->
             <div class="flex items-end">
-                <flux:button wire:click="clearFilters" variant="outline" size="sm" class="w-full">
+                <flux:button wire:click="clearFilters" variant="outline" class="w-full mb-0.5">
                     Clear Filters
                 </flux:button>
             </div>
