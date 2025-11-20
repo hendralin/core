@@ -36,10 +36,12 @@ class PermissionSeeder extends Seeder
             'session.delete',
             'session.connect',
             'session.disconnect',
+            'waha.view',
+            'waha.edit',
         ];
 
         foreach ($permissions as $key => $value) {
-            Permission::create(['name' => $value]);
+            Permission::firstOrCreate(['name' => $value]);
         }
 
         $permissions = Permission::all();

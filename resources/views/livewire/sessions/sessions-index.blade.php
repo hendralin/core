@@ -5,6 +5,84 @@
         <flux:separator variant="subtle" />
     </div>
 
+    @if(!$wahaConfigured)
+        <!-- WAHA Configuration Required Card -->
+        <div class="grid gap-6">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                                <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">WAHA Configuration Required</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">WhatsApp sessions cannot be managed yet</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <flux:badge color="yellow" icon="x-mark" size="sm">Not Configured</flux:badge>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-gray-200 dark:bg-zinc-600 rounded-lg">
+                                    <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Base URL</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">WAHA_API_URL environment variable</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Not set</p>
+                                <p class="text-xs text-red-600 dark:text-red-400">✗ Missing</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-gray-200 dark:bg-zinc-600 rounded-lg">
+                                    <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">API Key</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">WAHA_API_KEY environment variable</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Not set</p>
+                                <p class="text-xs text-red-600 dark:text-red-400">✗ Missing</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Configuration Required</h4>
+                                <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                                    You must configure WAHA_API_URL and WAHA_API_KEY in your environment variables before you can manage WhatsApp sessions.
+                                    <a href="{{ route('waha.index') }}" class="font-medium underline underline-offset-2 hover:text-yellow-800 dark:hover:text-yellow-100">Configure WAHA</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @else
     <div>
         @session('success')
             <x-alert type="success" class="mb-4">{{ $value }}</x-alert>
@@ -242,4 +320,5 @@
             </div>
         </div>
     </flux:modal>
+    @endif
 </div>

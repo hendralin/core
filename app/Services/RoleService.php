@@ -48,7 +48,8 @@ class RoleService
             'Cost Management' => [],
             'Transactions' => [],
             'Reports' => [],
-            'Sales & Cashier' => [],
+            'Setup' => [],
+            'WhatsApp Integration' => [],
         ];
 
         foreach ($permissions as $permission) {
@@ -99,8 +100,14 @@ class RoleService
                         $grouped['Reports'][] = $permission;
                         break;
                     case 'cashier':
-                    case 'sale':
-                        $grouped['Sales & Cashier'][] = $permission;
+                    case 'waha':
+                        $grouped['Setup'][] = $permission;
+                        break;
+                    case 'session':
+                        $grouped['WhatsApp Integration'][] = $permission;
+                        break;
+                    case 'waha':
+                        $grouped['WhatsApp Integration'][] = $permission;
                         break;
                     default:
                         $grouped['System'][] = $permission;

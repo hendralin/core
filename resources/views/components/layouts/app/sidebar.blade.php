@@ -55,6 +55,15 @@
                     </flux:navlist.group>
                 @endif
 
+                @if (auth()->user()->can('waha.view'))
+                    <flux:navlist.group :heading="__('Setup')" class="grid">
+                        @if (auth()->user()->can('waha.view') ||
+                        auth()->user()->can('waha.edit'))
+                            <flux:navlist.item icon="cog-6-tooth" :href="route('waha.index')" :current="request()->routeIs('waha.*')" wire:navigate>{{ __('WAHA Configuration') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
+
                 @if (auth()->user()->can('session.view'))
                     <flux:navlist.group :heading="__('List')" class="grid">
                         @if (auth()->user()->can('session.view') ||

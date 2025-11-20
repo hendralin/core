@@ -169,6 +169,14 @@ class SessionsIndex extends Component
 
     public function render()
     {
+        // Check if WAHA is configured
+        if (!env('WAHA_API_URL') || !env('WAHA_API_KEY')) {
+            return view('livewire.sessions.sessions-index', [
+                'sessions' => collect(),
+                'wahaConfigured' => false
+            ]);
+        }
+
         $sessions = collect();
 
         try {
@@ -320,6 +328,9 @@ class SessionsIndex extends Component
             ['path' => request()->url(), 'pageName' => 'page']
         );
 
-        return view('livewire.sessions.sessions-index', compact('sessions'));
+        return view('livewire.sessions.sessions-index', [
+            'sessions' => $sessions,
+            'wahaConfigured' => true
+        ]);
     }
 }

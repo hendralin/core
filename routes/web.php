@@ -4,6 +4,7 @@ use App\Livewire\Roles\RoleEdit;
 use App\Livewire\Roles\RoleShow;
 use App\Livewire\Users\UserEdit;
 use App\Livewire\Users\UserShow;
+use App\Livewire\Waha\WahaIndex;
 use App\Livewire\Roles\RoleAudit;
 use App\Livewire\Roles\RoleIndex;
 use App\Livewire\Users\UserAudit;
@@ -16,12 +17,12 @@ use App\Livewire\Settings\Password;
 use App\Livewire\Company\CompanyEdit;
 use App\Livewire\Company\CompanyShow;
 use App\Livewire\Settings\Appearance;
-use App\Livewire\Sessions\SessionsIndex;
-use App\Livewire\Sessions\SessionsCreate;
+use Illuminate\Support\Facades\Route;
 use App\Livewire\Sessions\SessionsEdit;
 use App\Livewire\Sessions\SessionsShow;
 use App\Livewire\Sessions\SessionsAudit;
-use Illuminate\Support\Facades\Route;
+use App\Livewire\Sessions\SessionsIndex;
+use App\Livewire\Sessions\SessionsCreate;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
 
 // License expired page (accessible even when license is expired)
@@ -69,6 +70,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('roles/create', RoleCreate::class)->name('roles.create')->middleware(['permission:role.create']);
     Route::get('roles/{role}/edit', RoleEdit::class)->name('roles.edit')->middleware(['permission:role.edit']);
     Route::get('roles/{role}', RoleShow::class)->name('roles.show')->middleware(['permission:role.view']);
+
+    Route::get('waha', WahaIndex::class)->name('waha.index')->middleware(['permission:waha.view|waha.edit']);
 
     Route::get('sessions', SessionsIndex::class)->name('sessions.index')->middleware(['permission:session.view|session.create|session.edit|session.delete']);
     Route::get('sessions/audit', SessionsAudit::class)->name('sessions.audit')->middleware(['permission:session.view']);
