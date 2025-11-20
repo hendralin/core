@@ -214,6 +214,47 @@ class SessionsShow extends Component
         }
     }
 
+    public function logoutSession()
+    {
+        $this->authorize('session.disconnect');
+
+        try {
+            // Hit WAHA API to logout session
+            $response = Http::withHeaders([
+                'accept' => 'application/json',
+                'X-Api-Key' => env('WAHA_API_KEY'),
+            ])->post(env('WAHA_API_URL') . "/api/sessions/{$this->session->session_id}/logout");
+
+            if ($response->successful()) {
+                // Log activity
+                activity()
+                    ->performedOn($this->session)
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'ip' => Request::ip(),
+                        'user_agent' => Request::userAgent(),
+                        'api_response' => $response->json(),
+                    ])
+                    ->log('logged out WAHA session via API');
+
+                $this->refreshSessionData();
+                session()->flash('success', 'Session logged out successfully.');
+            } else {
+                Log::warning('Failed to logout session via WAHA API', [
+                    'session_id' => $this->session->session_id,
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+                session()->flash('error', 'Failed to logout session: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            Log::error('logoutSession error: ' . $e->getMessage(), [
+                'session_id' => $this->session->session_id,
+            ]);
+            session()->flash('error', 'Failed to logout session: ' . $e->getMessage());
+        }
+    }
+
     public function scanQRCode()
     {
         $this->authorize('session.connect');

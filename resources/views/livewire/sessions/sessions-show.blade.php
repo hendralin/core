@@ -59,7 +59,7 @@
                         WhatsApp API Information
                     </flux:heading>
 
-                    <div class="space-y-4">                        
+                    <div class="space-y-4">
                         @if(isset($sessionData['me']))
                         <!-- Profile Picture Section -->
                         @if($profilePicture)
@@ -120,7 +120,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Engine</flux:text>
@@ -181,18 +181,18 @@
                     <div class="space-y-3">
                         @can('session.edit')
                             <flux:button variant="filled" size="sm" href="{{ route('sessions.edit', $session) }}" wire:navigate icon="pencil-square" class="w-full">
-                                Edit Session
+                                Edit
                             </flux:button>
                         @endcan
 
                         <flux:button variant="primary" color="green" size="sm" wire:click="refreshSessionData" icon="arrow-path" class="w-full cursor-pointer">
-                            Refresh API Data
+                            Refresh
                         </flux:button>
 
                         @can('session.connect')
                             @if($sessionData && ($sessionData['status'] === 'FAILED' || $sessionData['status'] === 'STOPPED' || $sessionData['status'] === 'UNKNOWN'))
                                 <flux:button variant="primary" color="blue" size="sm" wire:click="startSession" icon="play" class="w-full cursor-pointer">
-                                    Start Session
+                                    Start
                                 </flux:button>
                             @elseif($sessionData && $sessionData['status'] === 'SCAN_QR_CODE')
                                 <flux:modal.trigger name="qr-code-modal">
@@ -206,7 +206,7 @@
                         @can('session.connect')
                             @if($sessionData && ($sessionData['status'] === 'WORKING' || $sessionData['status'] === 'STOPPED' || $sessionData['status'] === 'FAILED'))
                                 <flux:button variant="primary" color="pink" size="sm" wire:click="restartSession" icon="arrow-uturn-left" class="w-full cursor-pointer">
-                                    Restart Session
+                                    Restart
                                 </flux:button>
                             @endif
                         @endcan
@@ -214,7 +214,13 @@
                         @can('session.disconnect')
                             @if($sessionData && ($sessionData['status'] === 'WORKING' || $sessionData['status'] === 'SCAN_QR_CODE'))
                                 <flux:button variant="primary" color="amber" size="sm" wire:click="stopSession" icon="stop" class="w-full cursor-pointer">
-                                    Stop Session
+                                    Stop
+                                </flux:button>
+                            @endif
+
+                            @if($sessionData && ($sessionData['status'] === 'WORKING'))
+                                <flux:button variant="primary" size="sm" wire:click="logoutSession" icon="arrow-left-start-on-rectangle" class="w-full cursor-pointer">
+                                    Logout
                                 </flux:button>
                             @endif
                         @endcan
@@ -222,7 +228,7 @@
                         @can('session.delete')
                             <flux:modal.trigger name="delete-session-modal">
                                 <flux:button variant="danger" size="sm" icon="trash" class="w-full cursor-pointer">
-                                    Delete Session
+                                    Delete
                                 </flux:button>
                             </flux:modal.trigger>
                         @endcan
