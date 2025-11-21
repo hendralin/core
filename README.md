@@ -21,6 +21,13 @@
 - **Real-time Status**: Live connection status and session health monitoring
 - **QR Code Scanning**: Easy WhatsApp Web authentication via QR codes
 
+### Template Management
+- **Message Templates**: Create and manage WhatsApp message templates
+- **Template Variables**: Support for dynamic variables (@{{1}}, @{{2}}, etc.)
+- **Template Preview**: Real-time preview of how messages will appear
+- **Usage Tracking**: Monitor template usage statistics and history
+- **Template Validation**: Enforce naming conventions and content rules
+
 ### User Management
 - **Role-Based Access Control**: Comprehensive permission system
 - **User Authentication**: Secure login and session management
@@ -34,6 +41,7 @@
 
 ### Advanced Features
 - **API Health Monitoring**: Real-time WAHA server connectivity checks
+- **Template System**: Dynamic message templates with variable substitution
 - **Caching System**: Optimized performance with intelligent caching
 - **Background Jobs**: Asynchronous processing for better UX
 - **Audit Trails**: Complete activity logging and tracking
@@ -138,12 +146,30 @@ Visit `http://localhost:8000` in your browser.
 
 3. **Access Configuration**: Navigate to `/waha` in your application to configure WAHA settings through the web interface.
 
+### Template Configuration
+
+Templates follow specific naming and validation rules:
+
+- **Template Name**: Must use only lowercase letters and underscores (e.g., `welcome_message`)
+- **Header**: Optional, maximum 60 characters
+- **Body**: Required, maximum 1024 characters, supports variables like @{{1}}, @{{2}}
+- **Variables**: Use @{{1}}, @{{2}}, etc. for dynamic content substitution
+- **Formatting**: Supports `*bold*`, `_italic_` text formatting
+
+**Example Template:**
+```
+Name: order_notification
+Header: New Order Received!
+Body: Hello @{{1}}, you have a new order #@{{2}} for $@{{3}}.
+```
+
 ### Permissions
 
 The application includes the following permission groups:
 
 - **System**: Company settings, backups, system management
 - **Users & Roles**: User and role management
+- **Templates**: Message template management and usage tracking
 - **Master Data**: Categories, items, customers, suppliers
 - **Inventory**: Item management, serial numbers, adjustments
 - **Transactions**: Purchase/sales orders, invoices, transfers
@@ -160,6 +186,29 @@ The application includes the following permission groups:
 3. **Create Sessions**: Add and manage WhatsApp sessions
 4. **Monitor Status**: Check connection health and session status
 
+### Template Management
+
+1. **Create Templates**: Design reusable message templates with variables
+2. **Preview Messages**: See real-time preview of how messages will appear
+3. **Manage Templates**: Edit, activate/deactivate, and track template usage
+4. **Template Variables**: Use @{{1}}, @{{2}}, etc. for dynamic content
+
+#### Template Features
+
+```php
+// Create a template with variables
+$template = Template::create([
+    'name' => 'welcome_message',
+    'header' => 'Welcome to Our Service!',
+    'body' => 'Hello @{{1}}, thank you for choosing @{{2}}. Your account is now active.',
+    'is_active' => true
+]);
+
+// Template will render as:
+// Header: Welcome to Our Service!
+// Body: Hello John, thank you for choosing Our Company. Your account is now active.
+```
+
 ### WhatsApp Session Management
 
 ```php
@@ -173,6 +222,28 @@ $session = Session::create([
 $response = Http::withHeaders([
     'X-Api-Key' => env('WAHA_API_KEY')
 ])->get(env('WAHA_API_URL') . '/api/sessions/' . $session->session_id);
+```
+
+### Template Management
+
+```php
+// Create a new template
+$template = Template::create([
+    'name' => 'order_confirmation',
+    'header' => 'Order Confirmed! 🎉',
+    'body' => 'Hi @{{1}}, your order #@{{2}} has been confirmed. Total: $@{{3}}',
+    'is_active' => true
+]);
+
+// Update usage count when template is used
+$template->incrementUsageCount();
+$template->last_used_at = now();
+$template->save();
+
+// Search templates
+$templates = Template::where('name', 'like', '%welcome%')
+    ->where('is_active', true)
+    ->get();
 ```
 
 ### API Health Check
@@ -215,7 +286,17 @@ The application provides RESTful APIs for:
 - User management
 - Role and permission management
 - Session management
+- Template management
 - System configuration
+
+#### Template API Endpoints
+
+- `GET /templates` - List all templates
+- `POST /templates` - Create new template
+- `GET /templates/{id}` - Get template details
+- `PUT /templates/{id}` - Update template
+- `DELETE /templates/{id}` - Delete template
+- `GET /templates/audit` - Template audit trail
 
 ## 🔐 Security
 
@@ -314,6 +395,14 @@ CMD ["/usr/bin/supervisord", "-c", "/var/www/html/docker/supervisord.conf"]
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.1.0
+- **Template Management System**: Complete CRUD for WhatsApp message templates
+- **Template Variables**: Support for dynamic content (@{{1}}, @{{2}}, etc.)
+- **Real-time Preview**: Live preview of message templates
+- **Template Validation**: Naming conventions and content rules
+- **Usage Tracking**: Monitor template usage statistics
+- **Enhanced UI**: Improved interface with preview cards
 
 ### Version 1.0.0
 - Initial release with WAHA integration

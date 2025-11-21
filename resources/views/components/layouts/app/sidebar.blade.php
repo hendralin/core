@@ -71,7 +71,14 @@
                         auth()->user()->can('session.edit') ||
                         auth()->user()->can('session.delete') ||
                         auth()->user()->can('session.disconnect'))
-                            <flux:navlist.item icon="phone" :href="route('sessions.index')" :current="request()->routeIs('sessions.*')" wire:navigate>{{ __('Sessions') }}</flux:navlist.item>
+                            <flux:navlist.item icon="device-tablet" :href="route('sessions.index')" :current="request()->routeIs('sessions.*')" wire:navigate>{{ __('Sessions') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('template.view') ||
+                        auth()->user()->can('template.create') ||
+                        auth()->user()->can('template.edit') ||
+                        auth()->user()->can('template.delete'))
+                            <flux:navlist.item icon="document-text" :href="route('templates.index')" :current="request()->routeIs('templates.*')" wire:navigate>{{ __('Templates') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

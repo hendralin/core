@@ -106,6 +106,9 @@ class RoleService
                     case 'session':
                         $grouped['WhatsApp Integration'][] = $permission;
                         break;
+                    case 'template':
+                        $grouped['WhatsApp Integration'][] = $permission;
+                        break;
                     case 'waha':
                         $grouped['WhatsApp Integration'][] = $permission;
                         break;

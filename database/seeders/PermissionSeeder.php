@@ -30,14 +30,18 @@ class PermissionSeeder extends Seeder
             'backup-restore.download',
             'backup-restore.restore',
             'backup-restore.delete',
+            'waha.view',
+            'waha.edit',
             'session.view',
             'session.create',
             'session.edit',
             'session.delete',
             'session.connect',
             'session.disconnect',
-            'waha.view',
-            'waha.edit',
+            'template.view',
+            'template.create',
+            'template.edit',
+            'template.delete',
         ];
 
         foreach ($permissions as $key => $value) {

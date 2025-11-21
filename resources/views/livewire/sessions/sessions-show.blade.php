@@ -219,7 +219,7 @@
                             @endif
 
                             @if($sessionData && ($sessionData['status'] === 'WORKING'))
-                                <flux:button variant="primary" size="sm" wire:click="logoutSession" icon="arrow-left-start-on-rectangle" class="w-full cursor-pointer">
+                                <flux:button variant="primary" size="sm" wire:click="logoutSession" icon="arrow-right-start-on-rectangle" class="w-full cursor-pointer">
                                     Logout
                                 </flux:button>
                             @endif

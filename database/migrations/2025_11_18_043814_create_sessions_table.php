@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique(); // Session name
             $table->string('session_id')->unique(); // WAHA session ID
-            $table->boolean('is_active')->default(true); // Whether session is active
+            $table->boolean('is_active')->unsigned()->default(true); // Whether session is active
             $table->timestamps();
         });
     }

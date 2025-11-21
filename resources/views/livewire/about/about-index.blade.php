@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About Broadcast') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About Broadcaster') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -15,10 +15,10 @@
             </div>
             <div class="space-y-4">
                 <div>
-                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcast</flux:heading>
+                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster</flux:heading>
                     <flux:text class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                        Broadcast is a modern WhatsApp session management system built with Laravel and powered by WAHA (WhatsApp HTTP API).
-                        It provides a comprehensive solution for managing multiple WhatsApp Business sessions through an intuitive web interface.
+                        Broadcaster is a modern WhatsApp session management system built with Laravel and powered by WAHA (WhatsApp HTTP API).
+                        It provides a comprehensive solution for managing multiple WhatsApp Business sessions and message templates through an intuitive web interface.
                     </flux:text>
                 </div>
 
@@ -54,6 +54,12 @@
                                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
+                                Template Management System
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
                                 Role-Based Access Control
                             </li>
                             <li class="flex items-center gap-2">
@@ -75,6 +81,7 @@
                 <div class="pt-4 border-t border-blue-200 dark:border-blue-700">
                     <flux:text class="text-sm text-gray-600 dark:text-gray-400">
                         Built with modern web technologies including Laravel, Livewire, Flux UI, and Tailwind CSS for optimal performance and user experience.
+                        Features advanced template management with real-time preview capabilities.
                     </flux:text>
                 </div>
             </div>
@@ -87,14 +94,14 @@
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                 <flux:heading size="lg" class="mb-4 flex items-center gap-2">
                     <flux:icon.information-circle class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    Broadcast Information
+                    Broadcaster Information
                 </flux:heading>
 
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Application Name</flux:text>
-                            <flux:text class="text-lg font-semibold">Broadcast</flux:text>
+                            <flux:text class="text-lg font-semibold">{{  env('APP_NAME') }}</flux:text>
                         </div>
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Version</flux:text>
@@ -206,6 +213,89 @@
                             </div>
                         </div>
                     @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Template Management Information -->
+        <div class="space-y-6">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                <flux:heading size="lg" class="mb-4 flex items-center gap-2">
+                    <svg class="h-6 w-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Template Management System
+                </flux:heading>
+
+                <div class="space-y-4">
+                    <flux:text class="text-gray-700 dark:text-gray-300">
+                        Advanced template management system for creating and managing WhatsApp message templates with dynamic variables and real-time preview capabilities.
+                    </flux:text>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ \App\Models\Template::count() }}</div>
+                            <div class="text-sm text-purple-700 dark:text-purple-300">Total Templates</div>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                            <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ \App\Models\Template::where('is_active', true)->count() }}</div>
+                            <div class="text-sm text-green-700 dark:text-green-300">Active Templates</div>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ \App\Models\Template::sum('usage_count') }}</div>
+                            <div class="text-sm text-blue-700 dark:text-blue-300">Total Usage</div>
+                        </div>
+                        <div class="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                            <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ \App\Models\Template::where('last_used_at', '>=', now()->startOfWeek())->count() }}</div>
+                            <div class="text-sm text-orange-700 dark:text-orange-300">Used This Week</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <flux:text class="font-semibold text-gray-900 dark:text-white">Template Features</flux:text>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Dynamic Variables (@{{1}}, @{{2}}, etc.)
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Real-time Preview
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Usage Tracking
+                                </li>
+                            </ul>
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Template Validation
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Audit Trail
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    WhatsApp Formatting
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

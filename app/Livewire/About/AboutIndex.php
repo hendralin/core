@@ -7,13 +7,13 @@ use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-#[Title('About Broadcast v1.0.0')]
+#[Title('About The Broadcaster System v1.1.0')]
 class AboutIndex extends Component
 {
     public function render()
     {
         $systemInfo = [
-            'version' => '1.0.0',
+            'version' => '1.1.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
