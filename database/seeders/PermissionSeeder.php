@@ -42,6 +42,8 @@ class PermissionSeeder extends Seeder
             'template.create',
             'template.edit',
             'template.delete',
+            'contact.view',
+            'contact.sync',
         ];
 
         foreach ($permissions as $key => $value) {

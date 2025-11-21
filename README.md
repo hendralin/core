@@ -28,6 +28,14 @@
 - **Usage Tracking**: Monitor template usage statistics and history
 - **Template Validation**: Enforce naming conventions and content rules
 
+### Contacts Management
+- **Contact Synchronization**: Sync contacts from WhatsApp via WAHA API
+- **Profile Pictures**: Automatic fetching and caching of contact profile pictures
+- **Contact Filtering**: Filter contacts by session, verification status, and search
+- **Real-time Updates**: Live synchronization with WhatsApp contact data
+- **Contact Details**: Comprehensive contact information display with profile images
+- **Session-based Management**: Organize contacts by WhatsApp session
+
 ### User Management
 - **Role-Based Access Control**: Comprehensive permission system
 - **User Authentication**: Secure login and session management
@@ -170,12 +178,13 @@ The application includes the following permission groups:
 - **System**: Company settings, backups, system management
 - **Users & Roles**: User and role management
 - **Templates**: Message template management and usage tracking
+- **Contacts**: Contact synchronization and management
 - **Master Data**: Categories, items, customers, suppliers
 - **Inventory**: Item management, serial numbers, adjustments
 - **Transactions**: Purchase/sales orders, invoices, transfers
 - **Reports**: Various business reports
 - **Sales & Cashier**: POS and sales operations
-- **WhatsApp Integration**: WAHA configuration and session management
+- **WhatsApp Integration**: WAHA configuration, session management, and contacts
 
 ## 📖 Usage
 
@@ -207,6 +216,70 @@ $template = Template::create([
 // Template will render as:
 // Header: Welcome to Our Service!
 // Body: Hello John, thank you for choosing Our Company. Your account is now active.
+```
+
+### Contacts Management
+
+1. **Sync Contacts**: Automatically synchronize contacts from WhatsApp sessions
+2. **View Contact Details**: Browse and search through synchronized contacts
+3. **Filter Contacts**: Filter by session, verification status, or search terms
+4. **Profile Pictures**: View contact profile pictures fetched from WhatsApp
+
+#### Contact Synchronization
+
+```php
+// Sync contacts from a specific session
+$session = Session::find(1);
+$response = Http::withHeaders([
+    'accept' => '*/*',
+    'X-Api-Key' => env('WAHA_API_KEY'),
+])->get(env('WAHA_API_URL') . '/api/contacts/all', [
+    'session' => $session->session_id,
+    'refresh' => 'false'
+]);
+
+// Process and save contacts
+foreach ($response->json() as $contactData) {
+    // Skip group chats and LID contacts
+    if (str_ends_with($contactData['id'], '@g.us') ||
+        str_ends_with($contactData['id'], '@lid')) {
+        continue;
+    }
+
+    Contact::updateOrCreate(
+        [
+            'waha_session_id' => $session->id,
+            'wa_id' => $contactData['id']
+        ],
+        [
+            'name' => $contactData['name'] ?? null,
+            'verified_name' => $contactData['verifiedName'] ?? null,
+            'push_name' => $contactData['pushname'] ?? null,
+        ]
+    );
+}
+```
+
+#### Contact Profile Pictures
+
+```php
+// Fetch profile picture for a contact
+$contact = Contact::find(1);
+$response = Http::withHeaders([
+    'accept' => '*/*',
+    'X-Api-Key' => env('WAHA_API_KEY'),
+])->get(env('WAHA_API_URL') . '/api/contacts/profile-picture', [
+    'contactId' => $contact->wa_id,
+    'refresh' => 'false',
+    'session' => $contact->wahaSession->session_id
+]);
+
+if ($response->successful()) {
+    $data = $response->json();
+    $contact->update([
+        'profile_picture_url' => $data['profilePictureURL']
+    ]);
+}
 ```
 
 ### WhatsApp Session Management
@@ -272,12 +345,21 @@ if ($wahaHealth->successful()) {
 
 The application integrates with WAHA API endpoints:
 
+#### Session Management
 - `GET /health` - Server health check
 - `GET /api/version` - Get WAHA version
 - `GET /api/sessions` - List all sessions
 - `POST /api/sessions/{sessionId}/start` - Start session
 - `POST /api/sessions/{sessionId}/stop` - Stop session
 - `GET /api/screenshot` - Get QR code for authentication
+
+#### Contacts Management
+- `GET /api/contacts/all?session={sessionId}` - Get all contacts for a session
+- `GET /api/contacts/profile-picture?contactId={waId}&session={sessionId}&refresh=false` - Get contact profile picture
+
+#### Message Templates (if available)
+- `POST /api/sendText` - Send text message
+- `POST /api/sendTemplate` - Send message using template
 
 ### Application API
 
@@ -297,6 +379,13 @@ The application provides RESTful APIs for:
 - `PUT /templates/{id}` - Update template
 - `DELETE /templates/{id}` - Delete template
 - `GET /templates/audit` - Template audit trail
+
+#### Contacts API Endpoints
+
+- `GET /contacts` - List all contacts with filtering and pagination
+- `GET /contacts/{id}` - Get contact details
+- `POST /contacts/sync` - Sync contacts from WAHA API
+- `GET /contacts/audit` - Contacts audit trail
 
 ## 🔐 Security
 
@@ -395,6 +484,14 @@ CMD ["/usr/bin/supervisord", "-c", "/var/www/html/docker/supervisord.conf"]
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.2.0
+- **Contacts Management System**: Complete contact synchronization from WhatsApp
+- **Profile Picture Integration**: Automatic fetching and caching of contact photos
+- **Advanced Filtering**: Filter contacts by session, verification status, and search
+- **WAHA Contacts API**: Full integration with WhatsApp contacts API
+- **Contact Details View**: Comprehensive contact information with profile images
+- **Database Caching**: Optimized performance with profile picture caching
 
 ### Version 1.1.0
 - **Template Management System**: Complete CRUD for WhatsApp message templates

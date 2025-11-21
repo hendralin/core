@@ -18,8 +18,10 @@ use App\Livewire\Company\CompanyEdit;
 use App\Livewire\Company\CompanyShow;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Contacts\ContactsShow;
 use App\Livewire\Sessions\SessionsEdit;
 use App\Livewire\Sessions\SessionsShow;
+use App\Livewire\Contacts\ContactsIndex;
 use App\Livewire\Sessions\SessionsAudit;
 use App\Livewire\Sessions\SessionsIndex;
 use App\Livewire\Sessions\SessionsCreate;
@@ -89,6 +91,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('templates/create', TemplatesCreate::class)->name('templates.create')->middleware(['permission:template.create']);
     Route::get('templates/{template}/edit', TemplatesEdit::class)->name('templates.edit')->middleware(['permission:template.edit']);
     Route::get('templates/{template}', TemplatesShow::class)->name('templates.show')->middleware(['permission:template.view']);
+
+    Route::get('contacts', ContactsIndex::class)->name('contacts.index')->middleware(['permission:contact.view']);
+    Route::get('contacts/{contact}', ContactsShow::class)->name('contacts.show')->middleware(['permission:contact.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
