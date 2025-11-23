@@ -136,7 +136,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
                                             @if($contact->profile_picture_url)
-                                                <img src="{{ $contact->profile_picture_url }}" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-zinc-600 shrink-0">
+                                                <flux:modal.trigger name="profile-preview-{{ $contact->id }}">
+                                                    <img src="{{ $contact->profile_picture_url }}" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-zinc-600 shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
+                                                </flux:modal.trigger>
                                             @else
                                                 <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center shrink-0">
                                                     <flux:icon.user class="w-4 h-4 text-gray-400 dark:text-zinc-500" />
@@ -228,4 +230,37 @@
             </form>
         </div>
     </flux:modal>
+
+    @foreach($contacts as $contact)
+        @if($contact->profile_picture_url)
+            <flux:modal name="profile-preview-{{ $contact->id }}" class="md:w-96">
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">{{ __('Profile Picture') }}</flux:heading>
+                        <flux:subheading>
+                            @if($contact->verified_name)
+                                @if($contact->name)
+                                    <flux:text class="mt-1">{{ $contact->name }}</flux:text>
+                                @endif
+                                <flux:text class="mt-1">{{ $contact->verified_name }}</flux:text>
+                            @else
+                                <flux:text class="mt-1">{{ $contact->name }}</flux:text>
+                            @endif
+                            @if($contact->push_name && $contact->push_name !== $contact->name)
+                                <flux:text class="mt-1">Push: {{ $contact->push_name }}</flux:text>
+                            @endif
+                        </flux:subheading>
+                    </div>
+                    <div class="flex justify-center">
+                        <img src="{{ $contact->profile_picture_url }}" alt="Profile" class="max-w-full max-h-96 rounded-lg object-contain">
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <flux:modal.close>
+                            <flux:button variant="ghost">Close</flux:button>
+                        </flux:modal.close>
+                    </div>
+                </div>
+            </flux:modal>
+        @endif
+    @endforeach
 </div>
