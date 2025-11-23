@@ -16,7 +16,9 @@
                     <div class="mb-6 flex items-center gap-4">
                         @if($profilePictureUrl)
                             <div class="shrink-0">
-                                <img src="{{ $profilePictureUrl }}" alt="Profile Picture" class="w-16 h-16 rounded-full object-cover border-2 border-gray-200 dark:border-zinc-700">
+                                <button wire:click="$set('showProfileModal', true)" class="cursor-pointer hover:opacity-80 transition-opacity">
+                                    <img src="{{ $profilePictureUrl }}" alt="Profile Picture" class="w-16 h-16 rounded-full object-cover border-2 border-gray-200 dark:border-zinc-700">
+                                </button>
                             </div>
                         @else
                             <div class="shrink-0">
@@ -76,4 +78,23 @@
             </div>
         </div>
     </div>
+
+    <!-- Profile Picture Preview Modal -->
+    <flux:modal name="profile-modal" wire:model="showProfileModal" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('Profile Picture') }}</flux:heading>
+                <flux:subheading>{{ $contact->name }}</flux:subheading>
+            </div>
+
+            <div class="flex justify-center">
+                <img src="{{ $profilePictureUrl }}" alt="Profile Picture" class="max-w-full max-h-96 rounded-lg object-contain">
+            </div>
+
+            <div class="flex justify-end space-x-2">
+                <flux:spacer />
+                <flux:button wire:click="$set('showProfileModal', false)" variant="ghost">{{ __('Close') }}</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>

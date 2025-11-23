@@ -12,6 +12,7 @@ class ContactsShow extends Component
 {
     public Contact $contact;
     public $profilePictureUrl;
+    public $showProfileModal = false;
 
     public function mount(Contact $contact): void
     {
