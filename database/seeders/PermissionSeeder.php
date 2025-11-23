@@ -44,6 +44,8 @@ class PermissionSeeder extends Seeder
             'template.delete',
             'contact.view',
             'contact.sync',
+            'group.view',
+            'group.sync',
         ];
 
         foreach ($permissions as $key => $value) {

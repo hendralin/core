@@ -36,6 +36,14 @@
 - **Contact Details**: Comprehensive contact information display with profile images
 - **Session-based Management**: Organize contacts by WhatsApp session
 
+### Groups Management
+- **Group Synchronization**: Sync WhatsApp groups and communities via WAHA API
+- **Group Details**: Comprehensive group information including participants, settings, and metadata
+- **Participant Management**: Display group participants with contact names and admin roles
+- **Profile Pictures**: Automatic fetching and preview of group and participant profile pictures
+- **Group Filtering**: Filter groups by session, type (Community/Group), and search
+- **Visual Preview**: Clickable profile pictures for enlarged viewing with contextual information
+
 ### User Management
 - **Role-Based Access Control**: Comprehensive permission system
 - **User Authentication**: Secure login and session management
@@ -179,6 +187,7 @@ The application includes the following permission groups:
 - **Users & Roles**: User and role management
 - **Templates**: Message template management and usage tracking
 - **Contacts**: Contact synchronization and management
+- **Groups**: Group synchronization and participant management
 - **Master Data**: Categories, items, customers, suppliers
 - **Inventory**: Item management, serial numbers, adjustments
 - **Transactions**: Purchase/sales orders, invoices, transfers
@@ -193,7 +202,9 @@ The application includes the following permission groups:
 1. **Login**: Access the application with your credentials
 2. **Configure WAHA**: Set up your WhatsApp API integration
 3. **Create Sessions**: Add and manage WhatsApp sessions
-4. **Monitor Status**: Check connection health and session status
+4. **Sync Contacts**: Synchronize contacts from WhatsApp
+5. **Sync Groups**: Synchronize groups and communities
+6. **Monitor Status**: Check connection health and session status
 
 ### Template Management
 
@@ -282,6 +293,59 @@ if ($response->successful()) {
 }
 ```
 
+### Groups Management
+
+1. **Sync Groups**: Automatically synchronize groups and communities from WhatsApp sessions
+2. **View Group Details**: Browse and search through synchronized groups
+3. **Filter Groups**: Filter by session, type (Community/Group), or search terms
+4. **Participant Information**: View group participants with contact names and admin roles
+5. **Profile Pictures**: Click to preview enlarged group and participant profile pictures
+
+#### Group Synchronization
+
+```php
+// Sync groups from a specific session
+$session = Session::find(1);
+$response = Http::withHeaders([
+    'accept' => 'application/json',
+    'X-Api-Key' => env('WAHA_API_KEY'),
+])->get(env('WAHA_API_URL') . '/api/odon/groups');
+
+// Process and save groups
+foreach ($response->json() as $groupId => $groupData) {
+    Group::updateOrCreate(
+        [
+            'waha_session_id' => $session->id,
+            'group_wa_id' => $groupId,
+        ],
+        [
+            'name' => $groupData['subject'] ?? null,
+            'detail' => $groupData,
+        ]
+    );
+}
+```
+
+#### Group Profile Pictures
+
+```php
+// Fetch profile picture for a group
+$group = Group::find(1);
+$response = Http::withHeaders([
+    'accept' => 'application/json',
+    'X-Api-Key' => env('WAHA_API_KEY'),
+])->get(env('WAHA_API_URL') . '/api/' . $group->wahaSession->session_id . '/groups/' . $group->group_wa_id . '/picture', [
+    'refresh' => 'false'
+]);
+
+if ($response->successful()) {
+    $data = $response->json();
+    $group->update([
+        'picture_url' => $data['url']
+    ]);
+}
+```
+
 ### WhatsApp Session Management
 
 ```php
@@ -357,6 +421,11 @@ The application integrates with WAHA API endpoints:
 - `GET /api/contacts/all?session={sessionId}` - Get all contacts for a session
 - `GET /api/contacts/profile-picture?contactId={waId}&session={sessionId}&refresh=false` - Get contact profile picture
 
+#### Groups Management
+- `GET /api/odon/groups` - Get all groups and communities
+- `GET /api/{sessionId}/groups/{groupId}/picture?refresh=false` - Get group profile picture
+- `GET /api/contacts/profile-picture?contactId={waId}&session={sessionId}&refresh=false` - Get participant profile picture
+
 #### Message Templates (if available)
 - `POST /api/sendText` - Send text message
 - `POST /api/sendTemplate` - Send message using template
@@ -386,6 +455,13 @@ The application provides RESTful APIs for:
 - `GET /contacts/{id}` - Get contact details
 - `POST /contacts/sync` - Sync contacts from WAHA API
 - `GET /contacts/audit` - Contacts audit trail
+
+#### Groups API Endpoints
+
+- `GET /groups` - List all groups with filtering and pagination
+- `GET /groups/{id}` - Get group details with participants
+- `POST /groups/sync` - Sync groups from WAHA API
+- `GET /groups/audit` - Groups audit trail
 
 ## 🔐 Security
 
@@ -484,6 +560,15 @@ CMD ["/usr/bin/supervisord", "-c", "/var/www/html/docker/supervisord.conf"]
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.3.0
+- **Groups Management System**: Complete group and community synchronization from WhatsApp
+- **Participant Information**: Display group participants with contact names and admin roles
+- **Group Profile Pictures**: Automatic fetching and preview of group profile pictures
+- **Participant Profile Pictures**: Clickable participant photos with enlarged preview
+- **Group Type Filtering**: Distinguish between Communities and regular Groups
+- **Visual Group Details**: Comprehensive group information with participant management
+- **WAHA Groups API**: Full integration with WhatsApp groups API
 
 ### Version 1.2.0
 - **Contacts Management System**: Complete contact synchronization from WhatsApp

@@ -18,7 +18,7 @@
                     <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster</flux:heading>
                     <flux:text class="text-gray-700 dark:text-gray-300 leading-relaxed">
                         Broadcaster is a modern WhatsApp session management system built with Laravel and powered by WAHA (WhatsApp HTTP API).
-                        It provides a comprehensive solution for managing multiple WhatsApp Business sessions, message templates, and contact synchronization through an intuitive web interface.
+                        It provides a comprehensive solution for managing multiple WhatsApp Business sessions, message templates, contacts, and groups synchronization through an intuitive web interface.
                     </flux:text>
                 </div>
 
@@ -60,7 +60,7 @@
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    Contacts Management & Sync
+                                    Contacts & Groups Management
                                 </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -117,7 +117,7 @@
                         </div>
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Version</flux:text>
-                            <flux:text class="text-lg font-semibold">{{ $systemInfo['version'] }}</flux:text>
+                            <flux:text class="text-lg font-semibold">v{{ $systemInfo['version'] }}</flux:text>
                         </div>
                     </div>
 
@@ -387,6 +387,89 @@
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
                                     Audit Trail & Logging
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Groups Management Information -->
+        <div class="space-y-6">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                <flux:heading size="lg" class="mb-4 flex items-center gap-2">
+                    <svg class="h-6 w-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Groups Management & Sync
+                </flux:heading>
+
+                <div class="space-y-4">
+                    <flux:text class="text-gray-700 dark:text-gray-300">
+                        Advanced group and community management system with automatic synchronization from WhatsApp sessions, participant information, and profile picture integration.
+                    </flux:text>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                            <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ $statistics['groups'] ?? 0 }}</div>
+                            <div class="text-sm text-indigo-700 dark:text-indigo-300">Total Groups</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $statistics['communities'] ?? 0 }}</div>
+                            <div class="text-sm text-purple-700 dark:text-purple-300">Communities</div>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $statistics['regular_groups'] ?? 0 }}</div>
+                            <div class="text-sm text-blue-700 dark:text-blue-300">Regular Groups</div>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                            <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $statistics['contacts'] ?? 0 }}</div>
+                            <div class="text-sm text-green-700 dark:text-green-300">Linked Contacts</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <flux:text class="font-semibold text-gray-900 dark:text-white">Groups Features</flux:text>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    WhatsApp Groups API Sync
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Community vs Group Detection
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Participant Information
+                                </li>
+                            </ul>
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Profile Picture Preview
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Admin Role Identification
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Contact Name Resolution
                                 </li>
                             </ul>
                         </div>

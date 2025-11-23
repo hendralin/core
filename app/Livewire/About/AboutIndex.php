@@ -2,29 +2,43 @@
 
 namespace App\Livewire\About;
 
+use App\Models\Contact;
+use App\Models\Group;
+use App\Models\Template;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-#[Title('About The Broadcaster System v1.1.0')]
+#[Title('About The Broadcaster System v1.3.0')]
 class AboutIndex extends Component
 {
     public function render()
     {
         $systemInfo = [
-            'version' => '1.1.0',
+            'version' => '1.3.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
             'timezone' => config('app.timezone'),
             'environment' => config('app.env'),
+            'features' => [
+                'contacts_management' => true,
+                'groups_management' => true,
+                'templates_system' => true,
+                'waha_integration' => true,
+                'profile_pictures' => true,
+                'activity_logging' => true,
+            ],
         ];
 
         // Check WAHA connection status
         $wahaInfo = $this->getWahaInfo();
 
-        return view('livewire.about.about-index', compact('systemInfo', 'wahaInfo'));
+        // Get system statistics
+        $statistics = $this->getSystemStatistics();
+
+        return view('livewire.about.about-index', compact('systemInfo', 'wahaInfo', 'statistics'));
     }
 
     private function getWahaInfo()
@@ -80,5 +94,17 @@ class AboutIndex extends Component
         }
 
         return $wahaInfo;
+    }
+
+    private function getSystemStatistics()
+    {
+        return [
+            'contacts' => Contact::count(),
+            'groups' => Group::count(),
+            'templates' => Template::count(),
+            'active_templates' => Template::where('is_active', true)->count(),
+            'communities' => Group::whereRaw("JSON_EXTRACT(detail, '$.isCommunity') = true")->count(),
+            'regular_groups' => Group::whereRaw("JSON_EXTRACT(detail, '$.isCommunity') = false")->count(),
+        ];
     }
 }

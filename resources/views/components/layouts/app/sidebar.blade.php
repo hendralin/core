@@ -74,18 +74,21 @@
                             <flux:navlist.item icon="device-tablet" :href="route('sessions.index')" :current="request()->routeIs('sessions.*')" wire:navigate>{{ __('Sessions') }}</flux:navlist.item>
                         @endif
 
+                        @if (auth()->user()->can('contact.view') ||
+                        auth()->user()->can('contact.sync'))
+                            <flux:navlist.item icon="user-circle" :href="route('contacts.index')" :current="request()->routeIs('contacts.*')" wire:navigate>{{ __('Contacts') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('group.view') ||
+                        auth()->user()->can('group.sync'))
+                            <flux:navlist.item icon="user-group" :href="route('groups.index')" :current="request()->routeIs('groups.*')" wire:navigate>{{ __('Groups') }}</flux:navlist.item>
+                        @endif
+
                         @if (auth()->user()->can('template.view') ||
                         auth()->user()->can('template.create') ||
                         auth()->user()->can('template.edit') ||
                         auth()->user()->can('template.delete'))
                             <flux:navlist.item icon="document-text" :href="route('templates.index')" :current="request()->routeIs('templates.*')" wire:navigate>{{ __('Templates') }}</flux:navlist.item>
-                        @endif
-
-                        @if (auth()->user()->can('contact.view') ||
-                        auth()->user()->can('contact.create') ||
-                        auth()->user()->can('contact.edit') ||
-                        auth()->user()->can('contact.delete'))
-                            <flux:navlist.item icon="user-group" :href="route('contacts.index')" :current="request()->routeIs('contacts.*')" wire:navigate>{{ __('Contacts') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

@@ -13,7 +13,9 @@ use App\Livewire\About\AboutIndex;
 use App\Livewire\Roles\RoleCreate;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Users\UserCreate;
+use App\Livewire\Groups\GroupsShow;
 use App\Livewire\Settings\Password;
+use App\Livewire\Groups\GroupsIndex;
 use App\Livewire\Company\CompanyEdit;
 use App\Livewire\Company\CompanyShow;
 use App\Livewire\Settings\Appearance;
@@ -86,14 +88,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('sessions/{session}/edit', SessionsEdit::class)->name('sessions.edit')->middleware(['permission:session.edit']);
     Route::get('sessions/{session}', SessionsShow::class)->name('sessions.show')->middleware(['permission:session.view']);
 
+    Route::get('contacts', ContactsIndex::class)->name('contacts.index')->middleware(['permission:contact.view|contact.sync']);
+    Route::get('contacts/{contact}', ContactsShow::class)->name('contacts.show')->middleware(['permission:contact.view']);
+
+    Route::get('groups', GroupsIndex::class)->name('groups.index')->middleware(['permission:group.view|group.sync']);
+    Route::get('groups/{group}', GroupsShow::class)->name('groups.show')->middleware(['permission:group.view']);
+
     Route::get('templates', TemplatesIndex::class)->name('templates.index')->middleware(['permission:template.view|template.create|template.edit|template.delete']);
     Route::get('templates/audit', TemplatesAudit::class)->name('templates.audit')->middleware(['permission:template.view']);
     Route::get('templates/create', TemplatesCreate::class)->name('templates.create')->middleware(['permission:template.create']);
     Route::get('templates/{template}/edit', TemplatesEdit::class)->name('templates.edit')->middleware(['permission:template.edit']);
     Route::get('templates/{template}', TemplatesShow::class)->name('templates.show')->middleware(['permission:template.view']);
-
-    Route::get('contacts', ContactsIndex::class)->name('contacts.index')->middleware(['permission:contact.view']);
-    Route::get('contacts/{contact}', ContactsShow::class)->name('contacts.show')->middleware(['permission:contact.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
