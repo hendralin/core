@@ -78,8 +78,8 @@
                 <flux:button variant="primary" size="sm" href="{{ route('roles.create') }}" wire:navigate icon="plus">Create Role</flux:button>
             @endcan
 
-            @can('role.view')
-                <flux:button variant="outline" size="sm" href="{{ route('roles.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+            @can('role.audit')
+                <flux:button variant="ghost" size="sm" href="{{ route('roles.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
             @endcan
 
             <div wire:loading>
@@ -228,7 +228,7 @@
         {{ $roles->links(data: ['scrollTo' => false]) }}
     </div>
 
-    <flux:modal name="delete-role" class="min-w-[22rem]">
+    <flux:modal name="delete-role" class="min-w-88">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">Delete role?</flux:heading>

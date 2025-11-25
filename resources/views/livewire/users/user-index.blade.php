@@ -22,7 +22,9 @@
                         <flux:button variant="primary" size="sm" href="{{ route('users.create') }}" wire:navigate icon="plus">Create User</flux:button>
                     @endcan
 
-                    <flux:button variant="outline" size="sm" href="{{ route('users.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                    @can('user.audit')
+                        <flux:button variant="ghost" size="sm" href="{{ route('users.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                    @endcan
 
                     @if (count($selected) > 0)
                         <!-- Bulk Status Change -->
