@@ -137,7 +137,9 @@
                             <flux:button variant="primary" size="sm" href="{{ route('sessions.create') }}" wire:navigate icon="plus">Create Session</flux:button>
                         @endcan
 
-                        <flux:button size="sm" href="{{ route('sessions.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                        @can('session.audit')
+                            <flux:button variant="ghost" size="sm" href="{{ route('sessions.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                        @endcan
 
                         <div wire:loading>
                             <flux:icon.loading class="text-red-600" />

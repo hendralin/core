@@ -72,7 +72,6 @@
                 @endforeach
             </flux:select>
 
-
             <!-- Per Page -->
             <flux:select label="Show" wire:model.live="perPage" placeholder="Select per page...">
                 @foreach($this->perPageOptions as $option)

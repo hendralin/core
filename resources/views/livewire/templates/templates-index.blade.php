@@ -65,7 +65,9 @@
                         <flux:button variant="primary" size="sm" href="{{ route('templates.create') }}" wire:navigate icon="plus">Create Template</flux:button>
                     @endcan
 
-                    <flux:button size="sm" href="{{ route('templates.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                    @can('template.audit')
+                        <flux:button variant="ghost" size="sm" href="{{ route('templates.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                    @endcan
 
                     <div wire:loading>
                         <flux:icon.loading class="text-red-600" />

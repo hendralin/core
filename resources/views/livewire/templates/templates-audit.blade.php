@@ -5,6 +5,8 @@
         <flux:separator variant="subtle" />
     </div>
 
+    <flux:button variant="primary" size="sm" href="{{ route('templates.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Back to Templates" class="mb-4">Back</flux:button>
+
     <!-- Statistics Overview -->
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
         <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-4">
@@ -62,39 +64,26 @@
     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Search -->
-            <flux:input
-                wire:model.live.debounce.300ms="search"
-                label="Search Activities"
-                placeholder="Search activities..." clearable />
+            <flux:input type="text" label="Search Activities" wire:model.live.debounce.300ms="search" placeholder="Search activities..." clearable />
 
             <!-- Template Filter -->
-            <div>
-                <label for="template-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Template
-                </label>
-                <flux:select wire:model.live="selectedTemplate">
-                    <flux:select.option value="">All Templates</flux:select.option>
-                    @foreach($templates as $template)
-                        <flux:select.option value="{{ $template->id }}">{{ $template->name }}</flux:select.option>
-                    @endforeach
-                </flux:select>
-            </div>
+            <flux:select label="Template" wire:model.live="selectedTemplate">
+                <flux:select.option value="">All Templates</flux:select.option>
+                @foreach($templates as $template)
+                    <flux:select.option value="{{ $template->id }}">{{ $template->name }}</flux:select.option>
+                @endforeach
+            </flux:select>
 
             <!-- Per Page -->
-            <div>
-                <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Show
-                </label>
-                <flux:select wire:model.live="perPage" placeholder="Select per page...">
-                    @foreach($this->perPageOptions as $option)
-                        <flux:select.option value="{{ $option }}">{{ $option }} per page</flux:select.option>
-                    @endforeach
-                </flux:select>
-            </div>
+            <flux:select label="Show" wire:model.live="perPage" placeholder="Select per page...">
+                @foreach($this->perPageOptions as $option)
+                    <flux:select.option value="{{ $option }}">{{ $option }} per page</flux:select.option>
+                @endforeach
+            </flux:select>
 
             <!-- Clear Filters -->
             <div class="flex items-end">
-                <flux:button wire:click="clearFilters" class="w-full mb-0.5">
+                <flux:button wire:click="clearFilters" class="w-full cursor-pointer">
                     Clear Filters
                 </flux:button>
             </div>
@@ -109,7 +98,7 @@
                     <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="flex items-start space-x-4">
                             <!-- Activity Icon -->
-                            <div class="flex-shrink-0">
+                            <div class="shrink-0">
                                 <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
                                     @switch($activity->description)
                                         @case('created a new template')

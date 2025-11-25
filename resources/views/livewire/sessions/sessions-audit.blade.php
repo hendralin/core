@@ -71,11 +71,9 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6 mb-6">
-        <flux:heading size="lg" class="mb-4">Filters</flux:heading>
-
+    <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <flux:input wire:model.live="search" label="Search" placeholder="Search activities..." />
+            <flux:input wire:model.live="search" label="Search Activities" placeholder="Search activities..." />
 
             <flux:select wire:model.live="selectedSession" label="Session">
                 <option value="">All Sessions</option>
@@ -85,7 +83,7 @@
             </flux:select>
 
             <div class="flex items-end gap-2">
-                <flux:button wire:click="clearFilters" class="cursor-pointer">
+                <flux:button wire:click="clearFilters" class="w-full cursor-pointer">
                     Clear Filters
                 </flux:button>
             </div>
