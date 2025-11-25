@@ -42,11 +42,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('company/edit', CompanyEdit::class)->name('company.edit')->middleware(['permission:company.edit']);
     Route::get('company', CompanyShow::class)->name('company.show')->middleware(['permission:company.view']);
 
-    Route::get('users', UserIndex::class)->name('users.index');
-    Route::get('users/audit', UserAudit::class)->name('users.audit');
-    Route::get('users/create', UserCreate::class)->name('users.create');
-    Route::get('users/{user}/edit', UserEdit::class)->name('users.edit');
-    Route::get('users/{user}', UserShow::class)->name('users.show');
+    Route::get('users', UserIndex::class)->name('users.index')->middleware(['permission:user.view']);
+    Route::get('users/audit', UserAudit::class)->name('users.audit')->middleware(['permission:user.audit']);
+    Route::get('users/create', UserCreate::class)->name('users.create')->middleware(['permission:user.create']);
+    Route::get('users/{user}/edit', UserEdit::class)->name('users.edit')->middleware(['permission:user.edit']);
+    Route::get('users/{user}', UserShow::class)->name('users.show')->middleware(['permission:user.view']);
     Route::get('users/download/{filename}', function ($filename) {
         $path = storage_path('app/temp/' . $filename);
 
@@ -60,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('users.download')->middleware('auth');
 
     Route::get('roles', RoleIndex::class)->name('roles.index')->middleware(['permission:role.view|role.create|role.edit|role.delete']);
-    Route::get('roles/audit', RoleAudit::class)->name('roles.audit')->middleware(['permission:role.view']);
+    Route::get('roles/audit', RoleAudit::class)->name('roles.audit')->middleware(['permission:role.audit']);
     Route::get('roles/create', RoleCreate::class)->name('roles.create')->middleware(['permission:role.create']);
     Route::get('roles/{role}/edit', RoleEdit::class)->name('roles.edit')->middleware(['permission:role.edit']);
     Route::get('roles/{role}', RoleShow::class)->name('roles.show')->middleware(['permission:role.view']);
