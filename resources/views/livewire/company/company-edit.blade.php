@@ -232,7 +232,7 @@
                             @error('newSocialUrl') <p class="text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
 
                             <div class="flex items-end">
-                                <flux:button wire:click="addSocialMedia" class="w-full">
+                                <flux:button wire:click="addSocialMedia" class="w-full" class="cursor-pointer">
                                     Add Link
                                 </flux:button>
                             </div>
@@ -250,7 +250,7 @@
                             License Information
                         </flux:heading>
 
-                        <flux:button wire:click="toggleLicenseSection" variant="ghost" size="sm" icon="{{ $showLicenseSection ? 'chevron-up' : 'chevron-down' }}">
+                        <flux:button wire:click="toggleLicenseSection" variant="ghost" size="sm" icon="{{ $showLicenseSection ? 'chevron-up' : 'chevron-down' }}" class="cursor-pointer">
                             {{ $showLicenseSection ? 'Hide' : 'Show' }} License Settings
                         </flux:button>
                     </div>
@@ -263,7 +263,7 @@
                                     <flux:input wire:model="license_key" label="License Key" placeholder="LIC-XXXX-YYYY" />
                                     @error('license_key') <p class="text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                                     <div class="mt-2">
-                                        <flux:button wire:click="generateLicenseKey" size="sm" type="button">
+                                        <flux:button wire:click="generateLicenseKey" size="sm" type="button" class="cursor-pointer">
                                             Generate Key
                                         </flux:button>
                                     </div>
@@ -347,7 +347,7 @@
                                     <h5 class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-2">Add New Feature:</h5>
                                     <div class="flex gap-2">
                                         <flux:input wire:model="newFeature" placeholder="Enter feature name..." class="flex-1" />
-                                        <flux:button wire:click="addFeature" type="button">
+                                        <flux:button wire:click="addFeature" type="button" class="cursor-pointer">
                                             Add Feature
                                         </flux:button>
                                     </div>
@@ -361,7 +361,7 @@
 
             <!-- Submit Button -->
             <div class="flex justify-end pt-6 border-t border-gray-200 dark:border-zinc-700">
-                <flux:button type="submit" variant="primary" icon="check">
+                <flux:button type="submit" variant="primary" icon="check" class="cursor-pointer">
                     Save Changes
                 </flux:button>
             </div>
