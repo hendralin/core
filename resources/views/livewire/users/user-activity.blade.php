@@ -3,38 +3,38 @@
     <div class="flex items-center justify-between">
         <div>
             <flux:heading size="lg">Activity Log</flux:heading>
-            <flux:text class="text-gray-600 dark:text-gray-400 mt-1">
+            <flux:text class="text-gray-600 dark:text-zinc-400 mt-1">
                 Track all activities performed by {{ $user->name }}
             </flux:text>
         </div>
-        <flux:button wire:click="clearFilters" variant="outline" size="sm">
+        <flux:button wire:click="clearFilters" size="sm" class="cursor-pointer">
             Clear Filters
         </flux:button>
     </div>
 
     <!-- Filters -->
-    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-4 border border-gray-200 dark:border-zinc-700">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <!-- Search -->
             <div>
-                <label for="activity-search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="activity-search" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">
                     Search Activities
                 </label>
                 <input type="text"
                        id="activity-search"
                        wire:model.live.debounce.300ms="search"
                        placeholder="Search activities..."
-                       class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- Log Type Filter -->
             <div>
-                <label for="log-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="log-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">
                     Activity Type
                 </label>
                 <select id="log-filter"
                         wire:model.live="logFilter"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">All Activities</option>
                     @foreach($logTypes as $logType)
                         <option value="{{ $logType }}">{{ ucwords(str_replace('_', ' ', $logType)) }}</option>
@@ -44,12 +44,12 @@
 
             <!-- Date Filter -->
             <div>
-                <label for="date-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="date-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">
                     Time Period
                 </label>
                 <select id="date-filter"
                         wire:model.live="dateFilter"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="1">Last 24 Hours</option>
                     <option value="7">Last 7 Days</option>
                     <option value="30">Last 30 Days</option>
@@ -60,12 +60,12 @@
 
             <!-- Per Page -->
             <div>
-                <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">
                     Show
                 </label>
                 <select id="per-page"
                         wire:model.live="perPage"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="10">10 per page</option>
                     <option value="25">25 per page</option>
                     <option value="50">50 per page</option>
@@ -76,14 +76,14 @@
     </div>
 
     <!-- Activities List -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 overflow-hidden">
         @if($activities->count() > 0)
-            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            <div class="divide-y divide-gray-200 dark:divide-zinc-700">
                 @foreach($activities as $activity)
-                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition-colors">
                         <div class="flex items-start space-x-4">
                             <!-- Activity Icon -->
-                            <div class="flex-shrink-0">
+                            <div class="shrink-0">
                                 <div class="w-10 h-10 rounded-full bg-{{ $activity->color }}-100 dark:bg-{{ $activity->color }}-900/20 flex items-center justify-center">
                                     <svg class="w-5 h-5 text-{{ $activity->color }}-600 dark:text-{{ $activity->color }}-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @switch($activity->icon)
@@ -121,20 +121,20 @@
                             <!-- Activity Content -->
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between">
-                                    <flux:text class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <flux:text class="text-sm font-medium text-gray-900 dark:text-zinc-100">
                                         {{ $activity->formatted_description }}
                                     </flux:text>
-                                    <flux:text class="text-xs text-gray-500 dark:text-gray-400">
+                                    <flux:text class="text-xs text-gray-500 dark:text-zinc-400">
                                         {{ $activity->created_at->diffForHumans() }}
                                     </flux:text>
                                 </div>
 
                                 <!-- Changes Details -->
                                 @if($activity->properties && isset($activity->properties['attributes']))
-                                    <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                    <div class="mt-2 text-xs text-gray-600 dark:text-zinc-400">
                                         <div class="flex flex-wrap gap-1">
                                             @foreach(array_keys($activity->properties['attributes']) as $field)
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 dark:bg-zinc-700 text-gray-800 dark:text-zinc-200">
                                                     {{ ucwords(str_replace('_', ' ', $field)) }}
                                                 </span>
                                             @endforeach
@@ -144,7 +144,7 @@
 
                                 <!-- IP Address & User Agent if available -->
                                 @if(isset($activity->properties['ip']) || isset($activity->properties['user_agent']))
-                                    <div class="mt-2 text-xs text-gray-500 dark:text-gray-500">
+                                    <div class="mt-2 text-xs text-gray-500 dark:text-zinc-500">
                                         @if(isset($activity->properties['ip']))
                                             <span>IP: {{ $activity->properties['ip'] }}</span>
                                         @endif
@@ -160,17 +160,17 @@
             </div>
 
             <!-- Pagination -->
-            <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <div class="px-4 py-3 bg-gray-50 dark:bg-zinc-800 border-t border-gray-200 dark:border-zinc-700">
                 {{ $activities->links(data: ['scrollTo' => false]) }}
             </div>
         @else
             <!-- Empty State -->
             <div class="p-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                <flux:heading size="md" class="mt-4 text-gray-900 dark:text-gray-100">No Activities Found</flux:heading>
-                <flux:text class="mt-2 text-gray-600 dark:text-gray-400">
+                <flux:heading size="md" class="mt-4 text-gray-900 dark:text-zinc-100">No Activities Found</flux:heading>
+                <flux:text class="mt-2 text-gray-600 dark:text-zinc-400">
                     @if($search || $logFilter || $dateFilter !== '7')
                         No activities match your current filters. Try adjusting your search criteria.
                     @else

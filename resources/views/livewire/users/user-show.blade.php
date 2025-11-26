@@ -17,7 +17,7 @@
                 <img src="{{ $user->avatar_url }}" class="h-20 w-20 rounded-full" alt="{{ $user->name }}">
                 <div class="ml-6">
                     <flux:heading size="xl">{{ $user->name }}</flux:heading>
-                    <flux:text class="text-gray-600 dark:text-gray-400">{{ $user->email }}</flux:text>
+                    <flux:text>{{ $user->email }}</flux:text>
                     <div class="mt-2">
                         @if ($user->status == 0)
                             <flux:badge color="red">Inactive</flux:badge>
@@ -38,21 +38,21 @@
             <flux:heading size="lg">Account Information</flux:heading>
             <div class="grid grid-cols-2 gap-4 mt-3 mb-6">
                 <div>
-                    <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Joined</flux:heading>
+                    <flux:heading size="sm">Joined</flux:heading>
                     <flux:text class="mt-1">{{ $user->created_at->format('M d, Y') }}</flux:text>
                 </div>
                 <div>
-                    <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Account Age</flux:heading>
+                    <flux:heading size="sm">Account Age</flux:heading>
                     <flux:text class="mt-1">{{ $user->account_age }}</flux:text>
                 </div>
                 @if($user->last_login_at)
                 <div>
-                    <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Last Login</flux:heading>
+                    <flux:heading size="sm">Last Login</flux:heading>
                     <flux:text class="mt-1">{{ $user->last_login_at->format('M d, Y H:i') }}</flux:text>
                 </div>
                 @endif
                 <div>
-                    <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Timezone</flux:heading>
+                    <flux:heading size="sm">Timezone</flux:heading>
                     <flux:text class="mt-1">{{ $user->timezone }}</flux:text>
                 </div>
             </div>
@@ -62,19 +62,19 @@
             <div class="mt-3 space-y-3">
                 @if($user->phone)
                 <div>
-                    <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Phone</flux:heading>
+                    <flux:heading size="sm">Phone</flux:heading>
                     <flux:text class="mt-1">{{ $user->phone }}</flux:text>
                 </div>
                 @endif
                 @if($user->birth_date)
                 <div>
-                    <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Birth Date</flux:heading>
+                    <flux:heading size="sm">Birth Date</flux:heading>
                     <flux:text class="mt-1">{{ $user->birth_date->format('M d, Y') }}</flux:text>
                 </div>
                 @endif
                 @if($user->address)
                 <div>
-                    <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Address</flux:heading>
+                    <flux:heading size="sm">Address</flux:heading>
                     <flux:text class="mt-1">{{ $user->address }}</flux:text>
                 </div>
                 @endif

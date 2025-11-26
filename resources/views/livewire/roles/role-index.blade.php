@@ -28,8 +28,8 @@
                     <flux:icon.shield-check class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div class="ml-4">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $totalRoles }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Total Roles</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ $totalRoles }}</div>
+                    <div class="text-sm text-gray-600 dark:text-zinc-400">Total Roles</div>
                 </div>
             </div>
         </div>
@@ -40,8 +40,8 @@
                     <flux:icon.users class="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div class="ml-4">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $activeRoles }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Active Roles</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ $activeRoles }}</div>
+                    <div class="text-sm text-gray-600 dark:text-zinc-400">Active Roles</div>
                 </div>
             </div>
         </div>
@@ -52,8 +52,8 @@
                     <flux:icon.cog class="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
                 <div class="ml-4">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $systemRoles }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">System Roles</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ $systemRoles }}</div>
+                    <div class="text-sm text-gray-600 dark:text-zinc-400">System Roles</div>
                 </div>
             </div>
         </div>
@@ -64,8 +64,8 @@
                     <flux:icon.pencil-square class="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div class="ml-4">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $customRoles }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Custom Roles</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ $customRoles }}</div>
+                    <div class="text-sm text-gray-600 dark:text-zinc-400">Custom Roles</div>
                 </div>
             </div>
         </div>
@@ -75,11 +75,11 @@
         <!-- Actions Section -->
         <div class="flex flex-wrap gap-2">
             @can('role.create')
-                <flux:button variant="primary" size="sm" href="{{ route('roles.create') }}" wire:navigate icon="plus">Create Role</flux:button>
+                <flux:button variant="primary" size="sm" href="{{ route('roles.create') }}" wire:navigate icon="plus" tooltip="Create Role">Create</flux:button>
             @endcan
 
             @can('role.audit')
-                <flux:button variant="ghost" size="sm" href="{{ route('roles.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                <flux:button variant="ghost" size="sm" href="{{ route('roles.audit') }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
             @endcan
 
             <div wire:loading>
@@ -88,15 +88,15 @@
         </div>
 
         <!-- Filter Section -->
-        <div class="grid grid-cols-2 md:grid-cols-4">
-            <div class="flex items-center">
-                <label for="per-page" class="text-sm text-gray-700 dark:text-gray-300 mr-2">Per Page:</label>
-                <select id="per-page" wire:model.live="perPage"
-                        class="text-sm rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="grid grid-cols-1 md:grid-cols-4 mb-3 mt-4">
+            <div class="flex items-center gap-2 w-44 mb-2 md:mb-0">
+                <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">Show:</label>
+                <flux:select id="per-page" wire:model.live="perPage">
                     @foreach ($this->perPageOptions as $option)
-                        <option value="{{ $option }}">{{ $option }}</option>
+                    <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
+                <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">entries</label>
             </div>
             <flux:spacer class="hidden md:inline" />
             <flux:spacer class="hidden md:inline" />
@@ -106,8 +106,8 @@
 
     <!-- Table Section -->
     <div class="overflow-x-auto">
-        <table class="w-full min-w-[900px] text-sm text-left rtl:text-right text-gray-500 border dark:border-zinc-700 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b dark:border-b-0 dark:bg-zinc-700 dark:text-gray-400">
+        <table class="w-full min-w-[900px] text-sm text-left rtl:text-right text-gray-500 border dark:border-zinc-700 dark:text-zinc-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b dark:border-b-0 dark:bg-zinc-700 dark:text-zinc-400">
                 <tr>
                     <th scope="col" class="px-4 py-3 w-10 text-center">No.</th>
                     <th scope="col" class="px-4 py-3 w-40">
@@ -157,10 +157,10 @@
             <tbody>
                 @if(isset($roles) && $roles->count() > 0)
                     @foreach($roles as $index => $role)
-                        <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-gray-700/50" wire:loading.class="opacity-50">
+                        <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
                             <td class="px-4 py-2 text-center text-gray-900 dark:text-white">{{ $roles->firstItem() + $index }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-gray-300">{{ \App\Constants\RoleConstants::getDisplayName($role->name) }}</td>
-                            <td class="px-4 py-2 text-gray-600 dark:text-gray-300">
+                            <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-zinc-300">{{ \App\Constants\RoleConstants::getDisplayName($role->name) }}</td>
+                            <td class="px-4 py-2 text-gray-600 dark:text-zinc-300">
                                 @php
                                     $formattedPermissions = $roleService->formatPermissionsForDisplay($role->permissions, 3);
                                 @endphp
@@ -173,16 +173,16 @@
                                 @endif
                                 </div>
                             </td>
-                            <td class="px-4 py-2 text-center text-gray-600 dark:text-gray-300">
+                            <td class="px-4 py-2 text-center text-gray-600 dark:text-zinc-300">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    {{ $role->users_count > 0 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
+                                    {{ $role->users_count > 0 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-100 text-gray-800 dark:bg-zinc-700 dark:text-zinc-300' }}">
                                     {{ $role->users_count }}
                                 </span>
                             </td>
-                            <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                            <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-zinc-300">
                                 {{ $role->created_at->format('d/m/Y H:i') }}
                             </td>
-                            <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                            <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-zinc-300">
                                 {{ $role->updated_at->format('d/m/Y H:i') }}
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap text-center">
@@ -210,7 +210,7 @@
                     @endforeach
                 @else
                     <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 border-gray-200">
-                        <td class="px-4 py-2 text-gray-600 dark:text-gray-300 text-center" colspan="7">
+                        <td class="px-4 py-2 text-gray-600 dark:text-zinc-300 text-center" colspan="7">
                             @if(isset($search) && !empty($search))
                                 No results found for "{{ $search }}"
                             @else
