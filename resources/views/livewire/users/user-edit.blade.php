@@ -10,7 +10,7 @@
 
     <div class="w-full max-w-4xl mt-6" x-data="userTabs()">
         <!-- Tab Navigation -->
-        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+        <div class="border-b border-gray-200 dark:border-zinc-700 mb-6">
             <nav class="-mb-px flex space-x-8">
                 <button @click="setActiveTab('profile')"
                         :class="activeTab === 'profile' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"

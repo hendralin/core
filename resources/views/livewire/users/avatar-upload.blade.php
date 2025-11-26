@@ -4,7 +4,7 @@
         <div class="relative">
             <img src="{{ $user->avatar_url }}"
                  alt="{{ $user->name }}"
-                 class="h-32 w-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700">
+                 class="h-32 w-32 rounded-full object-cover border-4 border-gray-200 dark:border-zinc-700">
 
             @if($user->avatar)
                 <button wire:click="removeAvatar"
@@ -20,25 +20,25 @@
 
         <div class="text-center">
             <flux:heading size="md">{{ $user->name }}</flux:heading>
-            <flux:text class="text-gray-600 dark:text-gray-400">{{ $user->email }}</flux:text>
+            <flux:text class="text-gray-600 dark:text-zinc-400">{{ $user->email }}</flux:text>
         </div>
     </div>
 
     <!-- Avatar Upload Form -->
-    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+    <div class="border-t border-gray-200 dark:border-zinc-700 pt-6">
         <flux:heading size="md" class="mb-4">Update Avatar</flux:heading>
 
         <div class="space-y-4">
             <!-- File Input -->
             <div>
-                <label for="avatar-upload" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="avatar-upload" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
                     Choose New Avatar
                 </label>
                 <input type="file"
                        id="avatar-upload"
                        wire:model="avatar"
                        accept="image/*"
-                       class="block w-full text-sm text-gray-500 dark:text-gray-400
+                       class="block w-full text-sm text-gray-500 dark:text-zinc-400
                               file:mr-4 file:py-2 file:px-4
                               file:rounded-lg file:border-0
                               file:text-sm file:font-medium
@@ -57,10 +57,10 @@
                 <div class="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <img src="{{ $avatar->temporaryUrl() }}"
                          alt="Preview"
-                         class="h-20 w-20 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600">
+                         class="h-20 w-20 rounded-full object-cover border-2 border-gray-300 dark:border-zinc-600">
                     <div class="flex-1">
                         <flux:text class="font-medium">{{ $avatar->getClientOriginalName() }}</flux:text>
-                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
                             {{ number_format($avatar->getSize() / 1024, 1) }} KB
                         </flux:text>
                     </div>
@@ -80,6 +80,7 @@
                            :disabled="!$avatar || $isUploading"
                            variant="primary"
                            size="sm"
+                           class="cursor-pointer"
                            :loading="$isUploading">
                     @if($isUploading)
                         Uploading...
@@ -89,7 +90,7 @@
                 </flux:button>
 
                 @if(!$avatar)
-                    <flux:text class="text-sm text-gray-500 dark:text-gray-400">
+                    <flux:text class="text-sm text-gray-500 dark:text-zinc-400">
                         Select an image file (max 2MB, JPEG/PNG/JPG/GIF/WebP)
                     </flux:text>
                 @endif

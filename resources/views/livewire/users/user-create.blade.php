@@ -30,7 +30,7 @@
                         @endforeach
                     </flux:checkbox.group>
                 </div>
-                <flux:button type="submit" variant="primary">Create User</flux:button>
+                <flux:button type="submit" variant="primary" class="cursor-pointer">Create User</flux:button>
             </form>
         </div>
     </div>

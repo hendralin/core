@@ -19,11 +19,11 @@
             <x-slot name="actions">
                 <div class="flex flex-wrap gap-2">
                     @can('user.create')
-                        <flux:button variant="primary" size="sm" href="{{ route('users.create') }}" wire:navigate icon="plus">Create User</flux:button>
+                        <flux:button variant="primary" size="sm" href="{{ route('users.create') }}" wire:navigate icon="plus" tooltip="Create User">Create</flux:button>
                     @endcan
 
                     @can('user.audit')
-                        <flux:button variant="ghost" size="sm" href="{{ route('users.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                        <flux:button variant="ghost" size="sm" href="{{ route('users.audit') }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
                     @endcan
 
                     @if (count($selected) > 0)
@@ -77,8 +77,8 @@
                                 <div class="flex items-center">
                                     <img src="{{ $user->avatar_url }}" class="h-10 w-10 rounded-full" alt="{{ $user->name }}">
                                     <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-zinc-100">{{ $user->name }}</div>
+                                        <div class="text-sm text-gray-500 dark:text-zinc-400">{{ $user->email }}</div>
                                     </div>
                                 </div>
                             </x-table-cell>
