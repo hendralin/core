@@ -243,9 +243,9 @@
                 <div class="flex gap-2">
                     <flux:spacer />
                     <flux:modal.close>
-                        <flux:button variant="ghost">Cancel</flux:button>
+                        <flux:button variant="ghost" class="cursor-pointer">Cancel</flux:button>
                     </flux:modal.close>
-                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
+                    <flux:button type="submit" variant="primary" color="green" wire:loading.attr="disabled" class="cursor-pointer">
                         <span wire:loading.remove>Sync Groups</span>
                         <span wire:loading>Syncing...</span>
                     </flux:button>

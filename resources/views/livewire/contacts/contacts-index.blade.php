@@ -76,7 +76,7 @@
                     <div class="flex flex-wrap gap-2">
                         @can('contact.sync')
                             <flux:modal.trigger name="sync-contacts-modal">
-                                <flux:button variant="ghost" class="cursor-pointer" icon="arrow-path" tooltip="Sync Contacts">Sync Contacts</flux:button>
+                                <flux:button variant="ghost" size="sm" class="cursor-pointer" icon="arrow-path" tooltip="Sync Contacts">Sync Contacts</flux:button>
                             </flux:modal.trigger>
                         @endcan
 
