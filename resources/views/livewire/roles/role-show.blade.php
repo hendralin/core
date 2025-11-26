@@ -28,9 +28,9 @@
                         <flux:heading size="sm">System Role</flux:heading>
                         <flux:text class="mt-1">
                             @if (\App\Constants\RoleConstants::isProtected($role->name))
-                                <flux:badge variant="destructive" size="sm">Protected</flux:badge>
+                                <flux:badge color="red" size="sm">Protected</flux:badge>
                             @else
-                                <flux:badge variant="secondary" size="sm">Custom</flux:badge>
+                                <flux:badge color="green" size="sm">Custom</flux:badge>
                             @endif
                         </flux:text>
                     </div>
@@ -96,7 +96,7 @@
                                     <flux:heading size="sm" class="mb-2 text-gray-900 dark:text-zinc-100">{{ $groupName }}</flux:heading>
                                     <div class="flex flex-wrap gap-2">
                                         @foreach ($groupPermissions as $permission)
-                                            <flux:badge variant="outline">{{ $permission->name }}</flux:badge>
+                                            <flux:badge color="zinc">{{ $permission->name }}</flux:badge>
                                         @endforeach
                                     </div>
                                 </div>
