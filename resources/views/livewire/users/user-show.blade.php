@@ -6,7 +6,7 @@
     </div>
 
     <div>
-        <flux:button variant="primary" size="sm" href="{{ route('users.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Back to Users">Back</flux:button>
+        <flux:button variant="primary" size="sm" href="{{ route('users.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Users">Back</flux:button>
         @can('user.edit')
             <flux:button variant="filled" size="sm" href="{{ route('users.edit', $user->id) }}" wire:navigate icon="pencil-square" class="ml-1">Edit</flux:button>
         @endcan
@@ -89,6 +89,17 @@
                     @endforeach
                 @else
                     <flux:text class="text-gray-500">No roles assigned</flux:text>
+                @endif
+            </flux:text>
+
+            <flux:heading size="lg" class="mt-6">Assigned Warehouses</flux:heading>
+            <flux:text class="mt-3">
+                @if ($user->warehouses)
+                    @foreach ($user->warehouses as $warehouse)
+                        <flux:badge color="lime" class="mr-2 mb-2">{{ $warehouse->name }}</flux:badge>
+                    @endforeach
+                @else
+                    <flux:text class="text-gray-500">No warehouses assigned</flux:text>
                 @endif
             </flux:text>
         </div>

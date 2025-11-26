@@ -55,6 +55,84 @@
                     </flux:navlist.group>
                 @endif
 
+                @if (auth()->user()->can('warehouse.view') ||
+                auth()->user()->can('brand.view') ||
+                auth()->user()->can('vendor.view') ||
+                auth()->user()->can('vehiclemodel.view') ||
+                auth()->user()->can('category.view') ||
+                auth()->user()->can('type.view') ||
+                auth()->user()->can('vehicle.view'))
+                    <flux:navlist.group :heading="__('List')" class="grid">
+                        @if (auth()->user()->can('brand.view') ||
+                        auth()->user()->can('brand.create') ||
+                        auth()->user()->can('brand.edit') ||
+                        auth()->user()->can('brand.delete'))
+                            <flux:navlist.item icon="tag" :href="route('brands.index')" :current="request()->routeIs('brands.*')" wire:navigate>{{ __('Brands') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('type.view') ||
+                        auth()->user()->can('type.create') ||
+                        auth()->user()->can('type.edit') ||
+                        auth()->user()->can('type.delete'))
+                            <flux:navlist.item icon="squares-2x2" :href="route('types.index')" :current="request()->routeIs('types.*')" wire:navigate>{{ __('Types') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('category.view') ||
+                        auth()->user()->can('category.create') ||
+                        auth()->user()->can('category.edit') ||
+                        auth()->user()->can('category.delete'))
+                            <flux:navlist.item icon="rectangle-stack" :href="route('categories.index')" :current="request()->routeIs('categories.*')" wire:navigate>{{ __('Categories') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('vehiclemodel.view') ||
+                        auth()->user()->can('vehiclemodel.create') ||
+                        auth()->user()->can('vehiclemodel.edit') ||
+                        auth()->user()->can('vehiclemodel.delete'))
+                            <flux:navlist.item icon="cube" :href="route('models.index')" :current="request()->routeIs('models.*')" wire:navigate>{{ __('Models') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('vendor.view') ||
+                        auth()->user()->can('vendor.create') ||
+                        auth()->user()->can('vendor.edit') ||
+                        auth()->user()->can('vendor.delete'))
+                            <flux:navlist.item icon="user-circle" :href="route('vendors.index')" :current="request()->routeIs('vendors.*')" wire:navigate>{{ __('Vendors') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('salesman.view') ||
+                        auth()->user()->can('salesman.create') ||
+                        auth()->user()->can('salesman.edit') ||
+                        auth()->user()->can('salesman.delete'))
+                            <flux:navlist.item icon="user-group" :href="route('salesmen.index')" :current="request()->routeIs('salesmen.*')" wire:navigate>{{ __('Salesmen') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('warehouse.view') ||
+                        auth()->user()->can('warehouse.create') ||
+                        auth()->user()->can('warehouse.edit') ||
+                        auth()->user()->can('warehouse.delete'))
+                            <flux:navlist.item icon="building-storefront" :href="route('warehouses.index')" :current="request()->routeIs('warehouses.*')" wire:navigate>{{ __('Warehouses') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('vehicle.view') ||
+                        auth()->user()->can('vehicle.create') ||
+                        auth()->user()->can('vehicle.edit') ||
+                        auth()->user()->can('vehicle.delete'))
+                            <flux:navlist.item icon="truck" :href="route('vehicles.index')" :current="request()->routeIs('vehicles.*')" wire:navigate>{{ __('Vehicles') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
+
+                @if (auth()->user()->can('cost.view'))
+                    <flux:navlist.group :heading="__('Activity')" class="grid">
+                        @if (auth()->user()->can('cost.view') ||
+                        auth()->user()->can('cost.create') ||
+                        auth()->user()->can('cost.edit') ||
+                        auth()->user()->can('cost.delete'))
+                            <flux:navlist.item icon="beaker" :href="route('costs.index')" :current="request()->routeIs('costs.*')" wire:navigate>{{ __('Pembukuan Modal') }}</flux:navlist.item>
+                        @endif
+
+                    </flux:navlist.group>
+                @endif
+
                 <flux:navlist.group :heading="__('Tool')" class="grid">
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
                         <flux:navlist.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup & Restore') }}</flux:navlist.item>

@@ -14,7 +14,7 @@
 
     <!-- Filters -->
     <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-4 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Search -->
             <div>
                 <label for="activity-search" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">
@@ -78,12 +78,12 @@
     <!-- Activities List -->
     <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 overflow-hidden">
         @if($activities->count() > 0)
-            <div class="divide-y divide-gray-200 dark:divide-zinc-700">
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($activities as $activity)
-                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition-colors">
+                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="flex items-start space-x-4">
                             <!-- Activity Icon -->
-                            <div class="shrink-0">
+                            <div class="flex-shrink-0">
                                 <div class="w-10 h-10 rounded-full bg-{{ $activity->color }}-100 dark:bg-{{ $activity->color }}-900/20 flex items-center justify-center">
                                     <svg class="w-5 h-5 text-{{ $activity->color }}-600 dark:text-{{ $activity->color }}-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @switch($activity->icon)

@@ -13,7 +13,7 @@ class UserShow extends Component
 
     public function mount(User $user): void
     {
-        $this->user = $user->load(['roles']); // Eager load relationships
+        $this->user = $user->load(['roles', 'warehouses']); // Eager load relationships
     }
 
     public function render()

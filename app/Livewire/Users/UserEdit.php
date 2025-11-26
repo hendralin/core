@@ -4,6 +4,7 @@ namespace App\Livewire\Users;
 
 use App\Models\User;
 use Livewire\Component;
+use App\Models\Warehouse;
 use Livewire\Attributes\Title;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
@@ -20,9 +21,11 @@ class UserEdit extends Component
     protected $queryString = [
         'activeTab' => ['except' => 'profile'],
     ];
-    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles, $status;
+    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles, $allWarehouses, $status;
 
     public $roles = [];
+
+    public $warehouses = [];
 
     public function mount(User $user): void
     {
@@ -37,6 +40,9 @@ class UserEdit extends Component
 
         $this->allRoles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
         $this->roles = $user->roles()->pluck('name');
+
+        $this->allWarehouses = Warehouse::all();
+        $this->warehouses = $user->warehouses()->pluck('id');
     }
 
     public function submit()
@@ -50,6 +56,7 @@ class UserEdit extends Component
             'timezone' => 'required|string',
             'status' => 'required|integer|in:0,1,2',
             'roles' => 'required|array',
+            'warehouses' => 'required|array',
             'password' => 'nullable|string|min:8|same:confirm_password',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
@@ -79,6 +86,9 @@ class UserEdit extends Component
             'roles.required' => 'Setidaknya satu peran harus dipilih.',
             'roles.array' => 'Format peran tidak valid.',
 
+            'warehouses.required' => 'Setidaknya satu gudang harus dipilih.',
+            'warehouses.array' => 'Format gudang tidak valid.',
+
             'password.min' => 'Kata sandi minimal 8 karakter.',
             'password.regex' => 'Kata sandi harus mengandung huruf besar, huruf kecil, dan angka.',
             'password.same' => 'Konfirmasi kata sandi tidak cocok.',
@@ -94,6 +104,7 @@ class UserEdit extends Component
             'timezone' => $this->user->timezone,
             'status' => $this->user->status,
             'roles' => $this->user->roles()->pluck('name')->toArray(),
+            'warehouses' => $this->user->warehouses()->pluck('id')->toArray(),
         ];
 
         $this->user->name = $this->name;
@@ -112,6 +123,8 @@ class UserEdit extends Component
 
         $this->user->syncRoles($this->roles);
 
+        $this->user->warehouses()->sync($this->warehouses);
+
         // Log activity with detailed before/after information
         activity()
             ->performedOn($this->user)
@@ -127,6 +140,7 @@ class UserEdit extends Component
                     'timezone' => $this->timezone,
                     'status' => $this->status,
                     'roles' => $this->roles,
+                    'warehouses' => $this->warehouses,
                     'password_changed' => !empty($this->password),
                 ],
                 'ip' => request()->ip(),

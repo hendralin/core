@@ -23,11 +23,16 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             PermissionSeeder::class,
-            BackupRestorePermissionSeeder::class,
+            UserSeeder::class,
             CompanySeeder::class,
             CompanyLicenseSeeder::class,
             DefaultBackupScheduleSeeder::class,
-            UserSeeder::class,
+            BrandSeeder::class,
+            VehicleModelSeeder::class,
+            TypeSeeder::class,
+            CategorySeeder::class,
+            VendorSeeder::class,
+            WarehouseSeeder::class,
         ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Livewire\Users;
 
 use App\Models\User;
 use Livewire\Component;
+use App\Models\Warehouse;
 use Livewire\Attributes\Title;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
@@ -12,13 +13,17 @@ use Illuminate\Support\Facades\Hash;
 #[Title('Create User')]
 class UserCreate extends Component
 {
-    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles;
+    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles, $allWarehouses;
 
     public $roles = [];
+
+    public $warehouses = [];
 
     public function mount()
     {
         $this->allRoles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
+
+        $this->allWarehouses = Warehouse::all();
     }
 
     public function submit()
@@ -31,6 +36,7 @@ class UserCreate extends Component
             'address' => 'nullable|string|max:500',
             'timezone' => 'required|string',
             'roles' => 'required|array',
+            'warehouses' => 'required|array',
             'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/|same:confirm_password',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
@@ -56,6 +62,9 @@ class UserCreate extends Component
             'roles.required' => 'Setidaknya satu peran harus dipilih.',
             'roles.array' => 'Format peran tidak valid.',
 
+            'warehouses.required' => 'Setidaknya satu gudang harus dipilih.',
+            'warehouses.array' => 'Format gudang tidak valid.',
+
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi minimal 8 karakter.',
             'password.regex' => 'Kata sandi harus mengandung huruf besar, huruf kecil, dan angka.',
@@ -77,6 +86,8 @@ class UserCreate extends Component
 
         $user->syncRoles($this->roles);
 
+        $user->warehouses()->sync($this->warehouses);
+
         // Log activity with detailed information
         activity()
             ->performedOn($user)
@@ -91,6 +102,7 @@ class UserCreate extends Component
                     'timezone' => $this->timezone,
                     'status' => '1',
                     'roles' => $this->roles,
+                    'warehouses' => $this->warehouses,
                 ],
                 'ip' => request()->ip(),
                 'user_agent' => request()->userAgent(),

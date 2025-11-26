@@ -12,6 +12,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -157,6 +158,16 @@ class User extends Authenticatable implements MustVerifyEmail
             'deleted' => "User :name was deleted",
             default => "User :name was {$eventName}",
         };
+    }
+
+    /**
+     * The warehouses that belong to the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function warehouses(): BelongsToMany
+    {
+        return $this->belongsToMany(Warehouse::class, 'user_has_warehouses', 'user_id', 'warehouse_id')->withTimestamps();
     }
 
     /**

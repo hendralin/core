@@ -5,7 +5,7 @@
         <flux:separator variant="subtle" />
     </div>
 
-    <flux:button variant="primary" size="sm" href="{{ route('users.index') }}" icon="arrow-left" tooltip="Back to Users" class="mb-4">Back</flux:button>
+    <flux:button variant="primary" size="sm" href="{{ route('users.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke User" class="mb-4">Back</flux:button>
 
     <!-- Statistics Overview -->
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
@@ -62,7 +62,7 @@
 
     <!-- Filters -->
     <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Search -->
             <flux:input type="text" label="Search Activities" wire:model.live.debounce.300ms="search" placeholder="Search activities..." clearable />
 
@@ -74,9 +74,8 @@
                 @endforeach
             </flux:select>
 
-
             <!-- Per Page -->
-            <flux:select label="Show" wire:model.live="perPage" placeholder="Select per page...">
+            <flux:select label="Show" wire:model.live="perPage">
                 @foreach($this->perPageOptions as $option)
                     <flux:select.option value="{{ $option }}">{{ $option }} per page</flux:select.option>
                 @endforeach
@@ -147,7 +146,7 @@
                                                         @foreach($activity->properties['old'] as $field => $value)
                                                             <div class="text-xs text-gray-600 dark:text-zinc-400">
                                                                 <span class="font-medium">{{ ucwords(str_replace('_', ' ', $field)) }}:</span>
-                                                                @if(in_array($field, ['roles']))
+                                                                @if(in_array($field, ['roles', 'warehouses']))
                                                                     {{ is_array($value) ? implode(', ', $value) : $value }}
                                                                 @else
                                                                     {{ $activity->convertValueToString($value) }}
@@ -160,7 +159,7 @@
                                                         @foreach($activity->properties['attributes'] as $field => $value)
                                                             <div class="text-xs text-gray-600 dark:text-zinc-400">
                                                                 <span class="font-medium">{{ ucwords(str_replace('_', ' ', $field)) }}:</span>
-                                                                @if(in_array($field, ['roles']))
+                                                                @if(in_array($field, ['roles', 'warehouses']))
                                                                     {{ is_array($value) ? implode(', ', $value) : $value }}
                                                                 @elseif($field === 'password_changed')
                                                                     {{ $value ? 'Yes' : 'No' }}
@@ -175,7 +174,7 @@
                                                 @foreach($activity->properties['attributes'] as $field => $value)
                                                     <div class="text-xs text-gray-600 dark:text-zinc-400 mb-1">
                                                         <span class="font-medium">{{ ucwords(str_replace('_', ' ', $field)) }}:</span>
-                                                        @if(in_array($field, ['roles']))
+                                                        @if(in_array($field, ['roles', 'warehouses']))
                                                             {{ is_array($value) ? implode(', ', $value) : $value }}
                                                         @elseif($field === 'password_changed')
                                                             {{ $value ? 'Yes' : 'No' }}

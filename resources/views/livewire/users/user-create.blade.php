@@ -6,7 +6,7 @@
     </div>
 
     <div>
-        <flux:button variant="primary" size="sm" href="{{ route('users.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Back to Users">Back</flux:button>
+        <flux:button variant="primary" size="sm" href="{{ route('users.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Users">Back</flux:button>
 
         <div class="w-full max-w-lg">
             <form wire:submit="submit" class="mt-6 space-y-6">
@@ -27,6 +27,11 @@
                     <flux:checkbox.group wire:model="roles" label="Roles">
                         @foreach ($allRoles as $role)
                             <flux:checkbox label="{{ $role->name }}" value="{{ $role->name }}" />
+                        @endforeach
+                    </flux:checkbox.group>
+                    <flux:checkbox.group wire:model="warehouses" label="Warehouses">
+                        @foreach ($allWarehouses as $warehouse)
+                            <flux:checkbox label="{{ $warehouse->name }}" value="{{ $warehouse->id }}" />
                         @endforeach
                     </flux:checkbox.group>
                 </div>

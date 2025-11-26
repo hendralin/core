@@ -5,13 +5,13 @@ namespace App\Livewire\About;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 
-#[Title('About Boilerplate v1.0.0')]
+    #[Title('About WOTO v1.10.0')]
 class AboutIndex extends Component
 {
     public function render()
     {
         $systemInfo = [
-            'version' => '1.0.0',
+            'version' => '1.10.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
@@ -19,6 +19,25 @@ class AboutIndex extends Component
             'environment' => config('app.env'),
         ];
 
-        return view('livewire.about.about-index', compact('systemInfo'));
+        // Get real-time statistics
+        $stats = [
+            'brands_count' => \App\Models\Brand::count(),
+            'vendors_count' => \App\Models\Vendor::count(),
+            'salesmen_count' => \App\Models\Salesman::count(),
+            'vehicle_models_count' => \App\Models\VehicleModel::count(),
+            'categories_count' => \App\Models\Category::count(),
+            'types_count' => \App\Models\Type::count(),
+            'vehicles_count' => \App\Models\Vehicle::count(),
+            'costs_count' => \App\Models\Cost::count(),
+            'warehouses_count' => \App\Models\Warehouse::count(),
+            'users_count' => \App\Models\User::count(),
+            'companies_count' => \App\Models\Company::count(),
+            // Additional dashboard metrics
+            'vehicles_sold_this_month' => \App\Models\Vehicle::where('status', 0)->whereYear('selling_date', now()->year)->whereMonth('selling_date', now()->month)->count(),
+            'new_vehicles_this_month' => \App\Models\Vehicle::whereYear('purchase_date', now()->year)->whereMonth('purchase_date', now()->month)->count(),
+            'vehicles_ready_for_sale' => \App\Models\Vehicle::where('status', 1)->count(),
+        ];
+
+        return view('livewire.about.about-index', compact('systemInfo', 'stats'));
     }
 }

@@ -6,11 +6,11 @@
     </div>
 
     <div>
-        <flux:button variant="primary" size="sm" href="{{ route('users.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Back to Users">Back</flux:button>
+        <flux:button variant="primary" size="sm" href="{{ route('users.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Users">Back</flux:button>
 
     <div class="w-full max-w-4xl mt-6" x-data="userTabs()">
         <!-- Tab Navigation -->
-        <div class="border-b border-gray-200 dark:border-zinc-700 mb-6">
+        <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
             <nav class="-mb-px flex space-x-8">
                 <button @click="setActiveTab('profile')"
                         :class="activeTab === 'profile' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -70,8 +70,13 @@
                             <flux:checkbox label="{{ $role->name }}" value="{{ $role->name }}" />
                         @endforeach
                     </flux:checkbox.group>
+                    <flux:checkbox.group wire:model="warehouses" label="Warehouses">
+                        @foreach ($allWarehouses as $warehouse)
+                            <flux:checkbox label="{{ $warehouse->name }}" value="{{ $warehouse->id }}" />
+                        @endforeach
+                    </flux:checkbox.group>
                 </div>
-                <flux:button type="submit" variant="primary">Update User</flux:button>
+                <flux:button type="submit" variant="primary" class="cursor-pointer">Update User</flux:button>
             </form>
         </div>
 

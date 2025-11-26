@@ -15,11 +15,11 @@
         @endsession
 
 
-        <x-data-table :data="$users" :roles="$roles" :showAdvancedFilters="$showAdvancedFilters" searchable filterable selectable title="Users" placeholder="Search users...">
+        <x-data-table :data="$users" :roles="$roles" :warehouses="$warehouses" :showAdvancedFilters="$showAdvancedFilters" searchable filterable selectable title="Users" placeholder="Search users...">
             <x-slot name="actions">
                 <div class="flex flex-wrap gap-2">
                     @can('user.create')
-                        <flux:button variant="primary" size="sm" href="{{ route('users.create') }}" wire:navigate icon="plus" tooltip="Create User">Create</flux:button>
+                        <flux:button variant="primary" size="sm" href="{{ route('users.create') }}" wire:navigate icon="plus" tooltip="Tambah User">Tambah</flux:button>
                     @endcan
 
                     @can('user.audit')

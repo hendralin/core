@@ -9,7 +9,6 @@ use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Log;
 use Livewire\WithoutUrlPagination;
 use Spatie\Permission\Models\Role;
 
@@ -22,6 +21,7 @@ class UserIndex extends Component
         'search' => ['except' => ''],
         'statusFilter' => ['except' => ''],
         'roleFilter' => ['except' => ''],
+        'warehouseFilter' => ['except' => ''],
         'verificationFilter' => ['except' => ''],
         'createdDateFrom' => ['except' => ''],
         'createdDateTo' => ['except' => ''],
@@ -34,6 +34,7 @@ class UserIndex extends Component
     public $search = '';
     public $statusFilter = '';
     public $roleFilter = '';
+    public $warehouseFilter = '';
     public $verificationFilter = '';
     public $dateRangeFilter = '';
     public $createdDateFrom = '';
@@ -164,6 +165,7 @@ class UserIndex extends Component
             'search',
             'statusFilter',
             'roleFilter',
+            'warehouseFilter',
             'verificationFilter',
             'createdDateFrom',
             'createdDateTo',
@@ -321,7 +323,7 @@ class UserIndex extends Component
             $this->reset(['selected', 'selectAll']);
 
         } catch (\Exception $e) {
-            Log::error('bulkStatusChange error: ' . $e->getMessage());
+            \Log::error('bulkStatusChange error: ' . $e->getMessage());
             session()->flash('error', 'Failed to update user status: ' . $e->getMessage());
         }
     }
@@ -335,7 +337,7 @@ class UserIndex extends Component
 
         try {
             // Get selected users with relationships
-            $users = User::with(['roles'])
+            $users = User::with(['roles', 'warehouses'])
                 ->whereIn('id', $this->selected)
                 ->get();
 
@@ -382,6 +384,7 @@ class UserIndex extends Component
             'Status',
             'Email Verified',
             'Roles',
+            'Warehouses',
             'Joined Date',
             'Last Login',
             'Timezone'
@@ -402,6 +405,7 @@ class UserIndex extends Component
                 $user->status == 1 ? 'Active' : ($user->status == 0 ? 'Inactive' : 'Pending'),
                 $user->is_email_verified ? 'Yes' : 'No',
                 $user->roles->pluck('name')->implode('; '),
+                $user->warehouses->pluck('name')->implode('; '),
                 $user->created_at->format('Y-m-d H:i:s'),
                 $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i:s') : '',
                 $user->timezone
@@ -417,7 +421,7 @@ class UserIndex extends Component
 
     public function render()
     {
-        $users = User::with(['roles']) // Eager load relationships
+        $users = User::with(['roles', 'warehouses']) // Eager load relationships
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')
@@ -429,6 +433,11 @@ class UserIndex extends Component
             ->when($this->roleFilter, function ($q) {
                 $q->whereHas('roles', function ($query) {
                     $query->where('id', $this->roleFilter);
+                });
+            })
+            ->when($this->warehouseFilter, function ($q) {
+                $q->whereHas('warehouses', function ($query) {
+                    $query->where('id', $this->warehouseFilter);
                 });
             })
             ->when($this->verificationFilter !== '', function ($q) {
@@ -448,6 +457,9 @@ class UserIndex extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
-        return view('livewire.users.user-index', compact('users'));
+        // Get warehouses for filter dropdown
+        $warehouses = \App\Models\Warehouse::all();
+
+        return view('livewire.users.user-index', compact('users', 'warehouses'));
     }
 }
