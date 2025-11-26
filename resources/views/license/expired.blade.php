@@ -19,8 +19,8 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+<body class="bg-gray-100 dark:bg-zinc-900 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white dark:bg-zinc-800 rounded-lg shadow-xl overflow-hidden">
         <!-- Header -->
         <div class="bg-gradient-expired px-6 py-8 text-center text-white">
             <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -36,10 +36,10 @@
         <div class="px-6 py-8">
             <!-- Company Info -->
             <div class="text-center mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-zinc-100 mb-2">
                     {{ \App\Models\Company::first()?->name ?? config('app.name') }}
                 </h2>
-                <p class="text-gray-600 dark:text-gray-400">
+                <p class="text-gray-600 dark:text-zinc-400">
                     Software as a Service Platform
                 </p>
             </div>
@@ -62,21 +62,21 @@
             @endphp
 
             @if($company)
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
-                    <h3 class="font-medium text-gray-900 dark:text-gray-100 mb-3">License Information</h3>
+                <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4 mb-6">
+                    <h3 class="font-medium text-gray-900 dark:text-zinc-100 mb-3">License Information</h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">License Type:</span>
+                            <span class="text-gray-600 dark:text-zinc-400">License Type:</span>
                             <span class="font-medium">{{ $company->getLicenseTypeDisplay() }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Expired Date:</span>
+                            <span class="text-gray-600 dark:text-zinc-400">Expired Date:</span>
                             <span class="font-medium text-red-600">
                                 {{ $company->license_expires_at ? $company->license_expires_at->format('M d, Y') : 'N/A' }}
                             </span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">License Key:</span>
+                            <span class="text-gray-600 dark:text-zinc-400">License Key:</span>
                             <span class="font-mono text-xs">{{ $company->license_key ?? 'N/A' }}</span>
                         </div>
                     </div>
@@ -117,8 +117,8 @@
             </div>
 
             <!-- Footer -->
-            <div class="text-center mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
+            <div class="text-center mt-6 pt-6 border-t border-gray-200 dark:border-zinc-700">
+                <p class="text-xs text-gray-500 dark:text-zinc-400">
                     © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
                 </p>
             </div>
@@ -136,9 +136,9 @@
 
         <!-- Emergency Modal -->
         <div id="emergency-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Emergency Access</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-zinc-100">Emergency Access</h3>
+                <p class="text-sm text-gray-600 dark:text-zinc-400 mb-4">
                     This is for development/testing purposes only. Use with caution.
                 </p>
                 <div class="flex space-x-3">
@@ -147,7 +147,7 @@
                         Go to Login
                     </button>
                     <button onclick="document.getElementById('emergency-modal').classList.add('hidden')"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
+                            class="px-4 py-2 border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-zinc-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
                         Cancel
                     </button>
                 </div>

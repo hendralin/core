@@ -166,10 +166,10 @@
                                 @endphp
                                 <div class="flex flex-wrap gap-1">
                                     @foreach ($formattedPermissions['permissions'] as $permissionName)
-                                        <flux:badge variant="outline" size="xs">{{ $permissionName }}</flux:badge>
+                                        <flux:badge color="zinc" size="xs">{{ $permissionName }}</flux:badge>
                                     @endforeach
                                     @if ($formattedPermissions['has_more'])
-                                        <flux:badge variant="secondary" size="xs">+{{ $formattedPermissions['remaining_count'] }}</flux:badge>
+                                        <flux:badge color="zinc" size="xs">+{{ $formattedPermissions['remaining_count'] }}</flux:badge>
                                 @endif
                                 </div>
                             </td>
