@@ -27,7 +27,7 @@
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">WAHA Configuration</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Base URL and API key settings</p>
+                            <p class="text-sm text-gray-600 dark:text-zinc-400">Base URL and API key settings</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -49,13 +49,13 @@
                     <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-lg">
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-gray-200 dark:bg-zinc-600 rounded-lg">
-                                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-gray-600 dark:text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
                                 </svg>
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">Base URL</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">WAHA_API_URL environment variable</p>
+                                <p class="text-sm text-gray-600 dark:text-zinc-400">WAHA_API_URL environment variable</p>
                             </div>
                         </div>
                         <div class="text-right">
@@ -63,7 +63,7 @@
                                 <p class="font-mono text-sm text-gray-900 dark:text-white">{{ env('WAHA_API_URL') }}</p>
                                 <p class="text-xs text-green-600 dark:text-green-400">✓ Configured</p>
                             @else
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Not set</p>
+                                <p class="text-sm text-gray-500 dark:text-zinc-400">Not set</p>
                                 <p class="text-xs text-red-600 dark:text-red-400">✗ Missing</p>
                             @endif
                         </div>
@@ -73,13 +73,13 @@
                     <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-lg">
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-gray-200 dark:bg-zinc-600 rounded-lg">
-                                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-gray-600 dark:text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
                                 </svg>
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">API Key</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">WAHA_API_KEY environment variable</p>
+                                <p class="text-sm text-gray-600 dark:text-zinc-400">WAHA_API_KEY environment variable</p>
                             </div>
                         </div>
                         <div class="text-right">
@@ -87,7 +87,7 @@
                                 <p class="font-mono text-sm text-gray-900 dark:text-white">{{ Str::mask(env('WAHA_API_KEY'), '*', 8) }}</p>
                                 <p class="text-xs text-green-600 dark:text-green-400">✓ Configured</p>
                             @else
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Not set</p>
+                                <p class="text-sm text-gray-500 dark:text-zinc-400">Not set</p>
                                 <p class="text-xs text-red-600 dark:text-red-400">✗ Missing</p>
                             @endif
                         </div>
@@ -130,7 +130,7 @@
     @can('waha.edit')
         <div class="mt-6 flex justify-start">
             <flux:modal.trigger name="show-configuration">
-                <flux:button variant="primary" icon="cog-6-tooth">
+                <flux:button variant="primary" icon="cog-6-tooth" class="cursor-pointer">
                     Configure WAHA
                 </flux:button>
             </flux:modal.trigger>
@@ -151,9 +151,9 @@
             <div class="flex gap-2">
                 <flux:spacer />
                 <flux:modal.close>
-                    <flux:button variant="ghost">Cancel</flux:button>
+                    <flux:button variant="ghost" class="cursor-pointer">Cancel</flux:button>
                 </flux:modal.close>
-                <flux:button wire:click="saveConfiguration" variant="primary">
+                <flux:button wire:click="saveConfiguration" variant="primary" class="cursor-pointer">
                     Save Configuration
                 </flux:button>
             </div>

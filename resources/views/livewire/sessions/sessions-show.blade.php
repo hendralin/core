@@ -28,21 +28,21 @@
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Session Name</flux:text>
+                                <flux:heading size="sm">Session Name</flux:heading>
                                 <flux:text class="text-lg font-semibold">{{ $session->name }}</flux:text>
                             </div>
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Session ID</flux:text>
+                                <flux:heading size="sm">Session ID</flux:heading>
                                 <flux:text class="text-lg font-semibold">{{ $session->session_id }}</flux:text>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Created At</flux:text>
+                                <flux:heading size="sm">Created At</flux:heading>
                                 <flux:text class="text-sm">{{ $session->created_at->format('M d, Y H:i') }}</flux:text>
                             </div>
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Last Updated</flux:text>
+                                <flux:heading size="sm">Last Updated</flux:heading>
                                 <flux:text class="text-sm">{{ $session->updated_at->format('M d, Y H:i') }}</flux:text>
                             </div>
                         </div>
@@ -65,21 +65,21 @@
                         @if($profilePicture)
                         <div class="flex items-center gap-4 mb-4">
                             <div class="shrink-0">
-                                <img src="{{ $profilePicture }}" alt="Profile Picture" class="w-16 h-16 rounded-full border-2 border-gray-200 dark:border-gray-700 object-cover">
+                                <img src="{{ $profilePicture }}" alt="Profile Picture" class="w-16 h-16 rounded-full border-2 border-gray-200 dark:border-zinc-700 object-cover">
                             </div>
                             <div>
                                 <flux:text class="text-lg font-semibold">{{ $sessionData['me']['pushName'] ?? 'N/A' }}</flux:text>
-                                <flux:text class="text-sm text-gray-600 dark:text-gray-400">{{ isset($sessionData['me']['id']) ? substr($sessionData['me']['id'], 0, -5) : 'N/A' }}</flux:text>
+                                <flux:text>{{ isset($sessionData['me']['id']) ? substr($sessionData['me']['id'], 0, -5) : 'N/A' }}</flux:text>
                             </div>
                         </div>
                         @else
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">WhatsApp Number</flux:text>
+                                <flux:heading level="3">WhatsApp Number</flux:heading>
                                 <flux:text class="text-lg font-semibold">{{ isset($sessionData['me']['id']) ? substr($sessionData['me']['id'], 0, -5) : 'N/A' }}</flux:text>
                             </div>
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Display Name</flux:text>
+                                <flux:heading level="3">Display Name</flux:heading>
                                 <flux:text class="text-lg font-semibold">{{ $sessionData['me']['pushName'] ?? 'N/A' }}</flux:text>
                             </div>
                         </div>
@@ -88,7 +88,7 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">API Status</flux:text>
+                                <flux:heading level="3">API Status</flux:heading>
                                 <div class="flex items-center gap-2">
                                     @if ($sessionData['status'] == 'WORKING')
                                         <flux:badge color="green">Working</flux:badge>
@@ -108,7 +108,7 @@
                                 </div>
                             </div>
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Presence</flux:text>
+                                <flux:heading level="3">Presence</flux:heading>
                                 <div class="flex items-center gap-2">
                                     @if($sessionData['presence'] == 'online')
                                         <flux:badge color="green">Online</flux:badge>
@@ -123,11 +123,11 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Engine</flux:text>
+                                <flux:heading level="3">Engine</flux:heading>
                                 <flux:text class="text-sm">{{ $sessionData['engine']['engine'] ?? 'N/A' }}</flux:text>
                             </div>
                             <div>
-                                <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Last Activity</flux:text>
+                                <flux:heading level="3">Last Activity</flux:heading>
                                 <flux:text class="text-sm">
                                     @if(isset($sessionData['timestamps']['activity']))
                                         {{ \Carbon\Carbon::createFromTimestampMs($sessionData['timestamps']['activity'])->format('M d, Y H:i:s') }}
@@ -140,18 +140,18 @@
 
                         @if(isset($sessionData['config']['noweb']))
                         <div>
-                            <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">NOWEB Configuration</flux:text>
+                            <flux:heading size="lg" class="mb-2">NOWEB Configuration</flux:heading>
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <flux:text class="font-medium">Mark Online:</flux:text>
+                                    <flux:heading>Mark Online:</flux:heading>
                                     <flux:text>{{ $sessionData['config']['noweb']['markOnline'] ? 'Yes' : 'No' }}</flux:text>
                                 </div>
                                 <div>
-                                    <flux:text class="font-medium">Store Enabled:</flux:text>
+                                    <flux:heading>Store Enabled:</flux:heading>
                                     <flux:text>{{ $sessionData['config']['noweb']['store']['enabled'] ? 'Yes' : 'No' }}</flux:text>
                                 </div>
                                 <div>
-                                    <flux:text class="font-medium">Full Sync:</flux:text>
+                                    <flux:heading>Full Sync:</flux:heading>
                                     <flux:text>{{ $sessionData['config']['noweb']['store']['fullSync'] ? 'Yes' : 'No' }}</flux:text>
                                 </div>
                             </div>
@@ -245,26 +245,25 @@
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">{{ __('Delete Session') }}</flux:heading>
-                <flux:text class="mt-2 text-gray-600 dark:text-gray-600">
+                <flux:text class="mt-2">
                     {{ __('Are you sure you want to delete this session? This action cannot be undone.') }}
                 </flux:text>
             </div>
 
-            <div class="p-3 bg-gray-50 dark:bg-gray-50 rounded-md border border-gray-200 dark:border-gray-200">
-                <flux:text class="font-semibold text-gray-900 dark:text-gray-900">{{ $session->name }}</flux:text>
+            <div class="p-3 bg-gray-50 dark:bg-zinc-200 rounded-md border border-gray-200 dark:border-zinc-200">
+                <flux:text class="font-semibold text-gray-900 dark:text-zinc-900">{{ $session->name }}</flux:text>
             </div>
 
             <div class="flex gap-2">
                 <flux:spacer />
 
                 <flux:modal.close>
-                    <flux:button variant="ghost" class="text-gray-700 dark:text-gray-700 border-gray-300 dark:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-50">
+                    <flux:button variant="ghost" class="cursor-pointer">
                         {{ __('Cancel') }}
                     </flux:button>
                 </flux:modal.close>
 
-                <flux:button variant="danger" wire:click="delete()"
-                             class="bg-red-600 dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-700 text-white dark:text-white">
+                <flux:button variant="danger" wire:click="delete()" class="cursor-pointer">
                     {{ __('Delete') }}
                 </flux:button>
             </div>
@@ -279,21 +278,21 @@
                     <flux:icon.qr-code class="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     WhatsApp QR Code
                 </flux:heading>
-                <flux:text class="mt-2 text-gray-600 dark:text-gray-400">
+                <flux:text class="mt-2 text-gray-600 dark:text-zinc-400">
                     Scan this QR code with WhatsApp on your phone to connect this session.
                 </flux:text>
             </div>
 
             @if($qrCodeImage)
             <div class="text-center">
-                <div class="inline-block p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="inline-block p-4 bg-gray-50 dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-700">
                     <img src="{{ $qrCodeImage }}" alt="WhatsApp QR Code" class="max-w-full h-auto rounded-md shadow-sm max-h-80">
                 </div>
             </div>
             @else
             <div class="text-center py-8">
-                <flux:icon.qr-code class="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                <flux:text class="text-gray-600 dark:text-gray-400">
+                <flux:icon.qr-code class="h-16 w-16 text-gray-400 dark:text-zinc-600 mx-auto mb-4" />
+                <flux:text class="text-gray-600 dark:text-zinc-400">
                     QR Code will appear here after scanning.
                 </flux:text>
             </div>

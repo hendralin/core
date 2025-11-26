@@ -52,66 +52,66 @@
                     <flux:heading size="lg">Group Information</flux:heading>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 mb-6">
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">WhatsApp ID</flux:heading>
+                            <flux:heading size="sm">WhatsApp ID</flux:heading>
                             <flux:text class="mt-1">{{ $group->group_wa_id }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Group Name</flux:heading>
+                            <flux:heading size="sm">Group Name</flux:heading>
                             <flux:text class="mt-1">{{ $group->name }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Session</flux:heading>
+                            <flux:heading size="sm">Session</flux:heading>
                             <flux:text class="mt-1">{{ $group->wahaSession->name ?? 'Unknown' }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Size</flux:heading>
+                            <flux:heading size="sm">Size</flux:heading>
                             <flux:text class="mt-1">{{ $group->detail['size'] ?? 'N/A' }} members</flux:text>
                         </div>
                         @if($group->detail && isset($group->detail['owner']))
                             <div>
-                                <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Owner</flux:heading>
+                                <flux:heading size="sm">Owner</flux:heading>
                                 <flux:text class="mt-1">{{ $group->detail['owner'] }}</flux:text>
                             </div>
                         @endif
                         @if($group->detail && isset($group->detail['ownerPn']))
                             <div>
-                                <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Owner Phone</flux:heading>
+                                <flux:heading size="sm">Owner Phone</flux:heading>
                                 <flux:text class="mt-1">{{ $group->detail['ownerPn'] }}</flux:text>
                             </div>
                         @endif
                         @if($group->detail && isset($group->detail['creation']))
                             <div>
-                                <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Created</flux:heading>
+                                <flux:heading size="sm">Created</flux:heading>
                                 <flux:text class="mt-1">{{ date('M d, Y H:i', $group->detail['creation']) }}</flux:text>
                             </div>
                         @endif
                         @if($group->detail && isset($group->detail['subjectTime']))
                             <div>
-                                <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Subject Updated</flux:heading>
+                                <flux:heading size="sm">Subject Updated</flux:heading>
                                 <flux:text class="mt-1">{{ date('M d, Y H:i', $group->detail['subjectTime']) }}</flux:text>
                             </div>
                         @endif
                         @if($group->detail && isset($group->detail['restrict']))
                             <div>
-                                <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Admin Only Messages</flux:heading>
+                                <flux:heading size="sm">Admin Only Messages</flux:heading>
                                 <flux:text class="mt-1">{{ $group->detail['restrict'] ? 'Yes' : 'No' }}</flux:text>
                             </div>
                         @endif
                         @if($group->detail && isset($group->detail['announce']))
                             <div>
-                                <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Admin Only Announcements</flux:heading>
+                                <flux:heading size="sm">Admin Only Announcements</flux:heading>
                                 <flux:text class="mt-1">{{ $group->detail['announce'] ? 'Yes' : 'No' }}</flux:text>
                             </div>
                         @endif
                         @if($group->detail && isset($group->detail['joinApprovalMode']))
                             <div>
-                                <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Join Approval Required</flux:heading>
+                                <flux:heading size="sm">Join Approval Required</flux:heading>
                                 <flux:text class="mt-1">{{ $group->detail['joinApprovalMode'] ? 'Yes' : 'No' }}</flux:text>
                             </div>
                         @endif
                         @if($group->detail && isset($group->detail['memberAddMode']))
                             <div>
-                                <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Admin Only Add Members</flux:heading>
+                                <flux:heading size="sm">Admin Only Add Members</flux:heading>
                                 <flux:text class="mt-1">{{ $group->detail['memberAddMode'] ? 'Yes' : 'No' }}</flux:text>
                             </div>
                         @endif
@@ -120,11 +120,11 @@
                     <flux:heading size="lg" class="mt-6">Timestamps</flux:heading>
                     <div class="grid grid-cols-2 gap-4 mt-3">
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Created</flux:heading>
+                            <flux:heading size="sm">Created</flux:heading>
                             <flux:text class="mt-1">{{ $group->created_at->format('M d, Y H:i') }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Updated</flux:heading>
+                            <flux:heading size="sm">Updated</flux:heading>
                             <flux:text class="mt-1">{{ $group->updated_at->format('M d, Y H:i') }}</flux:text>
                         </div>
                     </div>
@@ -159,7 +159,7 @@
                                                 <div class="text-sm font-medium">{{ $participant['id'] }}</div>
                                             @endif
                                             @if(isset($participant['phoneNumber']))
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $participant['phoneNumber'] }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-zinc-400">{{ $participant['phoneNumber'] }}</div>
                                             @endif
                                         </div>
                                     </div>
@@ -228,7 +228,7 @@
 
             <div class="flex justify-end gap-2">
                 <flux:modal.close>
-                    <flux:button variant="ghost">Close</flux:button>
+                    <flux:button variant="ghost" class="cursor-pointer">Close</flux:button>
                 </flux:modal.close>
             </div>
         </div>

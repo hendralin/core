@@ -38,27 +38,27 @@
                     <flux:heading size="lg">Contact Information</flux:heading>
                     <div class="grid grid-cols-1 gap-4 mt-3 mb-6">
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">WhatsApp ID</flux:heading>
+                            <flux:heading size="sm">WhatsApp ID</flux:heading>
                             <flux:text class="mt-1">{{ $contact->wa_id }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Name</flux:heading>
+                            <flux:heading size="sm">Name</flux:heading>
                             <flux:text class="mt-1">{{ $contact->name }}</flux:text>
                         </div>
                         @if($contact->verified_name)
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Verified Name</flux:heading>
+                            <flux:heading size="sm">Verified Name</flux:heading>
                             <flux:text class="mt-1">{{ $contact->verified_name }}</flux:text>
                         </div>
                         @endif
                         @if($contact->push_name)
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Push Name</flux:heading>
+                            <flux:heading size="sm">Push Name</flux:heading>
                             <flux:text class="mt-1">{{ $contact->push_name }}</flux:text>
                         </div>
                         @endif
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Session</flux:heading>
+                            <flux:heading size="sm">Session</flux:heading>
                             <flux:text class="mt-1">{{ $contact->wahaSession->name ?? 'Unknown' }}</flux:text>
                         </div>
                     </div>
@@ -66,11 +66,11 @@
                     <flux:heading size="lg" class="mt-6">Timestamps</flux:heading>
                     <div class="grid grid-cols-2 gap-4 mt-3">
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Created</flux:heading>
+                            <flux:heading size="sm">Created</flux:heading>
                             <flux:text class="mt-1">{{ $contact->created_at->format('M d, Y H:i') }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Updated</flux:heading>
+                            <flux:heading size="sm">Updated</flux:heading>
                             <flux:text class="mt-1">{{ $contact->updated_at->format('M d, Y H:i') }}</flux:text>
                         </div>
                     </div>
@@ -93,7 +93,7 @@
 
             <div class="flex justify-end space-x-2">
                 <flux:spacer />
-                <flux:button wire:click="$set('showProfileModal', false)" variant="ghost">{{ __('Close') }}</flux:button>
+                <flux:button wire:click="$set('showProfileModal', false)" variant="ghost" class="cursor-pointer">{{ __('Close') }}</flux:button>
             </div>
         </div>
     </flux:modal>

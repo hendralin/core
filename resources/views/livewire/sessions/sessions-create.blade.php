@@ -14,8 +14,8 @@
                 <flux:input wire:model="session_id" label="Session ID" placeholder="session-001..." />
                 <flux:checkbox wire:model="is_active" label="Active" />
                 <div class="flex gap-4">
-                    <flux:button type="submit" variant="primary" icon="plus">Create Session</flux:button>
-                    <flux:button variant="ghost" href="{{ route('sessions.index') }}" wire:navigate>Cancel</flux:button>
+                    <flux:button type="submit" variant="primary" icon="plus" class="cursor-pointer">Create Session</flux:button>
+                    <flux:button variant="ghost" href="{{ route('sessions.index') }}" wire:navigate class="cursor-pointer">Cancel</flux:button>
                 </div>
             </form>
         </div>

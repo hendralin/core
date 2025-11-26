@@ -29,8 +29,8 @@
                     <div class="flex items-center gap-3">
                         <!-- Session Filter -->
                         <div class="flex items-center">
-                            <label for="session-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Session:</label>
-                            <flux:select wire:model.live="sessionFilter" size="sm">
+                            <label for="session-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2">Session:</label>
+                            <flux:select wire:model.live="sessionFilter">
                                 <flux:select.option value="">All Sessions</flux:select.option>
                                 @foreach($availableSessions as $session)
                                     <flux:select.option value="{{ $session->id }}">{{ $session->name }}</flux:select.option>
@@ -40,8 +40,8 @@
 
                         <!-- Verified Filter -->
                         <div class="flex items-center">
-                            <label for="verified-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Verified:</label>
-                            <flux:select wire:model.live="verifiedFilter" size="sm">
+                            <label for="verified-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2">Verified:</label>
+                            <flux:select wire:model.live="verifiedFilter">
                                 <flux:select.option value="">All</flux:select.option>
                                 <flux:select.option value="verified">Verified</flux:select.option>
                                 <flux:select.option value="unverified">Unverified</flux:select.option>
@@ -50,8 +50,8 @@
 
                         <!-- Per Page Filter -->
                         <div class="flex items-center">
-                            <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Show:</label>
-                            <flux:select wire:model.live="perPage" size="sm" class="w-20">
+                            <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2">Show:</label>
+                            <flux:select wire:model.live="perPage" class="w-20">
                                 <flux:select.option value="10">10</flux:select.option>
                                 <flux:select.option value="25">25</flux:select.option>
                                 <flux:select.option value="50">50</flux:select.option>
@@ -61,7 +61,7 @@
 
                         <!-- Clear Filters -->
                         @if($search || $sessionFilter || $verifiedFilter)
-                            <flux:button wire:click="clearFilters" variant="ghost" size="sm">
+                            <flux:button wire:click="clearFilters" variant="ghost" class="cursor-pointer" tooltip="Clear Filters">
                                 Clear Filters
                             </flux:button>
                         @endif
@@ -70,12 +70,13 @@
             </div>
 
             <!-- Actions Bar -->
+            @if (env('WAHA_API_URL') && env('WAHA_API_KEY'))
             <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
                 <div class="flex flex-wrap gap-2 justify-end">
                     <div class="flex flex-wrap gap-2">
                         @can('contact.sync')
                             <flux:modal.trigger name="sync-contacts-modal">
-                                <flux:button variant="ghost" size="sm" icon="arrow-path">Sync Contacts</flux:button>
+                                <flux:button variant="ghost" class="cursor-pointer" icon="arrow-path" tooltip="Sync Contacts">Sync Contacts</flux:button>
                             </flux:modal.trigger>
                         @endcan
 
@@ -85,17 +86,18 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
-                    <thead class="bg-gray-50 dark:bg-zinc-900">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b dark:border-b-0 dark:bg-zinc-700 dark:text-zinc-400">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
                                 No.
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <button wire:click="sortBy('name')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-gray-300">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                <button wire:click="sortBy('name')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-zinc-300">
                                     <span>Name</span>
                                     @if($sortField === 'name')
                                         <flux:icon.chevron-up class="h-4 w-4 {{ $sortDirection === 'asc' ? 'text-blue-600' : 'text-gray-400' }}" />
@@ -103,10 +105,10 @@
                                     @endif
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">WhatsApp ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Session</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <button wire:click="sortBy('created_at')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-gray-300">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">WhatsApp ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Session</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                <button wire:click="sortBy('created_at')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-zinc-300">
                                     <span>Created</span>
                                     @if($sortField === 'created_at')
                                         <flux:icon.chevron-up class="h-4 w-4 {{ $sortDirection === 'asc' ? 'text-blue-600' : 'text-gray-400' }}" />
@@ -114,8 +116,8 @@
                                     @endif
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <button wire:click="sortBy('updated_at')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-gray-300">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                <button wire:click="sortBy('updated_at')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-zinc-300">
                                     <span>Updated</span>
                                     @if($sortField === 'updated_at')
                                         <flux:icon.chevron-up class="h-4 w-4 {{ $sortDirection === 'asc' ? 'text-blue-600' : 'text-gray-400' }}" />
@@ -123,14 +125,14 @@
                                     @endif
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-zinc-800 divide-y divide-gray-200 dark:divide-zinc-700">
                         @if(isset($contacts) && $contacts->count() > 0)
                             @foreach($contacts as $index => $contact)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-zinc-900" wire:loading.class="opacity-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
+                                <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400 text-center">
                                         {{ $contacts->firstItem() + $index }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -145,26 +147,26 @@
                                                 </div>
                                             @endif
                                             <div>
-                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $contact->name }}</div>
+                                                <div class="text-sm font-medium text-gray-900 dark:text-zinc-100">{{ $contact->name }}</div>
                                                 @if($contact->verified_name)
-                                                    <div class="text-sm text-gray-500 dark:text-gray-400">Verified: {{ $contact->verified_name }}</div>
+                                                    <div class="text-sm text-gray-500 dark:text-zinc-400">Verified: {{ $contact->verified_name }}</div>
                                                 @endif
                                                 @if($contact->push_name && $contact->push_name !== $contact->name)
-                                                    <div class="text-sm text-gray-500 dark:text-gray-400">Push: {{ $contact->push_name }}</div>
+                                                    <div class="text-sm text-gray-500 dark:text-zinc-400">Push: {{ $contact->push_name }}</div>
                                                 @endif
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                         {{ $contact->wa_id }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                         {{ $contact->wahaSession->name ?? 'Unknown' }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                         {{ $contact->created_at->format('M d, Y') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                         {{ $contact->updated_at->format('M d, Y') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -180,7 +182,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-zinc-400">
                                     @if(isset($search) && !empty($search))
                                         No results found for "{{ $search }}"
                                     @else
@@ -196,7 +198,7 @@
             <!-- Pagination -->
             @if(isset($contacts) && $contacts->hasPages())
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50">
-                    {{ $contacts->links() }}
+                    {{ $contacts->links(data: ['scrollTo' => false]) }}
                 </div>
             @endif
         </div>
@@ -220,9 +222,9 @@
                 <div class="flex gap-2">
                     <flux:spacer />
                     <flux:modal.close>
-                        <flux:button variant="ghost">Cancel</flux:button>
+                        <flux:button variant="ghost" class="cursor-pointer">Cancel</flux:button>
                     </flux:modal.close>
-                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
+                    <flux:button type="submit" variant="primary" color="green" wire:loading.attr="disabled" class="cursor-pointer">
                         <span wire:loading.remove>Sync Contacts</span>
                         <span wire:loading>Syncing...</span>
                     </flux:button>
@@ -256,7 +258,7 @@
                     </div>
                     <div class="flex justify-end gap-2">
                         <flux:modal.close>
-                            <flux:button variant="ghost">Close</flux:button>
+                            <flux:button variant="ghost" class="cursor-pointer">Close</flux:button>
                         </flux:modal.close>
                     </div>
                 </div>

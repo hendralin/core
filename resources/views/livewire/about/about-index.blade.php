@@ -6,7 +6,7 @@
     </div>
 
     <!-- Application Description -->
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-6 mb-8">
+    <div class="bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-6 mb-8">
         <div class="flex items-start gap-4">
             <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
                 <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,7 +16,7 @@
             <div class="space-y-4">
                 <div>
                     <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster</flux:heading>
-                    <flux:text class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <flux:text class="text-gray-700 dark:text-zinc-300 leading-relaxed">
                         Broadcaster is a modern WhatsApp session management system built with Laravel and powered by WAHA (WhatsApp HTTP API).
                         It provides a comprehensive solution for managing multiple WhatsApp Business sessions, message templates, contacts, and groups synchronization through an intuitive web interface.
                     </flux:text>
@@ -25,7 +25,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-3">
                         <flux:text class="font-semibold text-gray-900 dark:text-white">Core Features</flux:text>
-                        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -49,7 +49,7 @@
 
                     <div class="space-y-3">
                         <flux:text class="font-semibold text-gray-900 dark:text-white">System Features</flux:text>
-                        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -91,7 +91,7 @@
                 </div>
 
                 <div class="pt-4 border-t border-blue-200 dark:border-blue-700">
-                    <flux:text class="text-sm text-gray-600 dark:text-gray-400">
+                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
                         Built with modern web technologies including Laravel, Livewire, Flux UI, and Tailwind CSS for optimal performance and user experience.
                         Features advanced template management with real-time preview capabilities and comprehensive contact synchronization system.
                     </flux:text>
@@ -112,39 +112,39 @@
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Application Name</flux:text>
-                            <flux:text class="text-lg font-semibold">Boilerplate</flux:text>
+                            <flux:heading>Application Name</flux:heading>
+                            <flux:text class="text-lg font-semibold">{{ env('APP_NAME') }}</flux:text>
                         </div>
                         <div>
-                            <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Version</flux:text>
+                            <flux:heading>Version</flux:heading>
                             <flux:text class="text-lg font-semibold">{{ $systemInfo['version'] }}</flux:text>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <flux:heading size="sm" level="3">PHP Version</flux:heading>
+                            <flux:heading>PHP Version</flux:heading>
                             <flux:text class="text-sm">{{ $systemInfo['php_version'] }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" level="3">Laravel Version</flux:heading>
+                            <flux:heading>Laravel Version</flux:heading>
                             <flux:text class="text-sm">{{ $systemInfo['laravel_version'] }}</flux:text>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <flux:heading size="sm" level="3">Database</flux:heading>
+                            <flux:heading>Database</flux:heading>
                             <flux:text class="text-sm">{{ ucfirst($systemInfo['database']) }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" level="3">Environment</flux:heading>
+                            <flux:heading>Environment</flux:heading>
                             <flux:text class="text-sm">{{ ucfirst($systemInfo['environment']) }}</flux:text>
                         </div>
                     </div>
 
                     <div>
-                        <flux:heading size="sm" level="3">Timezone</flux:heading>
+                        <flux:heading>Timezone</flux:heading>
                         <flux:text class="text-sm">{{ $systemInfo['timezone'] }}</flux:text>
                     </div>
                 </div>
@@ -162,7 +162,7 @@
                 </flux:heading>
 
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 rounded-lg border @if($wahaInfo['configured'] && $wahaInfo['connected']) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 @elseif($wahaInfo['configured']) bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 @else bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700 @endif">
+                    <div class="flex items-center justify-between p-4 rounded-lg border @if($wahaInfo['configured'] && $wahaInfo['connected']) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 @elseif($wahaInfo['configured']) bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 @else bg-gray-50 dark:bg-zinc-700/50 border-gray-200 dark:border-zinc-700 @endif">
                         <div class="flex items-center gap-3">
                             @if($wahaInfo['configured'] && $wahaInfo['connected'])
                                 <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -177,8 +177,8 @@
                                     </svg>
                                 </div>
                             @else
-                                <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                                    <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="p-2 bg-gray-100 dark:bg-zinc-700 rounded-lg">
+                                    <svg class="w-4 h-4 text-gray-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
                                     </svg>
                                 </div>
@@ -201,11 +201,11 @@
                         <div class="space-y-3">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">API URL</flux:text>
+                                    <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">API URL</flux:text>
                                     <flux:text class="text-sm font-mono break-all">{{ $wahaInfo['api_url'] }}</flux:text>
                                 </div>
                                 <div>
-                                    <flux:text class="text-sm font-medium text-gray-600 dark:text-gray-400">Version</flux:text>
+                                    <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">Version</flux:text>
                                     <flux:text class="text-sm">{{ $wahaInfo['version'] ?? 'Unknown' }}</flux:text>
                                 </div>
                             </div>
@@ -238,7 +238,7 @@
                 </flux:heading>
 
                 <div class="space-y-4">
-                    <flux:text class="text-gray-700 dark:text-gray-300">
+                    <flux:text class="text-gray-700 dark:text-zinc-300">
                         Advanced template management system for creating and managing WhatsApp message templates with dynamic variables and real-time preview capabilities.
                     </flux:text>
 
@@ -264,7 +264,7 @@
                     <div class="space-y-3">
                         <flux:text class="font-semibold text-gray-900 dark:text-white">Template Features</flux:text>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -284,7 +284,7 @@
                                     Usage Tracking
                                 </li>
                             </ul>
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -319,7 +319,7 @@
                 </flux:heading>
 
                 <div class="space-y-4">
-                    <flux:text class="text-gray-700 dark:text-gray-300">
+                    <flux:text class="text-gray-700 dark:text-zinc-300">
                         Advanced contact management system with automatic synchronization from WhatsApp sessions, profile picture caching, and comprehensive filtering capabilities.
                     </flux:text>
 
@@ -345,7 +345,7 @@
                     <div class="space-y-3">
                         <flux:text class="font-semibold text-gray-900 dark:text-white">Contacts Features</flux:text>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -365,7 +365,7 @@
                                     Advanced Filtering
                                 </li>
                             </ul>
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -400,7 +400,7 @@
                 </flux:heading>
 
                 <div class="space-y-4">
-                    <flux:text class="text-gray-700 dark:text-gray-300">
+                    <flux:text class="text-gray-700 dark:text-zinc-300">
                         Advanced group and community management system with automatic synchronization from WhatsApp sessions, participant information, and profile picture integration.
                     </flux:text>
 
@@ -426,7 +426,7 @@
                     <div class="space-y-3">
                         <flux:text class="font-semibold text-gray-900 dark:text-white">Groups Features</flux:text>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -446,7 +446,7 @@
                                     Participant Information
                                 </li>
                             </ul>
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>

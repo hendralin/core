@@ -19,7 +19,7 @@
                             </div>
                             <div>
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">WAHA Configuration Required</h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">WhatsApp sessions cannot be managed yet</p>
+                                <p class="text-sm text-gray-600 dark:text-zinc-400">WhatsApp sessions cannot be managed yet</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
@@ -31,17 +31,17 @@
                         <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-lg">
                             <div class="flex items-center gap-3">
                                 <div class="p-2 bg-gray-200 dark:bg-zinc-600 rounded-lg">
-                                    <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 text-gray-600 dark:text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
                                     </svg>
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-900 dark:text-white">Base URL</p>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">WAHA_API_URL environment variable</p>
+                                    <p class="text-sm text-gray-600 dark:text-zinc-400">WAHA_API_URL environment variable</p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Not set</p>
+                                <p class="text-sm text-gray-500 dark:text-zinc-400">Not set</p>
                                 <p class="text-xs text-red-600 dark:text-red-400">✗ Missing</p>
                             </div>
                         </div>
@@ -49,17 +49,17 @@
                         <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-lg">
                             <div class="flex items-center gap-3">
                                 <div class="p-2 bg-gray-200 dark:bg-zinc-600 rounded-lg">
-                                    <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 text-gray-600 dark:text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
                                     </svg>
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-900 dark:text-white">API Key</p>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">WAHA_API_KEY environment variable</p>
+                                    <p class="text-sm text-gray-600 dark:text-zinc-400">WAHA_API_KEY environment variable</p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Not set</p>
+                                <p class="text-sm text-gray-500 dark:text-zinc-400">Not set</p>
                                 <p class="text-xs text-red-600 dark:text-red-400">✗ Missing</p>
                             </div>
                         </div>
@@ -107,8 +107,8 @@
                     <div class="flex items-center gap-3">
                         <!-- Status Filter -->
                         <div class="flex items-center">
-                            <label for="status-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Status:</label>
-                            <flux:select wire:model.live="statusFilter" size="sm">
+                            <label for="status-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2">Status:</label>
+                            <flux:select wire:model.live="statusFilter">
                                 <flux:select.option value="">All Status</flux:select.option>
                                 <flux:select.option value="WORKING">Working</flux:select.option>
                                 <flux:select.option value="SCAN_QR_CODE">Scan QR Code</flux:select.option>
@@ -121,7 +121,7 @@
 
                         <!-- Clear Filters -->
                         @if($search || $statusFilter)
-                            <flux:button wire:click="clearFilters" variant="ghost" size="sm">
+                            <flux:button wire:click="clearFilters" variant="ghost" class="cursor-pointer" tooltip="Clear Filters">
                                 Clear Filters
                             </flux:button>
                         @endif
@@ -134,11 +134,11 @@
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="flex flex-wrap gap-2">
                         @can('session.create')
-                            <flux:button variant="primary" size="sm" href="{{ route('sessions.create') }}" wire:navigate icon="plus">Create Session</flux:button>
+                            <flux:button variant="primary" size="sm" href="{{ route('sessions.create') }}" wire:navigate icon="plus" tooltip="Create Session">Create</flux:button>
                         @endcan
 
                         @can('session.audit')
-                            <flux:button variant="ghost" size="sm" href="{{ route('sessions.audit') }}" wire:navigate icon="document-text">Audit Trail</flux:button>
+                            <flux:button variant="ghost" size="sm" href="{{ route('sessions.audit') }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
                         @endcan
 
                         <div wire:loading>
@@ -146,19 +146,19 @@
                         </div>
                     </div>
 
-                    <flux:button variant="ghost" size="sm" wire:click="clearCache" icon="arrow-path" class="cursor-pointer">Refresh</flux:button>
+                    <flux:button variant="ghost" size="sm" wire:click="clearCache" icon="arrow-path" class="cursor-pointer" tooltip="Refresh">Refresh</flux:button>
                 </div>
             </div>
 
             <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
-                    <thead class="bg-gray-50 dark:bg-zinc-900">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b dark:border-b-0 dark:bg-zinc-700 dark:text-zinc-400">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
                                 No.
                             </th>
-                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 tracking-wider">
                                 <button wire:click="sortBy('name')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-gray-300">
                                     <span>Name</span>
                                     @if($sortField === 'name')
@@ -167,7 +167,7 @@
                                     @endif
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
                                 <button wire:click="sortBy('session_id')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-gray-300">
                                     <span>Session ID</span>
                                     @if($sortField === 'session_id')
@@ -176,17 +176,17 @@
                                     @endif
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Account</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Account</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-zinc-800 divide-y divide-gray-200 dark:divide-zinc-700">
                         @if(isset($sessions) && $sessions->count() > 0)
                             @foreach($sessions as $index => $session)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-zinc-900" wire:loading.class="opacity-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
+                                <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400 text-center">
                                         {{ $sessions->firstItem() + $index }}
                                     </td>
                                     <td class="px-2 py-4 whitespace-nowrap">
@@ -197,31 +197,31 @@
                                                 </svg>
                                             </div>
                                             <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $session->name }}</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $session->session_id }}</div>
+                                                <div class="text-sm font-medium text-gray-900 dark:text-zinc-100">{{ $session->name }}</div>
+                                                <div class="text-sm text-gray-500 dark:text-zinc-400">{{ $session->session_id }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $session->session_id }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">{{ $session->session_id }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                         <div class="flex items-center space-x-3">
                                             <div class="shrink-0">
                                                 @if($session->profile_picture)
                                                     <img src="{{ $session->profile_picture }}" alt="Profile Picture" class="h-10 w-10 rounded-full object-cover">
                                                 @else
-                                                    <div class="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                                                        <flux:icon.user class="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                                                    <div class="h-10 w-10 rounded-full bg-gray-300 dark:bg-zinc-600 flex items-center justify-center">
+                                                        <flux:icon.user class="h-6 w-6 text-gray-500 dark:text-zinc-400" />
                                                     </div>
                                                 @endif
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 @if($session->me && isset($session->me['id']) && isset($session->me['pushName']))
                                                     <div class="text-sm">
-                                                        <div class="font-medium text-gray-900 dark:text-gray-100">{{ $session->me['pushName'] }}</div>
-                                                        <div class="text-gray-400">{{ $session->me['id'] }}</div>
+                                                        <div class="font-medium text-gray-900 dark:text-zinc-100">{{ $session->me['pushName'] }}</div>
+                                                        <div class="text-gray-400 dark:text-zinc-400">{{ $session->me['id'] }}</div>
                                                     </div>
                                                 @else
-                                                    <span class="text-gray-400">Not available</span>
+                                                    <span class="text-gray-400 dark:text-zinc-400">Not available</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -243,7 +243,7 @@
                                             <flux:badge color="red">{{ $session->status }}</flux:badge>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $session->created_at->format('M d, Y') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">{{ $session->created_at->format('M d, Y') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end space-x-2">
                                             @can('session.view')
@@ -273,8 +273,8 @@
                             <tr>
                                 <td colspan="6" class="px-6 py-8 text-center">
                                     <flux:icon.inbox-stack class="mx-auto h-12 w-12 text-gray-400" />
-                                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No sessions</h3>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-zinc-100">No sessions</h3>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                                         @if(isset($search) && !empty($search))
                                             No results found for "{{ $search }}"
                                         @else
