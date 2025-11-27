@@ -56,12 +56,12 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                    @if($vehicle->status == 1)
-                        bg-green-100 text-green-800
-                    @else
-                        bg-red-100 text-red-800
-                    @endif">
+                @php
+                    $statusClasses = $vehicle->status == 1
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800';
+                @endphp
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $statusClasses }}">
                     {{ $vehicle->status == 1 ? 'Available' : 'Sold' }}
                 </span>
             </div>
@@ -382,19 +382,21 @@
                         @if($vehicle->vehicle_registration_date)
                         <div class="flex items-center justify-between">
                             <flux:text>Registration</flux:text>
-                            <span class="text-sm font-medium
-                                @if(Carbon\Carbon::parse($vehicle->vehicle_registration_date)->isPast())
-                                    text-red-600 dark:text-red-400
-                                @elseif(Carbon\Carbon::parse($vehicle->vehicle_registration_date)->diffInDays() * -1 < 30)
-                                    text-yellow-600 dark:text-yellow-400
-                                @else
-                                    text-green-600 dark:text-green-400
-                                @endif">
-                                @if(Carbon\Carbon::parse($vehicle->vehicle_registration_date)->isPast())
-                                    Expired
-                                @else
-                                    {{ number_format(Carbon\Carbon::parse($vehicle->vehicle_registration_date)->diffInDays() * -1, 0, ',', '.') }} days left
-                                @endif
+                            @php
+                                $registrationDate = Carbon\Carbon::parse($vehicle->vehicle_registration_date);
+                                $isPast = $registrationDate->isPast();
+                                $daysLeft = $registrationDate->diffInDays() * -1;
+                                $registrationClasses = $isPast
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : ($daysLeft < 30
+                                        ? 'text-yellow-600 dark:text-yellow-400'
+                                        : 'text-green-600 dark:text-green-400');
+                                $registrationText = $isPast
+                                    ? 'Expired'
+                                    : number_format($daysLeft, 0, ',', '.') . ' days left';
+                            @endphp
+                            <span class="text-sm font-medium {{ $registrationClasses }}">
+                                {{ $registrationText }}
                             </span>
                         </div>
                         @endif
@@ -402,19 +404,21 @@
                         @if($vehicle->vehicle_registration_expiry_date)
                         <div class="flex items-center justify-between">
                             <flux:text>Registration Tax</flux:text>
-                            <span class="text-sm font-medium
-                                @if(Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->isPast())
-                                    text-red-600 dark:text-red-400
-                                @elseif(Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->diffInDays() * -1 < 30)
-                                    text-yellow-600 dark:text-yellow-400
-                                @else
-                                    text-green-600 dark:text-green-400
-                                @endif">
-                                @if(Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->isPast())
-                                    Expired
-                                @else
-                                    {{ number_format(Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->diffInDays() * -1, 0, ',', '.') }} days left
-                                @endif
+                            @php
+                                $expiryDate = Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date);
+                                $isExpired = $expiryDate->isPast();
+                                $daysLeftExpiry = $expiryDate->diffInDays() * -1;
+                                $expiryClasses = $isExpired
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : ($daysLeftExpiry < 30
+                                        ? 'text-yellow-600 dark:text-yellow-400'
+                                        : 'text-green-600 dark:text-green-400');
+                                $expiryText = $isExpired
+                                    ? 'Expired'
+                                    : number_format($daysLeftExpiry, 0, ',', '.') . ' days left';
+                            @endphp
+                            <span class="text-sm font-medium {{ $expiryClasses }}">
+                                {{ $expiryText }}
                             </span>
                         </div>
                         @endif
@@ -456,14 +460,14 @@
                             @if($vehicle->purchase_price && $vehicle->selling_price)
                             <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-zinc-700">
                                 <flux:text>Keuntungan/Kerugian</flux:text>
-                                <span class="text-lg font-bold
-                                    @if($vehicle->selling_price > ($vehicle->purchase_price + $costSummary['total']))
-                                        text-green-600 dark:text-green-400
-                                    @else
-                                        text-red-600 dark:text-red-400
-                                    @endif">
-                                    @php $totalModal = $vehicle->purchase_price + $costSummary['total']; @endphp
-                                    @php $profit = $vehicle->selling_price - $totalModal; @endphp
+                                @php
+                                    $totalModal = $vehicle->purchase_price + $costSummary['total'];
+                                    $profit = $vehicle->selling_price - $totalModal;
+                                    $profitClasses = $vehicle->selling_price > $totalModal
+                                        ? 'text-green-600 dark:text-green-400'
+                                        : 'text-red-600 dark:text-red-400';
+                                @endphp
+                                <span class="text-lg font-bold {{ $profitClasses }}">
                                     {{ $profit > 0 ? '+' : '' }}Rp {{ number_format($profit, 0, ',', '.') }}
                                 </span>
                             </div>
@@ -683,7 +687,10 @@
                         <div class="mt-6 p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-lg border border-gray-200 dark:border-zinc-600">
                             <flux:heading size="md" class="mb-4 text-gray-900 dark:text-white">Analisis Harga Jual</flux:heading>
 
-                            <div class="grid grid-cols-1 @if($priceAnalysis['has_selling_price']) md:grid-cols-3 @else md:grid-cols-2 @endif gap-4 mb-4">
+                            @php
+                                $gridClasses = $priceAnalysis['has_selling_price'] ? 'md:grid-cols-3' : 'md:grid-cols-2';
+                            @endphp
+                            <div class="grid grid-cols-1 {{ $gridClasses }} gap-4 mb-4">
                                 <div class="space-y-2">
                                     <flux:heading size="sm" class="text-gray-900 dark:text-white mb-3">Modal & Cost</flux:heading>
                                     <div class="flex justify-between">
@@ -712,29 +719,26 @@
                                     </div>
                                     <div class="flex justify-between">
                                         <flux:text class="text-sm text-gray-600 dark:text-gray-400">Selisih vs Modal:</flux:text>
-                                        <flux:text class="text-sm font-medium
-                                            @if($priceAnalysis['display_price_difference'] >= 0)
-                                                text-green-600 dark:text-green-400
-                                            @else
-                                                text-red-600 dark:text-red-400
-                                            @endif">
-                                            @if($priceAnalysis['display_price_difference'] >= 0)
-                                                +Rp {{ number_format($priceAnalysis['display_price_difference'], 0, ',', '.') }}
-                                            @else
-                                                Rp {{ number_format($priceAnalysis['display_price_difference'], 0, ',', '.') }}
-                                            @endif
+                                        @php
+                                            $differenceClasses = $priceAnalysis['display_price_difference'] >= 0
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : 'text-red-600 dark:text-red-400';
+                                            $differencePrefix = $priceAnalysis['display_price_difference'] >= 0 ? '+' : '';
+                                        @endphp
+                                        <flux:text class="text-sm font-medium {{ $differenceClasses }}">
+                                            {{ $differencePrefix }}Rp {{ number_format($priceAnalysis['display_price_difference'], 0, ',', '.') }}
                                         </flux:text>
                                     </div>
                                     <div class="flex justify-between">
                                         <flux:text class="text-sm text-gray-600 dark:text-gray-400">Margin Keuntungan:</flux:text>
-                                        <flux:text class="text-sm font-medium
-                                            @if($priceAnalysis['display_profit_margin'] >= 20)
-                                                text-green-600 dark:text-green-400
-                                            @elseif($priceAnalysis['display_profit_margin'] >= 10)
-                                                text-yellow-600 dark:text-yellow-400
-                                            @else
-                                                text-red-600 dark:text-red-400
-                                            @endif">
+                                        @php
+                                            $marginClasses = $priceAnalysis['display_profit_margin'] >= 20
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : ($priceAnalysis['display_profit_margin'] >= 10
+                                                    ? 'text-yellow-600 dark:text-yellow-400'
+                                                    : 'text-red-600 dark:text-red-400');
+                                        @endphp
+                                        <flux:text class="text-sm font-medium {{ $marginClasses }}">
                                             {{ number_format($priceAnalysis['display_profit_margin'], 1, ',', '.') }}%
                                         </flux:text>
                                     </div>
@@ -749,49 +753,45 @@
                                     </div>
                                     <div class="flex justify-between">
                                         <flux:text class="text-sm text-gray-600 dark:text-gray-400">Selisih vs Modal:</flux:text>
-                                        <flux:text class="text-sm font-medium
-                                            @if($priceAnalysis['selling_price_difference'] >= 0)
-                                                text-green-600 dark:text-green-400
-                                            @else
-                                                text-red-600 dark:text-red-400
-                                            @endif">
-                                            @if($priceAnalysis['selling_price_difference'] >= 0)
-                                                +Rp {{ number_format($priceAnalysis['selling_price_difference'], 0, ',', '.') }}
-                                            @else
-                                                Rp {{ number_format($priceAnalysis['selling_price_difference'], 0, ',', '.') }}
-                                            @endif
+                                        @php
+                                            $sellingDifferenceClasses = $priceAnalysis['selling_price_difference'] >= 0
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : 'text-red-600 dark:text-red-400';
+                                            $sellingDifferencePrefix = $priceAnalysis['selling_price_difference'] >= 0 ? '+' : '';
+                                        @endphp
+                                        <flux:text class="text-sm font-medium {{ $sellingDifferenceClasses }}">
+                                            {{ $sellingDifferencePrefix }}Rp {{ number_format($priceAnalysis['selling_price_difference'], 0, ',', '.') }}
                                         </flux:text>
                                     </div>
                                     <div class="flex justify-between">
                                         <flux:text class="text-sm text-gray-600 dark:text-gray-400">Margin Keuntungan:</flux:text>
-                                        <flux:text class="text-sm font-medium
-                                            @if($priceAnalysis['selling_profit_margin'] >= 20)
-                                                text-green-600 dark:text-green-400
-                                            @elseif($priceAnalysis['selling_profit_margin'] >= 10)
-                                                text-yellow-600 dark:text-yellow-400
-                                            @else
-                                                text-red-600 dark:text-red-400
-                                            @endif">
+                                        @php
+                                            $sellingMarginClasses = $priceAnalysis['selling_profit_margin'] >= 20
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : ($priceAnalysis['selling_profit_margin'] >= 10
+                                                    ? 'text-yellow-600 dark:text-yellow-400'
+                                                    : 'text-red-600 dark:text-red-400');
+                                        @endphp
+                                        <flux:text class="text-sm font-medium {{ $sellingMarginClasses }}">
                                             {{ number_format($priceAnalysis['selling_profit_margin'], 1, ',', '.') }}%
                                         </flux:text>
                                     </div>
                                     <div class="flex justify-between">
                                         <flux:text class="text-sm text-gray-600 dark:text-gray-400">Gap Display vs Aktual:</flux:text>
-                                        <flux:text class="text-sm font-medium
-                                            @if($priceAnalysis['price_vs_selling_gap'] > 0)
-                                                text-orange-600 dark:text-orange-400
-                                            @elseif($priceAnalysis['price_vs_selling_gap'] < 0)
-                                                text-blue-600 dark:text-blue-400
-                                            @else
-                                                text-gray-600 dark:text-gray-400
-                                            @endif">
-                                            @if($priceAnalysis['price_vs_selling_gap'] > 0)
-                                                -Rp {{ number_format(abs($priceAnalysis['price_vs_selling_gap']), 0, ',', '.') }}
-                                            @elseif($priceAnalysis['price_vs_selling_gap'] < 0)
-                                                +Rp {{ number_format(abs($priceAnalysis['price_vs_selling_gap']), 0, ',', '.') }}
-                                            @else
-                                                Rp 0
-                                            @endif
+                                        @php
+                                            $gapClasses = $priceAnalysis['price_vs_selling_gap'] > 0
+                                                ? 'text-orange-600 dark:text-orange-400'
+                                                : ($priceAnalysis['price_vs_selling_gap'] < 0
+                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                    : 'text-gray-600 dark:text-gray-400');
+                                            $gapText = $priceAnalysis['price_vs_selling_gap'] > 0
+                                                ? '-Rp ' . number_format(abs($priceAnalysis['price_vs_selling_gap']), 0, ',', '.')
+                                                : ($priceAnalysis['price_vs_selling_gap'] < 0
+                                                    ? '+Rp ' . number_format(abs($priceAnalysis['price_vs_selling_gap']), 0, ',', '.')
+                                                    : 'Rp 0');
+                                        @endphp
+                                        <flux:text class="text-sm font-medium {{ $gapClasses }}">
+                                            {{ $gapText }}
                                         </flux:text>
                                     </div>
                                 </div>
