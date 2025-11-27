@@ -61,8 +61,8 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-6 mb-6 border border-gray-200 dark:border-zinc-700">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <!-- Search -->
             <flux:input type="text" label="Search Activities" wire:model.live.debounce.300ms="search" placeholder="Search activities..." clearable />
 
