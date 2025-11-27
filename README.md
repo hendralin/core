@@ -1,66 +1,828 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚗 WOTO - Sistem Penjualan Mobil Bekas Showroom
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, dan mengelola operasional bisnis dengan efisien.
 
-## About Laravel
+## ✨ Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 📊 Dashboard Overview Real-time
+- **4 Metric Cards Modern**: Vehicles Sold, Total Sales, Ready for Sale, Total Cost dengan design responsive
+- **Advanced Card Features**: Horizontal layout dengan icon di kanan, hover animations, compact design
+- **Business Intelligence**: Real-time operational overview untuk decision making
+- **Responsive Grid Layout**: 4 columns desktop → 2 columns tablet → 1 column mobile
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🚗 Manajemen Kendaraan Lengkap
+- **CRUD Vehicles**: Sistem lengkap Create, Read, Update, Delete kendaraan
+- **Advanced Form Features**:
+  - **Rich Text Editor (Quill)**: Editor deskripsi kendaraan dengan formatting lengkap
+  - **Auto-formatting**: Otomatis format nomor polisi Indonesia, kilometer, harga, cylinder capacity
+  - **Progress Indicator**: Visual progress pengisian form dengan step-by-step guide
+  - **Form State Persistence**: Auto-save form ke localStorage, restore saat kembali
+  - **Keyboard Shortcuts**: Ctrl+S (save), Ctrl+R (reset), Escape (back)
+  - **Conditional Validation**: Field selling date/price muncul otomatis berdasarkan status
+  - **Smart Dropdowns**: Cascading select untuk Brand → Type → Model
+  - **File Upload**: Upload STNK dengan preview dan validasi
+- **Spesifikasi Lengkap**: Police number, year, fuel type, kilometer, purchase/selling price, dll
+- **Status Tracking**: Available/Sold dengan conditional fields
+- **Audit Trail**: Activity logging lengkap untuk semua perubahan kendaraan
+- **📊 Analisis Harga Jual**: Card "Rincian Modal Mobil" dengan analisis komprehensif
+  - **Perhitungan Modal**: Total modal = harga beli + biaya kendaraan (approved + pending)
+  - **Validasi Harga Display**: Cek apakah harga jual mencakup total modal
+  - **Perbandingan Harga**: Bandingkan display_price vs selling_price (harga actual terjual)
+  - **Margin Keuntungan**: Hitung margin keuntungan untuk display dan actual price
+  - **Rekomendasi Pricing**: Saran harga minimum untuk mencapai breakeven point
+  - **Status Badge**: Visual indicator untuk cost approval (Approved/Pending/Rejected)
+  - **Paginasi**: Sistem paginasi untuk cost records dengan 10 items per halaman
+  - **Gap Analysis**: Analisis selisih antara harga display vs harga actual terjual
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 📋 Master Data Management
+- **Manajemen Brand**: Database merek mobil populer di Indonesia (31+ brand)
+- **Manajemen Vendor**: Database vendor/supplier kendaraan
+- **Manajemen Salesmen**: Database salesman dengan auto-create user account dan status management
+- **Manajemen Models**: Database model kendaraan STNK Indonesia (SEDAN, SUV, MPV, MINIBUS, TRUCK, dll)
+- **Manajemen Categories**: Database kategori kendaraan STNK Indonesia (MB, BB, BA, BK, TK, DS, dll)
+- **Manajemen Types**: Database 65+ tipe kendaraan Indonesia dengan format STNK (SIGRA 1.0 D MT, dll)
+- **Kategori & Tipe**: Pengelompokan kendaraan berdasarkan kategori dan tipe
+- **Lokasi Warehouse**: Penyimpanan kendaraan di berbagai lokasi gudang
+- **Foto Kendaraan**: Upload dan manajemen gambar kendaraan
 
-## Learning Laravel
+### 💰 Sistem Costs (Biaya Kendaraan)
+- **Cost Management**: Sistem lengkap pencatatan berbagai biaya kendaraan (service, spare parts, maintenance, dll)
+- **Advanced Form Features**:
+  - **Vendor Selection**: Dropdown vendor/supplier dengan database lengkap
+  - **Auto-formatting Price**: Otomatis format harga Rupiah (150.000) dengan thousand separator
+  - **Document Upload**: Upload invoice, kwitansi, atau dokumen biaya
+  - **Approval Workflow**: Sistem approval pending/approved/rejected untuk cost records
+- **Complete Cost Records**: Tanggal biaya, vendor, deskripsi, total price, document, status
+- **Audit Trail**: Activity logging lengkap untuk semua perubahan cost records
+- **Vendor Relationship**: Setiap cost record terkait dengan vendor tertentu
+- **Status Tracking**: Pending/Approved/Rejected dengan workflow approval
+- **Status Badges**: Visual indicator warna untuk status cost (Green=Approved, Yellow=Pending, Red=Rejected)
+- **Export Features**: Excel dan PDF dengan template yang konsisten
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 👥 Manajemen User & Akses
+- **Role-Based Access Control**: Sistem permission yang fleksibel
+- **Multi-User**: Mendukung berbagai level user (Admin, Manager, Staff)
+- **Activity Logging**: Tracking semua aktivitas user dalam sistem
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 🧾 Sistem Kwitansi Penjualan
+- **Cetak Kwitansi Otomatis**: Generate kwitansi PDF untuk kendaraan yang sudah terjual
+- **Form Data Pembeli**: Modal input data lengkap pembeli (nama, telepon, alamat) sebelum cetak
+- **Nomor Kwitansi Otomatis**: Format KW/YYYYMMDD/XXXXX dengan sequence per tahun
+- **Terbilang Rupiah**: Konversi angka ke teks dalam bahasa Indonesia (satu juta lima ratus ribu rupiah)
+- **Logo Perusahaan**: Integrasi logo perusahaan dari database ke kwitansi PDF
+- **Data Perusahaan Dinamis**: Informasi perusahaan (nama, alamat, telepon, email) diambil dari tabel companies
+- **Format Kuitansi Formal**: Template A4 portrait dengan layout profesional
+- **Base64 Image Support**: Logo ditampilkan menggunakan base64 encoding untuk kompatibilitas DomPDF
+- **Layout Responsif**: Header dengan logo kiri, title tengah, informasi perusahaan terstruktur
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 📊 Laporan & Analytics
+- **Dashboard Overview v1.10.0**: Real-time business dashboard dengan 4 metric cards modern
+  - **Vehicles Sold This Month**: Jumlah kendaraan terjual bulan ini dengan tracking quantity
+  - **Total Sales This Month**: Revenue total dari penjualan kendaraan bulan ini dengan currency formatting
+  - **Vehicles Ready for Sale**: Jumlah kendaraan yang tersedia dijual + info kendaraan baru bulan ini
+  - **Total Cost This Month**: Total biaya operasional bulan ini dengan expense tracking
+- **Advanced Card Features**: Horizontal layout, hover animations, compact design, color-coded icons
+- **Responsive Grid Layout**: 4 columns desktop → 2 columns tablet → 1 column mobile
+- **Transition Optimization**: Fixed flickering issues dengan transition-shadow dan transition-transform
+- **Business Intelligence**: Comprehensive operational overview untuk decision making
+- **Export Data**: Export laporan ke Excel dan PDF dengan template yang konsisten
+- **Audit Trail**: Riwayat lengkap semua perubahan data (Brands, Vendors, Categories, Types, Vehicles, Costs, dll)
+- **Activity Logging**: Tracking detail perubahan dengan before/after values
+- **PDF Reports**: Template PDF yang rapi dan konsisten untuk semua module
 
-## Laravel Sponsors
+### 🔒 Backup & Security
+- **Automated Backup**: Sistem backup otomatis database dan file
+- **Restore**: Fitur restore data dari backup
+- **Data Security**: Enkripsi dan proteksi data sensitif
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🛠️ Tech Stack
 
-### Premium Partners
+- **Backend**: Laravel 12.x - PHP Framework
+- **Frontend**: Livewire 3.x + Flux UI Components + Alpine.js
+- **Database**: MySQL/PostgreSQL dengan Eloquent Relationships
+- **Authentication**: Laravel Sanctum
+- **File Storage**: Laravel Storage (local/cloud)
+- **PDF Generation**: DomPDF (dengan base64 image support untuk logo perusahaan)
+- **Excel Export**: Laravel Excel (Maatwebsite)
+- **Activity Logging**: Spatie Laravel Activity Log (audit trail lengkap)
+- **Permissions**: Spatie Laravel Permission (role-based access)
+- **Rich Text Editor**: Quill.js untuk deskripsi kendaraan
+- **UI/UX**: Tailwind CSS + Custom styling untuk dark mode compatibility
+- **JavaScript**: Vanilla JS dengan Livewire integration, Quill.js editor, localStorage API
+- **Form Enhancement**: Auto-formatting, progress indicators, keyboard shortcuts, state persistence
+- **Indonesian Text Conversion**: Custom terbilang function untuk mata uang Rupiah
+- **Receipt Generation**: Sistem generate kwitansi PDF dengan nomor otomatis dan data perusahaan dinamis
+- **Data Seeding**: Laravel Seeders untuk data master (Brands, Types, Vehicles, Companies)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 📋 Prasyarat Sistem
 
-## Contributing
+- PHP 8.2 atau lebih tinggi
+- Composer
+- Node.js & NPM
+- MySQL/PostgreSQL
+- Git
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Instalasi
 
-## Code of Conduct
+### 1. Clone Repository
+```bash
+git clone https://github.com/your-username/woto.git
+cd woto
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 2. Install Dependencies
+```bash
+composer install
+npm install
+```
 
-## Security Vulnerabilities
+### 3. Environment Setup
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4. Database Configuration
+Edit file `.env` dan konfigurasikan database:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=woto
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-## License
+### 5. Database Migration & Seeding
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Seeder Data Tersedia:
+- **BrandSeeder**: 31+ merek mobil Indonesia
+- **VendorSeeder**: 25+ vendor/supplier kendaraan Indonesia
+- **VehicleModelSeeder**: 25+ model kendaraan STNK Indonesia (SEDAN, SUV, MPV, MINIBUS, TRUCK, dll)
+- **CategorySeeder**: 26+ kategori kendaraan STNK Indonesia (MB, BB, BA, BK, TK, DS, dll)
+- **TypeSeeder**: 65+ tipe kendaraan dengan format STNK
+- **CompanySeeder**: Data perusahaan default untuk kwitansi (nama, alamat, telepon, email, logo)
+- **VehicleSeeder**: Sample data kendaraan untuk testing (relasi ke brands, vendors, types, warehouses)
+- **UserSeeder**: User default untuk testing
+- **WarehouseSeeder**: Data warehouse default
+
+Untuk seed seeder tertentu:
+```bash
+php artisan db:seed --class=BrandSeeder
+php artisan db:seed --class=VendorSeeder
+php artisan db:seed --class=CompanySeeder
+php artisan db:seed --class=VehicleSeeder
+php artisan db:seed --class=VehicleModelSeeder
+php artisan db:seed --class=CategorySeeder
+php artisan db:seed --class=TypeSeeder
+```
+
+### 6. Build Assets
+```bash
+npm run build
+# atau untuk development
+npm run dev
+```
+
+### 7. Storage Link
+```bash
+php artisan storage:link
+```
+
+### 8. Jalankan Aplikasi
+```bash
+php artisan serve
+```
+
+Aplikasi akan berjalan di `http://localhost:8000`
+
+## 📖 Penggunaan
+
+### Akses Sistem
+1. Buka browser dan akses `http://localhost:8000`
+2. Login dengan akun default:
+   - **Email**: admin@woto.com
+   - **Password**: password
+
+### Menu Utama
+- **Dashboard**: Overview bisnis dan statistik
+- **Vehicles**: Manajemen inventori kendaraan lengkap dengan CRUD + Audit Trail
+- **Costs**: Manajemen biaya kendaraan (service, spare parts, maintenance) + Approval Workflow + Audit Trail
+- **Brands**: Manajemen merek mobil (31+ brand Indonesia) + Audit Trail
+- **Vendors**: Manajemen vendor/supplier kendaraan + Audit Trail
+- **Salesmen**: Manajemen salesman dengan auto-create user account + Status management + Audit Trail
+- **Models**: Manajemen model kendaraan STNK (25+ model: SEDAN, SUV, MPV, MINIBUS, dll) + Audit Trail
+- **Categories**: Manajemen kategori kendaraan STNK (26+ kategori) + Audit Trail
+- **Types**: Manajemen tipe kendaraan (65+ tipe dengan format STNK) + Brand filtering + Audit Trail
+- **Warehouses**: Manajemen lokasi penyimpanan kendaraan
+- **Users**: Manajemen user dan role
+- **Backup & Restore**: Manajemen backup data
+
+### Fitur Khusus Models Module
+- **STNK Classification**: Model kendaraan berdasarkan klasifikasi STNK Indonesia (SEDAN, SUV, MPV, MINIBUS, TRUCK, dll)
+- **Vehicle Relationship**: Setiap model memiliki relasi dengan kendaraan
+- **Audit Trail**: Tracking lengkap perubahan dengan before/after values
+- **Export**: Export ke Excel/PDF dengan filter aktif
+- **UI Consistency**: Interface mengikuti pola BrandAudit dengan card-based layout
+
+### Cara Menggunakan Models Module
+1. **Akses Models**: Klik menu "Models" di sidebar
+2. **Add New Model**: Klik "Create Vehicle Model" untuk menambah model baru
+3. **Edit Model**: Klik icon edit untuk mengubah model
+4. **View Details**: Klik icon eye untuk melihat detail dan vehicles terkait
+5. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan
+6. **Export Data**: Gunakan tombol Excel/PDF untuk export data
+
+### Fitur Khusus Categories Module
+- **STNK Classification**: Kategori berdasarkan klasifikasi STNK Indonesia (MB, BB, BA, BK, TK, DS, dll)
+- **Vehicle Relationship**: Setiap kategori memiliki relasi dengan kendaraan
+- **Audit Trail**: Tracking lengkap perubahan dengan before/after values
+- **Export**: Export ke Excel/PDF dengan filter aktif
+- **UI Consistency**: Interface mengikuti pola BrandAudit dengan card-based layout
+
+### Cara Menggunakan Categories Module
+1. **Akses Categories**: Klik menu "Categories" di sidebar
+2. **Add New Category**: Klik "Create Category" untuk menambah kategori baru
+3. **Edit Category**: Klik icon edit untuk mengubah kategori
+4. **View Details**: Klik icon eye untuk melihat detail dan vehicles terkait
+5. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan
+6. **Export Data**: Gunakan tombol Excel/PDF untuk export data
+
+### Fitur Khusus Types Module
+- **Brand Relationship**: Setiap type terkait dengan brand tertentu
+- **Advanced Filtering**: Filter berdasarkan brand dengan tombol clear filters
+- **STNK Format**: Data types menggunakan format STNK Indonesia (SIGRA 1.0 D MT)
+- **Audit Trail**: Tracking lengkap perubahan dengan before/after values
+- **Export**: Export ke Excel/PDF dengan filter aktif
+- **UI Consistency**: Interface mengikuti pola BrandAudit dengan card-based layout
+
+### Cara Menggunakan Types Module
+1. **Akses Types**: Klik menu "Types" di sidebar
+2. **Filter by Brand**: Gunakan dropdown Brand untuk filter types tertentu
+3. **Add New Type**: Klik "Create Type" untuk menambah type baru
+4. **Edit Type**: Klik icon edit untuk mengubah type
+5. **View Details**: Klik icon eye untuk melihat detail dan vehicles terkait
+6. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan
+7. **Export Data**: Gunakan tombol Excel/PDF untuk export data
+
+### 🚗 Fitur Khusus Vehicles Module
+- **Complete CRUD Operations**: Create, Read, Update, Delete kendaraan dengan interface lengkap
+- **Advanced Form Features**:
+  - **Quill Rich Text Editor**: Editor deskripsi dengan toolbar lengkap (bold, italic, lists, links, dll)
+  - **Auto-formatting Fields**:
+    - **Police Number**: Format otomatis ke format Indonesia (BG 1821 MY)
+    - **Kilometer**: Format ribuan dengan titik (15.000)
+    - **Purchase/Selling Price**: Format mata uang Indonesia (150.000.000)
+    - **Cylinder Capacity**: Format angka otomatis (1.500)
+  - **Smart Progress Indicator**: Visual progress dengan 5 langkah pengisian form
+  - **Form State Persistence**: Auto-save ke localStorage setiap 30 detik, restore saat kembali
+  - **Keyboard Shortcuts**: Ctrl+S (simpan), Ctrl+R (reset), Escape (kembali)
+  - **Conditional Fields**: Selling date/price muncul otomatis saat status "Sold"
+  - **Cascading Dropdowns**: Brand → Type → Model dengan filter otomatis
+  - **File Upload STNK**: Upload gambar dengan preview dan validasi
+- **Comprehensive Specifications**: Police number, year, fuel type (Bensin/Solar), kilometer, cylinder capacity, colors, dll
+- **Status Management**: Available/Sold dengan validasi conditional
+- **Audit Trail**: Activity logging lengkap dengan before/after values
+- **Export Features**: Excel dan PDF dengan template yang konsisten
+- **Responsive UI**: Interface modern dengan grouping visual dan icons
+- **📊 Analisis Harga Jual**: Card "Rincian Modal Mobil" dengan analisis komprehensif
+  - **Perhitungan Modal**: Total modal = harga beli + biaya kendaraan (approved + pending)
+  - **Validasi Harga Display**: Cek apakah harga jual mencakup total modal
+  - **Perbandingan Harga**: Bandingkan display_price vs selling_price (harga actual terjual)
+  - **Margin Keuntungan**: Hitung margin keuntungan untuk display dan actual price
+  - **Rekomendasi Pricing**: Saran harga minimum untuk mencapai breakeven point
+  - **Status Badge**: Visual indicator untuk cost approval (Approved/Pending/Rejected)
+  - **Paginasi**: Sistem paginasi untuk cost records dengan 10 items per halaman
+   - **Gap Analysis**: Analisis selisih antara harga display vs harga actual terjual
+
+### 🚗 Fitur Khusus Receipt/Kwitansi Module
+- **PDF Receipt Generation**: Generate kwitansi penjualan kendaraan dalam format PDF A4 portrait
+- **Buyer Information Form**: Modal form untuk input data pembeli sebelum generate kwitansi
+- **Auto Receipt Number**: Nomor kwitansi otomatis dengan format KW/YYYYMMDD/XXXXX (sequential per tahun)
+- **Indonesian Currency Converter**: Fungsi terbilang lengkap untuk mata uang Rupiah (satu juta lima ratus ribu rupiah)
+- **Company Logo Integration**: Logo perusahaan dari database ditampilkan di header kwitansi
+- **Dynamic Company Data**: Informasi perusahaan (nama, alamat, telepon, email, website) diambil dari tabel companies
+- **Professional Layout**: Template kwitansi formal dengan layout yang rapi dan profesional
+- **DomPDF Compatible**: Optimasi untuk PDF generation dengan base64 image encoding
+- **Complete Transaction Data**: Menampilkan data kendaraan, pembeli, salesman, dan detail transaksi
+
+### Cara Menggunakan Receipt/Kwitansi Module
+1. **Akses Vehicles**: Klik menu "Vehicles" di sidebar
+2. **Pilih Kendaraan Terjual**: Cari kendaraan dengan status "Sold" (Terjual)
+3. **Cetak Kwitansi**: Klik tombol "Print Receipt" pada card vehicle detail
+4. **Input Data Pembeli**: Isi form modal dengan data lengkap pembeli:
+   - **Nama Pembeli**: Nama lengkap pembeli kendaraan
+   - **Nomor Telepon**: Kontak telepon pembeli
+   - **Alamat Pembeli**: Alamat lengkap pembeli
+5. **Generate PDF**: Klik "Cetak Kwitansi" untuk generate dan download PDF
+6. **Nomor Kwitansi Otomatis**: Sistem otomatis generate nomor kwitansi dengan format KW/YYYYMMDD/XXXXX
+7. **Terbilang Rupiah**: Jumlah terjual otomatis dikonversi ke teks bahasa Indonesia
+
+### Format Kwitansi Generated
+```
+┌─────────────────────────────────────────────────┐
+│ [🏢 LOGO]         KWITANSI                      │ ← Logo kiri, title tengah
+│                    Penjualan Kendaraan Bermotor   │
+│                                                 │
+│                    PT. ABC MOTOR                │ ← Nama perusahaan (dari DB)
+│                    Jl. Sudirman No. 123         │ ← Alamat perusahaan
+│                    Phone: (021) 1234567         │ ← Kontak perusahaan
+│                    Email: info@abc.com          │
+│                                                 │
+│   No. KW/20251110/00001                    [CAP]│ ← Nomor kwitansi
+├─────────────────┬───────────────────────────────┤
+│ DATA KENDARAAN  │ DATA PEMBELI                  │ ← Table layout
+│ No. Polisi: ... │ Nama: ...                     │
+│ Merk/Type: ...  │ Telepon: ...                  │
+│ Tahun: ...      │ Alamat: ...                   │
+│ No. Rangka: ... │                               │
+│ No. Mesin: ...  │                               │
+│ Warna: ...      │                               │
+├─────────────────┴───────────────────────────────┤
+│                                                 │
+│ TELAH TERIMA DARI                               │ ← Section pembayaran
+│ [Nama Pembeli]                                  │
+│                                                 │
+│ UANG SEJUMLAH                                   │
+│ Rp 1,500,000                                    │
+│ Satu juta lima ratus ribu rupiah               │ ← Terbilang otomatis
+│                                                 │
+│ UNTUK PEMBAYARAN                                │
+│ Pembelian Kendaraan Bermotor                     │
+│ No. Polisi: ..., Merk/Type: ...                 │
+├─────────────────────────────────────────────────┤
+│ Penerima,          Yang Menyerahkan,    Hormat Kami, │ ← Tanda tangan
+│ ________________   ________________     ________________ │
+│ (Nama Pembeli)     (Nama Salesman)      (Nama Manager)  │
+└─────────────────────────────────────────────────┘
+```
+
+### Cara Menggunakan Vehicles Module
+1. **Akses Vehicles**: Klik menu "Vehicles" di sidebar
+2. **View All Vehicles**: Lihat daftar kendaraan dengan pagination dan search
+3. **Add New Vehicle**: Klik "Create Vehicle" untuk menambah kendaraan baru
+   - **Progress Indicator**: Ikuti panduan 5 langkah pengisian form
+   - **Auto-formatting**: Input otomatis terformat sesuai standar Indonesia
+   - **Rich Text Editor**: Gunakan Quill untuk deskripsi detail
+   - **Smart Dropdowns**: Pilih Brand → Type otomatis terfilter → Model
+   - **File Upload**: Upload gambar STNK dengan preview
+   - **Form Persistence**: Form tersimpan otomatis, bisa dilanjutkan kapan saja
+4. **Edit Vehicle**: Klik icon edit untuk mengubah data kendaraan
+5. **View Details**: Klik icon eye untuk melihat detail lengkap kendaraan
+   - **Analisis Harga Jual**: Lihat card "Rincian Modal Mobil" dengan analisis komprehensif
+   - **Perhitungan Modal**: Total modal = harga beli + semua biaya kendaraan
+   - **Validasi Pricing**: Cek apakah harga display mencukupi untuk breakeven
+   - **Perbandingan Harga**: Bandingkan display price vs actual selling price
+   - **Rekomendasi**: Dapatkan saran harga minimum dan margin keuntungan
+   - **Status Cost**: Lihat status approval setiap cost record (Approved/Pending/Rejected)
+   - **Paginasi**: Navigasi cost records dengan sistem paginasi
+7. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan lengkap
+8. **Export Data**: Gunakan tombol Excel/PDF untuk export data kendaraan
+9. **Keyboard Shortcuts**:
+   - **Ctrl+S**: Simpan form
+   - **Ctrl+R**: Reset form (dengan konfirmasi modal)
+   - **Escape**: Kembali ke halaman sebelumnya
+
+### Form Fields Vehicles
+- **Informasi Dasar**: Police number (auto-format), year (dropdown 15 tahun), brand, type, model
+- **Detail Kendaraan**: Chassis number, engine number, color, fuel type (Bensin/Solar)
+- **Spesifikasi Teknis**: Kilometer (auto-format), cylinder capacity (auto-format)
+- **Registrasi & Dokumen**: Vehicle registration date/expiry, STNK file upload
+- **Informasi Keuangan**: Purchase date, purchase price (auto-format), selling price (conditional), status (Available/Sold)
+
+### 💰 Fitur Khusus Costs Module
+- **Complete Cost Management**: Sistem lengkap pencatatan berbagai biaya kendaraan (service, spare parts, maintenance, dll)
+- **Advanced Form Features**:
+  - **Vendor Dropdown**: Pilih vendor/supplier dari database lengkap
+  - **Auto-formatting Price**: Format harga Rupiah otomatis (150.000) dengan thousand separator
+  - **Document Upload**: Upload invoice, kwitansi, atau dokumen biaya (Max 5MB, PDF/JPG/PNG)
+  - **Approval Workflow**: Sistem approval dengan status Pending/Approved/Rejected
+- **Comprehensive Cost Records**: Cost date, vendor, description, total price, document, status, created by
+- **Vendor Integration**: Setiap cost record terkait dengan vendor tertentu melalui foreign key
+- **Status Management**: Approval workflow dengan conditional actions (approve/reject)
+- **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan
+- **Advanced Filtering**: Filter berdasarkan status, vendor, dan vehicle dengan clear filters
+- **Export Features**: Excel dan PDF dengan template yang konsisten dan filter aktif
+- **Responsive UI**: Interface modern dengan visual grouping dan icons
+
+### Cara Menggunakan Costs Module
+1. **Akses Costs**: Klik menu "Costs" di sidebar
+2. **View All Records**: Lihat daftar cost records dengan pagination, search, dan filtering
+3. **Add New Cost Record**: Klik "Create Cost Record" untuk menambah record baru
+   - **Vendor Selection**: Pilih vendor dari dropdown yang tersedia
+   - **Auto-formatting**: Input harga otomatis terformat dengan thousand separator
+   - **Document Upload**: Upload dokumen pendukung dengan preview
+   - **Approval Workflow**: Record akan berstatus "Pending" sampai di-approve
+4. **Edit Cost Record**: Klik icon edit untuk mengubah data (hanya status "Pending")
+5. **View Details**: Klik icon eye untuk melihat detail lengkap cost record
+6. **Approval Actions**: Gunakan tombol Approve/Reject untuk mengubah status record
+7. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan lengkap
+8. **Export Data**: Gunakan tombol Excel/PDF untuk export data dengan filter aktif
+9. **Advanced Filtering**:
+   - **Status Filter**: Filter berdasarkan Pending/Approved/Rejected
+   - **Vehicle Filter**: Filter berdasarkan kendaraan tertentu
+   - **Vendor Filter**: Filter berdasarkan vendor tertentu
+   - **Clear Filters**: Reset semua filter dengan satu klik
+
+### Form Fields Costs
+- **Vehicle Selection**: Pilih kendaraan dari dropdown (hanya yang status Available)
+- **Cost Date**: Tanggal biaya (tidak boleh di masa depan)
+- **Vendor**: Pilih vendor/supplier dari database lengkap
+- **Description**: Deskripsi detail biaya yang dikeluarkan
+- **Total Price**: Biaya total (auto-format Rupiah dengan thousand separator)
+- **Document**: Upload file pendukung (invoice, kwitansi, dll)
+- **Status**: Pending/Approved/Rejected (managed by approval workflow)
+- **Created By**: User yang membuat record (auto-fill)
+
+### Approval Workflow
+- **Pending**: Status default untuk record baru, bisa di-edit dan dihapus
+- **Approved**: Record telah disetujui, tidak bisa di-edit lagi
+- **Rejected**: Record ditolak, masih bisa di-edit untuk diperbaiki
+
+### Fitur Khusus Vendors Module
+- **Vendor Management**: Database vendor/supplier kendaraan Indonesia
+- **Contact Information**: Informasi lengkap vendor (name, contact, phone, email, address)
+- **Vehicle Relationship**: Setiap vendor memiliki relasi dengan kendaraan
+- **Audit Trail**: Tracking lengkap perubahan dengan before/after values
+- **Export**: Export ke Excel/PDF dengan template yang konsisten
+- **UI Consistency**: Interface mengikuti pola BrandAudit dengan card-based layout
+
+### Cara Menggunakan Vendors Module
+1. **Akses Vendors**: Klik menu "Vendors" di sidebar
+2. **Add New Vendor**: Klik "Create Vendor" untuk menambah vendor baru
+3. **Edit Vendor**: Klik icon edit untuk mengubah vendor
+4. **View Details**: Klik icon eye untuk melihat detail vendor
+5. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan
+6. **Export Data**: Gunakan tombol Excel/PDF untuk export data
+
+### Fitur Khusus Salesmen Module
+- **Auto User Creation**: Otomatis membuat user account saat create salesman dengan role "salesman"
+- **Default Password**: Password default "password" untuk semua salesman baru
+- **Status Management**: Toggle Active/Inactive status untuk kontrol akses salesman
+- **User Relationship**: Setiap salesman terhubung dengan user account untuk login
+- **Audit Trail**: Tracking lengkap perubahan dengan before/after values
+- **Export**: Export ke Excel/PDF dengan status information
+- **UI Consistency**: Interface mengikuti pola module lain dengan status badges
+
+### Cara Menggunakan Salesmen Module
+1. **Akses Salesmen**: Klik menu "Salesmen" di sidebar
+2. **Add New Salesman**: Klik "Create Salesman" untuk menambah salesman baru
+   - Sistem otomatis create user account dengan role "salesman"
+   - Password default akan diset ke "password"
+3. **Edit Salesman**: Klik icon edit untuk mengubah data dan status salesman
+   - **Status Control**: Toggle Active/Inactive untuk enable/disable akses
+   - **Password Reset**: Sistem otomatis reset password ke "password" saat edit
+4. **View Details**: Klik icon eye untuk melihat detail lengkap salesman
+5. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan
+6. **Export Data**: Gunakan tombol Excel/PDF untuk export data dengan status
+
+## 🔐 Permissions & Roles
+
+Sistem menggunakan Role-Based Access Control dengan permissions berikut:
+
+### Permissions Detail
+- `brand.*` - Manajemen brands (view, create, edit, delete)
+- `vendor.*` - Manajemen vendors (view, create, edit, delete)
+- `salesman.*` - Manajemen salesmen (view, create, edit, delete)
+- `vehicle.*` - Manajemen vehicles (view, create, edit, delete)
+- `vehicle-modal.view` - Akses card analisis harga jual di detail vehicle
+- `cost.*` - Manajemen cost records (view, create, edit, delete)
+- `vehiclemodel.*` - Manajemen vehicle models (view, create, edit, delete)
+- `category.*` - Manajemen categories (view, create, edit, delete)
+- `type.*` - Manajemen types (view, create, edit, delete)
+- `warehouse.*` - Manajemen warehouses (view, create, edit, delete)
+- `user.*` - Manajemen users (view, create, edit, delete)
+- `role.*` - Manajemen roles (view, create, edit, delete)
+- `backup-restore.*` - Backup dan restore data
+
+### Admin
+- Akses penuh ke semua fitur
+- Manajemen user dan role
+- Manajemen vehicles, costs, brands, vendors, salesmen, models, categories, types, dan warehouses
+- Analisis harga jual dan modal kendaraan (vehicle-modal.view)
+- Backup & restore data
+- Audit trail lengkap
+- Approve/reject cost records
+
+### Manager
+- Melihat semua data
+- CRUD lengkap kendaraan (vehicles) dan costs
+- Analisis harga jual dan modal kendaraan (vehicle-modal.view)
+- Manajemen brands, vendors, salesmen, models, categories, types, dan warehouses
+- Approve/reject cost records dan transaksi
+- Export laporan lengkap
+
+### Staff
+- CRUD kendaraan (vehicles) dengan approval manager
+- CRUD cost records dengan approval manager
+- Manajemen vendors, models, categories dan types kendaraan
+- Pencatatan biaya kendaraan
+- Generate laporan
+- View audit trail
+
+## 📊 Struktur Database
+
+### Tabel Utama
+- `users` - Data pengguna sistem
+- `roles` & `permissions` - Sistem autorisasi
+- `vehicles` - Data kendaraan lengkap dengan spesifikasi, status, dan data pembeli untuk kwitansi
+- `costs` - Data biaya kendaraan dengan approval workflow
+- `brands` - Merek mobil (31+ brand Indonesia)
+- `vendors` - Vendor/supplier kendaraan (25+ vendor Indonesia)
+- `salesmen` - Data salesman dengan auto-create user account (relasi ke users)
+- `companies` - Data perusahaan untuk kwitansi (nama, alamat, telepon, email, logo, dll)
+- `types` - Tipe kendaraan dengan format STNK (65+ tipe, relasi ke brands)
+- `warehouses` - Lokasi penyimpanan kendaraan
+- `vehicle_models` - Model kendaraan STNK (SEDAN, SUV, MPV, dll)
+- `categories` - Kategori kendaraan STNK (MB, BB, BA, BK, dll)
+- `activities` - Log aktivitas user (audit trail lengkap)
+
+## 🔄 API Endpoints
+
+Sistem menyediakan REST API untuk integrasi dengan aplikasi lain:
+
+```
+GET    /api/vehicles           - List semua kendaraan
+GET    /api/vehicles/{id}      - Detail kendaraan tertentu
+GET    /api/costs             - List semua cost records
+GET    /api/costs/{id}        - Detail cost record tertentu
+GET    /api/brands             - List semua brand
+GET    /api/vendors            - List semua vendor
+GET    /api/models             - List semua model kendaraan
+GET    /api/categories         - List semua kategori kendaraan
+GET    /api/types              - List semua tipe kendaraan
+GET    /api/warehouses         - List warehouse
+POST   /api/vehicles           - Tambah kendaraan baru
+PUT    /api/vehicles/{id}      - Update kendaraan
+DELETE /api/vehicles/{id}      - Hapus kendaraan
+POST   /api/costs             - Tambah cost record baru
+PUT    /api/costs/{id}        - Update cost record
+DELETE /api/costs/{id}        - Hapus cost record
+POST   /api/costs/{id}/approve - Approve cost record
+POST   /api/costs/{id}/reject  - Reject cost record
+POST   /api/vendors            - Tambah vendor baru
+PUT    /api/vendors/{id}       - Update vendor
+DELETE /api/vendors/{id}       - Hapus vendor
+GET    /api/companies          - List data perusahaan untuk kwitansi
+POST   /api/companies          - Tambah/update data perusahaan
+PUT    /api/companies/{id}     - Update data perusahaan
+GET    /api/salesmen           - List semua salesman
+POST   /api/salesmen           - Tambah salesman baru (auto-create user)
+PUT    /api/salesmen/{id}      - Update salesman dan status user
+DELETE /api/salesmen/{id}      - Hapus salesman
+POST   /api/vehicles/{id}/receipt - Generate kwitansi PDF untuk kendaraan tertentu
+POST   /api/models             - Tambah model kendaraan baru
+PUT    /api/models/{id}        - Update model kendaraan
+DELETE /api/models/{id}        - Hapus model kendaraan
+POST   /api/categories         - Tambah kategori kendaraan baru
+PUT    /api/categories/{id}    - Update kategori kendaraan
+DELETE /api/categories/{id}    - Hapus kategori kendaraan
+POST   /api/types              - Tambah tipe kendaraan baru
+PUT    /api/types/{id}         - Update tipe kendaraan
+DELETE /api/types/{id}         - Hapus tipe kendaraan
+```
+
+## 🧪 Testing
+
+Jalankan test suite:
+```bash
+php artisan test
+```
+
+## 📦 Deployment
+
+### Production Setup
+```bash
+# Optimize aplikasi
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Build assets untuk production
+npm run build
+
+# Setup queue worker (jika diperlukan)
+php artisan queue:work
+```
+
+### Environment Variables
+Pastikan setup environment variables berikut untuk production:
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+
+# Database
+DB_CONNECTION=mysql
+DB_HOST=your_db_host
+DB_DATABASE=your_db_name
+
+# Mail
+MAIL_MAILER=smtp
+MAIL_HOST=your_smtp_host
+
+# Storage
+FILESYSTEM_DISK=public
+```
+
+## 🤝 Kontribusi
+
+1. Fork repository
+2. Buat branch fitur (`git checkout -b feature/AmazingFeature`)
+3. Commit perubahan (`git commit -m 'Add some AmazingFeature'`)
+4. Push ke branch (`git push origin feature/AmazingFeature`)
+5. Buat Pull Request
+
+## 📝 Changelog
+
+### v1.10.0 - Dashboard Enhancement & UI Improvements
+- ✅ **Modern Dashboard Cards**: 4 metric cards dengan design modern dan responsive
+  - **Vehicles Sold This Month**: Card hijau dengan icon shopping cart untuk tracking penjualan quantity
+  - **Total Sales This Month**: Card biru dengan icon currency dollar untuk revenue tracking
+  - **Vehicles Ready for Sale**: Card ungu dengan icon truck + info kendaraan baru bulan ini
+  - **Total Cost This Month**: Card orange dengan icon receipt percent untuk cost tracking
+- ✅ **Advanced Card Features**:
+  - **Horizontal Layout**: Icon di kanan, text sejajar di kiri untuk space efficiency
+  - **Hover Animations**: Smooth shadow dan translate effects saat hover
+  - **Compact Design**: Reduced padding dan spacing untuk lebih banyak informasi
+  - **Color-coded Icons**: Setiap card memiliki background icon dengan warna berbeda
+  - **Dark Mode Support**: Full compatibility dengan light/dark theme switching
+- ✅ **Responsive Grid Layout**: 4 columns desktop → 2 columns tablet → 1 column mobile
+- ✅ **Transition Optimization**: Fixed flickering issues dengan transition-shadow dan transition-transform
+- ✅ **Real-time Metrics**: Live calculation dari database untuk semua dashboard metrics
+- ✅ **Business Intelligence**: Comprehensive overview untuk operational decision making
+
+### v1.10.0 - Dashboard Enhancement & UI Improvements
+- ✅ **Modern Dashboard Cards**: 4 metric cards dengan design modern dan responsive
+  - **Vehicles Sold This Month**: Card hijau dengan icon shopping cart untuk tracking penjualan quantity
+  - **Total Sales This Month**: Card biru dengan icon currency dollar untuk revenue tracking
+  - **Vehicles Ready for Sale**: Card ungu dengan icon truck + info kendaraan baru bulan ini
+  - **Total Cost This Month**: Card orange dengan icon receipt percent untuk cost tracking
+- ✅ **Advanced Card Features**:
+  - **Horizontal Layout**: Icon di kanan, text sejajar di kiri untuk space efficiency
+  - **Hover Animations**: Smooth shadow dan translate effects saat hover
+  - **Compact Design**: Reduced padding dan spacing untuk lebih banyak informasi
+  - **Color-coded Icons**: Setiap card memiliki background icon dengan warna berbeda
+  - **Dark Mode Support**: Full compatibility dengan light/dark theme switching
+- ✅ **Responsive Grid Layout**: 4 columns desktop → 2 columns tablet → 1 column mobile
+- ✅ **Transition Optimization**: Fixed flickering issues dengan transition-shadow dan transition-transform
+- ✅ **Real-time Metrics**: Live calculation dari database untuk semua dashboard metrics
+- ✅ **Business Intelligence**: Comprehensive overview untuk operational decision making
+
+### v1.9.0 - Receipt/Kwitansi Penjualan Module
+- ✅ **Complete Receipt Generation System**: Sistem lengkap generate kwitansi penjualan kendaraan PDF
+- ✅ **PDF Receipt Template**: Template A4 portrait dengan layout formal dan profesional
+- ✅ **Buyer Information Modal**: Form input data pembeli (nama, telepon, alamat) sebelum cetak kwitansi
+- ✅ **Auto Receipt Number Generation**: Format KW/YYYYMMDD/XXXXX dengan sequence per tahun
+- ✅ **Indonesian Rupiah Converter**: Fungsi terbilang lengkap untuk mata uang Rupiah (satu juta lima ratus ribu rupiah)
+- ✅ **Company Logo Integration**: Logo perusahaan dari database ditampilkan di header kwitansi
+- ✅ **Dynamic Company Data**: Informasi perusahaan (nama, alamat, telepon, email, website) diambil dari tabel companies
+- ✅ **Base64 Image Encoding**: Optimasi logo untuk kompatibilitas DomPDF dengan base64 encoding
+- ✅ **Professional Receipt Layout**: Header dengan logo kiri, title tengah, informasi terstruktur
+- ✅ **Complete Transaction Details**: Menampilkan data kendaraan, pembeli, salesman, dan detail transaksi
+- ✅ **Buyer Data Storage**: Data pembeli disimpan ke database vehicles (buyer_name, buyer_phone, buyer_address)
+- ✅ **Receipt Number Persistence**: Nomor kwitansi tersimpan dan tidak berubah jika dicetak ulang
+- ✅ **PDF Download**: Kwitansi langsung didownload dengan nama file yang descriptive
+- ✅ **Mobile Responsive**: Interface modal form responsive untuk semua device
+- ✅ **Form Validation**: Validasi lengkap untuk data pembeli (required fields)
+- ✅ **Audit Trail Integration**: Activity logging untuk perubahan data buyer dan receipt number
+
+### v1.8.0 - Salesmen Management Module
+- ✅ **Complete Salesmen CRUD Module**: Sistem lengkap manajemen salesman dengan auto-create user account
+- ✅ **Auto User Creation**: Otomatis membuat user account dengan role "salesman" saat create salesman
+- ✅ **Default Password Management**: Password default "password" dengan auto-reset saat edit
+- ✅ **Status Management**: Toggle Active/Inactive status untuk kontrol akses salesman
+- ✅ **User-Salesman Relationship**: Foreign key relationship antara salesman dan users table
+- ✅ **Comprehensive CRUD Operations**: Create, Read, Update, Delete dengan permission-based access
+- ✅ **Audit Trail Integration**: Activity logging lengkap dengan before/after values
+- ✅ **Advanced Filtering**: Search functionality dengan pagination
+- ✅ **Export Features**: Excel dan PDF dengan template konsisten dan status information
+- ✅ **PDF Landscape Orientation**: Export PDF dalam format landscape untuk data yang lebih luas
+- ✅ **UI Consistency**: Interface mengikuti pola module lain dengan status badges
+- ✅ **Permission System**: salesman.view, salesman.create, salesman.edit, salesman.delete
+- ✅ **Database Integration**: Foreign key ke users table dengan status management
+- ✅ **Responsive Design**: Mobile-friendly interface dengan proper spacing
+- ✅ **Module Architecture**: Full integration dengan existing permission dan audit systems
+
+### v1.7.0 - Price Analysis & Cost Status Enhancement
+- ✅ **Analisis Harga Jual Komprehensif**: Card "Rincian Modal Mobil" dengan perhitungan modal lengkap
+  - **Perhitungan Modal**: Total modal = harga beli + biaya kendaraan (approved + pending costs)
+  - **Validasi Harga Display**: Otomatis cek apakah display_price mencakup total modal
+  - **Perbandingan Harga**: Bandingkan display_price vs selling_price (harga actual terjual)
+  - **Margin Keuntungan**: Hitung margin keuntungan untuk display dan actual selling price
+  - **Rekomendasi Pricing**: Saran harga minimum untuk mencapai breakeven point
+  - **Gap Analysis**: Analisis selisih antara ekspektasi pricing vs realita penjualan
+- ✅ **Cost Status Badges**: Visual indicator warna untuk status cost approval
+  - **Green Badge**: Approved costs
+  - **Yellow Badge**: Pending costs
+  - **Red Badge**: Rejected costs
+- ✅ **Cost Records Pagination**: Sistem paginasi 10 items per halaman pada card vehicle detail
+- ✅ **Price Analysis Dashboard**: 3-kolom layout untuk modal, display price, dan selling price
+- ✅ **Business Intelligence**: Insights untuk optimasi pricing strategy dan profit margin
+- ✅ **Real-time Calculations**: Perhitungan otomatis berdasarkan data cost terkini
+
+### v1.6.0 - Cost Management Module
+- ✅ **Complete Cost Management Module**: Sistem lengkap manajemen biaya kendaraan (service, spare parts, maintenance, dll)
+- ✅ **Advanced Form Features**:
+  - **Vendor Dropdown**: Pilih vendor dari database lengkap dengan foreign key relationship
+  - **Auto-formatting Price**: Format harga Rupiah otomatis (150.000) dengan thousand separator dan debounce
+  - **Document Upload**: Upload invoice/kwitansi dengan validasi file (PDF/JPG/PNG, max 5MB)
+  - **Smart Date Validation**: Cost date tidak boleh di masa depan
+- ✅ **Approval Workflow System**: Status Pending/Approved/Rejected dengan conditional actions
+- ✅ **Advanced Filtering**: Triple filter (Status + Vehicle + Vendor) dengan clear filters functionality
+- ✅ **Comprehensive CRUD Operations**: Create, Read, Update, Delete dengan permission-based access
+- ✅ **Audit Trail Integration**: Activity logging lengkap dengan before/after values
+- ✅ **Export Features**: Excel dan PDF dengan template konsisten dan filter support
+- ✅ **UI Consistency**: Interface mengikuti pola BrandAudit dengan card-based layout
+- ✅ **Permission System**: cost.view, cost.create, cost.edit, cost.delete
+- ✅ **Database Integration**: Foreign key ke vehicles dan vendors table dengan cost_date field
+- ✅ **Responsive Design**: Mobile-friendly interface dengan proper spacing
+- ✅ **Module Refactoring Complete**: Full migration from ServicePart to Cost architecture
+
+### v1.5.0 - Vehicles Management Module with Advanced Features
+- ✅ **Complete Vehicles CRUD Module**: Sistem lengkap Create, Read, Update, Delete kendaraan
+- ✅ **Advanced Form Features**:
+  - **Quill Rich Text Editor**: Editor deskripsi dengan toolbar lengkap (bold, italic, lists, links)
+  - **Auto-formatting Fields**: Police number (BG 1821 MY), kilometer (15.000), prices (150.000.000), cylinder capacity (1.500)
+  - **Smart Progress Indicator**: Visual progress 5 langkah pengisian form
+  - **Form State Persistence**: Auto-save localStorage setiap 30 detik, restore saat kembali
+  - **Keyboard Shortcuts**: Ctrl+S (save), Ctrl+R (reset), Escape (back)
+  - **Conditional Validation**: Selling fields muncul otomatis saat status "Sold"
+  - **Cascading Dropdowns**: Brand → Type → Model filtering
+  - **File Upload STNK**: Upload dengan preview dan validasi
+- ✅ **Comprehensive Specifications**: Police number, year, fuel type, kilometer, cylinder capacity, colors, dll
+- ✅ **Status Management**: Available/Sold dengan conditional fields
+- ✅ **Vehicle Audit Trail**: Activity logging lengkap dengan before/after values
+- ✅ **Export Features**: Excel dan PDF dengan template konsisten
+- ✅ **Responsive UI**: Interface modern dengan visual grouping dan icons
+- ✅ **Permission System**: vehicle.view, vehicle.create, vehicle.edit, vehicle.delete
+- ✅ **JavaScript Optimization**: Clean console, no debug logs, proper error handling
+
+### v1.4.0 - Vendors Management Module & PDF Template Standardization
+- ✅ **Module Vendors Lengkap**: CRUD vendor/supplier kendaraan Indonesia
+- ✅ **Vendor Contact Information**: Data lengkap (name, contact, phone, email, address)
+- ✅ **Vendor Audit Trail**: Activity logging untuk semua perubahan vendors
+- ✅ **Export Standardization**: Template PDF konsisten di semua module (Brands, Vendors, Categories, Types, Vehicle Models, Warehouses)
+- ✅ **PDF Template Cleanup**: Styling bersih, font Arial, layout konsisten, footer minimal
+- ✅ **Excel Template Standardization**: Format Excel yang seragam di semua module
+- ✅ **UI Consistency**: Interface vendors mengikuti pola BrandAudit dengan card-based layout
+- ✅ **Permission System**: Permissions lengkap untuk vendor management (vendor.view, vendor.create, vendor.edit, vendor.delete)
+
+### v1.3.0 - Vehicle Models Management Module
+- ✅ **Module Vehicle Models Lengkap**: CRUD model kendaraan dengan format STNK Indonesia
+- ✅ **Database Vehicle Models**: 25+ model kendaraan STNK (SEDAN, SUV, MPV, MINIBUS, TRUCK, dll)
+- ✅ **Vehicle Model Audit Trail**: Activity logging untuk semua perubahan vehicle models
+- ✅ **Vehicle-Model Integration**: Relasi model dengan vehicles yang proper
+- ✅ **STNK Classification**: Model berdasarkan klasifikasi resmi STNK Indonesia
+- ✅ **Export Vehicle Models**: Export data vehicle models ke Excel dan PDF
+- ✅ **UI Consistency**: Interface vehicle models mengikuti pola BrandAudit
+- ✅ **Permission System**: Permissions lengkap untuk vehicle model management
+
+### v1.2.0 - Categories Management Module
+- ✅ **Module Categories Lengkap**: CRUD kategori kendaraan dengan format STNK Indonesia
+- ✅ **Database Categories**: 26+ kategori kendaraan STNK (MB, BB, BA, BK, TK, DS, KH, dll)
+- ✅ **Category Audit Trail**: Activity logging untuk semua perubahan categories
+- ✅ **Vehicle-Category Integration**: Relasi category dengan vehicles yang proper
+- ✅ **STNK Classification**: Kategori berdasarkan klasifikasi resmi STNK Indonesia
+- ✅ **Export Categories**: Export data categories ke Excel dan PDF
+- ✅ **UI Consistency**: Interface categories mengikuti pola BrandAudit
+- ✅ **Permission System**: Permissions lengkap untuk category management
+
+### v1.1.0 - Types Management Module
+- ✅ **Module Types Lengkap**: CRUD tipe kendaraan dengan brand relationship
+- ✅ **Database Types**: 65+ tipe kendaraan Indonesia dengan format STNK
+- ✅ **Type Audit Trail**: Activity logging untuk semua perubahan types
+- ✅ **Brand-Type Integration**: Relasi brand dengan types yang proper
+- ✅ **Advanced Filtering**: Filter types berdasarkan brand dengan clear filters
+- ✅ **Export Types**: Export data types ke Excel dan PDF
+- ✅ **UI Consistency**: Interface types mengikuti pola BrandAudit
+- ✅ **Permission System**: Permissions lengkap untuk type management
+
+### v1.0.0
+- ✅ Sistem manajemen brand lengkap (31+ brand Indonesia)
+- ✅ CRUD kendaraan dengan spesifikasi lengkap
+- ✅ Manajemen warehouse dan lokasi
+- ✅ Activity logging
+- ✅ Export Excel & PDF
+- ✅ Backup & restore otomatis
+- ✅ Role-based permissions
+
+## 📞 Support
+
+Jika Anda mengalami masalah atau memiliki pertanyaan:
+
+- **Email**: support@woto.com
+- **Documentation**: [Wiki](https://github.com/your-username/woto/wiki)
+- **Issues**: [GitHub Issues](https://github.com/your-username/woto/issues)
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+**WOTO** - Membuat penjualan mobil bekas menjadi lebih mudah dan efisien! 🚗💨
