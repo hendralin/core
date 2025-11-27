@@ -6,41 +6,38 @@
             <!-- Status Filter -->
             <div class="flex items-center">
                 <label for="status-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Status:</label>
-                <select id="status-filter" wire:model.live="statusFilter"
-                        class="text-sm rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All</option>
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
-                    <option value="2">Pending</option>
-                </select>
+                <flux:select size="sm" wire:model.live="statusFilter" id="status-filter" placeholder="">
+                    <flux:select.option value="">All</flux:select.option>
+                    <flux:select.option value="1">Active</flux:select.option>
+                    <flux:select.option value="0">Inactive</flux:select.option>
+                    <flux:select.option value="2">Pending</flux:select.option>
+                </flux:select>
             </div>
 
             <!-- Role Filter -->
             <div class="flex items-center">
                 <label for="role-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Role:</label>
-                <select id="role-filter" wire:model.live="roleFilter"
-                        class="text-sm rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Roles</option>
+                <flux:select size="sm" wire:model.live="roleFilter" id="role-filter" placeholder="">
+                    <flux:select.option value="">All Roles</flux:select.option>
                     @foreach ($roles as $role)
-                        <option value="{{ $role->id }}">{{ ucwords($role->name) }}</option>
+                        <flux:select.option value="{{ $role->id }}">{{ ucwords($role->name) }}</flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
 
             <!-- Verification Filter -->
             <div class="flex items-center">
                 <label for="verification-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Email:</label>
-                <select id="verification-filter" wire:model.live="verificationFilter"
-                        class="text-sm rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All</option>
-                    <option value="verified">Verified</option>
-                    <option value="unverified">Unverified</option>
-                </select>
+                <flux:select size="sm" wire:model.live="verificationFilter" id="verification-filter" placeholder="">
+                    <flux:select.option value="">All</flux:select.option>
+                    <flux:select.option value="verified">Verified</flux:select.option>
+                    <flux:select.option value="unverified">Unverified</flux:select.option>
+                </flux:select>
             </div>
 
             <!-- Advanced Filters Toggle -->
             <button wire:click="toggleAdvancedFilters"
-                    class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center">
+                    class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center cursor-pointer">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
                 </svg>
@@ -48,7 +45,7 @@
             </button>
 
             <!-- Clear Filters -->
-            <button wire:click="clearFilters" class="text-sm text-blue-600 dark:text-blue-400 hover:underline ml-auto">
+            <button wire:click="clearFilters" class="text-sm text-blue-600 dark:text-blue-400 hover:underline ml-auto cursor-pointer">
                 Clear Filters
             </button>
         </div>
