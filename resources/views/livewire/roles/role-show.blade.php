@@ -28,7 +28,7 @@
                         <flux:heading size="sm">System Role</flux:heading>
                         <flux:text class="mt-1">
                             @if (\App\Constants\RoleConstants::isProtected($role->name))
-                                <flux:badge color="red" size="sm">Protected</flux:badge>
+                                <flux:badge color="red" size="sm" icon="shield-check">Protected</flux:badge>
                             @else
                                 <flux:badge color="green" size="sm">Custom</flux:badge>
                             @endif

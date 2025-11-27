@@ -232,7 +232,7 @@
                             @error('newSocialUrl') <p class="text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
 
                             <div class="flex items-end">
-                                <flux:button wire:click="addSocialMedia" class="w-full" class="cursor-pointer">
+                                <flux:button wire:click="addSocialMedia" class="w-full cursor-pointer">
                                     Add Link
                                 </flux:button>
                             </div>

@@ -240,9 +240,9 @@
             <div class="flex gap-2">
                 <flux:spacer />
                 <flux:modal.close>
-                    <flux:button variant="ghost">Cancel</flux:button>
+                    <flux:button variant="ghost" class="cursor-pointer">Cancel</flux:button>
                 </flux:modal.close>
-                <flux:button wire:click="delete" variant="danger">Delete Role</flux:button>
+                <flux:button wire:click="delete" variant="danger" class="cursor-pointer">Delete Role</flux:button>
             </div>
         </div>
     </flux:modal>
