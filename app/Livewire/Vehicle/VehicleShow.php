@@ -6,10 +6,13 @@ use App\Models\Cost;
 use App\Models\Vehicle;
 use Livewire\Component;
 use App\Models\Activity;
+use App\Models\Commission;
+use Illuminate\Support\Str;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
-use Livewire\WithoutUrlPagination;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Livewire\WithoutUrlPagination;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Show Vehicle')]
 class VehicleShow extends Component
@@ -22,15 +25,26 @@ class VehicleShow extends Component
 
     // Modal properties
     public $showBuyerModal = false;
+    public $showCommissionModal = false;
 
     // Buyer information
     public $buyer_name = '';
     public $buyer_phone = '';
     public $buyer_address = '';
 
+    // Commission form properties
+    public $commission_date = '';
+    public $commission_description = '';
+    public $commission_amount = '';
+    public $commission_type = 2; // Default to purchase commission
+
+    // Edit commission properties
+    public $editingCommissionId = null;
+    public $showEditCommissionModal = false;
+
     public function mount(Vehicle $vehicle): void
     {
-        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images']);
+        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions']);
 
         // Get cost summary for this vehicle
         $this->loadCostSummary();
@@ -343,5 +357,193 @@ class VehicleShow extends Component
         $result = ucfirst($words) . ' rupiah';
 
         return $result;
+    }
+
+    public function openCommissionModal()
+    {
+        $this->resetCommissionForm();
+        $this->showCommissionModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeCommissionModal()
+    {
+        $this->showCommissionModal = false;
+        $this->resetCommissionForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function createCommission()
+    {
+        $this->validate([
+            'commission_date' => 'required|date',
+            'commission_description' => 'required|string|max:255',
+            'commission_amount' => 'required|string',
+            'commission_type' => 'required|in:1,2',
+        ], [
+            'commission_date.required' => 'Tanggal komisi harus diisi.',
+            'commission_date.date' => 'Format tanggal tidak valid.',
+            'commission_description.required' => 'Deskripsi komisi harus diisi.',
+            'commission_description.max' => 'Deskripsi maksimal 255 karakter.',
+            'commission_amount.required' => 'Jumlah komisi harus diisi.',
+            'commission_amount.string' => 'Jumlah komisi harus berupa angka.',
+            'commission_type.required' => 'Tipe komisi harus dipilih.',
+            'commission_type.in' => 'Tipe komisi tidak valid.',
+        ]);
+
+        $commissionAmount = Str::replace(',', '', $this->commission_amount);
+
+        $commission = Commission::create([
+            'commission_date' => $this->commission_date,
+            'type' => $this->commission_type,
+            'vehicle_id' => $this->vehicle->id,
+            'amount' => $commissionAmount,
+            'description' => $this->commission_description,
+        ]);
+
+        // Reload vehicle with commissions
+        $this->vehicle->load('commissions');
+
+        // Log the creation activity with detailed information
+        activity()
+            ->performedOn($commission)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'attributes' => [
+                    'commission_date' => $this->commission_date,
+                    'type' => $this->commission_type,
+                    'amount' => $commissionAmount,
+                    'description' => $this->commission_description,
+                ]
+            ])
+            ->log('created commission');
+
+        // Show success message
+        session()->flash('message', 'Komisi ' . ($this->commission_type == 1 ? 'Penjualan' : 'Pembelian') . ' berhasil ditambahkan.');
+
+        // Close modal
+        $this->closeCommissionModal();
+    }
+
+    private function resetCommissionForm()
+    {
+        $this->reset('commission_date', 'commission_description', 'commission_amount', 'commission_type');
+    }
+
+    public function openEditCommissionModal($commissionId)
+    {
+        $commission = Commission::findOrFail($commissionId);
+
+        // Check if commission belongs to this vehicle
+        if ($commission->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->editingCommissionId = $commissionId;
+        $this->commission_date = $commission->commission_date;
+        $this->commission_description = $commission->description;
+        $this->commission_amount = number_format($commission->amount, 0);
+        $this->commission_type = $commission->type;
+
+        $this->showEditCommissionModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeEditCommissionModal()
+    {
+        $this->showEditCommissionModal = false;
+        $this->editingCommissionId = null;
+        $this->resetCommissionForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function updateCommission()
+    {
+        $this->validate([
+            'commission_date' => 'required|date',
+            'commission_description' => 'required|string|max:255',
+            'commission_amount' => 'required|string',
+            'commission_type' => 'required|in:1,2',
+        ], [
+            'commission_date.required' => 'Tanggal komisi harus diisi.',
+            'commission_date.date' => 'Format tanggal tidak valid.',
+            'commission_description.required' => 'Deskripsi komisi harus diisi.',
+            'commission_description.max' => 'Deskripsi maksimal 255 karakter.',
+            'commission_amount.required' => 'Jumlah komisi harus diisi.',
+            'commission_amount.string' => 'Jumlah komisi harus berupa angka.',
+            'commission_type.required' => 'Tipe komisi harus dipilih.',
+            'commission_type.in' => 'Tipe komisi tidak valid.',
+        ]);
+
+        $commission = Commission::findOrFail($this->editingCommissionId);
+
+        // Check if commission belongs to this vehicle
+        if ($commission->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $commissionAmount = Str::replace(',', '', $this->commission_amount);
+
+        // Store old commission data for logging
+        $oldCommission = [
+            'commission_date' => $commission->commission_date,
+            'type' => $commission->type,
+            'amount' => $commission->amount,
+            'description' => $commission->description,
+        ];
+
+        // Update commission data
+        $commission->update([
+            'commission_date' => $this->commission_date,
+            'type' => $this->commission_type,
+            'amount' => $commissionAmount,
+            'description' => $this->commission_description,
+        ]);
+
+        // Reload vehicle with commissions
+        $this->vehicle->load('commissions');
+
+        // Log the update activity with detailed information
+        activity()
+            ->performedOn($commission)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldCommission,
+                'attributes' => [
+                    'commission_date' => $this->commission_date,
+                    'type' => $this->commission_type,
+                    'amount' => $commissionAmount,
+                    'description' => $this->commission_description,
+                ]
+            ])
+            ->log('updated commission');
+
+        // Show success message
+        session()->flash('message', 'Komisi ' . ($this->commission_type == 1 ? 'Penjualan' : 'Pembelian') . ' berhasil diperbarui.');
+
+        // Close modal
+        $this->closeEditCommissionModal();
+    }
+
+    public function deleteCommission($commissionId)
+    {
+        $commission = Commission::findOrFail($commissionId);
+
+        // Check if commission belongs to this vehicle
+        if ($commission->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $commission->delete();
+
+        // Reload vehicle with commissions
+        $this->vehicle->load('commissions');
+
+        // Show success message
+        session()->flash('message', 'Komisi ' . ($commission->type == 1 ? 'Penjualan' : 'Pembelian') . ' berhasil dihapus.');
     }
 }

@@ -57,6 +57,7 @@ use App\Livewire\Warehouse\WarehouseShow;
 use App\Livewire\Warehouse\WarehouseAudit;
 use App\Livewire\Warehouse\WarehouseIndex;
 use App\Livewire\Warehouse\WarehouseCreate;
+use App\Livewire\Commission\CommissionAudit;
 use App\Livewire\VehicleModel\VehicleModelEdit;
 use App\Livewire\VehicleModel\VehicleModelShow;
 use App\Livewire\VehicleModel\VehicleModelAudit;
@@ -157,6 +158,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('vehicles/create', VehicleCreate::class)->name('vehicles.create')->middleware(['permission:vehicle.create']);
     Route::get('vehicles/{vehicle}/edit', VehicleEdit::class)->name('vehicles.edit')->middleware(['permission:vehicle.edit']);
     Route::get('vehicles/{vehicle}', VehicleShow::class)->name('vehicles.show')->middleware(['permission:vehicle.view']);
+
+    Route::get('commissions/audit', CommissionAudit::class)->name('commissions.audit')->middleware(['permission:vehicle-commission.audit']);
 
     Route::get('costs', CostIndex::class)->name('costs.index')->middleware(['permission:cost.view|cost.create|cost.edit|cost.delete']);
     Route::get('costs/audit', CostAudit::class)->name('costs.audit')->middleware(['permission:cost.audit']);

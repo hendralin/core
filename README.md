@@ -59,6 +59,23 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Status Badges**: Visual indicator warna untuk status cost (Green=Approved, Yellow=Pending, Red=Rejected)
 - **Export Features**: Excel dan PDF dengan template yang konsisten
 
+### 💎 Sistem Komisi (Commission Management)
+- **Commission Management**: Sistem lengkap manajemen komisi kendaraan (komisi penjualan dan pembelian)
+- **Advanced Form Features**:
+  - **Commission Types**: Komisi Penjualan (Sales) dan Komisi Pembelian (Purchase)
+  - **Auto-formatting Amount**: Format mata uang Rupiah otomatis dengan thousand separator
+  - **Modal Form Interface**: Form create/edit dengan validasi lengkap dan error handling
+  - **Date Picker**: Input tanggal komisi dengan validasi
+- **Complete Commission Records**: Tanggal komisi, tipe (sales/purchase), deskripsi, jumlah, status
+- **Audit Trail**: Activity logging lengkap untuk semua perubahan commission records
+- **Vehicle Relationship**: Setiap komisi terkait dengan kendaraan tertentu
+- **Commission Tables**: Separate tables untuk komisi penjualan (hijau) dan pembelian (biru)
+- **Modal Confirmation**: Confirmation dialog untuk delete operations dengan detail komisi
+- **Commission Audit Trail**: Dedicated audit page dengan filtering berdasarkan vehicle dan tipe komisi
+- **Advanced Filtering**: Filter berdasarkan vehicle, commission type, search functionality
+- **Export Features**: Excel dan PDF dengan template yang konsisten
+- **Real-time Updates**: Auto-refresh commission data setelah create/update/delete
+
 ### 👥 Manajemen User & Akses
 - **Role-Based Access Control**: Sistem permission yang fleksibel
 - **Multi-User**: Mendukung berbagai level user (Admin, Manager, Staff)
@@ -210,8 +227,9 @@ Aplikasi akan berjalan di `http://localhost:8000`
 
 ### Menu Utama
 - **Dashboard**: Overview bisnis dan statistik
-- **Vehicles**: Manajemen inventori kendaraan lengkap dengan CRUD + Audit Trail
+- **Vehicles**: Manajemen inventori kendaraan lengkap dengan CRUD + Commission Management + Audit Trail
 - **Costs**: Manajemen biaya kendaraan (service, spare parts, maintenance) + Approval Workflow + Audit Trail
+- **Commissions**: Audit trail lengkap untuk semua aktivitas komisi kendaraan + Vehicle Filtering
 - **Brands**: Manajemen merek mobil (31+ brand Indonesia) + Audit Trail
 - **Vendors**: Manajemen vendor/supplier kendaraan + Audit Trail
 - **Salesmen**: Manajemen salesman dengan auto-create user account + Status management + Audit Trail
@@ -443,6 +461,27 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Approved**: Record telah disetujui, tidak bisa di-edit lagi
 - **Rejected**: Record ditolak, masih bisa di-edit untuk diperbaiki
 
+### 💎 Cara Menggunakan Commission Module
+1. **Akses Commissions**: Klik menu "Commissions" di sidebar untuk melihat audit trail
+2. **View Commission Tables**: Di halaman vehicle detail, lihat tabel komisi penjualan dan pembelian
+3. **Add New Commission**: Klik "Tambah Komisi" untuk menambah komisi baru (max 4 per vehicle)
+   - **Commission Type**: Pilih Komisi Penjualan atau Komisi Pembelian
+   - **Date**: Pilih tanggal komisi dengan date picker
+   - **Description**: Masukkan deskripsi komisi (required)
+   - **Amount**: Masukkan jumlah komisi (auto-format Rupiah)
+4. **Edit Commission**: Klik icon edit pada tabel komisi untuk mengubah data
+5. **Delete Commission**: Klik icon trash untuk menghapus dengan confirmation modal
+6. **Commission Audit Trail**: Klik "Audit" di halaman vehicle detail untuk melihat riwayat lengkap
+7. **Advanced Filtering**: Gunakan search, vehicle filter, dan commission type filter
+8. **Export Data**: Gunakan tombol Excel/PDF untuk export data commission audit
+
+### Form Fields Commissions
+- **Commission Type**: Komisi Penjualan / Komisi Pembelian
+- **Commission Date**: Tanggal komisi dengan validasi
+- **Description**: Deskripsi detail komisi (required, max 255 characters)
+- **Amount**: Jumlah komisi (auto-format Rupiah dengan thousand separator)
+- **Vehicle**: Kendaraan terkait (auto-assigned berdasarkan context)
+
 ### Fitur Khusus Vendors Module
 - **Vendor Management**: Database vendor/supplier kendaraan Indonesia
 - **Contact Information**: Informasi lengkap vendor (name, contact, phone, email, address)
@@ -490,6 +529,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `salesman.*` - Manajemen salesmen (view, create, edit, delete)
 - `vehicle.*` - Manajemen vehicles (view, create, edit, delete)
 - `vehicle-modal.view` - Akses card analisis harga jual di detail vehicle
+- `vehicle-commission.*` - Manajemen commission records (view, create, edit, delete, audit)
 - `cost.*` - Manajemen cost records (view, create, edit, delete)
 - `vehiclemodel.*` - Manajemen vehicle models (view, create, edit, delete)
 - `category.*` - Manajemen categories (view, create, edit, delete)
@@ -530,6 +570,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `users` - Data pengguna sistem
 - `roles` & `permissions` - Sistem autorisasi
 - `vehicles` - Data kendaraan lengkap dengan spesifikasi, status, dan data pembeli untuk kwitansi
+- `commissions` - Data komisi kendaraan (sales/purchase) dengan relasi ke vehicles
 - `costs` - Data biaya kendaraan dengan approval workflow
 - `brands` - Merek mobil (31+ brand Indonesia)
 - `vendors` - Vendor/supplier kendaraan (25+ vendor Indonesia)
@@ -575,6 +616,11 @@ POST   /api/salesmen           - Tambah salesman baru (auto-create user)
 PUT    /api/salesmen/{id}      - Update salesman dan status user
 DELETE /api/salesmen/{id}      - Hapus salesman
 POST   /api/vehicles/{id}/receipt - Generate kwitansi PDF untuk kendaraan tertentu
+GET    /api/commissions        - List semua commission records
+GET    /api/commissions/{id}   - Detail commission record tertentu
+POST   /api/commissions        - Tambah commission record baru
+PUT    /api/commissions/{id}   - Update commission record
+DELETE /api/commissions/{id}  - Hapus commission record
 POST   /api/models             - Tambah model kendaraan baru
 PUT    /api/models/{id}        - Update model kendaraan
 DELETE /api/models/{id}        - Hapus model kendaraan
@@ -638,6 +684,25 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.11.0 - Commission Management Module
+- ✅ **Complete Commission Management System**: Sistem lengkap manajemen komisi kendaraan (sales & purchase)
+- ✅ **Commission CRUD Operations**: Create, Read, Update, Delete komisi dengan interface lengkap
+- ✅ **Commission Types**: Separate handling untuk Komisi Penjualan (Sales) dan Komisi Pembelian (Purchase)
+- ✅ **Advanced Commission Forms**:
+  - **Modal Form Interface**: Form create/edit dengan validasi lengkap dan error handling
+  - **Auto-formatting Amount**: Format mata uang Rupiah otomatis dengan thousand separator
+  - **Date Picker**: Input tanggal komisi dengan validasi dan format dd-mm-yyyy
+  - **Commission Type Selection**: Dropdown untuk memilih tipe komisi
+- ✅ **Commission Tables**: Separate visual tables untuk komisi penjualan (hijau) dan pembelian (biru)
+- ✅ **Commission Audit Trail**: Dedicated audit page dengan filtering berdasarkan vehicle dan tipe komisi
+- ✅ **Advanced Filtering**: Search, vehicle filter, commission type filter dengan pagination
+- ✅ **Modal Confirmation Dialogs**: Confirmation modals untuk delete operations dengan detail komisi
+- ✅ **Commission Statistics**: Dashboard statistics untuk total activities, today, created, updated, deleted
+- ✅ **Real-time Updates**: Auto-refresh commission data setelah create/update/delete operations
+- ✅ **Permission-based Access**: vehicle-commission.* permissions untuk semua operations
+- ✅ **Export Features**: Excel dan PDF dengan template yang konsisten
+- ✅ **UI Integration**: Seamless integration dengan vehicle detail page dan audit system
 
 ### v1.10.0 - Dashboard Enhancement & UI Improvements
 - ✅ **Modern Dashboard Cards**: 4 metric cards dengan design modern dan responsive

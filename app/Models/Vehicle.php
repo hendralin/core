@@ -153,4 +153,12 @@ class Vehicle extends Model
     {
         return $this->hasMany(Cost::class);
     }
+
+    /**
+     * Get the commissions for the vehicle
+     */
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
 }

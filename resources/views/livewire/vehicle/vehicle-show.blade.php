@@ -9,6 +9,15 @@
         <flux:separator variant="subtle" />
     </div>
 
+    <!-- Flash Messages -->
+    @if (session()->has('message'))
+        <div class="mb-6">
+            <flux:callout variant="success" class="mb-4" icon="check-circle">
+                {{ session('message') }}
+            </flux:callout>
+        </div>
+    @endif
+
     <!-- Hero Section -->
     @php
         $randomImage = null;
@@ -20,14 +29,14 @@
                 @if($randomImage)
                     min-h-[120px]
                 @else
-                    bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-800 dark:to-blue-900
+                    bg-line-to-r from-blue-600 to-blue-700 dark:from-blue-800 dark:to-blue-900
                 @endif"
          @if($randomImage)
-         style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ asset('photos/vehicles/' . $randomImage->image) }}'); background-size: cover; background-position: center;"
+         style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ asset('photos/vehicles/' . $randomImage->image) }}'); background-size: cover; background-position: center; background-blend-mode: multiply;"
          @endif>
         <div class="flex items-center justify-between relative z-10">
             <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0">
+                <div class="shrink-0">
                     @if($randomImage)
                         <!-- Vehicle Image -->
                         <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white/30 shadow-lg">
@@ -200,11 +209,11 @@
                     <!-- Timestamps -->
                     <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-zinc-700 mt-4">
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Created</flux:heading>
+                            <flux:heading size="sm">Created</flux:heading>
                             <flux:text class="text-sm">{{ $vehicle->created_at->format('M d, Y \a\t H:i') }}</flux:text>
                         </div>
                         <div>
-                            <flux:heading size="sm" class="text-gray-600 dark:text-gray-400">Last Updated</flux:heading>
+                            <flux:heading size="sm">Last Updated</flux:heading>
                             <flux:text class="text-sm">{{ $vehicle->updated_at->format('M d, Y \a\t H:i') }}</flux:text>
                         </div>
                     </div>
@@ -299,6 +308,225 @@
                         </div>
                     </div>
                 </div>
+                @endif
+
+                <!-- Commission Information -->
+                @if(auth()->user()->can('vehicle-commission.view') || auth()->user()->can('vehicle-commission.create') || auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete') || auth()->user()->can('vehicle-commission.audit'))
+                    @if($vehicle->commissions && $vehicle->commissions->count() > 0)
+                    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <flux:heading size="lg">Komisi</flux:heading>
+                            <div class="flex items-center gap-2">
+                                @can('vehicle-commission.audit')
+                                    <flux:button variant="filled" size="sm" href="{{ route('commissions.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
+                                @endcan
+                                @if($vehicle->commissions->where('type', 2)->count() < 4)
+                                    <flux:button wire:click="openCommissionModal" size="sm" variant="filled" icon="plus" tooltip="Tambah Komisi" :loading="false">Tambah Komisi</flux:button>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Purchase Commissions -->
+                        @if($vehicle->commissions->where('type', 2)->count() > 0)
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between">
+                                <flux:heading size="md" class="mb-2 text-blue-600 dark:text-blue-400">Komisi Pembelian (Max 4)</flux:heading>
+                                <flux:text class="text-sm text-blue-600 dark:text-blue-400">Total: Rp {{ number_format($vehicle->commissions->where('type', 2)->sum('amount'), 0) }}</flux:text>
+                            </div>
+                            <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Tanggal</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
+                                            <th class="px-4 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">Jumlah</th>
+                                            @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
+                                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                        @foreach($vehicle->commissions->where('type', 2)->sortByDesc('commission_date') as $commission)
+                                        <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                            <td class="px-4 py-2">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    {{ Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    {{ $commission->description ?? '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-2 text-right">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    Rp {{ number_format($commission->amount, 0, ',', '.') }}
+                                                </flux:text>
+                                            </td>
+                                            @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
+                                            <td class="px-4 py-2 text-center">
+                                                <div class="flex items-center justify-center space-x-1">
+                                                    @can('vehicle-commission.edit')
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="pencil-square"
+                                                        tooltip="Edit"
+                                                        wire:click="openEditCommissionModal({{ $commission->id }})"
+                                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                    ></flux:button>
+                                                    @endcan
+                                                    @can('vehicle-commission.delete')
+                                                    <flux:modal.trigger name="delete-commission-{{ $commission->id }}">
+                                                        <flux:button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            icon="trash"
+                                                            tooltip="Delete"
+                                                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                        ></flux:button>
+                                                    </flux:modal.trigger>
+                                                    @endcan
+                                                </div>
+                                            </td>
+                                            @endif
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Delete Commission Confirmation Modals for Purchase -->
+                        @foreach($vehicle->commissions->where('type', 2) as $commission)
+                        <flux:modal name="delete-commission-{{ $commission->id }}" class="min-w-88">
+                            <div class="space-y-6">
+                                <div>
+                                    <flux:heading size="lg">Hapus Komisi?</flux:heading>
+                                    <flux:text class="mt-2">
+                                        Anda akan menghapus komisi pembelian dengan jumlah Rp {{ number_format($commission->amount, 0, ',', '.') }}.<br>
+                                        Tindakan ini tidak dapat dibatalkan.
+                                    </flux:text>
+                                </div>
+                                <div class="flex gap-2">
+                                    <flux:spacer />
+                                    <flux:modal.close>
+                                        <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button
+                                        wire:click="deleteCommission({{ $commission->id }})"
+                                        variant="danger"
+                                        class="cursor-pointer"
+                                    >
+                                        Hapus Komisi
+                                    </flux:button>
+                                </div>
+                            </div>
+                        </flux:modal>
+                        @endforeach
+                        @endif
+
+                        <!-- Sales Commissions -->
+                        @if($vehicle->commissions->where('type', 1)->count() > 0)
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between">
+                                <flux:heading size="md" class="mb-2 text-green-600 dark:text-green-400">Komisi Penjualan</flux:heading>
+                                <flux:text class="text-sm text-green-600 dark:text-green-400">Total: Rp {{ number_format($vehicle->commissions->where('type', 1)->sum('amount'), 0) }}</flux:text>
+                            </div>
+                            <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                        <tr></tr>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Tanggal</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
+                                            <th class="px-4 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">Jumlah</th>
+                                            @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
+                                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                        @foreach($vehicle->commissions->where('type', 1)->sortByDesc('commission_date') as $commission)
+                                        <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                            <td class="px-4 py-2">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    {{ Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    {{ $commission->description ?? '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-2 text-right">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    Rp {{ number_format($commission->amount, 0, ',', '.') }}
+                                                </flux:text>
+                                            </td>
+                                            @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
+                                            <td class="px-4 py-2 text-center">
+                                                <div class="flex items-center justify-center space-x-1">
+                                                    @can('vehicle-commission.edit')
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="pencil-square"
+                                                        tooltip="Edit"
+                                                        wire:click="openEditCommissionModal({{ $commission->id }})"
+                                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                    ></flux:button>
+                                                    @endcan
+                                                    @can('vehicle-commission.delete')
+                                                    <flux:modal.trigger name="delete-commission-{{ $commission->id }}">
+                                                        <flux:button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            icon="trash"
+                                                            tooltip="Delete"
+                                                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                        ></flux:button>
+                                                    </flux:modal.trigger>
+                                                    @endcan
+                                                </div>
+                                                </td>
+                                            @endif
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Delete Commission Confirmation Modals for Sales -->
+                        @foreach($vehicle->commissions->where('type', 1) as $commission)
+                        <flux:modal name="delete-commission-{{ $commission->id }}" class="min-w-88">
+                            <div class="space-y-6">
+                                <div>
+                                    <flux:heading size="lg">Hapus Komisi?</flux:heading>
+                                    <flux:text class="mt-2">
+                                        Anda akan menghapus komisi penjualan dengan jumlah Rp {{ number_format($commission->amount, 0, ',', '.') }}.<br>
+                                        Tindakan ini tidak dapat dibatalkan.
+                                    </flux:text>
+                                </div>
+                                <div class="flex gap-2">
+                                    <flux:spacer />
+                                    <flux:modal.close>
+                                        <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button
+                                        wire:click="deleteCommission({{ $commission->id }})"
+                                        variant="danger"
+                                        class="cursor-pointer"
+                                    >
+                                        Hapus Komisi
+                                    </flux:button>
+                                </div>
+                            </div>
+                        </flux:modal>
+                        @endforeach
+                        @endif
+                    </div>
+                    @endif
                 @endif
 
                 <!-- Description -->
@@ -476,7 +704,7 @@
 
                             <div class="flex items-center justify-between">
                                 <flux:text>Nilai Saat Ini</flux:text>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">
+                                <span class="text-sm text-gray-600 dark:text-zinc-400">
                                     @if($vehicle->selling_price)
                                         Berdasarkan harga jual
                                     @elseif($vehicle->purchase_price)
@@ -496,51 +724,62 @@
 
                     <div class="space-y-2">
                         @can('vehicle.edit')
-                            <flux:button variant="outline" size="sm" href="{{ route('vehicles.edit', $vehicle->id) }}" wire:navigate icon="pencil-square" class="w-full justify-start p-6">
+                            <flux:button size="sm" href="{{ route('vehicles.edit', $vehicle->id) }}" wire:navigate icon="pencil-square" class="w-full justify-start p-6">
                                 <div class="flex flex-col items-start">
                                     <span>Edit Vehicle</span>
-                                    <span class="text-xs text-gray-500">Modify vehicle details</span>
+                                    <span class="text-xs text-gray-500 dark:text-zinc-400">Modify vehicle details</span>
                                 </div>
                             </flux:button>
                         @endcan
 
                         @can('vehicle.view')
-                            <flux:button variant="outline" size="sm" href="{{ route('vehicles.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" class="w-full justify-start p-6">
+                            <flux:button size="sm" href="{{ route('vehicles.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" class="w-full justify-start p-6">
                                 <div class="flex flex-col items-start">
                                     <span>View Audit Trail</span>
-                                    <span class="text-xs text-gray-500">Activity history</span>
+                                    <span class="text-xs text-gray-500 dark:text-zinc-400">Activity history</span>
                                 </div>
                             </flux:button>
                         @endcan
 
                         @can('vehicle.create')
-                            <flux:button variant="outline" size="sm" href="{{ route('vehicles.create') }}" wire:navigate icon="plus" class="w-full justify-start p-6">
+                            <flux:button size="sm" href="{{ route('vehicles.create') }}" wire:navigate icon="plus" class="w-full justify-start p-6">
                                 <div class="flex flex-col items-start">
                                     <span>Create New Vehicle</span>
-                                    <span class="text-xs text-gray-500">Add another vehicle</span>
+                                    <span class="text-xs text-gray-500 dark:text-zinc-400">Add another vehicle</span>
                                 </div>
                             </flux:button>
                         @endcan
 
                         @if($vehicle->file_stnk && Storage::disk('public')->exists('photos/stnk/'. $vehicle->file_stnk))
-                        <flux:button variant="outline" size="sm" href="{{ asset('photos/stnk/'.$vehicle->file_stnk) }}" target="_blank" icon="document" class="w-full justify-start p-6">
+                        <flux:button size="sm" href="{{ asset('photos/stnk/'.$vehicle->file_stnk) }}" target="_blank" icon="document" class="w-full justify-start p-6">
                             <div class="flex flex-col items-start">
                                 <span>View STNK</span>
-                                <span class="text-xs text-gray-500">Registration document</span>
+                                <span class="text-xs text-gray-500 dark:text-zinc-400">Registration document</span>
                             </div>
                         </flux:button>
                         @endif
 
-                        @can('vehicle-receipt.print')
-                            @if($vehicle->status == 0)
-                            <flux:button variant="outline" size="sm" wire:click="openBuyerModal" icon="printer" class="w-full justify-start p-6 cursor-pointer">
-                                <div class="flex flex-col items-start">
-                                    <span>Print Receipt</span>
-                                    <span class="text-xs text-gray-500">Download sales receipt</span>
-                                </div>
-                            </flux:button>
-                            @endif
-                        @endcan
+                        @if($vehicle->status == 0)
+                            @can('vehicle-receipt.print')
+                                <flux:button size="sm" wire:click="openBuyerModal" icon="printer" class="w-full justify-start p-6 cursor-pointer" :loading="false">
+                                    <div class="flex flex-col items-start">
+                                        <span>Print Receipt</span>
+                                        <span class="text-xs text-gray-500 dark:text-zinc-400">Download sales receipt</span>
+                                    </div>
+                                </flux:button>
+                            @endcan
+                        @endif
+
+                        @if($vehicle->commissions->where('type', 2)->count() < 4)
+                            @can('vehicle-commission.create')
+                                <flux:button wire:click="openCommissionModal" size="sm" icon="currency-dollar" class="w-full justify-start p-6 cursor-pointer" :loading="false">
+                                    <div class="flex flex-col items-start">
+                                        <span>Create New Commission</span>
+                                        <span class="text-xs text-gray-500 dark:text-zinc-400">Add a new commission (Max 4)</span>
+                                    </div>
+                                </flux:button>
+                            @endcan
+                        @endif
                     </div>
                 </div>
 
@@ -550,38 +789,38 @@
 
                     <div class="space-y-3">
                         <div class="flex items-start space-x-3">
-                            <div class="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                            <div class="shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                             <div>
                                 <flux:text class="text-sm font-medium">Vehicle Created</flux:text>
-                                <flux:text class="text-xs text-gray-600 dark:text-gray-400">{{ $vehicle->created_at->format('M d, Y \a\t H:i') }}</flux:text>
+                                <flux:text class="text-xs text-gray-600 dark:text-zinc-400">{{ $vehicle->created_at->format('M d, Y \a\t H:i') }}</flux:text>
                             </div>
                         </div>
 
                         @if($vehicle->purchase_date)
                         <div class="flex items-start space-x-3">
-                            <div class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                            <div class="shrink-0 w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                             <div>
                                 <flux:text class="text-sm font-medium">Purchase Date</flux:text>
-                                <flux:text class="text-xs text-gray-600 dark:text-gray-400">{{ Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') }}</flux:text>
+                                <flux:text class="text-xs text-gray-600 dark:text-zinc-400">{{ Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') }}</flux:text>
                             </div>
                         </div>
                         @endif
 
                         @if($vehicle->selling_date)
                         <div class="flex items-start space-x-3">
-                            <div class="flex-shrink-0 w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                            <div class="shrink-0 w-2 h-2 bg-red-500 rounded-full mt-2"></div>
                             <div>
                                 <flux:text class="text-sm font-medium">Sold</flux:text>
-                                <flux:text class="text-xs text-gray-600 dark:text-gray-400">{{ Carbon\Carbon::parse($vehicle->selling_date)->format('M d, Y') }}</flux:text>
+                                <flux:text class="text-xs text-gray-600 dark:text-zinc-400">{{ Carbon\Carbon::parse($vehicle->selling_date)->format('M d, Y') }}</flux:text>
                             </div>
                         </div>
                         @endif
 
                         <div class="flex items-start space-x-3">
-                            <div class="flex-shrink-0 w-2 h-2 bg-gray-400 rounded-full mt-2"></div>
+                            <div class="shrink-0 w-2 h-2 bg-gray-400 rounded-full mt-2"></div>
                             <div>
                                 <flux:text class="text-sm font-medium">Last Updated</flux:text>
-                                <flux:text class="text-xs text-gray-600 dark:text-gray-400">{{ $vehicle->updated_at->format('M d, Y \a\t H:i') }}</flux:text>
+                                <flux:text class="text-xs text-gray-600 dark:text-zinc-400">{{ $vehicle->updated_at->format('M d, Y \a\t H:i') }}</flux:text>
                             </div>
                         </div>
                     </div>
@@ -593,7 +832,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <flux:heading size="lg">Recent Activity</flux:heading>
                         @can('vehicle.view')
-                            <flux:button variant="outline" size="sm" href="{{ route('vehicles.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate>
+                            <flux:button size="sm" variant="filled" href="{{ route('vehicles.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate>
                                 View All Activities
                             </flux:button>
                         @endcan
@@ -603,7 +842,7 @@
                         <div class="space-y-3">
                             @foreach($recentActivities as $activity)
                             <div class="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-zinc-700/50 rounded-lg">
-                                <div class="flex-shrink-0">
+                                <div class="shrink-0">
                                     <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
                                         @switch($activity->description)
                                             @case('created vehicle')
@@ -626,12 +865,12 @@
                                     </flux:text>
                                     <div class="flex items-center space-x-2 mt-1">
                                         @if($activity->causer)
-                                            <flux:text class="text-xs text-gray-600 dark:text-gray-400">
+                                            <flux:text class="text-xs text-gray-600 dark:text-zinc-400">
                                                 by {{ $activity->causer->name }}
                                             </flux:text>
                                         @endif
-                                        <span class="text-xs text-gray-400">•</span>
-                                        <flux:text class="text-xs text-gray-400">
+                                        <span class="text-xs text-gray-400 dark:text-zinc-400">•</span>
+                                        <flux:text class="text-xs text-gray-400 dark:text-zinc-400">
                                             {{ $activity->created_at->diffForHumans() }}
                                         </flux:text>
                                     </div>
@@ -642,7 +881,7 @@
                     @else
                         <div class="text-center py-6">
                             <flux:icon.document-text class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-600" />
-                            <flux:text class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            <flux:text class="mt-2 text-sm text-gray-600 dark:text-zinc-400">
                                 No recent activities recorded for this vehicle.
                             </flux:text>
                         </div>
@@ -660,7 +899,7 @@
             @if($costs && $costs->count() > 0)
                 <div class="space-y-4">
                     <!-- Cost Summary -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                             <flux:text class="text-sm font-medium text-blue-600 dark:text-blue-400">Total Cost</flux:text>
                             <flux:text class="text-2xl font-bold text-blue-900 dark:text-blue-100">
@@ -681,6 +920,16 @@
                                 Rp {{ number_format($costSummary['other_cost'], 0, ',', '.') }}
                             </flux:text>
                         </div>
+
+                        <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <flux:text class="text-sm font-medium text-purple-600 dark:text-purple-400">Profit Margin</flux:text>
+                                <flux:badge size="sm" color="purple">{{ number_format($priceAnalysis['display_profit_margin'], 1, ',', '.') }}%</flux:badge>
+                            </div>
+                            <flux:text class="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                                Rp {{ number_format($priceAnalysis['display_price_difference'], 0, ',', '.') }}
+                            </flux:text>
+                        </div>
                     </div>
 
                         <!-- Price Analysis & Recommendation -->
@@ -694,15 +943,15 @@
                                 <div class="space-y-2">
                                     <flux:heading size="sm" class="text-gray-900 dark:text-white mb-3">Modal & Cost</flux:heading>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Harga Beli:</flux:text>
+                                        <flux:text class="text-sm">Harga Beli:</flux:text>
                                         <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['purchase_price'], 0, ',', '.') }}</flux:text>
                                     </div>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Total Cost (All):</flux:text>
+                                        <flux:text class="text-sm">Total Cost (All):</flux:text>
                                         <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['total_cost_all'], 0, ',', '.') }}</flux:text>
                                     </div>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Total Cost (Approved):</flux:text>
+                                        <flux:text class="text-sm">Total Cost (Approved):</flux:text>
                                         <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['total_cost_approved'], 0, ',', '.') }}</flux:text>
                                     </div>
                                     <div class="flex justify-between border-t border-gray-300 dark:border-zinc-600 pt-2">
@@ -714,11 +963,11 @@
                                 <div class="space-y-2">
                                     <flux:heading size="sm" class="text-gray-900 dark:text-white mb-3">Harga Display</flux:heading>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Harga Jual Display:</flux:text>
+                                        <flux:text class="text-sm">Harga Jual Display:</flux:text>
                                         <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['display_price'], 0, ',', '.') }}</flux:text>
                                     </div>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Selisih vs Modal:</flux:text>
+                                        <flux:text class="text-sm">Selisih vs Modal:</flux:text>
                                         @php
                                             $differenceClasses = $priceAnalysis['display_price_difference'] >= 0
                                                 ? 'text-green-600 dark:text-green-400'
@@ -730,7 +979,7 @@
                                         </flux:text>
                                     </div>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Margin Keuntungan:</flux:text>
+                                        <flux:text class="text-sm">Margin Keuntungan:</flux:text>
                                         @php
                                             $marginClasses = $priceAnalysis['display_profit_margin'] >= 20
                                                 ? 'text-green-600 dark:text-green-400'
@@ -748,11 +997,11 @@
                                 <div class="space-y-2">
                                     <flux:heading size="sm" class="text-gray-900 dark:text-white mb-3">Harga Aktual Terjual</flux:heading>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Harga Jual Aktual:</flux:text>
+                                        <flux:text class="text-sm">Harga Jual Aktual:</flux:text>
                                         <flux:text class="text-sm font-medium text-purple-600 dark:text-purple-400">Rp {{ number_format($priceAnalysis['selling_price'], 0, ',', '.') }}</flux:text>
                                     </div>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Selisih vs Modal:</flux:text>
+                                        <flux:text class="text-sm">Selisih vs Modal:</flux:text>
                                         @php
                                             $sellingDifferenceClasses = $priceAnalysis['selling_price_difference'] >= 0
                                                 ? 'text-green-600 dark:text-green-400'
@@ -764,7 +1013,7 @@
                                         </flux:text>
                                     </div>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Margin Keuntungan:</flux:text>
+                                        <flux:text class="text-sm">Margin Keuntungan:</flux:text>
                                         @php
                                             $sellingMarginClasses = $priceAnalysis['selling_profit_margin'] >= 20
                                                 ? 'text-green-600 dark:text-green-400'
@@ -777,13 +1026,13 @@
                                         </flux:text>
                                     </div>
                                     <div class="flex justify-between">
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400">Gap Display vs Aktual:</flux:text>
+                                        <flux:text class="text-sm">Gap Display vs Aktual:</flux:text>
                                         @php
                                             $gapClasses = $priceAnalysis['price_vs_selling_gap'] > 0
                                                 ? 'text-orange-600 dark:text-orange-400'
                                                 : ($priceAnalysis['price_vs_selling_gap'] < 0
                                                     ? 'text-blue-600 dark:text-blue-400'
-                                                    : 'text-gray-600 dark:text-gray-400');
+                                                    : 'text-gray-600 dark:text-zinc-400');
                                             $gapText = $priceAnalysis['price_vs_selling_gap'] > 0
                                                 ? '-Rp ' . number_format(abs($priceAnalysis['price_vs_selling_gap']), 0, ',', '.')
                                                 : ($priceAnalysis['price_vs_selling_gap'] < 0
@@ -805,7 +1054,7 @@
                                         <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400" />
                                         <flux:text class="font-medium text-green-600 dark:text-green-400">Harga Display Sudah Optimal</flux:text>
                                     </div>
-                                    <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
                                         Harga display sudah mencakup total modal. Margin keuntungan {{ number_format($priceAnalysis['display_profit_margin'], 1, ',', '.') }}%.
                                     </flux:text>
                                 @else
@@ -813,7 +1062,7 @@
                                         <flux:icon.exclamation-triangle class="w-5 h-5 text-red-600 dark:text-red-400" />
                                         <flux:text class="font-medium text-red-600 dark:text-red-400">Harga Display Perlu Disesuaikan</flux:text>
                                     </div>
-                                    <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
                                         Harga display kurang Rp {{ number_format(abs($priceAnalysis['display_price_difference']), 0, ',', '.') }} dari total modal.
                                         <strong>Rekomendasi:</strong> Set harga minimal Rp {{ number_format($priceAnalysis['recommended_min_price'], 0, ',', '.') }}
                                         untuk mencapai breakeven point.
@@ -826,7 +1075,7 @@
                                             <flux:icon.currency-dollar class="w-4 h-4 text-purple-600 dark:text-purple-400" />
                                             <flux:text class="font-medium text-purple-600 dark:text-purple-400">Status Penjualan Aktual</flux:text>
                                         </div>
-                                        <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
                                             @if($priceAnalysis['is_selling_price_correct'])
                                                 Harga aktual terjual sudah optimal dengan margin keuntungan {{ number_format($priceAnalysis['selling_profit_margin'], 1, ',', '.') }}%.
                                             @else
@@ -852,48 +1101,47 @@
                         <div class="divide-y divide-gray-200 dark:divide-zinc-700">
                             @foreach($costs as $cost)
                             <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-700/50">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex-1">
-                                            <div class="flex items-center space-x-3">
-                                                <flux:text class="font-medium text-gray-900 dark:text-white">{{ $cost->description }}</flux:text>
-                                                @if($cost->cost_type == 'service_parts')
-                                                    <flux:badge size="sm" color="green">Service & Parts</flux:badge>
-                                                @else
-                                                    <flux:badge size="sm" color="orange">Other Cost</flux:badge>
-                                                @endif
-                                                @if($cost->status === 'approved')
-                                                    <flux:badge size="sm" color="green">Approved</flux:badge>
-                                                @elseif($cost->status === 'rejected')
-                                                    <flux:badge size="sm" color="red">Rejected</flux:badge>
-                                                @else
-                                                    <flux:badge size="sm" color="yellow">Pending</flux:badge>
-                                                @endif
-                                            </div>
-
-                                            <div class="mt-1 flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                                                <span>{{ Carbon\Carbon::parse($cost->cost_date)->format('M d, Y') }}</span>
-                                                @if($cost->vendor)
-                                                    <span>•</span>
-                                                    <span>{{ $cost->vendor->name }}</span>
-                                                @endif
-                                            </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-3">
+                                            <flux:text class="font-medium text-gray-900 dark:text-white">{{ $cost->description }}</flux:text>
+                                            @if($cost->cost_type == 'service_parts')
+                                                <flux:badge size="sm" color="green">Service & Parts</flux:badge>
+                                            @else
+                                                <flux:badge size="sm" color="orange">Other Cost</flux:badge>
+                                            @endif
+                                            @if($cost->status === 'approved')
+                                                <flux:badge size="sm" color="green">Approved</flux:badge>
+                                            @elseif($cost->status === 'rejected')
+                                                <flux:badge size="sm" color="red">Rejected</flux:badge>
+                                            @else
+                                                <flux:badge size="sm" color="yellow">Pending</flux:badge>
+                                            @endif
                                         </div>
 
-                                        <div class="text-right">
-                                            <flux:text class="font-bold text-gray-900 dark:text-white">
-                                                Rp {{ number_format($cost->total_price, 0, ',', '.') }}
-                                            </flux:text>
+                                        <div class="mt-1 flex items-center space-x-4 text-sm text-gray-600 dark:text-zinc-400">
+                                            <span>{{ Carbon\Carbon::parse($cost->cost_date)->format('M d, Y') }}</span>
+                                            @if($cost->vendor)
+                                                <span>•</span>
+                                                <span>{{ $cost->vendor->name }}</span>
+                                            @endif
                                         </div>
                                     </div>
+
+                                    <div class="text-right">
+                                        <flux:text class="font-bold text-gray-900 dark:text-white">
+                                            Rp {{ number_format($cost->total_price, 0, ',', '.') }}
+                                        </flux:text>
+                                    </div>
                                 </div>
-                                @endforeach
                             </div>
+                            @endforeach
                         </div>
 
                         <!-- Pagination -->
                         @if($costs->hasPages())
                         <div class="mt-4 flex justify-center">
-                            {{ $costs->links() }}
+                            {{ $costs->links(data: ['scrollTo' => false]) }}
                         </div>
                         @endif
                     </div>
@@ -901,11 +1149,11 @@
                     <div class="text-center py-12">
                         <flux:icon.document-text class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" />
                         <flux:heading size="md" class="mt-4 text-gray-900 dark:text-white">Belum ada data biaya</flux:heading>
-                        <flux:text class="mt-2 text-gray-600 dark:text-gray-400">
+                        <flux:text class="mt-2 text-gray-600 dark:text-zinc-400">
                             Belum ada catatan biaya untuk kendaraan ini.
                         </flux:text>
                         @can('cost.create')
-                            <flux:button variant="outline" size="sm" href="{{ route('costs.create') }}" wire:navigate class="mt-4">
+                            <flux:button size="sm" href="{{ route('costs.create') }}" wire:navigate class="mt-4">
                                 Tambah Biaya Baru
                             </flux:button>
                         @endcan
@@ -968,12 +1216,13 @@
                     <div class="flex gap-2">
                         <flux:spacer />
                         <flux:modal.close>
-                            <flux:button variant="ghost">Batal</flux:button>
+                            <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
                         </flux:modal.close>
                         <flux:button
                             type="submit"
                             variant="primary"
                             wire:loading.attr="disabled"
+                            class="cursor-pointer"
                         >
                             <span wire:loading.remove>Cetak Kwitansi</span>
                             <span wire:loading>Memproses...</span>
@@ -1002,6 +1251,98 @@
             </div>
         </div>
     </div>
+
+    <!-- Commission Create Modal -->
+    <flux:modal wire:model.self="showCommissionModal" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Tambah Komisi Baru</flux:heading>
+                <flux:text class="mt-2">Tambahkan komisi baru untuk kendaraan ini.</flux:text>
+            </div>
+            <flux:select wire:model="commission_type" label="Tipe Komisi">
+                <flux:select.option value="1">Komisi Penjualan</flux:select.option>
+                <flux:select.option value="2">Komisi Pembelian</flux:select.option>
+            </flux:select>
+            <flux:input
+                wire:model="commission_date"
+                type="date"
+                label="Tanggal Komisi"
+                placeholder="Pilih tanggal"
+            />
+            <flux:input
+                wire:model="commission_amount"
+                mask:dynamic="$money($input)"
+                icon="currency-dollar"
+                label="Jumlah Komisi"
+                placeholder="188,000"
+            />
+            <flux:textarea
+                wire:model="commission_description"
+                label="Deskripsi"
+                placeholder="Masukkan deskripsi komisi (opsional)"
+                rows="3"
+            />
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    wire:click="createCommission"
+                    variant="primary"
+                    class="cursor-pointer"
+                >
+                    Simpan Komisi
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
+
+    <!-- Commission Edit Modal -->
+    <flux:modal wire:model.self="showEditCommissionModal" name="edit-commission" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Edit Komisi</flux:heading>
+                <flux:text class="mt-2">Perbarui informasi komisi.</flux:text>
+            </div>
+            <flux:select wire:model="commission_type" label="Tipe Komisi">
+                <flux:select.option value="1">Komisi Penjualan</flux:select.option>
+                <flux:select.option value="2">Komisi Pembelian</flux:select.option>
+            </flux:select>
+            <flux:input
+                wire:model="commission_date"
+                type="date"
+                label="Tanggal Komisi"
+                placeholder="Pilih tanggal"
+            />
+            <flux:input
+                wire:model="commission_amount"
+                mask:dynamic="$money($input)"
+                icon="currency-dollar"
+                label="Jumlah Komisi"
+                placeholder="188,000"
+            />
+            <flux:textarea
+                wire:model="commission_description"
+                label="Deskripsi"
+                placeholder="Masukkan deskripsi komisi (opsional)"
+                rows="3"
+            />
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    wire:click="updateCommission"
+                    variant="primary"
+                    class="cursor-pointer"
+                >
+                    Update Komisi
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>
 
 <script>

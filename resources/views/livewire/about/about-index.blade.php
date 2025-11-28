@@ -231,8 +231,16 @@
                     <div class="flex items-start gap-3">
                         <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
                         <div>
+                            <flux:text class="font-medium">💎 Commission Management</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Sistem lengkap komisi kendaraan (sales & purchase) dengan modal forms, audit trail, dan filtering berdasarkan vehicle</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                        <div>
                             <flux:text class="font-medium">Audit Trail</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Tracking lengkap semua perubahan data dengan before/after</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Tracking lengkap semua perubahan data dengan before/after untuk semua module termasuk commissions</flux:text>
                         </div>
                     </div>
 
@@ -258,7 +266,7 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.10.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, dan salesmen management dengan auto-create user account.
+                            <strong>WOTO v1.11.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, dan salesmen management dengan auto-create user account.
                         </flux:text>
                     </div>
 
@@ -266,8 +274,9 @@
                         <flux:text class="font-medium mb-2">Fitur Unggulan:</flux:text>
                         <div class="space-y-1">
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 📊 Dashboard overview real-time dengan 4 metric cards modern (Vehicles Sold, Total Sales, Ready for Sale, Total Cost)</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🚗 Vehicles module lengkap dengan Quill editor, auto-formatting, progress indicator, dan form persistence</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🚗 Vehicles module lengkap dengan Quill editor, auto-formatting, progress indicator, commission management, dan form persistence</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Costs module dengan approval workflow, auto-formatting price (150.000), dan vendor integration</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Commission module lengkap dengan sales/purchase types, modal forms, audit trail, dan vehicle filtering</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Database {{ $stats['brands_count'] }} brand, {{ $stats['vendors_count'] }} vendor, {{ $stats['salesmen_count'] }} salesman, {{ $stats['vehicle_models_count'] }} model STNK, {{ $stats['categories_count'] }} kategori STNK, dan {{ $stats['types_count'] }} tipe kendaraan Indonesia</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Audit trail lengkap dengan before/after tracking untuk semua module termasuk Vehicles & Costs</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Export data ke Excel dan PDF dengan template konsisten di semua module</flux:text>
@@ -377,10 +386,29 @@
                 </flux:heading>
 
                 <div class="space-y-4">
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <flux:text class="font-semibold text-purple-600 dark:text-purple-400">v1.11.0 - Commission Management Module</flux:text>
+                            <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">Latest</span>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
+                            <flux:text>• 💎 Complete Commission Management System: Sistem lengkap komisi kendaraan (sales & purchase) dengan interface modern</flux:text>
+                            <flux:text>• ✅ Commission CRUD Operations: Create, Read, Update, Delete komisi dengan modal forms dan validasi lengkap</flux:text>
+                            <flux:text>• ✅ Commission Types: Separate handling untuk Komisi Penjualan (hijau) dan Komisi Pembelian (biru)</flux:text>
+                            <flux:text>• ✅ Advanced Commission Forms: Modal interface dengan auto-formatting amount, date picker, dan type selection</flux:text>
+                            <flux:text>• ✅ Commission Tables: Visual tables terpisah dengan color coding dan totals untuk setiap jenis komisi</flux:text>
+                            <flux:text>• ✅ Commission Audit Trail: Dedicated audit page dengan filtering berdasarkan vehicle dan tipe komisi</flux:text>
+                            <flux:text>• ✅ Advanced Filtering: Search, vehicle filter, commission type filter dengan pagination dan real-time updates</flux:text>
+                            <flux:text>• ✅ Modal Confirmation Dialogs: Confirmation modals untuk delete operations dengan detail komisi yang akan dihapus</flux:text>
+                            <flux:text>• ✅ Permission-based Access: vehicle-commission.* permissions untuk semua operations (create, edit, delete, audit)</flux:text>
+                            <flux:text>• ✅ Export Features: Excel dan PDF dengan template konsisten dan filtering support</flux:text>
+                            <flux:text>• ✅ Real-time Updates: Auto-refresh commission data setelah create/update/delete operations</flux:text>
+                        </div>
+                    </div>
+
                     <div class="border-l-4 border-blue-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
                             <flux:text class="font-semibold text-blue-600 dark:text-blue-400">v1.10.0 - Dashboard Enhancement & UI Improvements</flux:text>
-                            <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
                             <flux:text>• 📊 Modern Dashboard Cards: 4 metric cards dengan design modern dan responsive (Vehicles Sold, Total Sales, Ready for Sale, Total Cost)</flux:text>
