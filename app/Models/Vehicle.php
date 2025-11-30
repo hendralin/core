@@ -161,4 +161,12 @@ class Vehicle extends Model
     {
         return $this->hasMany(Commission::class);
     }
+
+    /**
+     * Get the equipment for the vehicle
+     */
+    public function equipment(): HasMany
+    {
+        return $this->hasMany(VehicleEquipment::class);
+    }
 }

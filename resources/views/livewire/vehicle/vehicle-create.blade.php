@@ -9,14 +9,14 @@
     <div class="mb-8 bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
         <div class="flex items-center justify-between mb-4">
             <flux:heading size="sm">Progress Pengisian Form</flux:heading>
-            <span class="text-sm text-gray-600 dark:text-gray-400">
+            <span class="text-sm text-gray-600 dark:text-zinc-400">
                 Langkah {{ $current_step['step'] }} dari 5: {{ $current_step['name'] }}
             </span>
         </div>
         <div class="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-2">
             <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: {{ $progress_percentage }}%"></div>
         </div>
-        <div class="flex justify-between mt-2 text-xs text-gray-600 dark:text-gray-400">
+        <div class="flex justify-between mt-2 text-xs text-gray-600 dark:text-zinc-400">
             <span class="{{ $current_step['step'] >= 1 ? 'text-blue-600 font-medium' : '' }}">Dasar</span>
             <span class="{{ $current_step['step'] >= 2 ? 'text-blue-600 font-medium' : '' }}">Detail</span>
             <span class="{{ $current_step['step'] >= 3 ? 'text-blue-600 font-medium' : '' }}">Teknis</span>
@@ -32,7 +32,7 @@
                 <flux:button variant="primary" size="sm" href="{{ route('vehicles.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Back to Vehicles">Back</flux:button>
 
                 <!-- Keyboard Shortcuts Info -->
-                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-zinc-400">
                     <flux:icon.command-line class="w-4 h-4" />
                     <span class="hidden sm:inline">Ctrl+S: Save • Ctrl+R: Reset • Esc: Back</span>
                 </div>
@@ -296,6 +296,28 @@
                     @endif
                 </div>
 
+                <!-- Vehicle Completeness Checklist Section -->
+                <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6 mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <flux:icon.check-circle class="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                        <div>
+                            <flux:heading size="md">Kelengkapan Kendaraan</flux:heading>
+                            <flux:subheading size="sm">Periksa kelengkapan kendaraan yang tersedia</flux:subheading>
+                        </div>
+                    </div>
+                    <flux:fieldset>
+                        <flux:legend>Kelengkapan Kendaraan</flux:legend>
+                        <flux:description>Centang kelengkapan yang tersedia pada kendaraan ini</flux:description>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 *:gap-x-2">
+                            <flux:checkbox wire:model="stnk_asli" label="STNK Asli" />
+                            <flux:checkbox wire:model="kunci_roda" label="Kunci Roda" />
+                            <flux:checkbox wire:model="ban_serep" label="Ban Serep" />
+                            <flux:checkbox wire:model="kunci_serep" label="Kunci Serep" />
+                            <flux:checkbox wire:model="dongkrak" label="Dongkrak" />
+                        </div>
+                    </flux:fieldset>
+                </div>
+
                 <!-- Financial Information Section -->
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6 mb-6">
                     <div class="flex items-center gap-3 mb-4">
@@ -347,10 +369,10 @@
 
                     <div class="grid grid-cols-1 gap-6">
                         <div wire:ignore>
-                            <label for="description-editor" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label for="description-editor" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
                                 <i class="fas fa-file-alt mr-2"></i>Deskripsi
                             </label>
-                            <div id="description-editor" style="height: 120px;" ></div>
+                            <div id="description-editor" style="height: 120px;"></div>
                         </div>
                         <input type="hidden" wire:model="description" id="description-hidden">
                     </div>

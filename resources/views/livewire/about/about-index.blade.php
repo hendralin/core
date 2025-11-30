@@ -121,6 +121,17 @@
                             <flux:text class="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{{ number_format($stats['companies_count'] ?? 0) }}</flux:text>
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">🛠️ Equipment Records</flux:text>
+                            <flux:text class="text-lg font-semibold text-teal-600 dark:text-teal-400">{{ number_format($stats['equipment_count'] ?? 0) }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">📈 New Vehicles</flux:text>
+                            <flux:text class="text-lg font-semibold text-purple-600 dark:text-purple-400">{{ number_format($stats['new_vehicles_this_month']) }}</flux:text>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -144,7 +155,15 @@
                         <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
                         <div>
                             <flux:text class="font-medium">🚗 Manajemen Kendaraan Lengkap</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">CRUD vehicles dengan Quill editor, auto-formatting, progress indicator, dan state persistence</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">CRUD vehicles dengan Quill editor, auto-formatting, progress indicator, state persistence, commission management, dan vehicle completeness checklist</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                        <div>
+                            <flux:text class="font-medium">🛠️ Vehicle Completeness Checklist</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Sistem pencatatan kelengkapan peralatan kendaraan (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak) dengan visual status indicators</flux:text>
                         </div>
                     </div>
 
@@ -266,7 +285,7 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.11.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, dan salesmen management dengan auto-create user account.
+                            <strong>WOTO v1.12.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, salesmen management dengan auto-create user account, vehicle completeness checklist, dan database transactions untuk data consistency.
                         </flux:text>
                     </div>
 
@@ -274,7 +293,8 @@
                         <flux:text class="font-medium mb-2">Fitur Unggulan:</flux:text>
                         <div class="space-y-1">
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 📊 Dashboard overview real-time dengan 4 metric cards modern (Vehicles Sold, Total Sales, Ready for Sale, Total Cost)</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🚗 Vehicles module lengkap dengan Quill editor, auto-formatting, progress indicator, commission management, dan form persistence</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🚗 Vehicles module lengkap dengan Quill editor, auto-formatting, progress indicator, commission management, form persistence, dan vehicle completeness checklist</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🛠️ Vehicle Completeness Checklist: Sistem pencatatan kelengkapan peralatan kendaraan (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak) dengan visual status indicators</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Costs module dengan approval workflow, auto-formatting price (150.000), dan vendor integration</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Commission module lengkap dengan sales/purchase types, modal forms, audit trail, dan vehicle filtering</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Database {{ $stats['brands_count'] }} brand, {{ $stats['vendors_count'] }} vendor, {{ $stats['salesmen_count'] }} salesman, {{ $stats['vehicle_models_count'] }} model STNK, {{ $stats['categories_count'] }} kategori STNK, dan {{ $stats['types_count'] }} tipe kendaraan Indonesia</flux:text>
@@ -386,10 +406,31 @@
                 </flux:heading>
 
                 <div class="space-y-4">
+                    <div class="border-l-4 border-teal-500 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <flux:text class="font-semibold text-teal-600 dark:text-teal-400">v1.12.0 - Vehicle Completeness Checklist & Database Transactions</flux:text>
+                            <span class="px-2 py-1 bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 text-xs rounded-full">Latest</span>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
+                            <flux:text>• 🛠️ Complete Vehicle Completeness Checklist System: Sistem lengkap pencatatan kelengkapan peralatan kendaraan dengan visual status indicators</flux:text>
+                            <flux:text>• ✅ Equipment Items Management: 5 item kelengkapan (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak) dengan auto-default STNK</flux:text>
+                            <flux:text>• ✅ Visual Status Indicators: Card dengan warna hijau (tersedia) dan merah (tidak tersedia) untuk setiap item equipment</flux:text>
+                            <flux:text>• ✅ Database Integration: Data tersimpan di tabel vehicle_equipment dengan type purchase/sales dan proper relationships</flux:text>
+                            <flux:text>• ✅ Equipment CRUD Operations: Create, Read, Update, Delete equipment data di form vehicle create/edit</flux:text>
+                            <flux:text>• ✅ Equipment Display: Section kelengkapan kendaraan di halaman vehicle detail dengan summary dan status count</flux:text>
+                            <flux:text>• ✅ Database Transaction Implementation: Atomic operations untuk multi-table updates dengan error handling dan rollback</flux:text>
+                            <flux:text>• ✅ Transaction Rollback: Automatic rollback dengan file cleanup jika terjadi error pada database operations</flux:text>
+                            <flux:text>• ✅ Error Handling: Comprehensive error handling dengan logging dan user feedback untuk failed transactions</flux:text>
+                            <flux:text>• ✅ File Upload Safety: File uploads dipindahkan sebelum transaction untuk safety dan consistency</flux:text>
+                            <flux:text>• ✅ Equipment Relationship: Proper Eloquent relationship antara Vehicle dan VehicleEquipment models</flux:text>
+                            <flux:text>• ✅ Form Validation: Equipment properties disimpan sebagai boolean dengan proper type casting ke database</flux:text>
+                            <flux:text>• ✅ UI Consistency: Interface mengikuti pola Flux UI dengan responsive grid layout dan proper styling</flux:text>
+                        </div>
+                    </div>
+
                     <div class="border-l-4 border-purple-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
                             <flux:text class="font-semibold text-purple-600 dark:text-purple-400">v1.11.0 - Commission Management Module</flux:text>
-                            <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
                             <flux:text>• 💎 Complete Commission Management System: Sistem lengkap komisi kendaraan (sales & purchase) dengan interface modern</flux:text>

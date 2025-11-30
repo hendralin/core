@@ -2,6 +2,8 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, dan mengelola operasional bisnis dengan efisien.
 
+**Version 1.12.0** - Vehicle Completeness Checklist & Database Transactions
+
 ## ✨ Fitur Utama
 
 ### 📊 Dashboard Overview Real-time
@@ -23,6 +25,11 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
   - **File Upload**: Upload STNK dengan preview dan validasi
 - **Spesifikasi Lengkap**: Police number, year, fuel type, kilometer, purchase/selling price, dll
 - **Status Tracking**: Available/Sold dengan conditional fields
+- **🛠️ Checklist Kelengkapan Kendaraan**: Sistem pencatatan kelengkapan peralatan kendaraan
+  - **Item Kelengkapan**: STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak
+  - **Visual Status**: Indikator warna hijau (tersedia) dan merah (tidak tersedia)
+  - **Database Integration**: Tersimpan di tabel vehicle_equipment dengan type purchase/sales
+  - **Auto-default**: STNK Asli otomatis dicentang sebagai default
 - **Audit Trail**: Activity logging lengkap untuk semua perubahan kendaraan
 - **📊 Analisis Harga Jual**: Card "Rincian Modal Mobil" dengan analisis komprehensif
   - **Perhitungan Modal**: Total modal = harga beli + biaya kendaraan (approved + pending)
@@ -127,6 +134,7 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **UI/UX**: Tailwind CSS + Custom styling untuk dark mode compatibility
 - **JavaScript**: Vanilla JS dengan Livewire integration, Quill.js editor, localStorage API
 - **Form Enhancement**: Auto-formatting, progress indicators, keyboard shortcuts, state persistence
+- **Database Transactions**: Atomic operations untuk multi-table updates dengan error handling dan rollback
 - **Indonesian Text Conversion**: Custom terbilang function untuk mata uang Rupiah
 - **Receipt Generation**: Sistem generate kwitansi PDF dengan nomor otomatis dan data perusahaan dinamis
 - **Data Seeding**: Laravel Seeders untuk data master (Brands, Types, Vehicles, Companies)
@@ -389,8 +397,12 @@ Aplikasi akan berjalan di `http://localhost:8000`
    - **Smart Dropdowns**: Pilih Brand → Type otomatis terfilter → Model
    - **File Upload**: Upload gambar STNK dengan preview
    - **Form Persistence**: Form tersimpan otomatis, bisa dilanjutkan kapan saja
+   - **Completeness Checklist**: Centang item kelengkapan kendaraan (STNK Asli, Kunci Roda, Ban Serep, dll)
 4. **Edit Vehicle**: Klik icon edit untuk mengubah data kendaraan
+   - **Completeness Management**: Update checklist kelengkapan kendaraan sesuai kondisi aktual
 5. **View Details**: Klik icon eye untuk melihat detail lengkap kendaraan
+   - **Kelengkapan Kendaraan**: Lihat status kelengkapan peralatan kendaraan dengan indikator visual
+   - **Equipment Summary**: Ringkasan jumlah item tersedia vs tidak tersedia
    - **Analisis Harga Jual**: Lihat card "Rincian Modal Mobil" dengan analisis komprehensif
    - **Perhitungan Modal**: Total modal = harga beli + semua biaya kendaraan
    - **Validasi Pricing**: Cek apakah harga display mencukupi untuk breakeven
@@ -410,6 +422,7 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Detail Kendaraan**: Chassis number, engine number, color, fuel type (Bensin/Solar)
 - **Spesifikasi Teknis**: Kilometer (auto-format), cylinder capacity (auto-format)
 - **Registrasi & Dokumen**: Vehicle registration date/expiry, STNK file upload
+- **Kelengkapan Kendaraan**: Checklist equipment (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak)
 - **Informasi Keuangan**: Purchase date, purchase price (auto-format), selling price (conditional), status (Available/Sold)
 
 ### 💰 Fitur Khusus Costs Module
@@ -570,6 +583,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `users` - Data pengguna sistem
 - `roles` & `permissions` - Sistem autorisasi
 - `vehicles` - Data kendaraan lengkap dengan spesifikasi, status, dan data pembeli untuk kwitansi
+- `vehicle_equipment` - Data kelengkapan peralatan kendaraan (STNK, kunci, ban serep, dll) dengan type sales/purchase
 - `commissions` - Data komisi kendaraan (sales/purchase) dengan relasi ke vehicles
 - `costs` - Data biaya kendaraan dengan approval workflow
 - `brands` - Merek mobil (31+ brand Indonesia)
@@ -684,6 +698,22 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.12.0 - Vehicle Completeness Checklist & Database Transactions
+- ✅ **Vehicle Completeness Checklist System**: Sistem lengkap pencatatan kelengkapan peralatan kendaraan
+- ✅ **Equipment Items Management**: 5 item kelengkapan (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak)
+- ✅ **Visual Status Indicators**: Card dengan warna hijau (tersedia) dan merah (tidak tersedia) untuk setiap item
+- ✅ **Auto-default STNK**: STNK Asli otomatis dicentang sebagai default saat create vehicle
+- ✅ **Database Integration**: Data tersimpan di tabel vehicle_equipment dengan type purchase/sales
+- ✅ **Equipment CRUD Operations**: Create, Read, Update, Delete equipment data di form vehicle
+- ✅ **Equipment Display**: Section kelengkapan kendaraan di halaman vehicle detail dengan summary
+- ✅ **Database Transaction Implementation**: Atomic operations untuk multi-table updates
+- ✅ **Transaction Rollback**: Automatic rollback dengan file cleanup jika terjadi error
+- ✅ **Error Handling**: Comprehensive error handling dengan logging dan user feedback
+- ✅ **File Upload Safety**: File uploads dipindahkan sebelum transaction untuk safety
+- ✅ **Equipment Relationship**: Proper Eloquent relationship antara Vehicle dan VehicleEquipment
+- ✅ **Form Validation**: Equipment properties disimpan sebagai boolean dengan proper type casting
+- ✅ **UI Consistency**: Interface mengikuti pola Flux UI dengan responsive grid layout
 
 ### v1.11.0 - Commission Management Module
 - ✅ **Complete Commission Management System**: Sistem lengkap manajemen komisi kendaraan (sales & purchase)

@@ -2,18 +2,21 @@
 
 namespace App\Livewire\Vehicle;
 
-use Livewire\Component;
-use App\Models\Vehicle;
-use App\Models\Brand;
 use App\Models\Type;
+use App\Models\Brand;
+use App\Models\Vehicle;
+use Livewire\Component;
 use App\Models\Category;
-use App\Models\VehicleModel;
+use App\Models\Salesman;
 use App\Models\Warehouse;
 use App\Models\VehicleImage;
-use App\Models\Salesman;
-use Livewire\Attributes\Title;
-use Illuminate\Support\Facades\Auth;
+use App\Models\VehicleModel;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Title;
+use App\Models\VehicleEquipment;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 #[Title('Edit Vehicle')]
@@ -61,6 +64,13 @@ class VehicleEdit extends Component
 
     // Image management methods
     public $imagesToDelete = []; // Track images to delete
+
+    // Vehicle equipment completeness
+    public $stnk_asli = true; // STNK asli
+    public $kunci_roda = false; // Kunci roda
+    public $ban_serep = false; // Ban serep
+    public $kunci_serep = false; // Kunci serep
+    public $dongkrak = false; // Dongkrak
 
     // Progress indicator properties
     public $progress_percentage = 0;
@@ -266,6 +276,16 @@ class VehicleEdit extends Component
             ];
         })->toArray() : [];
 
+        // Load existing vehicle equipment
+        $equipment = $vehicle->equipment()->where('type', 2)->first(); // type 2 = purchase equipment
+        if ($equipment) {
+            $this->stnk_asli = (bool) $equipment->stnk_asli;
+            $this->kunci_roda = (bool) $equipment->kunci_roda;
+            $this->ban_serep = (bool) $equipment->ban_serep;
+            $this->kunci_serep = (bool) $equipment->kunci_serep;
+            $this->dongkrak = (bool) $equipment->dongkrak;
+        }
+
         // Initialize progress indicator
         $this->updateProgress();
     }
@@ -454,6 +474,7 @@ class VehicleEdit extends Component
             return;
         }
 
+        // Handle file uploads before transaction (filesystem operations)
         $fileStnkPath = $this->vehicle->file_stnk;
 
         // Handle file upload
@@ -467,142 +488,189 @@ class VehicleEdit extends Component
             $fileStnkPath = basename($storedPath);
         }
 
-        // Handle image deletions
-        if (!empty($this->imagesToDelete)) {
-            foreach ($this->imagesToDelete as $imageId) {
-                $image = VehicleImage::find($imageId);
-                if ($image) {
-                    // Delete file from storage
-                    if (Storage::disk('public')->exists('photos/vehicles/' . $image->image)) {
-                        Storage::disk('public')->delete('photos/vehicles/' . $image->image);
-                    }
-                    // Delete from database
-                    $image->delete();
-                }
-            }
-        }
-
-        // Handle new image uploads
+        // Handle new image uploads before transaction
         $uploadedImagePaths = [];
         if (!empty($this->images)) {
             foreach ($this->images as $image) {
                 if ($image) {
                     $storedImagePath = $image->store('photos/vehicles', 'public');
-                    $imagePath = basename($storedImagePath);
-
-                    VehicleImage::create([
-                        'vehicle_id' => $this->vehicle->id,
-                        'image' => $imagePath,
-                    ]);
-
-                    $uploadedImagePaths[] = $imagePath;
+                    $uploadedImagePaths[] = basename($storedImagePath);
                 }
             }
         }
 
-        $oldData = [
-            'police_number' => $this->vehicle->police_number,
-            'brand_id' => $this->vehicle->brand_id,
-            'type_id' => $this->vehicle->type_id,
-            'category_id' => $this->vehicle->category_id,
-            'vehicle_model_id' => $this->vehicle->vehicle_model_id,
-            'year' => $this->vehicle->year,
-            'cylinder_capacity' => $this->vehicle->cylinder_capacity,
-            'chassis_number' => $this->vehicle->chassis_number,
-            'engine_number' => $this->vehicle->engine_number,
-            'color' => $this->vehicle->color,
-            'fuel_type' => $this->vehicle->fuel_type,
-            'kilometer' => $this->vehicle->kilometer,
-            'vehicle_registration_date' => $this->vehicle->vehicle_registration_date,
-            'vehicle_registration_expiry_date' => $this->vehicle->vehicle_registration_expiry_date,
-            'file_stnk' => $this->vehicle->file_stnk,
-            'warehouse_id' => $this->vehicle->warehouse_id,
-            'salesman_id' => $this->vehicle->salesman_id,
-            'buyer_name' => $this->vehicle->buyer_name,
-            'buyer_phone' => $this->vehicle->buyer_phone,
-            'buyer_address' => $this->vehicle->buyer_address,
-            'purchase_date' => $this->vehicle->purchase_date,
-            'purchase_price' => $this->vehicle->purchase_price,
-            'display_price' => $this->vehicle->display_price,
-            'selling_date' => $this->vehicle->selling_date,
-            'selling_price' => $this->vehicle->selling_price,
-            'status' => $this->vehicle->status,
-            'description' => $this->vehicle->description,
-        ];
+        try {
+            DB::beginTransaction();
 
-        $this->vehicle->update([
-            'police_number' => $this->police_number,
-            'brand_id' => $this->brand_id,
-            'type_id' => $this->type_id,
-            'category_id' => $this->category_id,
-            'vehicle_model_id' => $this->vehicle_model_id,
-            'year' => $this->year,
-            'cylinder_capacity' => $this->cylinder_capacity,
-            'chassis_number' => $this->chassis_number,
-            'engine_number' => $this->engine_number,
-            'color' => $this->color,
-            'fuel_type' => $this->fuel_type,
-            'kilometer' => $this->kilometer,
-            'vehicle_registration_date' => $this->vehicle_registration_date,
-            'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
-            'file_stnk' => $fileStnkPath,
-            'warehouse_id' => $this->warehouse_id,
-            'salesman_id' => $this->status == '0' ? $this->salesman_id : null,
-            'buyer_name' => $this->status == '0' ? $this->buyer_name : null,
-            'buyer_phone' => $this->status == '0' ? $this->buyer_phone : null,
-            'buyer_address' => $this->status == '0' ? $this->buyer_address : null,
-            'purchase_date' => $this->purchase_date,
-            'purchase_price' => $this->purchase_price,
-            'display_price' => $this->display_price,
-            'selling_date' => $this->status == '0' ? $this->selling_date : null,
-            'selling_price' => $this->status == '0' ? $this->selling_price : null,
-            'status' => $this->status,
-            'description' => $this->description,
-        ]);
+            $oldData = [
+                'police_number' => $this->vehicle->police_number,
+                'brand_id' => $this->vehicle->brand_id,
+                'type_id' => $this->vehicle->type_id,
+                'category_id' => $this->vehicle->category_id,
+                'vehicle_model_id' => $this->vehicle->vehicle_model_id,
+                'year' => $this->vehicle->year,
+                'cylinder_capacity' => $this->vehicle->cylinder_capacity,
+                'chassis_number' => $this->vehicle->chassis_number,
+                'engine_number' => $this->vehicle->engine_number,
+                'color' => $this->vehicle->color,
+                'fuel_type' => $this->vehicle->fuel_type,
+                'kilometer' => $this->vehicle->kilometer,
+                'vehicle_registration_date' => $this->vehicle->vehicle_registration_date,
+                'vehicle_registration_expiry_date' => $this->vehicle->vehicle_registration_expiry_date,
+                'file_stnk' => $this->vehicle->file_stnk,
+                'warehouse_id' => $this->vehicle->warehouse_id,
+                'salesman_id' => $this->vehicle->salesman_id,
+                'buyer_name' => $this->vehicle->buyer_name,
+                'buyer_phone' => $this->vehicle->buyer_phone,
+                'buyer_address' => $this->vehicle->buyer_address,
+                'purchase_date' => $this->vehicle->purchase_date,
+                'purchase_price' => $this->vehicle->purchase_price,
+                'display_price' => $this->vehicle->display_price,
+                'selling_date' => $this->vehicle->selling_date,
+                'selling_price' => $this->vehicle->selling_price,
+                'status' => $this->vehicle->status,
+                'description' => $this->vehicle->description,
+            ];
 
-        // Log the update activity with detailed information
-        activity()
-            ->performedOn($this->vehicle)
-            ->causedBy(Auth::user())
-            ->withProperties([
-                'old' => $oldData,
-                'attributes' => [
-                    'police_number' => $this->police_number,
-                    'brand_id' => $this->brand_id,
-                    'type_id' => $this->type_id,
-                    'category_id' => $this->category_id,
-                    'vehicle_model_id' => $this->vehicle_model_id,
-                    'year' => $this->year,
-                    'cylinder_capacity' => $this->cylinder_capacity,
-                    'chassis_number' => $this->chassis_number,
-                    'engine_number' => $this->engine_number,
-                    'color' => $this->color,
-                    'fuel_type' => $this->fuel_type,
-                    'kilometer' => $this->kilometer,
-                    'vehicle_registration_date' => $this->vehicle_registration_date,
-                    'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
-                    'file_stnk' => $fileStnkPath,
-            'warehouse_id' => $this->warehouse_id,
-            'salesman_id' => $this->status == '0' ? $this->salesman_id : null,
-            'buyer_name' => $this->status == '0' ? $this->buyer_name : null,
-            'buyer_phone' => $this->status == '0' ? $this->buyer_phone : null,
-            'buyer_address' => $this->status == '0' ? $this->buyer_address : null,
-            'purchase_date' => $this->purchase_date,
-            'purchase_price' => $this->purchase_price,
-            'display_price' => $this->display_price,
-            'selling_date' => $this->status == '0' ? $this->selling_date : null,
-            'selling_price' => $this->status == '0' ? $this->selling_price : null,
-            'status' => $this->status,
-            'description' => $this->description,
-            'uploaded_images' => $uploadedImagePaths,
-            'deleted_images' => $this->imagesToDelete,
+            // Update vehicle record
+            $this->vehicle->update([
+                'police_number' => $this->police_number,
+                'brand_id' => $this->brand_id,
+                'type_id' => $this->type_id,
+                'category_id' => $this->category_id,
+                'vehicle_model_id' => $this->vehicle_model_id,
+                'year' => $this->year,
+                'cylinder_capacity' => $this->cylinder_capacity,
+                'chassis_number' => $this->chassis_number,
+                'engine_number' => $this->engine_number,
+                'color' => $this->color,
+                'fuel_type' => $this->fuel_type,
+                'kilometer' => $this->kilometer,
+                'vehicle_registration_date' => $this->vehicle_registration_date,
+                'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
+                'file_stnk' => $fileStnkPath,
+                'warehouse_id' => $this->warehouse_id,
+                'salesman_id' => $this->status == '0' ? $this->salesman_id : null,
+                'buyer_name' => $this->status == '0' ? $this->buyer_name : null,
+                'buyer_phone' => $this->status == '0' ? $this->buyer_phone : null,
+                'buyer_address' => $this->status == '0' ? $this->buyer_address : null,
+                'purchase_date' => $this->purchase_date,
+                'purchase_price' => $this->purchase_price,
+                'display_price' => $this->display_price,
+                'selling_date' => $this->status == '0' ? $this->selling_date : null,
+                'selling_price' => $this->status == '0' ? $this->selling_price : null,
+                'status' => $this->status,
+                'description' => $this->description,
+            ]);
+
+            // Handle image deletions
+            if (!empty($this->imagesToDelete)) {
+                foreach ($this->imagesToDelete as $imageId) {
+                    $image = VehicleImage::find($imageId);
+                    if ($image) {
+                        // Delete file from storage
+                        if (Storage::disk('public')->exists('photos/vehicles/' . $image->image)) {
+                            Storage::disk('public')->delete('photos/vehicles/' . $image->image);
+                        }
+                        // Delete from database
+                        $image->delete();
+                    }
+                }
+            }
+
+            // Create new vehicle image records
+            foreach ($uploadedImagePaths as $imagePath) {
+                VehicleImage::create([
+                    'vehicle_id' => $this->vehicle->id,
+                    'image' => $imagePath,
+                ]);
+            }
+
+            // Update or create vehicle equipment record
+            VehicleEquipment::updateOrCreate(
+                [
+                    'vehicle_id' => $this->vehicle->id,
+                    'type' => 2, // 2 = purchase equipment
+                ],
+                [
+                    'stnk_asli' => (int) $this->stnk_asli,
+                    'kunci_roda' => (int) $this->kunci_roda,
+                    'ban_serep' => (int) $this->ban_serep,
+                    'kunci_serep' => (int) $this->kunci_serep,
+                    'dongkrak' => (int) $this->dongkrak,
                 ]
-            ])
-            ->log('updated vehicle');
+            );
 
-        session()->flash('success', 'Vehicle updated.');
+            // Log the update activity with detailed information
+            activity()
+                ->performedOn($this->vehicle)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'old' => $oldData,
+                    'attributes' => [
+                        'police_number' => $this->police_number,
+                        'brand_id' => $this->brand_id,
+                        'type_id' => $this->type_id,
+                        'category_id' => $this->category_id,
+                        'vehicle_model_id' => $this->vehicle_model_id,
+                        'year' => $this->year,
+                        'cylinder_capacity' => $this->cylinder_capacity,
+                        'chassis_number' => $this->chassis_number,
+                        'engine_number' => $this->engine_number,
+                        'color' => $this->color,
+                        'fuel_type' => $this->fuel_type,
+                        'kilometer' => $this->kilometer,
+                        'vehicle_registration_date' => $this->vehicle_registration_date,
+                        'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
+                        'file_stnk' => $fileStnkPath,
+                        'warehouse_id' => $this->warehouse_id,
+                        'salesman_id' => $this->status == '0' ? $this->salesman_id : null,
+                        'buyer_name' => $this->status == '0' ? $this->buyer_name : null,
+                        'buyer_phone' => $this->status == '0' ? $this->buyer_phone : null,
+                        'buyer_address' => $this->status == '0' ? $this->buyer_address : null,
+                        'purchase_date' => $this->purchase_date,
+                        'purchase_price' => $this->purchase_price,
+                        'display_price' => $this->display_price,
+                        'selling_date' => $this->status == '0' ? $this->selling_date : null,
+                        'selling_price' => $this->status == '0' ? $this->selling_price : null,
+                        'status' => $this->status,
+                        'description' => $this->description,
+                        'uploaded_images' => $uploadedImagePaths,
+                        'deleted_images' => $this->imagesToDelete,
+                    ]
+                ])
+                ->log('updated vehicle');
 
-        return $this->redirect('/vehicles', true);
+            DB::commit();
+
+            session()->flash('success', 'Vehicle updated.');
+            return $this->redirect('/vehicles', true);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Failed to update vehicle', [
+                'error' => $e->getMessage(),
+                'vehicle_id' => $this->vehicle->id,
+                'police_number' => $this->police_number,
+                'user_id' => Auth::id(),
+            ]);
+
+            // Clean up uploaded files if transaction failed
+            if ($this->file_stnk && $fileStnkPath !== $this->vehicle->file_stnk && file_exists(storage_path('app/public/photos/stnk/' . $fileStnkPath))) {
+                unlink(storage_path('app/public/photos/stnk/' . $fileStnkPath));
+            }
+
+            foreach ($uploadedImagePaths as $imagePath) {
+                if (file_exists(storage_path('app/public/photos/vehicles/' . $imagePath))) {
+                    unlink(storage_path('app/public/photos/vehicles/' . $imagePath));
+                }
+            }
+
+            session()->flash('error', 'Failed to update vehicle. Please try again.');
+            return;
+        }
     }
 
     public function render()
@@ -652,6 +720,23 @@ class VehicleEdit extends Component
             ];
         })->toArray() : [];
         $this->imagesToDelete = [];
+
+        // Reset equipment properties to original values
+        $equipment = $this->vehicle->equipment()->where('type', 2)->first();
+        if ($equipment) {
+            $this->stnk_asli = (bool) $equipment->stnk_asli;
+            $this->kunci_roda = (bool) $equipment->kunci_roda;
+            $this->ban_serep = (bool) $equipment->ban_serep;
+            $this->kunci_serep = (bool) $equipment->kunci_serep;
+            $this->dongkrak = (bool) $equipment->dongkrak;
+        } else {
+            // Default values if no equipment record exists
+            $this->stnk_asli = true;
+            $this->kunci_roda = false;
+            $this->ban_serep = false;
+            $this->kunci_serep = false;
+            $this->dongkrak = false;
+        }
 
         $this->showResetModal = false;
 

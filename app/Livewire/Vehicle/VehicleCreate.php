@@ -2,19 +2,21 @@
 
 namespace App\Livewire\Vehicle;
 
-use Livewire\Component;
-use App\Models\Vehicle;
-use App\Models\Brand;
 use App\Models\Type;
+use App\Models\Brand;
+use App\Models\Vehicle;
+use Livewire\Component;
 use App\Models\Category;
-use App\Models\VehicleModel;
+use App\Models\Salesman;
 use App\Models\Warehouse;
 use App\Models\VehicleImage;
-use App\Models\Salesman;
-use Livewire\Attributes\Title;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use App\Models\VehicleModel;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Title;
+use App\Models\VehicleEquipment;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Create Vehicle')]
 class VehicleCreate extends Component
@@ -48,6 +50,13 @@ class VehicleCreate extends Component
 
     public $images = []; // Array of uploaded images
     public $tempImages = []; // Temporary storage for new images
+
+    // Vehicle equipment completeness
+    public $stnk_asli = true; // STNK asli
+    public $kunci_roda = false; // Kunci roda
+    public $ban_serep = false; // Ban serep
+    public $kunci_serep = false; // Kunci serep
+    public $dongkrak = false; // Dongkrak
 
     public $showResetModal = false;
 
@@ -328,10 +337,19 @@ class VehicleCreate extends Component
             'chassis_number', 'engine_number', 'cylinder_capacity', 'color', 'fuel_type',
             'kilometer', 'warehouse_id', 'vehicle_registration_date', 'vehicle_registration_expiry_date',
             'file_stnk', 'purchase_date', 'purchase_price', 'selling_date', 'selling_price',
-            'display_price', 'salesman_id', 'status', 'description', 'images', 'tempImages'
+            'display_price', 'salesman_id', 'status', 'description', 'images', 'tempImages',
+            'stnk_asli', 'kunci_roda', 'ban_serep', 'kunci_serep', 'dongkrak'
         ]);
 
         $this->status = 1; // Reset to default status
+
+        // Reset equipment defaults
+        $this->stnk_asli = true;
+        $this->kunci_roda = false;
+        $this->ban_serep = false;
+        $this->kunci_serep = false;
+        $this->dongkrak = false;
+
         $this->showResetModal = false;
 
         // Clear validation errors
@@ -449,89 +467,136 @@ class VehicleCreate extends Component
             return;
         }
 
+        // Handle file uploads before transaction (filesystem operations)
         $fileStnkPath = null;
         if ($this->file_stnk) {
             $storedPath = $this->file_stnk->store('photos/stnk', 'public');
             $fileStnkPath = basename($storedPath);
         }
 
-        $vehicle = Vehicle::create([
-            'police_number' => $this->police_number,
-            'brand_id' => $this->brand_id,
-            'type_id' => $this->type_id,
-            'category_id' => $this->category_id,
-            'vehicle_model_id' => $this->vehicle_model_id,
-            'year' => $this->year,
-            'cylinder_capacity' => $this->cylinder_capacity,
-            'chassis_number' => $this->chassis_number,
-            'engine_number' => $this->engine_number,
-            'color' => $this->color,
-            'fuel_type' => $this->fuel_type,
-            'kilometer' => $this->kilometer,
-            'vehicle_registration_date' => $this->vehicle_registration_date,
-            'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
-            'file_stnk' => $fileStnkPath,
-            'warehouse_id' => $this->warehouse_id,
-            'salesman_id' => $this->salesman_id,
-            'purchase_date' => $this->purchase_date,
-            'purchase_price' => $this->purchase_price,
-            'display_price' => $this->display_price,
-            'selling_date' => $this->selling_date,
-            'selling_price' => $this->selling_price,
-            'status' => $this->status,
-            'description' => $this->description,
-        ]);
-
-        // Handle multiple image uploads
+        $vehicleImages = [];
         if (!empty($this->images)) {
             foreach ($this->images as $image) {
                 if ($image) {
                     $storedImagePath = $image->store('photos/vehicles', 'public');
-                    VehicleImage::create([
-                        'vehicle_id' => $vehicle->id,
-                        'image' => basename($storedImagePath),
-                    ]);
+                    $vehicleImages[] = basename($storedImagePath);
                 }
             }
         }
 
-        // Log the creation activity with detailed information
-        activity()
-            ->performedOn($vehicle)
-            ->causedBy(Auth::user())
-            ->withProperties([
-                'attributes' => [
-                    'police_number' => $this->police_number,
-                    'brand_id' => $this->brand_id,
-                    'type_id' => $this->type_id,
-                    'category_id' => $this->category_id,
-                    'vehicle_model_id' => $this->vehicle_model_id,
-                    'year' => $this->year,
-                    'cylinder_capacity' => $this->cylinder_capacity,
-                    'chassis_number' => $this->chassis_number,
-                    'engine_number' => $this->engine_number,
-                    'color' => $this->color,
-                    'fuel_type' => $this->fuel_type,
-                    'kilometer' => $this->kilometer,
-                    'vehicle_registration_date' => $this->vehicle_registration_date,
-                    'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
-                    'file_stnk' => $fileStnkPath,
-                    'warehouse_id' => $this->warehouse_id,
-                    'salesman_id' => $this->salesman_id,
-                    'purchase_date' => $this->purchase_date,
-                    'purchase_price' => $this->purchase_price,
-                    'selling_date' => $this->selling_date,
-                    'selling_price' => $this->selling_price,
-                    'display_price' => $this->display_price,
-                    'status' => $this->status,
-                    'description' => $this->description,
-                ]
-            ])
-            ->log('created vehicle');
+        try {
+            DB::beginTransaction();
 
-        session()->flash('success', 'Vehicle created.');
+            // Create vehicle record
+            $vehicle = Vehicle::create([
+                'police_number' => $this->police_number,
+                'brand_id' => $this->brand_id,
+                'type_id' => $this->type_id,
+                'category_id' => $this->category_id,
+                'vehicle_model_id' => $this->vehicle_model_id,
+                'year' => $this->year,
+                'cylinder_capacity' => $this->cylinder_capacity,
+                'chassis_number' => $this->chassis_number,
+                'engine_number' => $this->engine_number,
+                'color' => $this->color,
+                'fuel_type' => $this->fuel_type,
+                'kilometer' => $this->kilometer,
+                'vehicle_registration_date' => $this->vehicle_registration_date,
+                'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
+                'file_stnk' => $fileStnkPath,
+                'warehouse_id' => $this->warehouse_id,
+                'salesman_id' => $this->salesman_id,
+                'purchase_date' => $this->purchase_date,
+                'purchase_price' => $this->purchase_price,
+                'display_price' => $this->display_price,
+                'selling_date' => $this->selling_date,
+                'selling_price' => $this->selling_price,
+                'status' => $this->status,
+                'description' => $this->description,
+            ]);
 
-        return $this->redirect('/vehicles', true);
+            // Create vehicle image records
+            foreach ($vehicleImages as $imagePath) {
+                VehicleImage::create([
+                    'vehicle_id' => $vehicle->id,
+                    'image' => $imagePath,
+                ]);
+            }
+
+            // Create vehicle equipment record
+            VehicleEquipment::create([
+                'type' => 2, // 2 = purchase equipment
+                'vehicle_id' => $vehicle->id,
+                'stnk_asli' => (int) $this->stnk_asli,
+                'kunci_roda' => (int) $this->kunci_roda,
+                'ban_serep' => (int) $this->ban_serep,
+                'kunci_serep' => (int) $this->kunci_serep,
+                'dongkrak' => (int) $this->dongkrak,
+            ]);
+
+            // Log the creation activity with detailed information
+            activity()
+                ->performedOn($vehicle)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'police_number' => $this->police_number,
+                        'brand_id' => $this->brand_id,
+                        'type_id' => $this->type_id,
+                        'category_id' => $this->category_id,
+                        'vehicle_model_id' => $this->vehicle_model_id,
+                        'year' => $this->year,
+                        'cylinder_capacity' => $this->cylinder_capacity,
+                        'chassis_number' => $this->chassis_number,
+                        'engine_number' => $this->engine_number,
+                        'color' => $this->color,
+                        'fuel_type' => $this->fuel_type,
+                        'kilometer' => $this->kilometer,
+                        'vehicle_registration_date' => $this->vehicle_registration_date,
+                        'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
+                        'file_stnk' => $fileStnkPath,
+                        'warehouse_id' => $this->warehouse_id,
+                        'salesman_id' => $this->salesman_id,
+                        'purchase_date' => $this->purchase_date,
+                        'purchase_price' => $this->purchase_price,
+                        'selling_date' => $this->selling_date,
+                        'selling_price' => $this->selling_price,
+                        'display_price' => $this->display_price,
+                        'status' => $this->status,
+                        'description' => $this->description,
+                    ]
+                ])
+                ->log('created vehicle');
+
+            DB::commit();
+
+            session()->flash('success', 'Vehicle created.');
+            return $this->redirect('/vehicles', true);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error
+            Log::error('Failed to create vehicle', [
+                'error' => $e->getMessage(),
+                'police_number' => $this->police_number,
+                'user_id' => Auth::id(),
+            ]);
+
+            // Clean up uploaded files if transaction failed
+            if ($fileStnkPath && file_exists(storage_path('app/public/photos/stnk/' . $fileStnkPath))) {
+                unlink(storage_path('app/public/photos/stnk/' . $fileStnkPath));
+            }
+
+            foreach ($vehicleImages as $imagePath) {
+                if (file_exists(storage_path('app/public/photos/vehicles/' . $imagePath))) {
+                    unlink(storage_path('app/public/photos/vehicles/' . $imagePath));
+                }
+            }
+
+            session()->flash('error', 'Failed to create vehicle. Please try again.');
+            return;
+        }
     }
 
     public function render()

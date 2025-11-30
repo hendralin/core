@@ -7,34 +7,42 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Commission extends Model
+class VehicleEquipment extends Model
 {
     use LogsActivity;
 
     protected $fillable = [
-        'commission_date',
         'type',
         'vehicle_id',
-        'amount',
-        'description',
-        'status',
+        'stnk_asli',
+        'kunci_roda',
+        'ban_serep',
+        'kunci_serep',
+        'dongkrak',
     ];
 
+    /**
+     * Get the options for activity logging
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly([
-                'commission_date',
                 'type',
                 'vehicle_id',
-                'amount',
-                'description',
-                'status',
+                'stnk_asli',
+                'kunci_roda',
+                'ban_serep',
+                'kunci_serep',
+                'dongkrak',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
 
+    /**
+     * Get the vehicle that owns the vehicle equipment
+     */
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);

@@ -44,7 +44,7 @@ class VehicleShow extends Component
 
     public function mount(Vehicle $vehicle): void
     {
-        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions']);
+        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment']);
 
         // Get cost summary for this vehicle
         $this->loadCostSummary();

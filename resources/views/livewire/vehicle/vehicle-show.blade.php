@@ -252,6 +252,121 @@
                     </div>
                 </div>
 
+                <!-- Vehicle Completeness Checklist -->
+                @php
+                    $equipment = $vehicle->equipment()->where('type', 2)->first();
+                @endphp
+                @if($equipment)
+                <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                    <flux:heading size="lg" class="mb-4">Kelengkapan Kendaraan</flux:heading>
+                    <flux:text class="mb-4">Berikut adalah daftar kelengkapan yang tersedia pada kendaraan ini:</flux:text>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- STNK Asli -->
+                        <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->stnk_asli) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
+                            @if($equipment->stnk_asli)
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-green-900 dark:text-green-100">STNK Asli</flux:text>
+                                    <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
+                                </div>
+                            @else
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-red-900 dark:text-red-100">STNK Asli</flux:text>
+                                    <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Kunci Roda -->
+                        <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->kunci_roda) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
+                            @if($equipment->kunci_roda)
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-green-900 dark:text-green-100">Kunci Roda</flux:text>
+                                    <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
+                                </div>
+                            @else
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-red-900 dark:text-red-100">Kunci Roda</flux:text>
+                                    <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Ban Serep -->
+                        <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->ban_serep) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
+                            @if($equipment->ban_serep)
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-green-900 dark:text-green-100">Ban Serep</flux:text>
+                                    <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
+                                </div>
+                            @else
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-red-900 dark:text-red-100">Ban Serep</flux:text>
+                                    <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Kunci Serep -->
+                        <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->kunci_serep) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
+                            @if($equipment->kunci_serep)
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-green-900 dark:text-green-100">Kunci Serep</flux:text>
+                                    <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
+                                </div>
+                            @else
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-red-900 dark:text-red-100">Kunci Serep</flux:text>
+                                    <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Dongkrak -->
+                        <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->dongkrak) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
+                            @if($equipment->dongkrak)
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-green-900 dark:text-green-100">Dongkrak</flux:text>
+                                    <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
+                                </div>
+                            @else
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <div>
+                                    <flux:text class="font-medium text-red-900 dark:text-red-100">Dongkrak</flux:text>
+                                    <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="mt-6 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                        <div class="flex items-center justify-between">
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Ringkasan Kelengkapan:</flux:text>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span class="flex items-center space-x-1">
+                                    <flux:icon.check-circle class="w-4 h-4 text-green-600" />
+                                    <span>{{ collect([$equipment->stnk_asli, $equipment->kunci_roda, $equipment->ban_serep, $equipment->kunci_serep, $equipment->dongkrak])->filter()->count() }} tersedia</span>
+                                </span>
+                                <span class="flex items-center space-x-1">
+                                    <flux:icon.x-circle class="w-4 h-4 text-red-600" />
+                                    <span>{{ collect([$equipment->stnk_asli, $equipment->kunci_roda, $equipment->ban_serep, $equipment->kunci_serep, $equipment->dongkrak])->filter(function($item) { return !$item; })->count() }} tidak tersedia</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Financial Information -->
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                     <flux:heading size="lg" class="mb-4">Informasi Keuangan</flux:heading>
@@ -321,7 +436,7 @@
                                     <flux:button variant="filled" size="sm" href="{{ route('commissions.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
                                 @endcan
                                 @if($vehicle->commissions->where('type', 2)->count() < 4)
-                                    <flux:button wire:click="openCommissionModal" size="sm" variant="filled" icon="plus" tooltip="Tambah Komisi" :loading="false">Tambah Komisi</flux:button>
+                                    <flux:button wire:click="openCommissionModal" size="sm" variant="filled" icon="plus" class="cursor-pointer" tooltip="Tambah Komisi" :loading="false">Tambah Komisi</flux:button>
                                 @endif
                             </div>
                         </div>
