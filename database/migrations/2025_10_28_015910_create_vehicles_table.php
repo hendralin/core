@@ -31,7 +31,9 @@ return new class extends Migration
             $table->foreignId('warehouse_id')->constrained();
             $table->date('purchase_date');
             $table->decimal('purchase_price', 15, 2)->unsigned();
-            $table->decimal('display_price', 15, 2)->unsigned();
+            $table->decimal('display_price', 15, 2)->unsigned(); // Harga Tunai (HT)
+            $table->decimal('loan_price', 15, 2)->unsigned(); // Harga Kredit (HK)
+            $table->decimal('roadside_allowance', 15, 2)->unsigned(); // Biaya Uang Jalan
             $table->date('selling_date')->nullable();
             $table->decimal('selling_price', 15, 2)->unsigned()->nullable();
             $table->enum('status', [0, 1])->default(1)->comment('0=sold, 1=available');

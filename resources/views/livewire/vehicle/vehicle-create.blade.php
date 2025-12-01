@@ -343,8 +343,13 @@
                             <flux:select.option value="0">💰 Terjual</flux:select.option>
                         </flux:select>
                         <div class="relative">
-                            <flux:input wire:model.live.debounce.1500ms="display_price" icon="currency-dollar" label="Harga Jual *" placeholder="180.000.000" />
+                            <flux:input wire:model.live.debounce.1500ms="roadside_allowance" icon="currency-dollar" label="Biaya Uang Jalan *" placeholder="250.000" />
                         </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <flux:input wire:model.live.debounce.1500ms="display_price" icon="currency-dollar" label="Harga Tunai *" placeholder="180.000.000" />
+                        <flux:input wire:model.live.debounce.1500ms="loan_price" icon="currency-dollar" label="Harga Kredit *" placeholder="198.000.000" />
                     </div>
 
                     <!-- Selling Information (only shown when status is Sold) -->
@@ -448,7 +453,8 @@
                         <li>• Tanggal Registrasi & Kadaluarsa</li>
                         <li>• File STNK</li>
                         <li>• Tanggal & Harga Beli</li>
-                        <li>• Harga Jual</li>
+                        <li>• Harga Tunai & Harga Kredit</li>
+                        <li>• Biaya Uang Jalan</li>
                         <li>• Status</li>
                     </ul>
                 </div>

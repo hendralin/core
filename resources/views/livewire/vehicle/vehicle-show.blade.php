@@ -383,21 +383,19 @@
                         </div>
 
                         <div>
-                            <flux:heading size="md">Harga Jual</flux:heading>
+                            <flux:heading size="md">Harga Tunai</flux:heading>
                             <flux:text class="mt-1">{{ $vehicle->display_price ? 'Rp ' . number_format($vehicle->display_price, 0, ',', '.') : '-' }}</flux:text>
                         </div>
 
-                        @if($vehicle->status == 0)
                         <div>
-                            <flux:heading size="md">Tanggal Penjualan</flux:heading>
-                            <flux:text class="mt-1">{{ $vehicle->selling_date ? Carbon\Carbon::parse($vehicle->selling_date)->format('M d, Y') : '-' }}</flux:text>
+                            <flux:heading size="md">Harga Kredit</flux:heading>
+                            <flux:text class="mt-1">{{ $vehicle->loan_price ? 'Rp ' . number_format($vehicle->loan_price, 0, ',', '.') : '-' }}</flux:text>
                         </div>
 
                         <div>
-                            <flux:heading size="md">Harga Penjualan</flux:heading>
-                            <flux:text class="mt-1">{{ $vehicle->selling_price ? 'Rp ' . number_format($vehicle->selling_price, 0, ',', '.') : '-' }}</flux:text>
+                            <flux:heading size="md">Biaya Uang Jalan</flux:heading>
+                            <flux:text class="mt-1">{{ $vehicle->roadside_allowance ? 'Rp ' . number_format($vehicle->roadside_allowance, 0, ',', '.') : '-' }}</flux:text>
                         </div>
-                        @endif
                     </div>
                 </div>
 
@@ -407,6 +405,16 @@
                     <flux:heading size="lg" class="mb-4">Informasi Pembeli</flux:heading>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <flux:heading size="md">Tanggal Penjualan</flux:heading>
+                            <flux:text class="mt-1">{{ $vehicle->selling_date ? Carbon\Carbon::parse($vehicle->selling_date)->format('M d, Y') : '-' }}</flux:text>
+                        </div>
+
+                        <div>
+                            <flux:heading size="md">Harga Penjualan</flux:heading>
+                            <flux:text class="mt-1">{{ $vehicle->selling_price ? 'Rp ' . number_format($vehicle->selling_price, 0, ',', '.') : '-' }}</flux:text>
+                        </div>
+
                         <div>
                             <flux:heading size="md">Nama Pembeli</flux:heading>
                             <flux:text class="mt-1">{{ $vehicle->buyer_name ?? '-' }}</flux:text>
@@ -1394,7 +1402,7 @@
             <flux:textarea
                 wire:model="commission_description"
                 label="Deskripsi"
-                placeholder="Masukkan deskripsi komisi (opsional)"
+                placeholder="Masukkan deskripsi komisi"
                 rows="3"
             />
             <div class="flex gap-2">

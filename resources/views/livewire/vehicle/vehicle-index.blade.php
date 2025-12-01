@@ -93,9 +93,8 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-4 py-3 w-32">Warehouse</th>
                     <th scope="col" class="px-4 py-3 w-32">
-                        <div class="flex items-center cursor-pointer @if ($sortField == 'status') {{ $sortDirection }} @endif" wire:click="sortBy('status')">
+                        <div class="flex justify-center cursor-pointer @if ($sortField == 'status') {{ $sortDirection }} @endif" wire:click="sortBy('status')">
                             Status
                             @if ($sortField == 'status' && $sortDirection == 'asc')
                                 <flux:icon.chevron-up class="ml-2 size-4" />
@@ -168,7 +167,6 @@
                             <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-zinc-300">{{ $vehicle->type?->name ?? '-' }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-zinc-300">{{ $vehicle->vehicle_model?->name ?? '-' }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-center text-gray-600 dark:text-zinc-300">{{ $vehicle->year }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-zinc-300">{{ $vehicle->warehouse?->name ?? '-' }}</td>
                             <td class="px-4 py-2 text-center">
                                 <div class="space-y-1">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -179,9 +177,18 @@
                                         @endif">
                                         {{ $vehicle->status == 1 ? 'Available' : 'Sold' }}
                                     </span>
-                                    @if($vehicle->display_price)
-                                        <div class="text-xs text-green-600 dark:text-green-400 font-medium">
-                                            Rp {{ number_format($vehicle->display_price / 1000000, 2) }}Jt
+                                    @if($vehicle->display_price || $vehicle->loan_price)
+                                        <div class="space-y-1">
+                                            @if($vehicle->display_price)
+                                                <div class="text-xs text-green-600 dark:text-green-400 font-medium">
+                                                    HT: Rp {{ number_format($vehicle->display_price / 1000000, 0) }}Jt
+                                                </div>
+                                            @endif
+                                            @if($vehicle->loan_price)
+                                                <div class="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                                    HK: Rp {{ number_format($vehicle->loan_price / 1000000, 0) }}Jt
+                                                </div>
+                                            @endif
                                         </div>
                                     @endif
                                     @if($vehicle->kilometer)
@@ -457,9 +464,18 @@
                                         </div>
                                     @endif
                                 </div>
-                                @if($vehicle->display_price)
-                                    <div class="text-lg font-bold text-green-600 dark:text-green-400">
-                                        Rp {{ number_format($vehicle->display_price / 1000000, 1) }}M
+                                @if($vehicle->display_price || $vehicle->loan_price)
+                                    <div class="text-right">
+                                        @if($vehicle->display_price)
+                                            <div class="text-sm font-bold text-green-600 dark:text-green-400">
+                                                HT: Rp {{ number_format($vehicle->display_price / 1000000, 0) }}Jt
+                                            </div>
+                                        @endif
+                                        @if($vehicle->loan_price)
+                                            <div class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                                                HK: Rp {{ number_format($vehicle->loan_price / 1000000, 0) }}Jt
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
                             </div>
@@ -578,9 +594,21 @@
                                                 <div class="text-gray-900 dark:text-white font-medium">{{ $vehicle->purchase_price ? 'Rp ' . number_format($vehicle->purchase_price, 0, ',', '.') : '-' }}</div>
                                             </div>
                                             <div>
-                                                <span class="text-gray-500 dark:text-zinc-400">Harga Jual:</span>
+                                                <span class="text-gray-500 dark:text-zinc-400">Harga Tunai:</span>
                                                 <div class="text-green-600 dark:text-green-400 font-medium">{{ $vehicle->display_price ? 'Rp ' . number_format($vehicle->display_price, 0, ',', '.') : '-' }}</div>
                                             </div>
+                                            @if($vehicle->loan_price)
+                                            <div>
+                                                <span class="text-gray-500 dark:text-zinc-400">Harga Kredit:</span>
+                                                <div class="text-blue-600 dark:text-blue-400 font-medium">{{ $vehicle->loan_price ? 'Rp ' . number_format($vehicle->loan_price, 0, ',', '.') : '-' }}</div>
+                                            </div>
+                                            @endif
+                                            @if($vehicle->roadside_allowance)
+                                            <div>
+                                                <span class="text-gray-500 dark:text-zinc-400">Biaya Uang Jalan:</span>
+                                                <div class="text-gray-900 dark:text-white font-medium">{{ $vehicle->roadside_allowance ? 'Rp ' . number_format($vehicle->roadside_allowance, 0, ',', '.') : '-' }}</div>
+                                            </div>
+                                            @endif
                                             @if($vehicle->selling_price)
                                             <div>
                                                 <span class="text-gray-500 dark:text-zinc-400">Harga Penjualan:</span>

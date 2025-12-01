@@ -41,6 +41,8 @@ class VehicleCreate extends Component
     public $warehouse_id;
     public $purchase_date;
     public $purchase_price;
+    public $loan_price;
+    public $roadside_allowance;
     public $selling_date;
     public $selling_price;
     public $display_price;
@@ -68,7 +70,7 @@ class VehicleCreate extends Component
     {
         // Calculate total required fields based on status
         $baseFields = 13; // Basic (6) + Technical (3) + Registration (4)
-        $totalFields = $baseFields + 3; // Financial (3) + Status (always required)
+        $totalFields = $baseFields + 5; // Financial (5) + Status (always required)
 
         // Add selling fields if status is sold
         if ($this->status == '0') {
@@ -98,10 +100,12 @@ class VehicleCreate extends Component
         if ($this->vehicle_registration_expiry_date) $filledFields++;
         if ($this->file_stnk) $filledFields++;
 
-        // Financial (3 required fields)
+        // Financial (5 required fields)
         if ($this->purchase_date) $filledFields++;
         if ($this->purchase_price) $filledFields++;
         if ($this->display_price) $filledFields++;
+        if ($this->loan_price) $filledFields++;
+        if ($this->roadside_allowance) $filledFields++;
 
         // Status is always required
         $filledFields++; // Status is always counted as filled
@@ -158,6 +162,8 @@ class VehicleCreate extends Component
         'selling_date' => 'required_if:status,0|nullable|date|after_or_equal:purchase_date',
         'selling_price' => 'required_if:status,0|nullable|numeric|min:0|max:99999999999999.99',
         'display_price' => 'required|numeric|min:0|max:99999999999999.99',
+        'loan_price' => 'required|numeric|min:0|max:99999999999999.99',
+        'roadside_allowance' => 'required|numeric|min:0|max:99999999999999.99',
         'salesman_id' => 'required_if:status,0|nullable|exists:salesmen,id',
         'status' => 'required|in:0,1',
         'description' => 'nullable|string',
@@ -337,7 +343,7 @@ class VehicleCreate extends Component
             'chassis_number', 'engine_number', 'cylinder_capacity', 'color', 'fuel_type',
             'kilometer', 'warehouse_id', 'vehicle_registration_date', 'vehicle_registration_expiry_date',
             'file_stnk', 'purchase_date', 'purchase_price', 'selling_date', 'selling_price',
-            'display_price', 'salesman_id', 'status', 'description', 'images', 'tempImages',
+            'display_price', 'loan_price', 'roadside_allowance', 'salesman_id', 'status', 'description', 'images', 'tempImages',
             'stnk_asli', 'kunci_roda', 'ban_serep', 'kunci_serep', 'dongkrak'
         ]);
 
@@ -448,6 +454,12 @@ class VehicleCreate extends Component
         if ($this->selling_price) {
             $this->selling_price = $this->parseFormatted($this->selling_price);
         }
+        if ($this->loan_price) {
+            $this->loan_price = $this->parseFormatted($this->loan_price);
+        }
+        if ($this->roadside_allowance) {
+            $this->roadside_allowance = $this->parseFormatted($this->roadside_allowance);
+        }
         if ($this->cylinder_capacity) {
             $this->cylinder_capacity = $this->parseFormatted($this->cylinder_capacity);
         }
@@ -509,6 +521,8 @@ class VehicleCreate extends Component
                 'purchase_date' => $this->purchase_date,
                 'purchase_price' => $this->purchase_price,
                 'display_price' => $this->display_price,
+                'loan_price' => $this->loan_price,
+                'roadside_allowance' => $this->roadside_allowance,
                 'selling_date' => $this->selling_date,
                 'selling_price' => $this->selling_price,
                 'status' => $this->status,

@@ -47,6 +47,8 @@ class VehicleEdit extends Component
     public $selling_date;
     public $selling_price;
     public $display_price;
+    public $loan_price;
+    public $roadside_allowance;
     public $salesman_id;
     public $buyer_name;
     public $buyer_phone;
@@ -80,7 +82,7 @@ class VehicleEdit extends Component
     {
         // Calculate total required fields based on status
         $baseFields = 13; // Basic (6) + Technical (3) + Registration (4)
-        $totalFields = $baseFields + 3; // Financial (3) + Status (always required)
+        $totalFields = $baseFields + 5; // Financial (5) + Status (always required)
 
         // Add selling fields if status is sold
         if ($this->status == '0') {
@@ -108,10 +110,12 @@ class VehicleEdit extends Component
         if ($this->vehicle_registration_expiry_date) $filledFields++;
         if ($this->file_stnk || $this->existing_file_stnk) $filledFields++;
 
-        // Financial (3 required fields)
+        // Financial (5 required fields)
         if ($this->purchase_date) $filledFields++;
         if ($this->purchase_price) $filledFields++;
         if ($this->display_price) $filledFields++;
+        if ($this->loan_price) $filledFields++;
+        if ($this->roadside_allowance) $filledFields++;
 
         // Status is always required
         $filledFields++; // Status is always counted as filled
@@ -172,6 +176,8 @@ class VehicleEdit extends Component
         'selling_date' => 'required_if:status,0|nullable|date|after_or_equal:purchase_date',
         'selling_price' => 'required_if:status,0|nullable|numeric|min:0|max:99999999999999.99',
         'display_price' => 'required|numeric|min:0|max:99999999999999.99',
+        'loan_price' => 'required|numeric|min:0|max:99999999999999.99',
+        'roadside_allowance' => 'required|numeric|min:0|max:99999999999999.99',
         'salesman_id' => 'required_if:status,0|nullable|exists:salesmen,id',
         'buyer_name' => 'required_if:status,0|nullable|string|max:255',
         'buyer_phone' => 'required_if:status,0|nullable|string|max:20',
@@ -253,6 +259,8 @@ class VehicleEdit extends Component
         $this->purchase_date = $vehicle->purchase_date;
         $this->purchase_price = number_format($vehicle->purchase_price, 0, ',', '.');
         $this->display_price = number_format($vehicle->display_price, 0, ',', '.');
+        $this->loan_price = $vehicle->loan_price ? number_format($vehicle->loan_price, 0, ',', '.') : null;
+        $this->roadside_allowance = $vehicle->roadside_allowance ? number_format($vehicle->roadside_allowance, 0, ',', '.') : null;
         $this->vehicle_registration_date = $vehicle->vehicle_registration_date;
         $this->vehicle_registration_expiry_date = $vehicle->vehicle_registration_expiry_date;
         $this->existing_file_stnk = $vehicle->file_stnk;
@@ -455,6 +463,8 @@ class VehicleEdit extends Component
         $this->kilometer = $this->parseFormatted($this->kilometer);
         $this->purchase_price = $this->parseFormatted($this->purchase_price);
         $this->display_price = $this->parseFormatted($this->display_price);
+        $this->loan_price = $this->parseFormatted($this->loan_price);
+        $this->roadside_allowance = $this->parseFormatted($this->roadside_allowance);
         if ($this->selling_price) {
             $this->selling_price = $this->parseFormatted($this->selling_price);
         }
@@ -526,6 +536,8 @@ class VehicleEdit extends Component
                 'purchase_date' => $this->vehicle->purchase_date,
                 'purchase_price' => $this->vehicle->purchase_price,
                 'display_price' => $this->vehicle->display_price,
+                'loan_price' => $this->vehicle->loan_price,
+                'roadside_allowance' => $this->vehicle->roadside_allowance,
                 'selling_date' => $this->vehicle->selling_date,
                 'selling_price' => $this->vehicle->selling_price,
                 'status' => $this->vehicle->status,
@@ -557,6 +569,8 @@ class VehicleEdit extends Component
                 'purchase_date' => $this->purchase_date,
                 'purchase_price' => $this->purchase_price,
                 'display_price' => $this->display_price,
+                'loan_price' => $this->loan_price,
+                'roadside_allowance' => $this->roadside_allowance,
                 'selling_date' => $this->status == '0' ? $this->selling_date : null,
                 'selling_price' => $this->status == '0' ? $this->selling_price : null,
                 'status' => $this->status,
@@ -631,6 +645,8 @@ class VehicleEdit extends Component
                         'purchase_date' => $this->purchase_date,
                         'purchase_price' => $this->purchase_price,
                         'display_price' => $this->display_price,
+                        'loan_price' => $this->loan_price,
+                        'roadside_allowance' => $this->roadside_allowance,
                         'selling_date' => $this->status == '0' ? $this->selling_date : null,
                         'selling_price' => $this->status == '0' ? $this->selling_price : null,
                         'status' => $this->status,
@@ -700,6 +716,9 @@ class VehicleEdit extends Component
         // Handle specific fields that might need special formatting
         $this->kilometer = $this->formatNumber($this->vehicle->kilometer);
         $this->purchase_price = $this->formatNumber($this->vehicle->purchase_price);
+        $this->display_price = $this->formatNumber($this->vehicle->display_price);
+        $this->loan_price = $this->formatNumber($this->vehicle->loan_price);
+        $this->roadside_allowance = $this->formatNumber($this->vehicle->roadside_allowance);
         $this->selling_price = $this->vehicle->selling_price ? $this->formatNumber($this->vehicle->selling_price) : null;
         $this->cylinder_capacity = $this->formatNumber($this->vehicle->cylinder_capacity);
 
