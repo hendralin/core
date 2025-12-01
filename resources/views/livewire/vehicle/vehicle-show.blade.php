@@ -265,13 +265,13 @@
                         <!-- STNK Asli -->
                         <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->stnk_asli) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
                             @if($equipment->stnk_asli)
-                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-green-900 dark:text-green-100">STNK Asli</flux:text>
                                     <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
                                 </div>
                             @else
-                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-red-900 dark:text-red-100">STNK Asli</flux:text>
                                     <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
@@ -282,13 +282,13 @@
                         <!-- Kunci Roda -->
                         <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->kunci_roda) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
                             @if($equipment->kunci_roda)
-                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-green-900 dark:text-green-100">Kunci Roda</flux:text>
                                     <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
                                 </div>
                             @else
-                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-red-900 dark:text-red-100">Kunci Roda</flux:text>
                                     <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
@@ -299,13 +299,13 @@
                         <!-- Ban Serep -->
                         <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->ban_serep) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
                             @if($equipment->ban_serep)
-                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-green-900 dark:text-green-100">Ban Serep</flux:text>
                                     <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
                                 </div>
                             @else
-                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-red-900 dark:text-red-100">Ban Serep</flux:text>
                                     <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
@@ -316,13 +316,13 @@
                         <!-- Kunci Serep -->
                         <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->kunci_serep) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
                             @if($equipment->kunci_serep)
-                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-green-900 dark:text-green-100">Kunci Serep</flux:text>
                                     <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
                                 </div>
                             @else
-                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-red-900 dark:text-red-100">Kunci Serep</flux:text>
                                     <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
@@ -333,13 +333,13 @@
                         <!-- Dongkrak -->
                         <div class="flex items-center space-x-3 p-3 rounded-lg border @if($equipment->dongkrak) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 @endif">
                             @if($equipment->dongkrak)
-                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <flux:icon.check-circle class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-green-900 dark:text-green-100">Dongkrak</flux:text>
                                     <flux:text class="text-sm text-green-700 dark:text-green-300">Tersedia</flux:text>
                                 </div>
                             @else
-                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                                <flux:icon.x-circle class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
                                 <div>
                                     <flux:text class="font-medium text-red-900 dark:text-red-100">Dongkrak</flux:text>
                                     <flux:text class="text-sm text-red-700 dark:text-red-300">Tidak tersedia</flux:text>
@@ -444,7 +444,7 @@
                                     <flux:button variant="filled" size="sm" href="{{ route('commissions.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
                                 @endcan
                                 @if($vehicle->commissions->where('type', 2)->count() < 4)
-                                    <flux:button wire:click="openCommissionModal" size="sm" variant="filled" icon="plus" class="cursor-pointer" tooltip="Tambah Komisi" :loading="false">Tambah Komisi</flux:button>
+                                    <flux:button wire:click="openCommissionModal" size="sm" variant="filled" icon="plus" class="cursor-pointer" tooltip="Tambah Komisi" :loading="false">Tambah</flux:button>
                                 @endif
                             </div>
                         </div>
@@ -471,23 +471,23 @@
                                     <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
                                         @foreach($vehicle->commissions->where('type', 2)->sortByDesc('commission_date') as $commission)
                                         <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
-                                            <td class="px-4 py-2">
+                                            <td class="px-4 py-1">
                                                 <flux:text class="text-sm whitespace-nowrap">
                                                     {{ Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') }}
                                                 </flux:text>
                                             </td>
-                                            <td class="px-4 py-2">
+                                            <td class="px-4 py-1">
                                                 <flux:text class="text-sm whitespace-nowrap">
                                                     {{ $commission->description ?? '-' }}
                                                 </flux:text>
                                             </td>
-                                            <td class="px-4 py-2 text-right">
+                                            <td class="px-4 py-1 text-right">
                                                 <flux:text class="text-sm whitespace-nowrap">
                                                     Rp {{ number_format($commission->amount, 0, ',', '.') }}
                                                 </flux:text>
                                             </td>
                                             @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
-                                            <td class="px-4 py-2 text-center">
+                                            <td class="px-4 py-1 text-center">
                                                 <div class="flex items-center justify-center space-x-1">
                                                     @can('vehicle-commission.edit')
                                                     <flux:button
@@ -551,73 +551,71 @@
 
                         <!-- Sales Commissions -->
                         @if($vehicle->commissions->where('type', 1)->count() > 0)
-                        <div class="mb-8">
-                            <div class="flex items-center justify-between">
-                                <flux:heading size="md" class="mb-2 text-green-600 dark:text-green-400">Komisi Penjualan</flux:heading>
-                                <flux:text class="text-sm text-green-600 dark:text-green-400">Total: Rp {{ number_format($vehicle->commissions->where('type', 1)->sum('amount'), 0) }}</flux:text>
-                            </div>
-                            <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
-                                <table class="w-full">
-                                    <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
-                                        <tr></tr>
-                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Tanggal</th>
-                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
-                                            <th class="px-4 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">Jumlah</th>
-                                            @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
-                                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
-                                            @endif
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
-                                        @foreach($vehicle->commissions->where('type', 1)->sortByDesc('commission_date') as $commission)
-                                        <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
-                                            <td class="px-4 py-2">
-                                                <flux:text class="text-sm whitespace-nowrap">
-                                                    {{ Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') }}
-                                                </flux:text>
-                                            </td>
-                                            <td class="px-4 py-2">
-                                                <flux:text class="text-sm whitespace-nowrap">
-                                                    {{ $commission->description ?? '-' }}
-                                                </flux:text>
-                                            </td>
-                                            <td class="px-4 py-2 text-right">
-                                                <flux:text class="text-sm whitespace-nowrap">
-                                                    Rp {{ number_format($commission->amount, 0, ',', '.') }}
-                                                </flux:text>
-                                            </td>
-                                            @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
-                                            <td class="px-4 py-2 text-center">
-                                                <div class="flex items-center justify-center space-x-1">
-                                                    @can('vehicle-commission.edit')
+                        <div class="flex items-center justify-between">
+                            <flux:heading size="md" class="mb-2 text-green-600 dark:text-green-400">Komisi Penjualan</flux:heading>
+                            <flux:text class="text-sm text-green-600 dark:text-green-400">Total: Rp {{ number_format($vehicle->commissions->where('type', 1)->sum('amount'), 0) }}</flux:text>
+                        </div>
+                        <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                    <tr></tr>
+                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Tanggal</th>
+                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
+                                        <th class="px-4 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">Jumlah</th>
+                                        @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
+                                        <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                        @endif
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                    @foreach($vehicle->commissions->where('type', 1)->sortByDesc('commission_date') as $commission)
+                                    <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                        <td class="px-4 py-1">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                {{ Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') }}
+                                            </flux:text>
+                                        </td>
+                                        <td class="px-4 py-1">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                {{ $commission->description ?? '-' }}
+                                            </flux:text>
+                                        </td>
+                                        <td class="px-4 py-1 text-right">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                Rp {{ number_format($commission->amount, 0, ',', '.') }}
+                                            </flux:text>
+                                        </td>
+                                        @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
+                                        <td class="px-4 py-1 text-center">
+                                            <div class="flex items-center justify-center space-x-1">
+                                                @can('vehicle-commission.edit')
+                                                <flux:button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    icon="pencil-square"
+                                                    tooltip="Edit"
+                                                    wire:click="openEditCommissionModal({{ $commission->id }})"
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                ></flux:button>
+                                                @endcan
+                                                @can('vehicle-commission.delete')
+                                                <flux:modal.trigger name="delete-commission-{{ $commission->id }}">
                                                     <flux:button
                                                         variant="ghost"
                                                         size="sm"
-                                                        icon="pencil-square"
-                                                        tooltip="Edit"
-                                                        wire:click="openEditCommissionModal({{ $commission->id }})"
-                                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                        icon="trash"
+                                                        tooltip="Delete"
+                                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
                                                     ></flux:button>
-                                                    @endcan
-                                                    @can('vehicle-commission.delete')
-                                                    <flux:modal.trigger name="delete-commission-{{ $commission->id }}">
-                                                        <flux:button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            icon="trash"
-                                                            tooltip="Delete"
-                                                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                                                        ></flux:button>
-                                                    </flux:modal.trigger>
-                                                    @endcan
-                                                </div>
-                                                </td>
-                                            @endif
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </flux:modal.trigger>
+                                                @endcan
+                                            </div>
+                                            </td>
+                                        @endif
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
 
                         <!-- Delete Commission Confirmation Modals for Sales -->
@@ -648,6 +646,114 @@
                         </flux:modal>
                         @endforeach
                         @endif
+                    </div>
+                    @endif
+                @endif
+
+                <!-- Loan Calculation -->
+                @if(auth()->user()->can('vehicle-loan-calculation.view') || auth()->user()->can('vehicle-loan-calculation.create') || auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete') || auth()->user()->can('vehicle-loan-calculation.audit'))
+                    @if($vehicle->loanCalculations && $vehicle->loanCalculations->count() > 0)
+                    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <flux:heading size="lg">Perhitungan Kredit</flux:heading>
+                            <div class="flex items-center gap-2">
+                                @can('vehicle-loan-calculation.audit')
+                                    <flux:button variant="filled" size="sm" href="{{ route('loan-calculations.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
+                                @endcan
+                                @can('vehicle-loan-calculation.create')
+                                    <flux:button wire:click="openLoanCalculationModal" size="sm" variant="filled" icon="plus" class="cursor-pointer" tooltip="Tambah Perhitungan Kredit">Tambah</flux:button>
+                                @endcan
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Leasing</th>
+                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
+                                        <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Tanggal Dibuat</th>
+                                        @if(auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete'))
+                                        <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                        @endif
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                    @foreach($vehicle->loanCalculations->sortBy('leasing.name') as $loanCalculation)
+                                    <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                        <td class="px-4 py-1">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                {{ $loanCalculation->leasing->name ?? '-' }}
+                                            </flux:text>
+                                        </td>
+                                        <td class="px-4 py-1">
+                                            <flux:text class="text-sm">
+                                                {{ $loanCalculation->description ?? '-' }}
+                                            </flux:text>
+                                        </td>
+                                        <td class="px-4 py-1 text-center">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                {{ Carbon\Carbon::parse($loanCalculation->created_at)->format('d-m-Y') }}
+                                            </flux:text>
+                                        </td>
+                                        @if(auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete'))
+                                        <td class="px-4 py-1 text-center">
+                                            <div class="flex items-center justify-center space-x-1">
+                                                @can('vehicle-loan-calculation.edit')
+                                                <flux:button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    icon="pencil-square"
+                                                    tooltip="Edit"
+                                                    wire:click="openEditLoanCalculationModal({{ $loanCalculation->id }})"
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                ></flux:button>
+                                                @endcan
+                                                @can('vehicle-loan-calculation.delete')
+                                                <flux:modal.trigger name="delete-loan-calculation-{{ $loanCalculation->id }}">
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="trash"
+                                                        tooltip="Delete"
+                                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                    ></flux:button>
+                                                </flux:modal.trigger>
+                                                @endcan
+                                            </div>
+                                        </td>
+                                        @endif
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Delete Loan Calculation Confirmation Modals -->
+                        @foreach($vehicle->loanCalculations as $loanCalculation)
+                        <flux:modal name="delete-loan-calculation-{{ $loanCalculation->id }}" class="min-w-88">
+                            <div class="space-y-6">
+                                <div>
+                                    <flux:heading size="lg">Hapus Perhitungan Kredit?</flux:heading>
+                                    <flux:text class="mt-2">
+                                        Apakah Anda yakin ingin menghapus perhitungan kredit ini? Tindakan ini tidak dapat dibatalkan.
+                                    </flux:text>
+                                </div>
+                                <div class="flex justify-end gap-2">
+                                    <flux:modal.close>
+                                        <flux:button variant="ghost">Batal</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button
+                                        wire:click="deleteLoanCalculation({{ $loanCalculation->id }})"
+                                        variant="danger"
+                                        class="cursor-pointer"
+                                    >
+                                        Hapus Perhitungan Kredit
+                                    </flux:button>
+                                </div>
+                            </div>
+                        </flux:modal>
+                        @endforeach
                     </div>
                     @endif
                 @endif
@@ -892,6 +998,15 @@
                                 </flux:button>
                             @endcan
                         @endif
+
+                        @can('vehicle-loan-calculation.create')
+                            <flux:button wire:click="openLoanCalculationModal" size="sm" icon="banknotes" class="w-full justify-start p-6 cursor-pointer" :loading="false">
+                                <div class="flex flex-col items-start">
+                                    <span>Create New Loan Calculation</span>
+                                    <span class="text-xs text-gray-500 dark:text-zinc-400">Add a new loan calculation</span>
+                                </div>
+                            </flux:button>
+                        @endcan
 
                         @if($vehicle->commissions->where('type', 2)->count() < 4)
                             @can('vehicle-commission.create')
@@ -1462,6 +1577,75 @@
                     class="cursor-pointer"
                 >
                     Update Komisi
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
+
+    <!-- Loan Calculation Create Modal -->
+    <flux:modal wire:model.self="showLoanCalculationModal" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Tambah Perhitungan Kredit</flux:heading>
+                <flux:text class="mt-2">Tambahkan perhitungan kredit baru untuk kendaraan ini.</flux:text>
+            </div>
+            <flux:select wire:model="loan_calculation_leasing_id" label="Leasing">
+                <flux:select.option value="">Pilih Leasing</flux:select.option>
+                @foreach(\App\Models\Leasing::orderBy('name')->get() as $leasing)
+                    <flux:select.option value="{{ $leasing->id }}">{{ $leasing->name }}</flux:select.option>
+                @endforeach
+            </flux:select>
+            <flux:textarea
+                wire:model="loan_calculation_description"
+                label="Perhitungan Kredit"
+                placeholder="Masukkan informasi perhitungan kredit"
+                rows="3"
+            />
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    wire:click="createLoanCalculation"
+                    variant="primary"
+                    class="cursor-pointer"
+                >
+                    Simpan Perhitungan Kredit
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
+
+    <!-- Loan Calculation Edit Modal -->
+    <flux:modal wire:model.self="showEditLoanCalculationModal" name="edit-loan-calculation" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Edit Perhitungan Kredit</flux:heading>
+                <flux:text class="mt-2">Perbarui informasi perhitungan kredit.</flux:text>
+            </div>
+            <flux:select wire:model="loan_calculation_leasing_id" label="Leasing">
+                @foreach(\App\Models\Leasing::all() as $leasing)
+                    <flux:select.option value="{{ $leasing->id }}">{{ $leasing->name }}</flux:select.option>
+                @endforeach
+            </flux:select>
+            <flux:textarea
+                wire:model="loan_calculation_description"
+                label="Deskripsi"
+                placeholder="Masukkan deskripsi perhitungan kredit"
+                rows="3"
+            />
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    wire:click="updateLoanCalculation"
+                    variant="primary"
+                    class="cursor-pointer"
+                >
+                    Update Perhitungan Kredit
                 </flux:button>
             </div>
         </div>

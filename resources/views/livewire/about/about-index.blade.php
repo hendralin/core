@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About WOTO') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About WOTO v1.13.0') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -122,11 +122,22 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="grid grid-cols-3 gap-4 pt-2">
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">🛠️ Equipment Records</flux:text>
                             <flux:text class="text-lg font-semibold text-teal-600 dark:text-teal-400">{{ number_format($stats['equipment_count'] ?? 0) }}</flux:text>
                         </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💰 Loan Calculations</flux:text>
+                            <flux:text class="text-lg font-semibold text-rose-600 dark:text-rose-400">{{ number_format($stats['loan_calculations_count'] ?? 0) }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">🏦 Leasings</flux:text>
+                            <flux:text class="text-lg font-semibold text-cyan-600 dark:text-cyan-400">{{ number_format($stats['leasings_count'] ?? 0) }}</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">📈 New Vehicles</flux:text>
                             <flux:text class="text-lg font-semibold text-purple-600 dark:text-purple-400">{{ number_format($stats['new_vehicles_this_month']) }}</flux:text>
@@ -258,8 +269,16 @@
                     <div class="flex items-start gap-3">
                         <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
                         <div>
+                            <flux:text class="font-medium">💰 Loan Calculation Management</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Sistem perhitungan kredit kendaraan dengan leasing integration, audit trail lengkap, dan sorting berdasarkan nama leasing</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                        <div>
                             <flux:text class="font-medium">Audit Trail</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Tracking lengkap semua perubahan data dengan before/after untuk semua module termasuk commissions</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Tracking lengkap semua perubahan data dengan before/after untuk semua module termasuk commissions dan loan calculations</flux:text>
                         </div>
                     </div>
 
@@ -285,19 +304,20 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.12.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, salesmen management dengan auto-create user account, vehicle completeness checklist, dan database transactions untuk data consistency.
+                            <strong>WOTO v1.13.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, salesmen management dengan auto-create user account, vehicle completeness checklist, dan database transactions untuk data consistency.
                         </flux:text>
                     </div>
 
                     <div>
                         <flux:text class="font-medium mb-2">Fitur Unggulan:</flux:text>
                         <div class="space-y-1">
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 📊 Dashboard overview real-time dengan 4 metric cards modern (Vehicles Sold, Total Sales, Ready for Sale, Total Cost)</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🚗 Vehicles module lengkap dengan Quill editor, auto-formatting, progress indicator, commission management, form persistence, dan vehicle completeness checklist</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🛠️ Vehicle Completeness Checklist: Sistem pencatatan kelengkapan peralatan kendaraan (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak) dengan visual status indicators</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Costs module dengan approval workflow, auto-formatting price (150.000), dan vendor integration</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Commission module lengkap dengan sales/purchase types, modal forms, audit trail, dan vehicle filtering</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Database {{ $stats['brands_count'] }} brand, {{ $stats['vendors_count'] }} vendor, {{ $stats['salesmen_count'] }} salesman, {{ $stats['vehicle_models_count'] }} model STNK, {{ $stats['categories_count'] }} kategori STNK, dan {{ $stats['types_count'] }} tipe kendaraan Indonesia</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 📊 Dashboard overview real-time dengan 4 metric cards modern (Vehicles Sold, Total Sales, Ready for Sale, Total Cost)</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🚗 Vehicles module lengkap dengan Quill editor, auto-formatting, progress indicator, commission management, loan calculation management, form persistence, dan vehicle completeness checklist</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🛠️ Vehicle Completeness Checklist: Sistem pencatatan kelengkapan peralatan kendaraan (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak) dengan visual status indicators</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Costs module dengan approval workflow, auto-formatting price (150.000), dan vendor integration</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Commission module lengkap dengan sales/purchase types, modal forms, audit trail, dan vehicle filtering</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Loan Calculation module dengan leasing integration, audit trail, sorting by leasing name, dan CRUD operations</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Database {{ $stats['brands_count'] }} brand, {{ $stats['vendors_count'] }} vendor, {{ $stats['salesmen_count'] }} salesman, {{ $stats['vehicle_models_count'] }} model STNK, {{ $stats['categories_count'] }} kategori STNK, dan {{ $stats['types_count'] }} tipe kendaraan Indonesia</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Audit trail lengkap dengan before/after tracking untuk semua module termasuk Vehicles & Costs</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Export data ke Excel dan PDF dengan template konsisten di semua module</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Advanced form features: auto-formatting prices, keyboard shortcuts, conditional validation, cascading dropdowns</flux:text>
@@ -406,10 +426,34 @@
                 </flux:heading>
 
                 <div class="space-y-4">
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <flux:text class="font-semibold text-purple-600 dark:text-purple-400">v1.13.0 - Loan Calculation Management System</flux:text>
+                            <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">Latest</span>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
+                            <flux:text>• 💰 Complete Loan Calculation Module: Sistem lengkap manajemen perhitungan kredit kendaraan</flux:text>
+                            <flux:text>• ✅ Loan Calculation CRUD Operations: Create, Read, Update, Delete perhitungan kredit dengan interface lengkap</flux:text>
+                            <flux:text>• ✅ Leasing Integration: Relasi dengan tabel leasings untuk data perusahaan pembiayaan</flux:text>
+                            <flux:text>• ✅ Advanced Form Interface: Modal form dengan validasi lengkap dan error handling</flux:text>
+                            <flux:text>• ✅ Activity Logging: Activity logging lengkap menggunakan Spatie Activity Log dengan HasActivity trait</flux:text>
+                            <flux:text>• ✅ Loan Calculation Audit Trail: Dedicated audit page dengan filtering, search, dan statistics dashboard</flux:text>
+                            <flux:text>• ✅ Advanced Audit Filtering: Search by description/user/leasing, vehicle filter, pagination dengan 10-100 items per page</flux:text>
+                            <flux:text>• ✅ Audit Trail Statistics: Real-time dashboard dengan total activities, today count, created/updated/deleted counters</flux:text>
+                            <flux:text>• ✅ Sorting by Leasing Name: Data diurutkan berdasarkan nama leasing secara alfabetis untuk kemudahan pencarian</flux:text>
+                            <flux:text>• ✅ Permission-based Access: vehicle-loan-calculation.* permissions untuk kontrol akses CRUD operations dan audit</flux:text>
+                            <flux:text>• ✅ Database Integration: Foreign key ke vehicles dan leasings table dengan proper relationships</flux:text>
+                            <flux:text>• ✅ Real-time Updates: Auto-refresh data setelah create/update/delete operations</flux:text>
+                            <flux:text>• ✅ UI Integration: Seamless integration dengan vehicle detail page dan audit system</flux:text>
+                            <flux:text>• ✅ Audit Trail: Activity logging lengkap dengan before/after values untuk semua perubahan</flux:text>
+                            <flux:text>• ✅ Model Relationships: Proper Eloquent relationships antara Vehicle, LoanCalculation, dan Leasing</flux:text>
+                            <flux:text>• ✅ Leasing Management: Database leasings untuk menyimpan data perusahaan leasing/pembiayaan</flux:text>
+                        </div>
+                    </div>
+
                     <div class="border-l-4 border-teal-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
                             <flux:text class="font-semibold text-teal-600 dark:text-teal-400">v1.12.0 - Vehicle Completeness Checklist & Database Transactions</flux:text>
-                            <span class="px-2 py-1 bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
                             <flux:text>• 🛠️ Complete Vehicle Completeness Checklist System: Sistem lengkap pencatatan kelengkapan peralatan kendaraan dengan visual status indicators</flux:text>

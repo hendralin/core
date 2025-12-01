@@ -10,6 +10,7 @@ use App\Models\Commission;
 use Illuminate\Support\Str;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
+use App\Models\LoanCalculation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Auth;
@@ -42,9 +43,18 @@ class VehicleShow extends Component
     public $editingCommissionId = null;
     public $showEditCommissionModal = false;
 
+    // Loan calculation form properties
+    public $showLoanCalculationModal = false;
+    public $loan_calculation_leasing_id = '';
+    public $loan_calculation_description = '';
+
+    // Edit loan calculation properties
+    public $editingLoanCalculationId = null;
+    public $showEditLoanCalculationModal = false;
+
     public function mount(Vehicle $vehicle): void
     {
-        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment']);
+        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations']);
 
         // Get cost summary for this vehicle
         $this->loadCostSummary();
@@ -543,7 +553,197 @@ class VehicleShow extends Component
         // Reload vehicle with commissions
         $this->vehicle->load('commissions');
 
+        // Log the deletion activity
+        activity()
+            ->performedOn($commission)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => [
+                    'vehicle_id' => $this->vehicle->id,
+                    'commission_date' => $commission->commission_date,
+                    'type' => $commission->type,
+                    'amount' => $commission->amount,
+                    'description' => $commission->description,
+                ],
+            ])
+            ->log('deleted commission');
+
         // Show success message
         session()->flash('message', 'Komisi ' . ($commission->type == 1 ? 'Penjualan' : 'Pembelian') . ' berhasil dihapus.');
+    }
+
+    // Loan Calculation Methods
+    public function openLoanCalculationModal()
+    {
+        $this->resetLoanCalculationForm();
+        $this->showLoanCalculationModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeLoanCalculationModal()
+    {
+        $this->showLoanCalculationModal = false;
+        $this->resetLoanCalculationForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function createLoanCalculation()
+    {
+        $this->validate([
+            'loan_calculation_leasing_id' => 'required|exists:leasings,id',
+            'loan_calculation_description' => 'required|string|max:255',
+        ], [
+            'loan_calculation_leasing_id.required' => 'Leasing harus dipilih.',
+            'loan_calculation_leasing_id.exists' => 'Leasing tidak valid.',
+            'loan_calculation_description.required' => 'Deskripsi harus diisi.',
+            'loan_calculation_description.max' => 'Deskripsi maksimal 255 karakter.',
+        ]);
+
+        $loanCalculation = LoanCalculation::create([
+            'vehicle_id' => $this->vehicle->id,
+            'leasing_id' => $this->loan_calculation_leasing_id,
+            'description' => $this->loan_calculation_description,
+        ]);
+
+        // Reload vehicle with loan calculations
+        $this->vehicle->load('loanCalculations');
+
+        // Log the creation activity
+        activity()
+            ->performedOn($loanCalculation)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'attributes' => [
+                    'vehicle_id' => $this->vehicle->id,
+                    'leasing_id' => $this->loan_calculation_leasing_id,
+                    'description' => $this->loan_calculation_description,
+                ]
+            ])
+            ->log('created loan calculation');
+
+        // Show success message
+        session()->flash('message', 'Perhitungan kredit berhasil ditambahkan.');
+
+        // Close modal
+        $this->closeLoanCalculationModal();
+    }
+
+    private function resetLoanCalculationForm()
+    {
+        $this->reset('loan_calculation_leasing_id', 'loan_calculation_description');
+    }
+
+    public function openEditLoanCalculationModal($loanCalculationId)
+    {
+        $loanCalculation = LoanCalculation::findOrFail($loanCalculationId);
+
+        // Check if loan calculation belongs to this vehicle
+        if ($loanCalculation->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->editingLoanCalculationId = $loanCalculationId;
+        $this->loan_calculation_leasing_id = $loanCalculation->leasing_id;
+        $this->loan_calculation_description = $loanCalculation->description;
+
+        $this->showEditLoanCalculationModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeEditLoanCalculationModal()
+    {
+        $this->showEditLoanCalculationModal = false;
+        $this->resetLoanCalculationForm();
+        $this->editingLoanCalculationId = null;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function updateLoanCalculation()
+    {
+        $this->validate([
+            'loan_calculation_leasing_id' => 'required|exists:leasings,id',
+            'loan_calculation_description' => 'required|string|max:255',
+        ], [
+            'loan_calculation_leasing_id.required' => 'Leasing harus dipilih.',
+            'loan_calculation_leasing_id.exists' => 'Leasing tidak valid.',
+            'loan_calculation_description.required' => 'Deskripsi harus diisi.',
+            'loan_calculation_description.max' => 'Deskripsi maksimal 255 karakter.',
+        ]);
+
+        $loanCalculation = LoanCalculation::findOrFail($this->editingLoanCalculationId);
+
+        // Check if loan calculation belongs to this vehicle
+        if ($loanCalculation->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $oldLoanCalculation = [
+            'vehicle_id' => $this->vehicle->id,
+            'leasing_id' => $loanCalculation->leasing_id,
+            'description' => $loanCalculation->description,
+        ];
+
+        $loanCalculation->update([
+            'leasing_id' => $this->loan_calculation_leasing_id,
+            'description' => $this->loan_calculation_description,
+        ]);
+
+        // Reload vehicle with loan calculations
+        $this->vehicle->load('loanCalculations');
+
+        // Log the update activity
+        activity()
+            ->performedOn($loanCalculation)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldLoanCalculation,
+                'attributes' => [
+                    'vehicle_id' => $this->vehicle->id,
+                    'leasing_id' => $this->loan_calculation_leasing_id,
+                    'description' => $this->loan_calculation_description,
+                ],
+            ])
+            ->log('updated loan calculation');
+
+        // Show success message
+        session()->flash('message', 'Perhitungan kredit berhasil diperbarui.');
+
+        // Close modal
+        $this->closeEditLoanCalculationModal();
+    }
+
+    public function deleteLoanCalculation($loanCalculationId)
+    {
+        $loanCalculation = LoanCalculation::findOrFail($loanCalculationId);
+
+        // Check if loan calculation belongs to this vehicle
+        if ($loanCalculation->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $loanCalculation->delete();
+
+        // Reload vehicle with loan calculations
+        $this->vehicle->load('loanCalculations');
+
+        // Log the deletion activity
+        activity()
+            ->performedOn($loanCalculation)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => [
+                    'vehicle_id' => $this->vehicle->id,
+                    'leasing_id' => $loanCalculation->leasing_id,
+                    'description' => $loanCalculation->description,
+                ],
+            ])
+            ->log('deleted loan calculation');
+
+        // Show success message
+        session()->flash('message', 'Perhitungan kredit berhasil dihapus.');
     }
 }

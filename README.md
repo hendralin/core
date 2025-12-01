@@ -1,8 +1,8 @@
 # 🚗 WOTO - Sistem Penjualan Mobil Bekas Showroom
 
-Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, dan mengelola operasional bisnis dengan efisien.
+Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration dan audit trail lengkap, dan mengelola operasional bisnis dengan efisien.
 
-**Version 1.12.0** - Vehicle Completeness Checklist & Database Transactions
+**Version 1.13.0** - Loan Calculation Management System
 
 ## ✨ Fitur Utama
 
@@ -40,6 +40,17 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
   - **Status Badge**: Visual indicator untuk cost approval (Approved/Pending/Rejected)
   - **Paginasi**: Sistem paginasi untuk cost records dengan 10 items per halaman
   - **Gap Analysis**: Analisis selisih antara harga display vs harga actual terjual
+- **💰 Perhitungan Kredit**: Sistem manajemen perhitungan kredit kendaraan
+  - **Loan Calculation CRUD**: Create, Read, Update, Delete perhitungan kredit
+  - **Leasing Integration**: Relasi dengan tabel leasing untuk data perusahaan pembiayaan
+  - **Advanced Form Interface**: Modal form dengan validasi lengkap dan error handling
+  - **Audit Trail**: Activity logging lengkap untuk semua perubahan loan calculations
+  - **Loan Calculation Audit Trail**: Dedicated audit page dengan filtering berdasarkan vehicle
+  - **Advanced Filtering**: Search, vehicle filter, dan pagination untuk audit trail
+  - **Sorting by Leasing Name**: Data diurutkan berdasarkan nama leasing secara alfabetis
+  - **Permission-based Access**: vehicle-loan-calculation.* permissions untuk kontrol akses
+  - **Database Integration**: Foreign key ke vehicles dan leasings table
+  - **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
 
 ### 📋 Master Data Management
 - **Manajemen Brand**: Database merek mobil populer di Indonesia (31+ brand)
@@ -235,9 +246,10 @@ Aplikasi akan berjalan di `http://localhost:8000`
 
 ### Menu Utama
 - **Dashboard**: Overview bisnis dan statistik
-- **Vehicles**: Manajemen inventori kendaraan lengkap dengan CRUD + Commission Management + Audit Trail
+- **Vehicles**: Manajemen inventori kendaraan lengkap dengan CRUD + Commission Management + Loan Calculation Management + Audit Trail
 - **Costs**: Manajemen biaya kendaraan (service, spare parts, maintenance) + Approval Workflow + Audit Trail
 - **Commissions**: Audit trail lengkap untuk semua aktivitas komisi kendaraan + Vehicle Filtering
+- **Loan Calculations**: Audit trail lengkap untuk semua aktivitas perhitungan kredit kendaraan + Vehicle Filtering
 - **Brands**: Manajemen merek mobil (31+ brand Indonesia) + Audit Trail
 - **Vendors**: Manajemen vendor/supplier kendaraan + Audit Trail
 - **Salesmen**: Manajemen salesman dengan auto-create user account + Status management + Audit Trail
@@ -495,6 +507,23 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Amount**: Jumlah komisi (auto-format Rupiah dengan thousand separator)
 - **Vehicle**: Kendaraan terkait (auto-assigned berdasarkan context)
 
+### 💰 Cara Menggunakan Loan Calculations Module
+1. **Akses Loan Calculations**: Klik menu "Loan Calculations" di sidebar untuk melihat audit trail
+2. **View Loan Calculation Tables**: Di halaman vehicle detail, lihat tabel perhitungan kredit
+3. **Add New Loan Calculation**: Klik "Tambah" untuk menambah perhitungan kredit baru
+   - **Leasing Selection**: Pilih perusahaan leasing dari dropdown
+   - **Description**: Masukkan deskripsi perhitungan kredit (required)
+4. **Edit Loan Calculation**: Klik icon edit pada tabel untuk mengubah data
+5. **Delete Loan Calculation**: Klik icon trash untuk menghapus dengan confirmation modal
+6. **Loan Calculation Audit Trail**: Klik "Audit" di halaman vehicle detail untuk melihat riwayat lengkap
+7. **Advanced Filtering**: Gunakan search, vehicle filter, dan pagination
+8. **Export Data**: Gunakan tombol Excel/PDF untuk export data loan calculation audit
+
+### Form Fields Loan Calculations
+- **Leasing**: Pilih perusahaan leasing dari database lengkap
+- **Description**: Deskripsi detail perhitungan kredit (required, max 255 characters)
+- **Vehicle**: Kendaraan terkait (auto-assigned berdasarkan context)
+
 ### Fitur Khusus Vendors Module
 - **Vendor Management**: Database vendor/supplier kendaraan Indonesia
 - **Contact Information**: Informasi lengkap vendor (name, contact, phone, email, address)
@@ -543,6 +572,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicle.*` - Manajemen vehicles (view, create, edit, delete)
 - `vehicle-modal.view` - Akses card analisis harga jual di detail vehicle
 - `vehicle-commission.*` - Manajemen commission records (view, create, edit, delete, audit)
+- `vehicle-loan-calculation.*` - Manajemen loan calculation records (view, create, edit, delete, audit)
 - `cost.*` - Manajemen cost records (view, create, edit, delete)
 - `vehiclemodel.*` - Manajemen vehicle models (view, create, edit, delete)
 - `category.*` - Manajemen categories (view, create, edit, delete)
@@ -585,11 +615,13 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicles` - Data kendaraan lengkap dengan spesifikasi, status, dan data pembeli untuk kwitansi
 - `vehicle_equipment` - Data kelengkapan peralatan kendaraan (STNK, kunci, ban serep, dll) dengan type sales/purchase
 - `commissions` - Data komisi kendaraan (sales/purchase) dengan relasi ke vehicles
+- `loan_calculations` - Data perhitungan kredit kendaraan dengan relasi ke vehicles dan leasings
 - `costs` - Data biaya kendaraan dengan approval workflow
 - `brands` - Merek mobil (31+ brand Indonesia)
 - `vendors` - Vendor/supplier kendaraan (25+ vendor Indonesia)
 - `salesmen` - Data salesman dengan auto-create user account (relasi ke users)
 - `companies` - Data perusahaan untuk kwitansi (nama, alamat, telepon, email, logo, dll)
+- `leasings` - Data perusahaan leasing/pembiayaan kendaraan
 - `types` - Tipe kendaraan dengan format STNK (65+ tipe, relasi ke brands)
 - `warehouses` - Lokasi penyimpanan kendaraan
 - `vehicle_models` - Model kendaraan STNK (SEDAN, SUV, MPV, dll)
@@ -635,6 +667,12 @@ GET    /api/commissions/{id}   - Detail commission record tertentu
 POST   /api/commissions        - Tambah commission record baru
 PUT    /api/commissions/{id}   - Update commission record
 DELETE /api/commissions/{id}  - Hapus commission record
+GET    /api/loan-calculations - List semua loan calculation records
+GET    /api/loan-calculations/{id} - Detail loan calculation record tertentu
+POST   /api/loan-calculations  - Tambah loan calculation record baru
+PUT    /api/loan-calculations/{id} - Update loan calculation record
+DELETE /api/loan-calculations/{id} - Hapus loan calculation record
+GET    /api/leasings           - List semua data leasing
 POST   /api/models             - Tambah model kendaraan baru
 PUT    /api/models/{id}        - Update model kendaraan
 DELETE /api/models/{id}        - Hapus model kendaraan
@@ -698,6 +736,24 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.13.0 - Loan Calculation Management System
+- ✅ **Complete Loan Calculation Module**: Sistem lengkap manajemen perhitungan kredit kendaraan
+- ✅ **Loan Calculation CRUD Operations**: Create, Read, Update, Delete perhitungan kredit dengan interface lengkap
+- ✅ **Leasing Integration**: Relasi dengan tabel leasings untuk data perusahaan pembiayaan
+- ✅ **Advanced Form Interface**: Modal form dengan validasi lengkap dan error handling
+- ✅ **Activity Logging**: Activity logging lengkap menggunakan Spatie Activity Log dengan HasActivity trait
+- ✅ **Loan Calculation Audit Trail**: Dedicated audit page dengan filtering, search, dan statistics dashboard
+- ✅ **Advanced Audit Filtering**: Search by description/user/leasing, vehicle filter, pagination dengan 10-100 items per page
+- ✅ **Audit Trail Statistics**: Real-time dashboard dengan total activities, today count, created/updated/deleted counters
+- ✅ **Sorting by Leasing Name**: Data diurutkan berdasarkan nama leasing secara alfabetis untuk kemudahan pencarian
+- ✅ **Permission-based Access**: vehicle-loan-calculation.* permissions untuk kontrol akses CRUD operations dan audit
+- ✅ **Database Integration**: Foreign key ke vehicles dan leasings table dengan proper relationships
+- ✅ **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
+- ✅ **UI Integration**: Seamless integration dengan vehicle detail page dan audit system
+- ✅ **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan
+- ✅ **Model Relationships**: Proper Eloquent relationships antara Vehicle, LoanCalculation, dan Leasing
+- ✅ **Leasing Management**: Database leasings untuk menyimpan data perusahaan leasing/pembiayaan
 
 ### v1.12.0 - Vehicle Completeness Checklist & Database Transactions
 - ✅ **Vehicle Completeness Checklist System**: Sistem lengkap pencatatan kelengkapan peralatan kendaraan

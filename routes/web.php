@@ -64,6 +64,7 @@ use App\Livewire\VehicleModel\VehicleModelAudit;
 use App\Livewire\VehicleModel\VehicleModelIndex;
 use App\Livewire\VehicleModel\VehicleModelCreate;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
+use App\Livewire\LoanCalculation\LoanCalculationAudit;
 
 // License expired page (accessible even when license is expired)
 Route::get('/license-expired', function () {
@@ -160,6 +161,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('vehicles/{vehicle}', VehicleShow::class)->name('vehicles.show')->middleware(['permission:vehicle.view']);
 
     Route::get('commissions/audit', CommissionAudit::class)->name('commissions.audit')->middleware(['permission:vehicle-commission.audit']);
+    Route::get('loan-calculations/audit', LoanCalculationAudit::class)->name('loan-calculations.audit')->middleware(['permission:vehicle-loan-calculation.audit']);
 
     Route::get('costs', CostIndex::class)->name('costs.index')->middleware(['permission:cost.view|cost.create|cost.edit|cost.delete']);
     Route::get('costs/audit', CostAudit::class)->name('costs.audit')->middleware(['permission:cost.audit']);

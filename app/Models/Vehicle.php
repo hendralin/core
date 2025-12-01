@@ -173,4 +173,12 @@ class Vehicle extends Model
     {
         return $this->hasMany(VehicleEquipment::class);
     }
+
+    /**
+     * Get the loan calculations for the vehicle
+     */
+    public function loanCalculations(): HasMany
+    {
+        return $this->hasMany(LoanCalculation::class);
+    }
 }
