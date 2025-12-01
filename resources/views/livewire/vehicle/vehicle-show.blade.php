@@ -1000,7 +1000,7 @@
                         @endif
 
                         @can('vehicle-loan-calculation.create')
-                            <flux:button wire:click="openLoanCalculationModal" size="sm" icon="banknotes" class="w-full justify-start p-6 cursor-pointer" :loading="false">
+                            <flux:button wire:click="openLoanCalculationModal" size="sm" icon="calculator" class="w-full justify-start p-6 cursor-pointer" :loading="false">
                                 <div class="flex flex-col items-start">
                                     <span>Create New Loan Calculation</span>
                                     <span class="text-xs text-gray-500 dark:text-zinc-400">Add a new loan calculation</span>

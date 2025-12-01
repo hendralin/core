@@ -120,7 +120,7 @@
                 @if(isset($vehicles) && $vehicles->count() > 0)
                     @foreach($vehicles as $index => $vehicle)
                         <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700/50" wire:key="vehicle-{{ $vehicle->id }}">
-                            <td class="px-4 py-2 text-center text-gray-900 dark:text-white">{{ $vehicles->firstItem() + $index }}</td>
+                            <td class="px-4 py-2 text-center @if($vehicle->purchase_date && Carbon\Carbon::parse($vehicle->purchase_date)->diffInMonths(Carbon\Carbon::now()) > 3) bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 @else bg-transparent text-gray-900 dark:text-white @endif">{{ $vehicles->firstItem() + $index }}</td>
                             <td class="px-2 py-2 text-center">
                                 @if($vehicle->images && $vehicle->images->count() > 0)
                                     <div class="relative w-10 h-10 rounded-md overflow-hidden border border-gray-200 dark:border-zinc-600 bg-gray-100 dark:bg-zinc-700 mx-auto cursor-pointer hover:shadow-md transition-shadow"
@@ -142,19 +142,14 @@
                                 @endif
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1">
                                     <flux:modal.trigger name="vehicle-details-{{ $vehicle->id }}">
-                                        <button type="button" class="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors bg-transparent border-none p-0">
-                                            <flux:icon.eye class="w-4 h-4" />
-                                        </button>
+                                        <flux:button variant="ghost" size="xs" square class="cursor-pointer" tooltip="Detail Kendaraan {{ $vehicle->police_number }}" title="Detail Kendaraan {{ $vehicle->police_number }}">
+                                            <flux:icon.eye variant="micro" class="text-blue-500 dark:text-blue-300" />
+                                        </flux:button>
                                     </flux:modal.trigger>
                                     <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-gray-600 dark:text-zinc-300 font-medium">{{ $vehicle->police_number }}</span>
-                                            @if($vehicle->images && $vehicle->images->count() > 0)
-                                                <flux:icon.photo class="w-4 h-4 text-blue-500 dark:text-blue-400" title="{{ $vehicle->images->count() }} images" />
-                                            @endif
-                                        </div>
+                                        <span class="text-gray-600 dark:text-zinc-300 font-medium">{{ $vehicle->police_number }}</span>
                                         @if($vehicle->created_at->diffInDays() <= 7)
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 ml-2">
                                                 New
@@ -227,6 +222,18 @@
                                         </flux:button>
                                     </flux:modal.trigger>
                                 @endcan
+
+                                @if($vehicle->images && $vehicle->images->count() > 0)
+                                <flux:tooltip content="Share {{ $vehicle->images->count() }} images via WhatsApp">
+                                    <button type="button"
+                                            onclick="shareViaWhatsApp('{{ $vehicle->police_number }}', {{ $vehicle->images->map(fn($img) => asset('photos/vehicles/' . $img->image))->toJson() }})"
+                                            class="cursor-pointer text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 transition-colors bg-transparent border-none p-0">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.742.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                                        </svg>
+                                    </button>
+                                </flux:tooltip>
+                                @endif
                             </td>
                         </tr>
                         <!-- Modal for vehicle details -->
@@ -307,24 +314,36 @@
                                             Informasi Harga
                                         </h4>
                                         <div class="space-y-1 text-sm">
+                                            @if($vehicle->purchase_date)
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600 dark:text-zinc-400">Tgl. Pembelian:</span>
+                                                <span class="text-gray-900 dark:text-white font-medium">{{ Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') }}</span>
+                                            </div>
+                                            @endif
                                             <div class="flex justify-between">
                                                 <span class="text-gray-600 dark:text-zinc-400">Harga Beli:</span>
                                                 <span class="text-gray-900 dark:text-white font-medium">{{ $vehicle->purchase_price ? 'Rp ' . number_format($vehicle->purchase_price, 0, ',', '.') : '-' }}</span>
                                             </div>
                                             <div class="flex justify-between">
-                                                <span class="text-gray-600 dark:text-zinc-400">Harga Jual:</span>
+                                                <span class="text-gray-600 dark:text-zinc-400">Harga Tunai:</span>
                                                 <span class="text-green-600 dark:text-green-400 font-medium">{{ $vehicle->display_price ? 'Rp ' . number_format($vehicle->display_price, 0, ',', '.') : '-' }}</span>
                                             </div>
+                                            @if($vehicle->loan_price)
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600 dark:text-zinc-400">Harga Kredit:</span>
+                                                <span class="text-blue-600 dark:text-blue-400 font-medium">{{ $vehicle->loan_price ? 'Rp ' . number_format($vehicle->loan_price, 0, ',', '.') : '-' }}</span>
+                                            </div>
+                                            @endif
+                                            @if($vehicle->roadside_allowance)
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600 dark:text-zinc-400">Biaya Uang Jalan:</span>
+                                                <span class="text-gray-900 dark:text-white font-medium">{{ $vehicle->roadside_allowance ? 'Rp ' . number_format($vehicle->roadside_allowance, 0, ',', '.') : '-' }}</span>
+                                            </div>
+                                            @endif
                                             @if($vehicle->selling_price)
                                             <div class="flex justify-between">
                                                 <span class="text-gray-600 dark:text-zinc-400">Harga Penjualan:</span>
                                                 <span class="text-blue-600 dark:text-blue-400 font-medium">{{ $vehicle->selling_price ? 'Rp ' . number_format($vehicle->selling_price, 0, ',', '.') : '-' }}</span>
-                                            </div>
-                                            @endif
-                                            @if($vehicle->purchase_date)
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600 dark:text-zinc-400">Tgl. Pembelian:</span>
-                                                <span class="text-gray-900 dark:text-white font-medium">{{ Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') }}</span>
                                             </div>
                                             @endif
                                         </div>
@@ -365,6 +384,60 @@
                                         </div>
                                     </div>
                                     @endif
+
+                                    <!-- Credit Calculation -->
+                                    <div class="bg-white dark:bg-zinc-800 rounded-lg p-3 border border-gray-200 dark:border-zinc-700">
+                                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                                            <flux:icon.calculator class="w-4 h-4 mr-2 text-gray-600 dark:text-zinc-400" />
+                                            Perhitungan Kredit
+                                        </h4>
+
+                                        <!-- Actual Loan Calculations -->
+                                        @if($vehicle->loanCalculations && $vehicle->loanCalculations->count() > 0)
+                                        <div class="space-y-3">
+                                            <div class="grid grid-cols-2 gap-3">
+                                                @foreach($vehicle->loanCalculations->take(3) as $index => $loanCalculation)
+                                                @php
+                                                    $colors = [
+                                                        ['bg' => 'bg-blue-50 dark:bg-blue-900/20', 'border' => 'border-blue-200 dark:border-blue-700'],
+                                                        ['bg' => 'bg-green-50 dark:bg-green-900/20', 'border' => 'border-green-200 dark:border-green-700'],
+                                                        ['bg' => 'bg-purple-50 dark:bg-purple-900/20', 'border' => 'border-purple-200 dark:border-purple-700'],
+                                                        ['bg' => 'bg-orange-50 dark:bg-orange-900/20', 'border' => 'border-orange-200 dark:border-orange-700'],
+                                                        ['bg' => 'bg-pink-50 dark:bg-pink-900/20', 'border' => 'border-pink-200 dark:border-pink-700'],
+                                                        ['bg' => 'bg-indigo-50 dark:bg-indigo-900/20', 'border' => 'border-indigo-200 dark:border-indigo-700']
+                                                    ];
+                                                    $colorIndex = $index % count($colors);
+                                                    $currentColor = $colors[$colorIndex];
+                                                @endphp
+                                                <div class="{{ $currentColor['bg'] }} rounded-lg p-3 border {{ $currentColor['border'] }}">
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        <flux:text class="font-medium text-gray-900 dark:text-white">{{ $loanCalculation->leasing->name ?? '-' }}</flux:text>
+                                                        <flux:text class="text-xs text-gray-500 dark:text-zinc-400">{{ Carbon\Carbon::parse($loanCalculation->created_at)->format('d-m-Y') }}</flux:text>
+                                                    </div>
+                                                    @if($loanCalculation->description)
+                                                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400">{{ Str::limit($loanCalculation->description, 100) }}</flux:text>
+                                                    @endif
+                                                </div>
+                                                @endforeach
+                                            </div>
+
+                                            @if($vehicle->loanCalculations->count() > 4)
+                                            <div class="text-center">
+                                                <flux:text class="text-sm text-gray-500 dark:text-zinc-400">
+                                                    Dan {{ $vehicle->loanCalculations->count() - 4 }} perhitungan lainnya...
+                                                </flux:text>
+                                            </div>
+                                            @endif
+                                        </div>
+                                        @else
+                                        <div class="text-center py-4">
+                                            <flux:icon.calculator class="w-8 h-8 text-gray-400 dark:text-gray-600 mx-auto mb-2" />
+                                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
+                                                Belum ada perhitungan kredit tersimpan
+                                            </flux:text>
+                                        </div>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <div class="flex gap-2">
@@ -408,6 +481,9 @@
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium @if($vehicle->purchase_date && Carbon\Carbon::parse($vehicle->purchase_date)->diffInMonths(Carbon\Carbon::now()) > 3) bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 @else bg-gray-100 text-gray-800 dark:bg-zinc-700 dark:text-zinc-300 @endif">
+                                        No. {{ $vehicles->firstItem() + $index }}
+                                    </span>
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                         {{ $vehicle->police_number }}
                                     </h3>
@@ -589,6 +665,12 @@
                                             Informasi Harga
                                         </h4>
                                         <div class="space-y-2 text-sm">
+                                            @if($vehicle->purchase_date)
+                                            <div>
+                                                <span class="text-gray-500 dark:text-zinc-400">Tgl. Pembelian:</span>
+                                                <div class="text-gray-900 dark:text-white font-medium">{{ Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') }}</div>
+                                            </div>
+                                            @endif
                                             <div>
                                                 <span class="text-gray-500 dark:text-zinc-400">Harga Beli:</span>
                                                 <div class="text-gray-900 dark:text-white font-medium">{{ $vehicle->purchase_price ? 'Rp ' . number_format($vehicle->purchase_price, 0, ',', '.') : '-' }}</div>
@@ -615,15 +697,52 @@
                                                 <div class="text-blue-600 dark:text-blue-400 font-medium">{{ $vehicle->selling_price ? 'Rp ' . number_format($vehicle->selling_price, 0, ',', '.') : '-' }}</div>
                                             </div>
                                             @endif
-                                            @if($vehicle->purchase_date)
-                                            <div>
-                                                <span class="text-gray-500 dark:text-zinc-400">Tgl. Pembelian:</span>
-                                                <div class="text-gray-900 dark:text-white font-medium">{{ Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') }}</div>
-                                            </div>
-                                            @endif
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Loan Calculations -->
+                                @if($vehicle->loanCalculations && $vehicle->loanCalculations->count() > 0)
+                                <div class="bg-gray-50 dark:bg-zinc-700/30 rounded-lg p-3">
+                                    <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                                        <flux:icon.calculator class="w-4 h-4 mr-2 text-gray-600 dark:text-zinc-400" />
+                                        Perhitungan Kredit
+                                    </h4>
+                                    <div class="grid grid-cols-1 gap-2">
+                                        @foreach($vehicle->loanCalculations->take(3) as $index => $loanCalculation)
+                                        @php
+                                            $colors = [
+                                                ['bg' => 'bg-blue-50 dark:bg-blue-900/20', 'border' => 'border-blue-200 dark:border-blue-700'],
+                                                ['bg' => 'bg-green-50 dark:bg-green-900/20', 'border' => 'border-green-200 dark:border-green-700'],
+                                                ['bg' => 'bg-purple-50 dark:bg-purple-900/20', 'border' => 'border-purple-200 dark:border-purple-700'],
+                                                ['bg' => 'bg-orange-50 dark:bg-orange-900/20', 'border' => 'border-orange-200 dark:border-orange-700'],
+                                                ['bg' => 'bg-pink-50 dark:bg-pink-900/20', 'border' => 'border-pink-200 dark:border-pink-700'],
+                                                ['bg' => 'bg-indigo-50 dark:bg-indigo-900/20', 'border' => 'border-indigo-200 dark:border-indigo-700']
+                                            ];
+                                            $colorIndex = $index % count($colors);
+                                            $currentColor = $colors[$colorIndex];
+                                        @endphp
+                                        <div class="{{ $currentColor['bg'] }} rounded-lg p-3 border {{ $currentColor['border'] }}">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <flux:text class="font-medium text-gray-900 dark:text-white">{{ $loanCalculation->leasing->name ?? '-' }}</flux:text>
+                                                <flux:text class="text-xs text-gray-500 dark:text-zinc-400">{{ Carbon\Carbon::parse($loanCalculation->created_at)->format('d-m-Y') }}</flux:text>
+                                            </div>
+                                            @if($loanCalculation->description)
+                                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">{{ Str::limit($loanCalculation->description, 100) }}</flux:text>
+                                            @endif
+                                        </div>
+                                        @endforeach
+
+                                        @if($vehicle->loanCalculations->count() > 3)
+                                        <div class="text-center">
+                                            <flux:text class="text-sm text-gray-500 dark:text-zinc-400">
+                                                Dan {{ $vehicle->loanCalculations->count() - 3 }} perhitungan lainnya...
+                                            </flux:text>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endif
 
                                 <!-- Description -->
                                 @if($vehicle->description)
@@ -671,6 +790,18 @@
                                         </flux:button>
                                     </flux:modal.trigger>
                                 @endcan
+
+                                @if($vehicle->images && $vehicle->images->count() > 0)
+                                <flux:tooltip content="Share {{ $vehicle->images->count() }} images via WhatsApp">
+                                    <button type="button"
+                                            onclick="shareViaWhatsApp('{{ $vehicle->police_number }}', {{ $vehicle->images->map(fn($img) => asset('photos/vehicles/' . $img->image))->toJson() }})"
+                                            class="cursor-pointer text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300 transition-colors bg-transparent border-none p-2">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.742.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                                        </svg>
+                                    </button>
+                                </flux:tooltip>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -904,4 +1035,57 @@
             closeImageModal();
         }
     });
+
+    // Share images via WhatsApp
+    async function shareViaWhatsApp(vehicleName, imageUrls) {
+        // Try to share images directly using Web Share API (if supported)
+        if (navigator.share && navigator.canShare) {
+            try {
+                const imagePromises = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
+                const imageBlobs = [];
+
+                // Fetch images and convert to blobs
+                for (const url of imagePromises) {
+                    try {
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        imageBlobs.push(new File([blob], `vehicle-${vehicleName}-${imageBlobs.length + 1}.jpg`, { type: 'image/jpeg' }));
+                    } catch (error) {
+                        console.warn('Failed to fetch image:', url, error);
+                    }
+                }
+
+                // Share files directly if we have any
+                if (imageBlobs.length > 0) {
+                    const shareData = {
+                        title: `Foto Kendaraan ${vehicleName}`,
+                        text: `Berbagi ${imageBlobs.length} foto kendaraan ${vehicleName}`,
+                        files: imageBlobs
+                    };
+
+                    if (navigator.canShare(shareData)) {
+                        await navigator.share(shareData);
+                        return; // Success, exit function
+                    }
+                }
+            } catch (error) {
+                console.warn('Web Share API failed, falling back to link sharing:', error);
+            }
+        }
+
+        // Fallback: Share links via WhatsApp web
+        let message = `Halo, saya ingin berbagi ${imageUrls.length} foto kendaraan ${vehicleName} yang saya temukan di aplikasi kami.\n\n`;
+
+        if (Array.isArray(imageUrls)) {
+            message += `Foto kendaraan (${imageUrls.length} gambar):\n`;
+            imageUrls.forEach((url, index) => {
+                message += `Foto ${index + 1}: ${url}\n`;
+            });
+        } else {
+            message += `Silakan klik link berikut untuk melihat foto: ${imageUrls}`;
+        }
+
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    }
 </script>
