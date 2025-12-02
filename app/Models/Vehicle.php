@@ -181,4 +181,12 @@ class Vehicle extends Model
     {
         return $this->hasMany(LoanCalculation::class);
     }
+
+    /**
+     * Get the purchase payments for the vehicle
+     */
+    public function purchasePayments(): HasMany
+    {
+        return $this->hasMany(PurchasePayment::class);
+    }
 }

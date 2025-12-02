@@ -12,9 +12,7 @@
     <!-- Flash Messages -->
     @if (session()->has('message'))
         <div class="mb-6">
-            <flux:callout variant="success" class="mb-4" icon="check-circle">
-                {{ session('message') }}
-            </flux:callout>
+            <flux:callout variant="success" class="mb-4" icon="check-circle" heading="{{ session('message') }}" />
         </div>
     @endif
 
@@ -369,7 +367,28 @@
 
                 <!-- Financial Information -->
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
-                    <flux:heading size="lg" class="mb-4">Informasi Keuangan</flux:heading>
+                    <div class="flex items-center justify-between mb-4">
+                        <flux:heading size="lg">Informasi Keuangan</flux:heading>
+                        <div class="flex items-center gap-2">
+                            @if($vehicle->purchasePayments->sum('amount') == 0)
+                                <flux:badge icon="x-circle" color="red">Belum Lunas</flux:badge>
+                            @elseif($vehicle->purchasePayments->sum('amount') == $vehicle->purchase_price)
+                                <flux:badge icon="check-circle" color="green">Lunas</flux:badge>
+                            @else
+                                <flux:tooltip content="Sisa Pembayaran: Rp {{ number_format($vehicle->purchase_price - $vehicle->purchasePayments->sum('amount'), 0, ',', '.') }}">
+                                    <flux:badge icon="exclamation-circle" color="yellow">Pembayaran Parsial</flux:badge>
+                                </flux:tooltip>
+                            @endif
+                            @can('vehicle-purchase-payment.audit')
+                                <flux:button variant="filled" size="sm" href="{{ route('purchase-payments.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
+                            @endcan
+                            @can('vehicle-purchase-payment.create')
+                                @if($vehicle->purchasePayments->sum('amount') < ($vehicle->purchase_price ?? 0))
+                                    <flux:button wire:click="openPurchasePaymentModal" variant="filled" size="sm" icon="plus" class="cursor-pointer" tooltip="Tambah Pembayaran Pembelian">Tambah</flux:button>
+                                @endif
+                            @endcan
+                        </div>
+                    </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -397,6 +416,138 @@
                             <flux:text class="mt-1">{{ $vehicle->roadside_allowance ? 'Rp ' . number_format($vehicle->roadside_allowance, 0, ',', '.') : '-' }}</flux:text>
                         </div>
                     </div>
+
+                    <!-- Purchase Payments -->
+                    @if(auth()->user()->can('vehicle-purchase-payment.view') || auth()->user()->can('vehicle-purchase-payment.create') || auth()->user()->can('vehicle-purchase-payment.edit') || auth()->user()->can('vehicle-purchase-payment.delete') || auth()->user()->can('vehicle-purchase-payment.audit'))
+                        @if($vehicle->purchasePayments && $vehicle->purchasePayments->count() > 0)
+                            @if($vehicle->purchasePayments->sum('amount') < $vehicle->purchase_price)
+                                <flux:callout variant="warning" icon="exclamation-circle" class="mt-4" heading="Sisa Pembayaran: Rp {{ number_format($vehicle->purchase_price - $vehicle->purchasePayments->sum('amount'), 0, ',', '.') }}." />
+                            @endif
+                            <div class="flex items-center justify-between mt-6 mb-2">
+                                <flux:heading size="md">Rincian Pembayaran Pembelian</flux:heading>
+                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->purchasePayments->sum('amount'), 0) }}</flux:text>
+                            </div>
+                            <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Tanggal</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Jumlah</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Dokumen</th>
+                                            @if(auth()->user()->can('vehicle-purchase-payment.edit') || auth()->user()->can('vehicle-purchase-payment.delete'))
+                                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                        @foreach($vehicle->purchasePayments as $payment)
+                                        <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    {{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('d-m-Y') : '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm whitespace-nowrap md:whitespace-normal">
+                                                    {{ $payment->description ?? '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm font-medium whitespace-nowrap">
+                                                    Rp {{ number_format($payment->amount, 0, ',', '.') }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                @if($payment->document)
+                                                    @php
+                                                        $files = explode(',', $payment->document);
+                                                    @endphp
+                                                    <div class="flex space-x-1 space-y-1">
+                                                        @foreach($files as $file)
+                                                            @php
+                                                                $fileName = trim($file);
+                                                                $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                                                            @endphp
+                                                            <a href="{{ asset('documents/purchase-payments/' . $fileName) }}" target="_blank" class="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                                                @if($extension === 'pdf')
+                                                                    <flux:icon.document class="w-4 h-4" />
+                                                                @elseif(in_array($extension, ['jpg', 'jpeg', 'png']))
+                                                                    <flux:icon.photo class="w-4 h-4" />
+                                                                @else
+                                                                    <flux:icon.document class="w-4 h-4" />
+                                                                @endif
+                                                            </a>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                                @endif
+                                            </td>
+                                            @if(auth()->user()->can('vehicle-purchase-payment.edit') || auth()->user()->can('vehicle-purchase-payment.delete'))
+                                            <td class="px-4 py-1 text-center">
+                                                <div class="flex items-center justify-center space-x-1">
+                                                @can('vehicle-purchase-payment.edit')
+                                                <flux:button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    icon="pencil-square"
+                                                    tooltip="Edit"
+                                                    wire:click="editPurchasePayment({{ $payment->id }})"
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                ></flux:button>
+                                                @endcan
+                                                @can('vehicle-purchase-payment.delete')
+                                                <flux:modal.trigger name="delete-purchase-payment-{{ $payment->id }}">
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="trash"
+                                                        tooltip="Hapus"
+                                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                    ></flux:button>
+                                                </flux:modal.trigger>
+                                                @endcan
+                                                </div>
+                                            </td>
+                                            @endif
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <flux:callout variant="danger" icon="x-circle" class="mt-4" heading="Belum ada pembayaran pembelian untuk kendaraan ini. Silakan tambahkan pembayaran pembelian." />
+                        @endif
+                    @endif
+
+                    <!-- Delete Purchase Payment Confirmation Modals -->
+                    @if($vehicle->purchasePayments && $vehicle->purchasePayments->count() > 0)
+                        @foreach($vehicle->purchasePayments as $payment)
+                        <flux:modal name="delete-purchase-payment-{{ $payment->id }}" class="min-w-88">
+                            <div class="space-y-6">
+                                <div>
+                                    <flux:heading size="lg">Hapus Pembayaran Pembelian?</flux:heading>
+                                    <flux:text class="mt-2">
+                                        Apakah Anda yakin ingin menghapus pembayaran pembelian ini? Tindakan ini tidak dapat dibatalkan.
+                                    </flux:text>
+                                </div>
+                                <div class="flex justify-end gap-2">
+                                    <flux:modal.close>
+                                        <flux:button variant="ghost">Batal</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button
+                                        wire:click="deletePurchasePayment({{ $payment->id }})"
+                                        variant="danger"
+                                        class="cursor-pointer"
+                                    >
+                                        Hapus Pembayaran
+                                    </flux:button>
+                                </div>
+                            </div>
+                        </flux:modal>
+                        @endforeach
+                    @endif
                 </div>
 
                 <!-- Buyer Information (only shown when status is Sold) -->
@@ -444,7 +595,7 @@
                                     <flux:button variant="filled" size="sm" href="{{ route('commissions.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
                                 @endcan
                                 @if($vehicle->commissions->where('type', 2)->count() < 4)
-                                    <flux:button wire:click="openCommissionModal" size="sm" variant="filled" icon="plus" class="cursor-pointer" tooltip="Tambah Komisi" :loading="false">Tambah</flux:button>
+                                    <flux:button wire:click="openCommissionModal" size="sm" variant="filled" icon="plus" class="cursor-pointer" tooltip="Tambah Komisi">Tambah</flux:button>
                                 @endif
                             </div>
                         </div>
@@ -453,8 +604,8 @@
                         @if($vehicle->commissions->where('type', 2)->count() > 0)
                         <div class="mb-8">
                             <div class="flex items-center justify-between">
-                                <flux:heading size="md" class="mb-2 text-blue-600 dark:text-blue-400">Komisi Pembelian (Max 4)</flux:heading>
-                                <flux:text class="text-sm text-blue-600 dark:text-blue-400">Total: Rp {{ number_format($vehicle->commissions->where('type', 2)->sum('amount'), 0) }}</flux:text>
+                                <flux:heading size="md" class="mb-2">Komisi Pembelian (Max 4)</flux:heading>
+                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->commissions->where('type', 2)->sum('amount'), 0) }}</flux:text>
                             </div>
                             <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
                                 <table class="w-full">
@@ -552,8 +703,8 @@
                         <!-- Sales Commissions -->
                         @if($vehicle->commissions->where('type', 1)->count() > 0)
                         <div class="flex items-center justify-between">
-                            <flux:heading size="md" class="mb-2 text-green-600 dark:text-green-400">Komisi Penjualan</flux:heading>
-                            <flux:text class="text-sm text-green-600 dark:text-green-400">Total: Rp {{ number_format($vehicle->commissions->where('type', 1)->sum('amount'), 0) }}</flux:text>
+                            <flux:heading size="md" class="mb-2">Komisi Penjualan</flux:heading>
+                            <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->commissions->where('type', 1)->sum('amount'), 0) }}</flux:text>
                         </div>
                         <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
                             <table class="w-full">
@@ -1650,6 +1801,121 @@
             </div>
         </div>
     </flux:modal>
+
+<!-- Purchase Payment Modal -->
+<flux:modal wire:model.self="showPurchasePaymentModal" class="md:w-96" @open="resetValidation(); resetErrorBag()">
+    <div class="space-y-6">
+        <div>
+            <flux:heading size="lg">Tambah Pembayaran Pembelian</flux:heading>
+            <flux:text class="mt-2">Tambahkan pembayaran untuk pembelian kendaraan ini.</flux:text>
+        </div>
+
+        @if (session()->has('error'))
+            <div class="mb-6">
+                <flux:callout variant="warning" class="mb-4" icon="exclamation-circle" heading="{{ session('error') }}" />
+            </div>
+        @endif
+
+        <form wire:submit="savePurchasePayment">
+            <div class="space-y-4">
+                <flux:input
+                    label="Tanggal Pembayaran"
+                    type="date"
+                    wire:model="purchase_payment_date"
+                />
+
+                <flux:input
+                    label="Deskripsi"
+                    placeholder="Deskripsi pembayaran..."
+                    wire:model="purchase_payment_description"
+                />
+
+                <flux:input
+                    label="Jumlah"
+                    mask:dynamic="$money($input)"
+                    placeholder="188,000,000"
+                    icon="currency-dollar"
+                    wire:model="purchase_payment_amount"
+                />
+
+                <flux:input
+                    type="file"
+                    label="Dokumen (Opsional)"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    wire:model="purchase_payment_document"
+                    multiple
+                />
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary" class="cursor-pointer">
+                    Simpan Pembayaran
+                </flux:button>
+            </div>
+        </form>
+    </div>
+</flux:modal>
+
+<!-- Edit Purchase Payment Modal -->
+<flux:modal wire:model.self="showEditPurchasePaymentModal" class="md:w-96" @open="resetValidation(); resetErrorBag()">
+    <div class="space-y-6">
+        <div>
+            <flux:heading size="lg">Edit Pembayaran Pembelian</flux:heading>
+            <flux:text class="mt-2">Perbarui informasi pembayaran pembelian.</flux:text>
+        </div>
+
+        @if (session()->has('error'))
+            <div class="mb-6">
+                <flux:callout variant="warning" class="mb-4" icon="exclamation-circle" heading="{{ session('error') }}" />
+            </div>
+        @endif
+
+        <form wire:submit="updatePurchasePayment">
+            <div class="space-y-4">
+                <flux:input
+                    label="Tanggal Pembayaran"
+                    type="date"
+                    wire:model="purchase_payment_date"
+                />
+
+                <flux:input
+                    label="Deskripsi"
+                    placeholder="Deskripsi pembayaran..."
+                    wire:model="purchase_payment_description"
+                />
+
+                <flux:input
+                    label="Jumlah"
+                    icon="currency-dollar"
+                    mask:dynamic="$money($input)"
+                    placeholder="188,000,000"
+                    wire:model="purchase_payment_amount"
+                />
+
+                <flux:input
+                    type="file"
+                    label="Dokumen (Opsional)"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    wire:model="purchase_payment_document"
+                    multiple
+                />
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary" class="cursor-pointer">
+                    Perbarui Pembayaran
+                </flux:button>
+            </div>
+        </form>
+    </div>
+</flux:modal>
+
 </div>
 
 <script>

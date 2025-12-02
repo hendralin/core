@@ -10,15 +10,18 @@ use App\Models\Commission;
 use Illuminate\Support\Str;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
+use Livewire\WithFileUploads;
 use App\Models\LoanCalculation;
+use App\Models\PurchasePayment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 #[Title('Show Vehicle')]
 class VehicleShow extends Component
 {
-    use WithPagination, WithoutUrlPagination;
+    use WithPagination, WithoutUrlPagination, WithFileUploads;
 
     public Vehicle $vehicle;
     public $recentActivities;
@@ -52,9 +55,20 @@ class VehicleShow extends Component
     public $editingLoanCalculationId = null;
     public $showEditLoanCalculationModal = false;
 
+    // Purchase payment form properties
+    public $showPurchasePaymentModal = false;
+    public $purchase_payment_date = '';
+    public $purchase_payment_description = '';
+    public $purchase_payment_amount = '';
+    public $purchase_payment_document = [];
+
+    // Edit purchase payment properties
+    public $showEditPurchasePaymentModal = false;
+    public $editingPurchasePaymentId = null;
+
     public function mount(Vehicle $vehicle): void
     {
-        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations']);
+        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments']);
 
         // Get cost summary for this vehicle
         $this->loadCostSummary();
@@ -745,5 +759,356 @@ class VehicleShow extends Component
 
         // Show success message
         session()->flash('message', 'Perhitungan kredit berhasil dihapus.');
+    }
+
+    // Purchase Payment Modal Methods
+    public function openPurchasePaymentModal()
+    {
+        $this->resetPurchasePaymentForm();
+        $this->showPurchasePaymentModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closePurchasePaymentModal()
+    {
+        $this->showPurchasePaymentModal = false;
+        $this->resetPurchasePaymentForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function resetPurchasePaymentForm()
+    {
+        $this->purchase_payment_date = '';
+        $this->purchase_payment_description = '';
+        $this->purchase_payment_amount = '';
+        $this->purchase_payment_document = [];
+    }
+
+    public function generatePaymentNumber()
+    {
+        $now = now();
+        $month = $now->month;
+        $year = $now->year;
+        $monthRoman = $this->monthToRoman($month);
+
+        // Get the last payment number for this month and year
+        $lastPayment = PurchasePayment::where('payment_number', 'like', "%/PP/WOTO/{$monthRoman}/{$year}")
+            ->orderBy('payment_number', 'desc')
+            ->first();
+
+        if ($lastPayment) {
+            // Extract the sequential number and increment
+            $parts = explode('/', $lastPayment->payment_number);
+            $sequence = (int) $parts[0];
+            $sequence++;
+        } else {
+            // Start from 0001 for new month/year
+            $sequence = 1;
+        }
+
+        // Format sequence with leading zeros (4 digits)
+        $formattedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        return "{$formattedSequence}/PP/WOTO/{$monthRoman}/{$year}";
+    }
+
+    private function monthToRoman($month)
+    {
+        $romanNumerals = [
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII'
+        ];
+
+        return $romanNumerals[$month] ?? 'I';
+    }
+
+    private function getTotalPurchasePayments()
+    {
+        return $this->vehicle->purchasePayments->sum('amount');
+    }
+
+    public function savePurchasePayment()
+    {
+        // Check if user has permission to create purchase payment
+        $this->authorize('vehicle-purchase-payment.create', $this->vehicle);
+
+        // Check if total payments would exceed purchase price
+        $currentTotalPaid = $this->getTotalPurchasePayments();
+        $newPaymentAmount = Str::replace(',', '', $this->purchase_payment_amount);
+        $purchasePrice = $this->vehicle->purchase_price ?? 0;
+
+        if (($currentTotalPaid + $newPaymentAmount) > $purchasePrice) {
+            session()->flash('error', 'Total pembayaran tidak boleh melebihi harga beli kendaraan.');
+            return;
+        }
+
+        // Validate the form
+        $this->validate([
+            'purchase_payment_date' => 'required|date',
+            'purchase_payment_description' => 'required|string|max:255',
+            'purchase_payment_amount' => 'required|string',
+            'purchase_payment_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ], [
+            'purchase_payment_date.required' => 'Tanggal pembayaran harus diisi.',
+            'purchase_payment_date.date' => 'Tanggal pembayaran tidak valid.',
+            'purchase_payment_description.required' => 'Deskripsi pembayaran harus diisi.',
+            'purchase_payment_description.string' => 'Deskripsi pembayaran harus berupa teks.',
+            'purchase_payment_description.max' => 'Deskripsi pembayaran maksimal 255 karakter.',
+            'purchase_payment_amount.required' => 'Jumlah pembayaran harus diisi.',
+            'purchase_payment_amount.string' => 'Jumlah pembayaran harus berupa angka.',
+            'purchase_payment_document.file' => 'Dokumen harus berupa file.',
+            'purchase_payment_document.mimes' => 'Dokumen harus berupa file PDF, JPG, JPEG, atau PNG.',
+            'purchase_payment_document.max' => 'Ukuran dokumen maksimal 2MB.',
+        ]);
+
+        // Handle file upload if provided
+        $documentPath = null;
+        if ($this->purchase_payment_document) {
+            $fileNames = [];
+
+            // Always treat as array since we use multiple attribute
+            $files = (array) $this->purchase_payment_document;
+
+            foreach ($files as $file) {
+                if ($file && is_object($file)) { // Make sure it's a valid file object
+                    $storedPath = $file->store('documents/purchase-payments', 'public');
+                    $fileNames[] = basename($storedPath);
+                }
+            }
+
+            if (!empty($fileNames)) {
+                $documentPath = implode(',', $fileNames);
+            }
+        }
+
+        // Generate payment number
+        $paymentNumber = $this->generatePaymentNumber();
+
+        // Create purchase payment
+        $purchasePayment = PurchasePayment::create([
+            'vehicle_id' => $this->vehicle->id,
+            'payment_number' => $paymentNumber,
+            'payment_date' => $this->purchase_payment_date,
+            'amount' => Str::replace(',', '', $this->purchase_payment_amount),
+            'description' => $this->purchase_payment_description,
+            'document' => $documentPath,
+            'created_by' => Auth::id(),
+            'status' => 'approved', // approved status
+        ]);
+
+        // Reload vehicle with purchase payments
+        $this->vehicle->load('purchasePayments');
+
+        // Log the creation activity
+        activity()
+            ->performedOn($purchasePayment)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'attributes' => [
+                    'vehicle_id' => $this->vehicle->id,
+                    'payment_number' => $paymentNumber,
+                    'payment_date' => $this->purchase_payment_date,
+                    'amount' => Str::replace(',', '', $this->purchase_payment_amount),
+                    'description' => $this->purchase_payment_description,
+                    'document' => $documentPath,
+                ],
+            ])
+            ->log('created purchase payment');
+
+        // Show success message
+        session()->flash('message', 'Pembayaran pembelian berhasil ditambahkan.');
+
+        // Close modal
+        $this->closePurchasePaymentModal();
+    }
+
+    public function editPurchasePayment($purchasePaymentId)
+    {
+        $purchasePayment = PurchasePayment::findOrFail($purchasePaymentId);
+
+        // Check if purchase payment belongs to this vehicle
+        if ($purchasePayment->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Fill form with existing data
+        $this->editingPurchasePaymentId = $purchasePaymentId;
+        $this->purchase_payment_date = $purchasePayment->payment_date ? \Carbon\Carbon::parse($purchasePayment->payment_date)->format('Y-m-d') : '';
+        $this->purchase_payment_description = $purchasePayment->description;
+        $this->purchase_payment_amount = number_format($purchasePayment->amount, 0);
+        // Keep existing document, don't reset it
+
+        $this->showEditPurchasePaymentModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeEditPurchasePaymentModal()
+    {
+        $this->showEditPurchasePaymentModal = false;
+        $this->editingPurchasePaymentId = null;
+        $this->resetPurchasePaymentForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function updatePurchasePayment()
+    {
+        // Check if user has permission to edit purchase payment
+        $this->authorize('vehicle-purchase-payment.edit', $this->vehicle);
+
+        $purchasePayment = PurchasePayment::findOrFail($this->editingPurchasePaymentId);
+
+        // Check if total payments would exceed purchase price after update
+        $currentTotalPaid = $this->getTotalPurchasePayments() - $purchasePayment->amount; // Subtract current amount
+        $newPaymentAmount = Str::replace(',', '', $this->purchase_payment_amount);
+        $purchasePrice = $this->vehicle->purchase_price ?? 0;
+
+        if (($currentTotalPaid + $newPaymentAmount) > $purchasePrice) {
+            session()->flash('error', 'Total pembayaran tidak boleh melebihi harga beli kendaraan.');
+            return;
+        }
+
+        // Validate the form
+        $this->validate([
+            'purchase_payment_date' => 'required|date',
+            'purchase_payment_description' => 'required|string|max:255',
+            'purchase_payment_amount' => 'required|string',
+            'purchase_payment_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ], [
+            'purchase_payment_date.required' => 'Tanggal pembayaran harus diisi.',
+            'purchase_payment_date.date' => 'Tanggal pembayaran tidak valid.',
+            'purchase_payment_description.required' => 'Deskripsi pembayaran harus diisi.',
+            'purchase_payment_description.string' => 'Deskripsi pembayaran harus berupa teks.',
+            'purchase_payment_description.max' => 'Deskripsi pembayaran maksimal 255 karakter.',
+            'purchase_payment_amount.required' => 'Jumlah pembayaran harus diisi.',
+            'purchase_payment_amount.string' => 'Jumlah pembayaran harus berupa angka.',
+            'purchase_payment_document.file' => 'Dokumen harus berupa file.',
+            'purchase_payment_document.mimes' => 'Dokumen harus berupa file PDF, JPG, JPEG, atau PNG.',
+            'purchase_payment_document.max' => 'Ukuran dokumen maksimal 2MB.',
+        ]);
+
+        $purchasePayment = PurchasePayment::findOrFail($this->editingPurchasePaymentId);
+
+        // Check if purchase payment belongs to this vehicle
+        if ($purchasePayment->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Store old data for logging
+        $oldPurchasePayment = $purchasePayment->toArray();
+
+        // Handle file upload if provided
+        $documentPath = $purchasePayment->document; // Keep existing document
+        if ($this->purchase_payment_document) {
+            // Delete old files if exist
+            if ($purchasePayment->document) {
+                $oldFiles = explode(',', $purchasePayment->document);
+                foreach ($oldFiles as $oldFile) {
+                    Storage::disk('public')->delete('documents/purchase-payments/' . trim($oldFile));
+                }
+            }
+
+            $fileNames = [];
+
+            // Always treat as array since we use multiple attribute
+            $files = (array) $this->purchase_payment_document;
+
+            foreach ($files as $file) {
+                if ($file && is_object($file)) { // Make sure it's a valid file object
+                    $storedPath = $file->store('documents/purchase-payments', 'public');
+                    $fileNames[] = basename($storedPath);
+                }
+            }
+
+            if (!empty($fileNames)) {
+                $documentPath = implode(',', $fileNames);
+            }
+        }
+
+        // Update purchase payment
+        $purchasePayment->update([
+            'payment_date' => $this->purchase_payment_date,
+            'amount' => Str::replace(',', '', $this->purchase_payment_amount),
+            'description' => $this->purchase_payment_description,
+            'document' => $documentPath,
+        ]);
+
+        // Reload vehicle with purchase payments
+        $this->vehicle->load('purchasePayments');
+
+        // Log the update activity
+        activity()
+            ->performedOn($purchasePayment)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldPurchasePayment,
+                'attributes' => [
+                    'payment_date' => $this->purchase_payment_date,
+                    'amount' => Str::replace(',', '', $this->purchase_payment_amount),
+                    'description' => $this->purchase_payment_description,
+                    'document' => $documentPath,
+                ],
+            ])
+            ->log('updated purchase payment');
+
+        // Show success message
+        session()->flash('message', 'Pembayaran pembelian berhasil diperbarui.');
+
+        // Close modal
+        $this->closeEditPurchasePaymentModal();
+    }
+
+    public function deletePurchasePayment($purchasePaymentId)
+    {
+        // Check if user has permission to delete purchase payment
+        $this->authorize('vehicle-purchase-payment.delete', $this->vehicle);
+
+        $purchasePayment = PurchasePayment::findOrFail($purchasePaymentId);
+
+        // Check if purchase payment belongs to this vehicle
+        if ($purchasePayment->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Store old data for logging
+        $oldPurchasePayment = $purchasePayment->toArray();
+
+        // Delete files if exist
+        if ($purchasePayment->document) {
+            $files = explode(',', $purchasePayment->document);
+            foreach ($files as $file) {
+                Storage::disk('public')->delete('documents/purchase-payments/' . trim($file));
+            }
+        }
+
+        $purchasePayment->delete();
+
+        // Reload vehicle with purchase payments
+        $this->vehicle->load('purchasePayments');
+
+        // Log the deletion activity
+        activity()
+            ->performedOn($purchasePayment)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldPurchasePayment,
+            ])
+            ->log('deleted purchase payment');
+
+        // Show success message
+        session()->flash('message', 'Pembayaran pembelian berhasil dihapus.');
     }
 }

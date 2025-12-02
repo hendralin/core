@@ -5,13 +5,13 @@ namespace App\Livewire\About;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 
-    #[Title('About WOTO v1.13.0')]
+    #[Title('About WOTO v1.14.0')]
 class AboutIndex extends Component
 {
     public function render()
     {
         $systemInfo = [
-            'version' => '1.13.0',
+            'version' => '1.14.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
@@ -35,6 +35,7 @@ class AboutIndex extends Component
             'equipment_count' => \App\Models\VehicleEquipment::count(),
             'loan_calculations_count' => \App\Models\LoanCalculation::count(),
             'leasings_count' => \App\Models\Leasing::count(),
+            'purchase_payments_count' => \App\Models\PurchasePayment::count(),
             // Additional dashboard metrics
             'vehicles_sold_this_month' => \App\Models\Vehicle::where('status', 0)->whereYear('selling_date', now()->year)->whereMonth('selling_date', now()->month)->count(),
             'new_vehicles_this_month' => \App\Models\Vehicle::whereYear('purchase_date', now()->year)->whereMonth('purchase_date', now()->month)->count(),
