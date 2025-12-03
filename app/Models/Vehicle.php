@@ -40,7 +40,8 @@ class Vehicle extends Model
         'buyer_name',
         'buyer_phone',
         'buyer_address',
-        'receipt_number',
+        'payment_type',
+        'leasing_id',
         'status',
         'description',
     ];
@@ -86,7 +87,8 @@ class Vehicle extends Model
                 'buyer_name',
                 'buyer_phone',
                 'buyer_address',
-                'receipt_number',
+                'payment_type',
+                'leasing_id',
                 'status',
                 'description',
             ])
@@ -143,6 +145,14 @@ class Vehicle extends Model
     }
 
     /**
+     * Get the leasing that owns the vehicle
+     */
+    public function leasing(): BelongsTo
+    {
+        return $this->belongsTo(Leasing::class);
+    }
+
+    /**
      * Get the images for the vehicle
      */
     public function images(): HasMany
@@ -188,5 +198,13 @@ class Vehicle extends Model
     public function purchasePayments(): HasMany
     {
         return $this->hasMany(PurchasePayment::class);
+    }
+
+    /**
+     * Get the payment receipts for the vehicle
+     */
+    public function paymentReceipts(): HasMany
+    {
+        return $this->hasMany(PaymentReceipt::class);
     }
 }

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->string('receipt_number')->unique()->nullable()->after('buyer_address');
+            $table->tinyInteger('payment_type')->comment('1=Cash/Tunai, 2=Kredit/Leasing')->default(2)->after('buyer_address');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->dropColumn('receipt_number');
+            $table->dropColumn('payment_type');
         });
     }
 };

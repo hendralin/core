@@ -9,12 +9,14 @@ use App\Models\Activity;
 use App\Models\Commission;
 use Illuminate\Support\Str;
 use Livewire\WithPagination;
-use Livewire\Attributes\Title;
 use Livewire\WithFileUploads;
+use App\Models\PaymentReceipt;
+use Livewire\Attributes\Title;
 use App\Models\LoanCalculation;
 use App\Models\PurchasePayment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\WithoutUrlPagination;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -66,9 +68,21 @@ class VehicleShow extends Component
     public $showEditPurchasePaymentModal = false;
     public $editingPurchasePaymentId = null;
 
+    // Payment receipt form properties
+    public $showPaymentReceiptModal = false;
+    public $payment_receipt_date = '';
+    public $payment_receipt_description = '';
+    public $payment_receipt_amount = '';
+    public $payment_receipt_must_be_settled_date = '';
+    public $payment_receipt_document = [];
+
+    // Edit payment receipt properties
+    public $showEditPaymentReceiptModal = false;
+    public $editingPaymentReceiptId = null;
+
     public function mount(Vehicle $vehicle): void
     {
-        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments']);
+        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments', 'paymentReceipts']);
 
         // Get cost summary for this vehicle
         $this->loadCostSummary();
@@ -176,211 +190,42 @@ class VehicleShow extends Component
 
     public function printReceipt()
     {
-        // Validate buyer information
-        $this->validate([
-            'buyer_name' => 'required|string|max:255',
-            'buyer_phone' => 'required|string|max:20',
-            'buyer_address' => 'required|string|max:1000',
-        ], [
-            'buyer_name.required' => 'Nama pembeli harus diisi.',
-            'buyer_phone.required' => 'Nomor telepon pembeli harus diisi.',
-            'buyer_address.required' => 'Alamat pembeli harus diisi.',
+        // Get the last payment receipt for this vehicle
+        $paymentReceipt = $this->vehicle->paymentReceipts()->latest()->first();
+
+        if (!$paymentReceipt) {
+            session()->flash('error', 'Tidak ada penerimaan pembayaran untuk kendaraan ini.');
+            return;
+        }
+
+        // Update print count
+        if ($paymentReceipt->print_count == 0) {
+            $paymentReceipt->update(['printed_at' => now()]);
+        }
+        $paymentReceipt->increment('print_count');
+
+        // Log the print activity
+        activity()
+            ->performedOn($paymentReceipt)
+            ->causedBy(auth()->user())
+            ->withProperties(['print_count' => $paymentReceipt->print_count])
+            ->log('printed payment receipt');
+
+        // Load payment receipt with vehicle relationship
+        $paymentReceipt->load(['vehicle']);
+
+        $pdf = Pdf::loadView('exports.kwitansi', [
+            'paymentReceipt' => $paymentReceipt
         ]);
 
-        // Generate receipt number if not exists
-        $receiptNumber = $this->generateReceiptNumber();
-
-        // Update vehicle with buyer information and receipt number
-        $this->vehicle->update([
-            'buyer_name' => $this->buyer_name,
-            'buyer_phone' => $this->buyer_phone,
-            'buyer_address' => $this->buyer_address,
-            'receipt_number' => $receiptNumber,
-        ]);
+        $filename = 'Kwitansi_' . str_replace(['/', '\\'], '_', $paymentReceipt->payment_number) . '.pdf';
 
         // Close modal
         $this->showBuyerModal = false;
 
-        // Load additional relationships needed for the receipt
-        $vehicle = $this->vehicle->fresh(['salesman']);
-
-        $pdf = Pdf::loadView('exports.vehicle-receipt', [
-            'vehicle' => $vehicle
-        ]);
-
-        $filename = 'kwitansi_' . $vehicle->police_number . '_' . now()->format('Ymd_His') . '.pdf';
-
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
         }, $filename);
-    }
-
-    private function generateReceiptNumber()
-    {
-        // Check if receipt number already exists
-        if ($this->vehicle->receipt_number) {
-            return $this->vehicle->receipt_number;
-        }
-
-        // Format: KW/YYYYMMDD/XXXXX
-        $prefix = 'KW';
-        $year = now()->format('Y');
-        $date = now()->format('Ymd');
-
-        // Get the last receipt number for this year
-        $lastReceipt = Vehicle::where('receipt_number', 'like', $prefix . '/' . $year . '%')
-            ->orderBy('receipt_number', 'desc')
-            ->first();
-
-        if ($lastReceipt) {
-            // Extract the sequence number and increment
-            $parts = explode('/', $lastReceipt->receipt_number);
-            $sequence = (int) end($parts);
-            $sequence++;
-        } else {
-            // Start from 00001 for new year
-            $sequence = 1;
-        }
-
-        // Format sequence with leading zeros (5 digits)
-        $formattedSequence = str_pad($sequence, 5, '0', STR_PAD_LEFT);
-
-        return $prefix . '/' . $date . '/' . $formattedSequence;
-    }
-
-    private function numberToWords($number)
-    {
-        $words = [
-            0 => 'nol',
-            1 => 'satu',
-            2 => 'dua',
-            3 => 'tiga',
-            4 => 'empat',
-            5 => 'lima',
-            6 => 'enam',
-            7 => 'tujuh',
-            8 => 'delapan',
-            9 => 'sembilan',
-            10 => 'sepuluh',
-            11 => 'sebelas',
-            12 => 'dua belas',
-            13 => 'tiga belas',
-            14 => 'empat belas',
-            15 => 'lima belas',
-            16 => 'enam belas',
-            17 => 'tujuh belas',
-            18 => 'delapan belas',
-            19 => 'sembilan belas',
-            20 => 'dua puluh',
-            30 => 'tiga puluh',
-            40 => 'empat puluh',
-            50 => 'lima puluh',
-            60 => 'enam puluh',
-            70 => 'tujuh puluh',
-            80 => 'delapan puluh',
-            90 => 'sembilan puluh'
-        ];
-
-        $result = '';
-
-        if ($number == 0) {
-            return '';
-        }
-
-        // Handle numbers less than 20
-        if ($number < 20) {
-            $result = $words[$number];
-        }
-        // Handle numbers less than 100
-        elseif ($number < 100) {
-            $tens = floor($number / 10) * 10;
-            $units = $number % 10;
-            $result = $words[$tens];
-            if ($units > 0) {
-                $result .= ' ' . $words[$units];
-            }
-        }
-        // Handle numbers less than 1000 (hundreds)
-        elseif ($number < 1000) {
-            $hundreds = floor($number / 100);
-            $remainder = $number % 100;
-
-            if ($hundreds == 1) {
-                $result = 'seratus';
-            } else {
-                $result = $words[$hundreds] . ' ratus';
-            }
-
-            if ($remainder > 0) {
-                $result .= ' ' . $this->numberToWords($remainder);
-            }
-        }
-        // Handle numbers less than 1 million (thousands)
-        elseif ($number < 1000000) {
-            $thousands = floor($number / 1000);
-            $remainder = $number % 1000;
-
-            if ($thousands == 1) {
-                $result = 'seribu';
-            } elseif ($thousands < 100) {
-                $result = $this->numberToWords($thousands) . ' ribu';
-            } else {
-                $result = $this->numberToWords($thousands) . ' ribu';
-            }
-
-            if ($remainder > 0) {
-                $result .= ' ' . $this->numberToWords($remainder);
-            }
-        }
-        // Handle numbers less than 1 billion (millions)
-        elseif ($number < 1000000000) {
-            $millions = floor($number / 1000000);
-            $remainder = $number % 1000000;
-
-            $result = $this->numberToWords($millions) . ' juta';
-
-            if ($remainder > 0) {
-                $result .= ' ' . $this->numberToWords($remainder);
-            }
-        }
-        // Handle larger numbers
-        elseif ($number < 1000000000000) {
-            $billions = floor($number / 1000000000);
-            $remainder = $number % 1000000000;
-
-            $result = $this->numberToWords($billions) . ' miliar';
-
-            if ($remainder > 0) {
-                $result .= ' ' . $this->numberToWords($remainder);
-            }
-        } else {
-            return 'Angka terlalu besar';
-        }
-
-        return trim($result);
-    }
-
-    public function getAmountInWords($amount)
-    {
-        if ($amount <= 0) {
-            return 'nol rupiah';
-        }
-
-        // Round to nearest rupiah (no decimals for rupiah)
-        $rupiah = floor($amount);
-
-        // Convert to words
-        $words = $this->numberToWords($rupiah);
-
-        // Handle special cases for Indonesian currency
-        // Change "satu ribu" to "seribu", "satu ratus" to "seratus", etc.
-        $words = preg_replace('/\bsatu ribu\b/', 'seribu', $words);
-        $words = preg_replace('/\bsatu ratus\b/', 'seratus', $words);
-
-        // Capitalize first letter
-        $result = ucfirst($words) . ' rupiah';
-
-        return $result;
     }
 
     public function openCommissionModal()
@@ -1110,5 +955,302 @@ class VehicleShow extends Component
 
         // Show success message
         session()->flash('message', 'Pembayaran pembelian berhasil dihapus.');
+    }
+
+    // Payment Receipt Methods
+    public function openPaymentReceiptModal()
+    {
+        $this->resetPaymentReceiptForm();
+        $this->showPaymentReceiptModal = true;
+    }
+
+    public function closePaymentReceiptModal()
+    {
+        $this->showPaymentReceiptModal = false;
+        $this->resetPaymentReceiptForm();
+    }
+
+    public function resetPaymentReceiptForm()
+    {
+        $this->payment_receipt_date = '';
+        $this->payment_receipt_description = '';
+        $this->payment_receipt_amount = '';
+        $this->payment_receipt_must_be_settled_date = '';
+        $this->payment_receipt_document = [];
+    }
+
+    private function generatePaymentReceiptNumber()
+    {
+        $monthRoman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
+        $year = date('Y');
+
+        // Get the last payment receipt number for this month
+        $lastPaymentReceipt = PaymentReceipt::where('payment_number', 'like', "%/PR/WOTO/{$monthRoman}/{$year}")
+            ->orderBy('payment_number', 'desc')
+            ->first();
+
+        if ($lastPaymentReceipt) {
+            $parts = explode('/', $lastPaymentReceipt->payment_number);
+            $lastNumber = (int) $parts[0];
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        return str_pad($newNumber, 3, '0', STR_PAD_LEFT) . "/PR/WOTO/{$monthRoman}/{$year}";
+    }
+
+    private function parseFormatted($value)
+    {
+        // Remove thousand separators (periods) and replace comma with dot for decimal
+        $cleaned = str_replace('.', '', $value);
+        $cleaned = str_replace(',', '.', $cleaned);
+
+        return (float) $cleaned;
+    }
+
+    private function getTotalPaymentReceipts()
+    {
+        return $this->vehicle->paymentReceipts->sum('amount');
+    }
+
+    public function savePaymentReceipt()
+    {
+        $this->validate([
+            'payment_receipt_date' => 'required|date',
+            'payment_receipt_amount' => 'required|string',
+            'payment_receipt_description' => 'nullable|string|max:255',
+            'payment_receipt_must_be_settled_date' => 'nullable|date|after:today',
+            'payment_receipt_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        // Additional validation: check total payments against selling price
+        $totalPaymentsIncludingCurrent = $this->getTotalPaymentReceipts() + Str::replace(',', '', $this->payment_receipt_amount);
+
+        // Total pembayaran tidak boleh melebihi harga jual
+        if ($totalPaymentsIncludingCurrent > $this->vehicle->selling_price) {
+            $this->addError('payment_receipt_amount', 'Total pembayaran tidak boleh melebihi Harga Jual Kendaraan (Rp ' . number_format($this->vehicle->selling_price, 0, ',', '.') . ').');
+            return;
+        }
+
+        // must_be_settled_date is required if total payments < selling_price
+        if ($totalPaymentsIncludingCurrent < $this->vehicle->selling_price && empty($this->payment_receipt_must_be_settled_date)) {
+            $this->addError('payment_receipt_must_be_settled_date', 'Tanggal harus diselesaikan wajib diisi jika total pembayaran masih kurang dari harga jual.');
+            return;
+        }
+
+        $paymentNumber = $this->generatePaymentReceiptNumber();
+
+        $documentPaths = [];
+        if ($this->payment_receipt_document) {
+            foreach ($this->payment_receipt_document as $document) {
+                $originalName = $document->getClientOriginalName();
+                $fileName = time() . '_' . $originalName;
+                $document->storeAs('documents/payment-receipts', $fileName, 'public');
+                $documentPaths[] = $fileName;
+            }
+        }
+
+        $paymentReceipt = PaymentReceipt::create([
+            'vehicle_id' => $this->vehicle->id,
+            'payment_number' => $paymentNumber,
+            'payment_date' => $this->payment_receipt_date,
+            'amount' => Str::replace(',', '', $this->payment_receipt_amount),
+            'description' => $this->payment_receipt_description,
+            'remaining_balance' => $this->vehicle->selling_price - ($this->getTotalPaymentReceipts() + Str::replace(',', '', $this->payment_receipt_amount)),
+            'must_be_settled_date' => $this->payment_receipt_must_be_settled_date ?: null,
+            'document' => $documentPaths ? implode(',', $documentPaths) : null,
+            'created_by' => Auth::id(),
+            'status' => 'approved',
+        ]);
+
+        $this->closePaymentReceiptModal();
+
+        // Reload vehicle with payment receipts
+        $this->vehicle->load('paymentReceipts');
+
+        // Log the creation activity
+        activity()
+            ->performedOn($paymentReceipt)
+            ->causedBy(Auth::user())
+            ->log('created payment receipt');
+
+        // Show success message
+        session()->flash('message', 'Penerimaan pembayaran berhasil ditambahkan.');
+    }
+
+    public function editPaymentReceipt($paymentReceiptId)
+    {
+        $paymentReceipt = PaymentReceipt::findOrFail($paymentReceiptId);
+
+        $this->editingPaymentReceiptId = $paymentReceiptId;
+        $this->payment_receipt_date = $paymentReceipt->payment_date ? date('Y-m-d', strtotime($paymentReceipt->payment_date)) : '';
+        $this->payment_receipt_description = $paymentReceipt->description;
+        $this->payment_receipt_amount = number_format($paymentReceipt->amount, 0);
+        $this->payment_receipt_must_be_settled_date = $paymentReceipt->must_be_settled_date ? date('Y-m-d', strtotime($paymentReceipt->must_be_settled_date)) : '';
+        $this->payment_receipt_document = [];
+
+        $this->showEditPaymentReceiptModal = true;
+    }
+
+    public function closeEditPaymentReceiptModal()
+    {
+        $this->showEditPaymentReceiptModal = false;
+        $this->editingPaymentReceiptId = null;
+        $this->resetPaymentReceiptForm();
+    }
+
+    public function updatePaymentReceipt()
+    {
+        $this->validate([
+            'payment_receipt_date' => 'required|date',
+            'payment_receipt_amount' => 'required|string',
+            'payment_receipt_description' => 'nullable|string|max:255',
+            'payment_receipt_must_be_settled_date' => 'nullable|date|after:today',
+            'payment_receipt_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        // Additional validation: check total payments against selling price
+        $paymentReceipt = PaymentReceipt::findOrFail($this->editingPaymentReceiptId);
+        $totalPaymentsExcludingCurrent = $this->getTotalPaymentReceipts() - $paymentReceipt->amount;
+        $totalPaymentsIncludingUpdated = $totalPaymentsExcludingCurrent + Str::replace(',', '', $this->payment_receipt_amount);
+
+        // Total pembayaran tidak boleh melebihi harga jual
+        if ($totalPaymentsIncludingUpdated > $this->vehicle->selling_price) {
+            $this->addError('payment_receipt_amount', 'Total pembayaran tidak boleh melebihi Harga Jual Kendaraan (Rp ' . number_format($this->vehicle->selling_price, 0, ',', '.') . ').');
+            return;
+        }
+
+        // must_be_settled_date is required if total payments < selling_price
+        if ($totalPaymentsIncludingUpdated < $this->vehicle->selling_price && empty($this->payment_receipt_must_be_settled_date)) {
+            $this->addError('payment_receipt_must_be_settled_date', 'Tanggal harus diselesaikan wajib diisi jika total pembayaran masih kurang dari harga jual.');
+            return;
+        }
+
+        $oldPaymentReceipt = $paymentReceipt->toArray();
+
+        $documentPaths = $paymentReceipt->document ? explode(',', $paymentReceipt->document) : [];
+
+        // Handle new documents
+        if ($this->payment_receipt_document) {
+            foreach ($this->payment_receipt_document as $document) {
+                $originalName = $document->getClientOriginalName();
+                $fileName = time() . '_' . $originalName;
+                $document->storeAs('documents/payment-receipts', $fileName, 'public');
+                $documentPaths[] = $fileName;
+            }
+        }
+
+        $paymentReceipt->update([
+            'payment_date' => $this->payment_receipt_date,
+            'amount' => Str::replace(',', '', $this->payment_receipt_amount),
+            'description' => $this->payment_receipt_description,
+            'remaining_balance' => $this->vehicle->selling_price - (($this->getTotalPaymentReceipts() - $paymentReceipt->amount) + Str::replace(',', '', $this->payment_receipt_amount)),
+            'must_be_settled_date' => $this->payment_receipt_must_be_settled_date ?: null,
+            'document' => $documentPaths ? implode(',', $documentPaths) : null,
+        ]);
+
+        $this->closeEditPaymentReceiptModal();
+
+        // Reload vehicle with payment receipts
+        $this->vehicle->load('paymentReceipts');
+
+        // Log the update activity
+        activity()
+            ->performedOn($paymentReceipt)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldPaymentReceipt,
+                'attributes' => $paymentReceipt->toArray(),
+            ])
+            ->log('updated payment receipt');
+
+        // Show success message
+        session()->flash('message', 'Penerimaan pembayaran berhasil diperbarui.');
+    }
+
+    public function deletePaymentReceipt($paymentReceiptId)
+    {
+        $paymentReceipt = PaymentReceipt::findOrFail($paymentReceiptId);
+
+        $oldPaymentReceipt = $paymentReceipt->toArray();
+
+        // Delete files if exist
+        if ($paymentReceipt->document) {
+            $files = explode(',', $paymentReceipt->document);
+            foreach ($files as $file) {
+                Storage::disk('public')->delete('documents/payment-receipts/' . trim($file));
+            }
+        }
+
+        $paymentReceipt->delete();
+
+        // Reload vehicle with payment receipts
+        $this->vehicle->load('paymentReceipts');
+
+        // Log the deletion activity
+        activity()
+            ->performedOn($paymentReceipt)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldPaymentReceipt,
+            ])
+            ->log('deleted payment receipt');
+
+        // Show success message
+        session()->flash('message', 'Penerimaan pembayaran berhasil dihapus.');
+    }
+
+    public function printPaymentReceipt($paymentReceiptId)
+    {
+        try {
+            $paymentReceipt = PaymentReceipt::with(['vehicle.brand', 'vehicle.type', 'vehicle.salesman'])->findOrFail($paymentReceiptId);
+
+            // Check permissions
+            if (!auth()->user()->can('vehicle-payment-receipt.print')) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Update print count
+            if ($paymentReceipt->print_count == 0) {
+                $paymentReceipt->update(['printed_at' => now()]);
+            }
+            $paymentReceipt->increment('print_count');
+
+            // Generate PDF
+            $pdf = Pdf::loadView('exports.kwitansi', compact('paymentReceipt'));
+
+            // Set PDF options for better formatting
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true
+            ]);
+
+            // Log the print activity
+            activity()
+                ->performedOn($paymentReceipt)
+                ->causedBy(auth()->user())
+                ->withProperties(['print_count' => $paymentReceipt->print_count])
+                ->log('printed payment receipt');
+
+            // Return PDF download
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->output();
+            }, 'Kwitansi_' . str_replace(['/', '\\'], '_', $paymentReceipt->payment_number) . '.pdf');
+
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Failed to print payment receipt', [
+                'error' => $e->getMessage(),
+                'payment_receipt_id' => $paymentReceiptId,
+                'user_id' => auth()->id(),
+            ]);
+
+            // Show error message
+            session()->flash('error', 'Gagal mencetak kwitansi penerimaan pembayaran.');
+            return redirect()->back();
+        }
     }
 }

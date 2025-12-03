@@ -11,6 +11,7 @@ use App\Models\Salesman;
 use App\Models\Warehouse;
 use App\Models\VehicleImage;
 use App\Models\VehicleModel;
+use App\Models\Leasing;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Title;
 use App\Models\VehicleEquipment;
@@ -53,6 +54,8 @@ class VehicleEdit extends Component
     public $buyer_name;
     public $buyer_phone;
     public $buyer_address;
+    public $payment_type;
+    public $leasing_id;
     public $status;
     public $description;
 
@@ -86,7 +89,7 @@ class VehicleEdit extends Component
 
         // Add selling fields if status is sold
         if ($this->status == '0') {
-            $totalFields += 6; // selling_date, selling_price, salesman_id, buyer_name, buyer_phone, buyer_address
+            $totalFields += 8; // selling_date, selling_price, salesman_id, buyer_name, buyer_phone, buyer_address, payment_type, leasing_id
         }
 
         $filledFields = 0;
@@ -120,7 +123,7 @@ class VehicleEdit extends Component
         // Status is always required
         $filledFields++; // Status is always counted as filled
 
-        // Selling info (6 fields, only if status is sold)
+        // Selling info (8 fields, only if status is sold)
         if ($this->status == '0') {
             if ($this->selling_date) $filledFields++;
             if ($this->selling_price) $filledFields++;
@@ -128,6 +131,8 @@ class VehicleEdit extends Component
             if ($this->buyer_name) $filledFields++;
             if ($this->buyer_phone) $filledFields++;
             if ($this->buyer_address) $filledFields++;
+            if ($this->payment_type) $filledFields++;
+            if ($this->payment_type == '2' && $this->leasing_id) $filledFields++;
         }
 
         // Images are optional - add bonus progress if uploaded or existing
@@ -182,6 +187,8 @@ class VehicleEdit extends Component
         'buyer_name' => 'required_if:status,0|nullable|string|max:255',
         'buyer_phone' => 'required_if:status,0|nullable|string|max:20',
         'buyer_address' => 'required_if:status,0|nullable|string|max:1000',
+        'payment_type' => 'required_if:status,0|nullable|in:1,2',
+        'leasing_id' => 'required_if:payment_type,2|nullable|exists:leasings,id',
         'status' => 'required|in:0,1',
         'description' => 'nullable|string',
         'tempImages.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB per image
@@ -219,6 +226,10 @@ class VehicleEdit extends Component
         'buyer_name.required_if' => 'Nama pembeli harus diisi untuk kendaraan yang terjual.',
         'buyer_phone.required_if' => 'Nomor telepon pembeli harus diisi untuk kendaraan yang terjual.',
         'buyer_address.required_if' => 'Alamat pembeli harus diisi untuk kendaraan yang terjual.',
+        'payment_type.required_if' => 'Metode pembayaran harus dipilih untuk kendaraan yang terjual.',
+        'payment_type.in' => 'Metode pembayaran harus berupa Tunai atau Kredit.',
+        'leasing_id.required_if' => 'Leasing harus dipilih jika metode pembayaran adalah Kredit.',
+        'leasing_id.exists' => 'Leasing yang dipilih tidak valid.',
         'display_price.required' => 'Display price is required.',
         'display_price.numeric' => 'Display price must be a number.',
         'display_price.min' => 'Display price must be greater than 0.',
@@ -269,6 +280,8 @@ class VehicleEdit extends Component
         $this->buyer_name = $vehicle->buyer_name;
         $this->buyer_phone = $vehicle->buyer_phone;
         $this->buyer_address = $vehicle->buyer_address;
+        $this->payment_type = $vehicle->payment_type;
+        $this->leasing_id = $vehicle->leasing_id;
         $this->selling_date = $vehicle->selling_date;
         $this->selling_price = $vehicle->selling_price ? number_format($vehicle->selling_price, 0, ',', '.') : null;
         $this->status = $vehicle->status;
@@ -392,6 +405,15 @@ class VehicleEdit extends Component
 
     public function updatedStatus()
     {
+        $this->updateProgress();
+    }
+
+    public function updatedPaymentType()
+    {
+        // Clear leasing_id if payment type is not credit
+        if ($this->payment_type != '2') {
+            $this->leasing_id = null;
+        }
         $this->updateProgress();
     }
 
@@ -533,6 +555,8 @@ class VehicleEdit extends Component
                 'buyer_name' => $this->vehicle->buyer_name,
                 'buyer_phone' => $this->vehicle->buyer_phone,
                 'buyer_address' => $this->vehicle->buyer_address,
+                'payment_type' => $this->vehicle->payment_type,
+                'leasing_id' => $this->vehicle->leasing_id,
                 'purchase_date' => $this->vehicle->purchase_date,
                 'purchase_price' => $this->vehicle->purchase_price,
                 'display_price' => $this->vehicle->display_price,
@@ -566,6 +590,8 @@ class VehicleEdit extends Component
                 'buyer_name' => $this->status == '0' ? $this->buyer_name : null,
                 'buyer_phone' => $this->status == '0' ? $this->buyer_phone : null,
                 'buyer_address' => $this->status == '0' ? $this->buyer_address : null,
+                'payment_type' => $this->status == '0' ? $this->payment_type : null,
+                'leasing_id' => $this->status == '0' && $this->payment_type == '2' ? $this->leasing_id : null,
                 'purchase_date' => $this->purchase_date,
                 'purchase_price' => $this->purchase_price,
                 'display_price' => $this->display_price,
@@ -642,6 +668,8 @@ class VehicleEdit extends Component
                         'buyer_name' => $this->status == '0' ? $this->buyer_name : null,
                         'buyer_phone' => $this->status == '0' ? $this->buyer_phone : null,
                         'buyer_address' => $this->status == '0' ? $this->buyer_address : null,
+                        'payment_type' => $this->status == '0' ? $this->payment_type : null,
+                        'leasing_id' => $this->status == '0' && $this->payment_type == '2' ? $this->leasing_id : null,
                         'purchase_date' => $this->purchase_date,
                         'purchase_price' => $this->purchase_price,
                         'display_price' => $this->display_price,
@@ -699,8 +727,9 @@ class VehicleEdit extends Component
         $models = VehicleModel::orderBy('name')->get();
         $warehouses = Warehouse::orderBy('name')->get();
         $salesmen = Salesman::orderBy('name')->get();
+        $leasings = Leasing::orderBy('name')->get();
 
-        return view('livewire.vehicle.vehicle-edit', compact('brands', 'types', 'categories', 'models', 'warehouses', 'salesmen'));
+        return view('livewire.vehicle.vehicle-edit', compact('brands', 'types', 'categories', 'models', 'warehouses', 'salesmen', 'leasings'));
     }
 
     public function confirmReset()
@@ -726,6 +755,8 @@ class VehicleEdit extends Component
         $this->buyer_name = $this->vehicle->buyer_name;
         $this->buyer_phone = $this->vehicle->buyer_phone;
         $this->buyer_address = $this->vehicle->buyer_address;
+        $this->payment_type = $this->vehicle->payment_type;
+        $this->leasing_id = $this->vehicle->leasing_id;
 
         // Reset image properties
         $this->images = [];

@@ -64,6 +64,7 @@ use App\Livewire\VehicleModel\VehicleModelAudit;
 use App\Livewire\VehicleModel\VehicleModelIndex;
 use App\Livewire\VehicleModel\VehicleModelCreate;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
+use App\Livewire\PaymentReceipt\PaymentReceiptAudit;
 use App\Livewire\LoanCalculation\LoanCalculationAudit;
 use App\Livewire\PurchasePayment\PurchasePaymentAudit;
 
@@ -164,6 +165,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('commissions/audit', CommissionAudit::class)->name('commissions.audit')->middleware(['permission:vehicle-commission.audit']);
     Route::get('loan-calculations/audit', LoanCalculationAudit::class)->name('loan-calculations.audit')->middleware(['permission:vehicle-loan-calculation.audit']);
     Route::get('purchase-payments/audit', PurchasePaymentAudit::class)->name('purchase-payments.audit')->middleware(['permission:vehicle-purchase-payment.audit']);
+    Route::get('payment-receipts/audit', PaymentReceiptAudit::class)->name('payment-receipts.audit')->middleware(['permission:vehicle-payment-receipt.audit']);
 
     Route::get('costs', CostIndex::class)->name('costs.index')->middleware(['permission:cost.view|cost.create|cost.edit|cost.delete']);
     Route::get('costs/audit', CostAudit::class)->name('costs.audit')->middleware(['permission:cost.audit']);

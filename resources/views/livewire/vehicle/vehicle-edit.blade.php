@@ -431,6 +431,20 @@
                             <flux:heading size="md">Informasi Pembeli</flux:heading>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <flux:select wire:model="payment_type" label="Metode Pembayaran *" icon="credit-card">
+                                <flux:select.option value="1">💰 Tunai</flux:select.option>
+                                <flux:select.option value="2">💳 Kredit</flux:select.option>
+                            </flux:select>
+                            @if($payment_type == '2')
+                            <flux:select wire:model="leasing_id" label="Leasing *" icon="building-office">
+                                <flux:select.option value="">{{ __('Pilih Leasing') }}</flux:select.option>
+                                @foreach($leasings as $leasing)
+                                    <flux:select.option value="{{ $leasing->id }}">{{ $leasing->name }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+                            @endif
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <flux:input wire:model="buyer_name" label="Nama Pembeli *" icon="user" placeholder="Masukkan nama lengkap pembeli" />
                             <flux:input wire:model="buyer_phone" label="Nomor Telepon Pembeli *" icon="phone" placeholder="081234567890" />
                         </div>

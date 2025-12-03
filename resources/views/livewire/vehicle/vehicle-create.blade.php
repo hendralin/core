@@ -340,7 +340,7 @@
                                     icon="check-circle"
                                     >
                             <flux:select.option value="1">🚗 Tersedia</flux:select.option>
-                            <flux:select.option value="0">💰 Terjual</flux:select.option>
+                            {{-- <flux:select.option value="0">💰 Terjual</flux:select.option> --}}
                         </flux:select>
                         <div class="relative">
                             <flux:input wire:model.live.debounce.1500ms="roadside_allowance" icon="currency-dollar" label="Biaya Uang Jalan *" placeholder="250.000" />

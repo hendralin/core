@@ -1,8 +1,8 @@
 # 🚗 WOTO - Sistem Penjualan Mobil Bekas Showroom
 
-Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration dan audit trail lengkap, dan mengelola operasional bisnis dengan efisien.
+Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.14.0** - Purchase Payment Audit Trail System
+**Version 1.15.0** - Payment Receipt Management System
 
 ## ✨ Fitur Utama
 
@@ -62,6 +62,24 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
   - **Purchase Payment Audit Trail**: Dedicated audit page dengan filtering berdasarkan vehicle
   - **Advanced Filtering**: Search by payment number/description/user, vehicle filter, pagination
   - **Permission-based Access**: vehicle-purchase-payment.* permissions untuk kontrol akses
+  - **Database Integration**: Foreign key ke vehicles table dengan document management
+  - **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
+
+- **💰 Penerimaan Pembayaran**: Sistem manajemen penerimaan pembayaran penjualan kendaraan
+  - **Payment Receipt CRUD**: Create, Read, Update, Delete penerimaan pembayaran dengan multiple file upload
+  - **Multiple File Upload**: Upload multiple dokumen penerimaan dengan auto-naming dan storage management
+  - **Auto Payment Number**: Generate nomor penerimaan otomatis dengan format 001/PR/WOTO/I/2025
+  - **Advanced Form Interface**: Modal form dengan validasi lengkap dan error handling
+  - **Selling Price Validation**: Prevent overpayment melebihi harga jual kendaraan
+  - **Settlement Date**: Field tanggal harus diselesaikan ketika pembayaran belum lunas
+  - **Remaining Balance**: Otomatis hitung sisa pembayaran yang harus dilunasi
+  - **File Type Icons**: Display icon berdasarkan tipe file (PDF, JPG, PNG) dengan nama file
+  - **Print Receipt**: Generate kwitansi PDF otomatis untuk penerimaan pembayaran
+  - **Terbilang Rupiah**: Konversi angka ke teks bahasa Indonesia (satu juta lima ratus ribu rupiah)
+  - **Audit Trail**: Activity logging lengkap untuk semua perubahan payment receipts
+  - **Payment Receipt Audit Trail**: Dedicated audit page dengan filtering berdasarkan vehicle
+  - **Advanced Filtering**: Search by payment number/description/user, vehicle filter, pagination
+  - **Permission-based Access**: vehicle-payment-receipt.* permissions untuk kontrol akses
   - **Database Integration**: Foreign key ke vehicles table dengan document management
   - **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
 
@@ -161,7 +179,7 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Multiple File Upload**: Livewire WithFileUploads untuk upload multiple files dengan comma-separated storage
 - **Auto Numbering**: Custom auto-increment numbering system dengan format 0001/PP/WOTO/XII/2025
 - **Database Transactions**: Atomic operations untuk multi-table updates dengan error handling dan rollback
-- **Indonesian Text Conversion**: Custom terbilang function untuk mata uang Rupiah
+- **Indonesian Text Conversion**: Custom terbilang helper function untuk mata uang Rupiah
 - **Receipt Generation**: Sistem generate kwitansi PDF dengan nomor otomatis dan data perusahaan dinamis
 - **Data Seeding**: Laravel Seeders untuk data master (Brands, Types, Vehicles, Companies)
 
@@ -266,6 +284,7 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Commissions**: Audit trail lengkap untuk semua aktivitas komisi kendaraan + Vehicle Filtering
 - **Loan Calculations**: Audit trail lengkap untuk semua aktivitas perhitungan kredit kendaraan + Vehicle Filtering
 - **Purchase Payments**: Audit trail lengkap untuk semua aktivitas pembayaran pembelian kendaraan + Vehicle Filtering
+- **Payment Receipts**: Audit trail lengkap untuk semua aktivitas penerimaan pembayaran kendaraan + Vehicle Filtering
 - **Brands**: Manajemen merek mobil (31+ brand Indonesia) + Audit Trail
 - **Vendors**: Manajemen vendor/supplier kendaraan + Audit Trail
 - **Salesmen**: Manajemen salesman dengan auto-create user account + Status management + Audit Trail
@@ -618,6 +637,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicle-commission.*` - Manajemen commission records (view, create, edit, delete, audit)
 - `vehicle-loan-calculation.*` - Manajemen loan calculation records (view, create, edit, delete, audit)
 - `vehicle-purchase-payment.*` - Manajemen purchase payment records (view, create, edit, delete, audit)
+- `vehicle-payment-receipt.*` - Manajemen payment receipt records (view, create, edit, delete, audit)
 - `cost.*` - Manajemen cost records (view, create, edit, delete)
 - `vehiclemodel.*` - Manajemen vehicle models (view, create, edit, delete)
 - `category.*` - Manajemen categories (view, create, edit, delete)
@@ -661,6 +681,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicle_equipment` - Data kelengkapan peralatan kendaraan (STNK, kunci, ban serep, dll) dengan type sales/purchase
 - `commissions` - Data komisi kendaraan (sales/purchase) dengan relasi ke vehicles
 - `purchase_payments` - Data pembayaran pembelian kendaraan dengan multiple file upload dan auto-numbering
+- `payment_receipts` - Data penerimaan pembayaran penjualan kendaraan dengan multiple file upload dan auto-numbering
 - `loan_calculations` - Data perhitungan kredit kendaraan dengan relasi ke vehicles dan leasings
 - `costs` - Data biaya kendaraan dengan approval workflow
 - `brands` - Merek mobil (31+ brand Indonesia)
@@ -723,6 +744,11 @@ GET    /api/purchase-payments/{id} - Detail purchase payment record tertentu
 POST   /api/purchase-payments  - Tambah purchase payment record baru
 PUT    /api/purchase-payments/{id} - Update purchase payment record
 DELETE /api/purchase-payments/{id} - Hapus purchase payment record
+GET    /api/payment-receipts - List semua payment receipt records
+GET    /api/payment-receipts/{id} - Detail payment receipt record tertentu
+POST   /api/payment-receipts  - Tambah payment receipt record baru
+PUT    /api/payment-receipts/{id} - Update payment receipt record
+DELETE /api/payment-receipts/{id} - Hapus payment receipt record
 GET    /api/leasings           - List semua data leasing
 POST   /api/models             - Tambah model kendaraan baru
 PUT    /api/models/{id}        - Update model kendaraan
@@ -804,6 +830,29 @@ FILESYSTEM_DISK=public
 - ✅ **UI Integration**: Seamless integration dengan vehicle detail page dan audit system
 - ✅ **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan
 - ✅ **Model Relationships**: Proper Eloquent relationships antara Vehicle, LoanCalculation, dan Leasing
+
+### v1.15.0 - Payment Receipt Management System
+- ✅ **Complete Payment Receipt Module**: Sistem lengkap manajemen penerimaan pembayaran penjualan kendaraan
+- ✅ **Payment Receipt CRUD Operations**: Create, Read, Update, Delete penerimaan pembayaran dengan interface lengkap
+- ✅ **Multiple File Upload**: Upload multiple dokumen penerimaan dengan auto-naming dan comma-separated storage
+- ✅ **Auto Payment Number Generation**: Generate nomor penerimaan otomatis dengan format 001/PR/WOTO/I/2025
+- ✅ **Selling Price Validation**: Prevent overpayment melebihi harga jual kendaraan dengan validation logic
+- ✅ **Settlement Date Management**: Field tanggal harus diselesaikan ketika pembayaran belum lunas
+- ✅ **Remaining Balance Calculation**: Otomatis hitung sisa pembayaran yang harus dilunasi
+- ✅ **Advanced Form Interface**: Modal form dengan validasi lengkap, error handling, dan resetValidation
+- ✅ **Payment Receipt Audit Trail**: Dedicated audit page dengan filtering, search, dan statistics dashboard
+- ✅ **Advanced Audit Filtering**: Search by payment number/description/user, vehicle filter, pagination
+- ✅ **Audit Trail Statistics**: Real-time dashboard dengan total activities, today count, created/updated/deleted counters
+- ✅ **Permission-based Access**: vehicle-payment-receipt.* permissions untuk kontrol akses CRUD operations dan audit
+- ✅ **Database Integration**: Foreign key ke vehicles table dengan document management dan file cleanup
+- ✅ **Print Receipt Functionality**: Generate kwitansi PDF otomatis untuk penerimaan pembayaran terakhir
+- ✅ **Terbilang Rupiah Helper**: Custom helper function untuk konversi angka ke teks bahasa Indonesia
+- ✅ **Kwitansi PDF Template**: Template kwitansi dengan logo perusahaan, data lengkap, dan terbilang otomatis
+- ✅ **Real-time Updates**: Auto-refresh data setelah create/update/delete operations dengan proper file handling
+- ✅ **UI Integration**: Seamless integration dengan vehicle detail page dan audit system
+- ✅ **File Management**: Proper file upload, storage, and deletion dengan multiple file support
+- ✅ **Error Handling**: Comprehensive validation dan user feedback untuk semua operations
+- ✅ **Print Count Tracking**: Track jumlah cetak kwitansi dengan timestamp untuk audit trail
 
 ### v1.14.0 - Purchase Payment Audit Trail System
 - ✅ **Complete Purchase Payment Module**: Sistem lengkap manajemen pembayaran pembelian kendaraan

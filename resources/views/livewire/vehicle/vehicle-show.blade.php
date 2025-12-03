@@ -553,9 +553,37 @@
                 <!-- Buyer Information (only shown when status is Sold) -->
                 @if($vehicle->status == 0)
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
-                    <flux:heading size="lg" class="mb-4">Informasi Pembeli</flux:heading>
-
+                    <div class="flex items-center justify-between mb-4">
+                        <flux:heading size="lg" class="mb-4">Informasi Pembeli</flux:heading>
+                        <div class="flex items-center gap-2">
+                            @if($vehicle->paymentReceipts->sum('amount') == 0)
+                                <flux:badge icon="x-circle" color="red">Belum Lunas</flux:badge>
+                            @elseif($vehicle->paymentReceipts->sum('amount') == $vehicle->selling_price)
+                                <flux:badge icon="check-circle" color="green">Lunas</flux:badge>
+                            @else
+                                <flux:tooltip content="Sisa Pelunasan: Rp {{ number_format($vehicle->selling_price - $vehicle->paymentReceipts->sum('amount'), 0, ',', '.') }}">
+                                    <flux:badge icon="exclamation-circle" color="yellow">Pelunasan Parsial</flux:badge>
+                                </flux:tooltip>
+                            @endif
+                            @can('vehicle-payment-receipt.audit')
+                                <flux:button variant="filled" size="sm" href="{{ route('payment-receipts.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
+                            @endcan
+                            @can('vehicle-payment-receipt.create')
+                            @if($vehicle->paymentReceipts->sum('amount') < $vehicle->selling_price)
+                                <flux:button wire:click="openPaymentReceiptModal" variant="filled" size="sm" icon="plus" class="cursor-pointer" tooltip="Tambah Penerimaan Pembayaran">Tambah</flux:button>
+                            @endif
+                            @endcan
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <flux:heading size="md">Metode Pembayaran</flux:heading>
+                            <flux:text class="mt-1">{{ $vehicle->payment_type == 1 ? 'Tunai' : 'Kredit' }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:heading size="md">Leasing</flux:heading>
+                            <flux:text class="mt-1">{{ $vehicle->leasing?->name ?? '-' }}</flux:text>
+                        </div>
                         <div>
                             <flux:heading size="md">Tanggal Penjualan</flux:heading>
                             <flux:text class="mt-1">{{ $vehicle->selling_date ? Carbon\Carbon::parse($vehicle->selling_date)->format('M d, Y') : '-' }}</flux:text>
@@ -578,10 +606,153 @@
 
                         <div class="md:col-span-2">
                             <flux:heading size="md">Alamat Pembeli</flux:heading>
-                            <flux:text class="mt-1">{{ $vehicle->buyer_address ?? '-' }}</flux:text>
+                            <flux:text class="mt-1">{!! $vehicle->buyer_address ? nl2br(e($vehicle->buyer_address)) : '-' !!}</flux:text>
                         </div>
                     </div>
+
+                    <!-- Payment Receipts -->
+                    @if(auth()->user()->can('vehicle-payment-receipt.view') || auth()->user()->can('vehicle-payment-receipt.create') || auth()->user()->can('vehicle-payment-receipt.edit') || auth()->user()->can('vehicle-payment-receipt.delete') || auth()->user()->can('vehicle-payment-receipt.audit'))
+                        @if($vehicle->paymentReceipts && $vehicle->paymentReceipts->count() > 0)
+                            @if($vehicle->paymentReceipts->sum('amount') < $vehicle->selling_price)
+                                <flux:callout variant="warning" icon="exclamation-circle" class="mt-4" heading="Sisa Pelunasan: Rp {{ number_format($vehicle->selling_price - $vehicle->paymentReceipts->sum('amount'), 0, ',', '.') }} akan diselesaikan selambat-lambatnya pada tanggal {{ $vehicle->paymentReceipts->last()->must_be_settled_date ? Carbon\Carbon::parse($vehicle->paymentReceipts->last()->must_be_settled_date)->format('d-m-Y') : '-' }}." />
+                            @endif
+                            <div class="flex items-center justify-between mt-6 mb-2">
+                                <flux:heading size="md">Rincian Penerimaan Pembayaran</flux:heading>
+                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->paymentReceipts->sum('amount'), 0) }}</flux:text>
+                            </div>
+                            <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Tanggal</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Jumlah</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Dokumen</th>
+                                            @if(auth()->user()->can('vehicle-payment-receipt.edit') || auth()->user()->can('vehicle-payment-receipt.delete'))
+                                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                        @foreach($vehicle->paymentReceipts as $receipt)
+                                        <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    {{ $receipt->payment_date ? \Carbon\Carbon::parse($receipt->payment_date)->format('d-m-Y') : '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm whitespace-nowrap md:whitespace-normal">
+                                                    {{ $receipt->description ?? '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm font-medium whitespace-nowrap">
+                                                    Rp {{ number_format($receipt->amount, 0, ',', '.') }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                @if($receipt->document)
+                                                    @php
+                                                        $files = explode(',', $receipt->document);
+                                                    @endphp
+                                                    <div class="flex space-x-1 space-y-1">
+                                                        @foreach($files as $file)
+                                                            @php
+                                                                $fileName = trim($file);
+                                                                $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                                                            @endphp
+                                                            <a href="{{ asset('documents/payment-receipts/' . $fileName) }}" target="_blank" class="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                                                @if($extension === 'pdf')
+                                                                    <flux:icon.document class="w-4 h-4" />
+                                                                @elseif(in_array($extension, ['jpg', 'jpeg', 'png']))
+                                                                    <flux:icon.photo class="w-4 h-4" />
+                                                                @else
+                                                                    <flux:icon.document class="w-4 h-4" />
+                                                                @endif
+                                                            </a>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                                @endif
+                                            </td>
+                                            @if(auth()->user()->can('vehicle-payment-receipt.edit') || auth()->user()->can('vehicle-payment-receipt.delete'))
+                                            <td class="px-4 py-1 text-center">
+                                                <div class="flex items-center justify-center space-x-1">
+                                                @can('vehicle-payment-receipt.edit')
+                                                <flux:button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    icon="pencil-square"
+                                                    tooltip="Edit"
+                                                    wire:click="editPaymentReceipt({{ $receipt->id }})"
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                ></flux:button>
+                                                @endcan
+                                                @can('vehicle-payment-receipt.print')
+                                                <flux:button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    icon="printer"
+                                                    tooltip="Print"
+                                                    wire:click="printPaymentReceipt({{ $receipt->id }})"
+                                                    class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 cursor-pointer"
+                                                ></flux:button>
+                                                @endcan
+                                                @can('vehicle-payment-receipt.delete')
+                                                <flux:modal.trigger name="delete-payment-receipt-{{ $receipt->id }}">
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="trash"
+                                                        tooltip="Hapus"
+                                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                    ></flux:button>
+                                                </flux:modal.trigger>
+                                                @endcan
+                                                </div>
+                                            </td>
+                                            @endif
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <flux:callout variant="danger" icon="x-circle" class="mt-4" heading="Belum ada penerimaan pembayaran untuk kendaraan ini. Silakan tambahkan penerimaan pembayaran." />
+                        @endif
+                    @endif
+
                 </div>
+                @endif
+
+                <!-- Delete Payment Receipt Confirmation Modals -->
+                @if($vehicle->paymentReceipts && $vehicle->paymentReceipts->count() > 0)
+                    @foreach($vehicle->paymentReceipts as $receipt)
+                    <flux:modal name="delete-payment-receipt-{{ $receipt->id }}" class="min-w-88">
+                        <div class="space-y-6">
+                            <div>
+                                <flux:heading size="lg">Hapus Penerimaan Pembayaran?</flux:heading>
+                                <flux:text class="mt-2">
+                                    Apakah Anda yakin ingin menghapus penerimaan pembayaran ini? Tindakan ini tidak dapat dibatalkan.
+                                </flux:text>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <flux:modal.close>
+                                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                                </flux:modal.close>
+                                <flux:button
+                                    wire:click="deletePaymentReceipt({{ $receipt->id }})"
+                                    variant="danger"
+                                    class="cursor-pointer"
+                                >
+                                    Hapus Penerimaan Pembayaran
+                                </flux:button>
+                            </div>
+                        </div>
+                    </flux:modal>
+                    @endforeach
                 @endif
 
                 <!-- Commission Information -->
@@ -1139,12 +1310,12 @@
                         </flux:button>
                         @endif
 
-                        @if($vehicle->status == 0)
-                            @can('vehicle-receipt.print')
+                        @if($vehicle->status == 0 && $vehicle->paymentReceipts->count() > 0)
+                            @can('vehicle-payment-receipt.print')
                                 <flux:button size="sm" wire:click="openBuyerModal" icon="printer" class="w-full justify-start p-6 cursor-pointer" :loading="false">
                                     <div class="flex flex-col items-start">
                                         <span>Print Receipt</span>
-                                        <span class="text-xs text-gray-500 dark:text-zinc-400">Download sales receipt</span>
+                                        <span class="text-xs text-gray-500 dark:text-zinc-400">Download payment receipt</span>
                                     </div>
                                 </flux:button>
                             @endcan
@@ -1910,6 +2081,138 @@
                 </flux:modal.close>
                 <flux:button type="submit" variant="primary" class="cursor-pointer">
                     Perbarui Pembayaran
+                </flux:button>
+            </div>
+        </form>
+    </div>
+</flux:modal>
+
+<!-- Payment Receipt Modal -->
+<flux:modal wire:model.self="showPaymentReceiptModal" class="md:w-96" @open="resetValidation(); resetErrorBag()">
+    <div class="space-y-6">
+        <div>
+            <flux:heading size="lg">Tambah Penerimaan Pembayaran</flux:heading>
+            <flux:text class="mt-2">Tambahkan penerimaan pembayaran untuk penjualan kendaraan ini.</flux:text>
+        </div>
+
+        @if (session()->has('error'))
+            <div class="mb-6">
+                <flux:callout variant="warning" class="mb-4" icon="exclamation-circle" heading="{{ session('error') }}" />
+            </div>
+        @endif
+
+        <form wire:submit="savePaymentReceipt">
+            <div class="space-y-4">
+                <flux:input
+                    label="Tanggal Penerimaan"
+                    type="date"
+                    wire:model="payment_receipt_date"
+                />
+
+                <flux:input
+                    label="Untuk Pembayaran"
+                    placeholder="Untuk penerimaan pembayaran..."
+                    wire:model="payment_receipt_description"
+                />
+
+                <flux:input
+                    label="Jumlah"
+                    mask:dynamic="$money($input)"
+                    placeholder="188,000,000"
+                    icon="currency-dollar"
+                    wire:model.live.debounce.500ms="payment_receipt_amount"
+                />
+
+                @if($payment_receipt_amount && ($vehicle->paymentReceipts->sum('amount') + Str::replace(',', '', $payment_receipt_amount)) < $vehicle->selling_price)
+                <flux:input
+                    label="Diselesaikan selambatnya pada tanggal"
+                    type="date"
+                    wire:model="payment_receipt_must_be_settled_date"
+                    placeholder="Pilih tanggal"
+                />
+                @endif
+
+                <flux:input
+                    type="file"
+                    label="Dokumen (Opsional)"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    wire:model="payment_receipt_document"
+                    multiple
+                />
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary" class="cursor-pointer">
+                    Simpan Penerimaan
+                </flux:button>
+            </div>
+        </form>
+    </div>
+</flux:modal>
+
+<!-- Edit Payment Receipt Modal -->
+<flux:modal wire:model.self="showEditPaymentReceiptModal" class="md:w-96" @open="resetValidation(); resetErrorBag()">
+    <div class="space-y-6">
+        <div>
+            <flux:heading size="lg">Edit Penerimaan Pembayaran</flux:heading>
+            <flux:text class="mt-2">Perbarui informasi penerimaan pembayaran.</flux:text>
+        </div>
+
+        @if (session()->has('error'))
+            <div class="mb-6">
+                <flux:callout variant="warning" class="mb-4" icon="exclamation-circle" heading="{{ session('error') }}" />
+            </div>
+        @endif
+
+        <form wire:submit="updatePaymentReceipt">
+            <div class="space-y-4">
+                <flux:input
+                    label="Tanggal Penerimaan"
+                    type="date"
+                    wire:model="payment_receipt_date"
+                />
+
+                <flux:input
+                    label="Untuk Pembayaran"
+                    placeholder="Untuk penerimaan pembayaran..."
+                    wire:model="payment_receipt_description"
+                />
+
+                <flux:input
+                    label="Jumlah"
+                    icon="currency-dollar"
+                    mask:dynamic="$money($input)"
+                    placeholder="188,000,000"
+                    wire:model.live.debounce.500ms="payment_receipt_amount"
+                />
+
+                @if($payment_receipt_amount && ($vehicle->paymentReceipts->sum('amount') + Str::replace(',', '', $payment_receipt_amount)) < $vehicle->selling_price)
+                <flux:input
+                    label="Diselesaikan selambatnya pada tanggal"
+                    type="date"
+                    wire:model="payment_receipt_must_be_settled_date"
+                    placeholder="Pilih tanggal"
+                />
+                @endif
+
+                <flux:input
+                    type="file"
+                    label="Dokumen (Opsional)"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    wire:model="payment_receipt_document"
+                    multiple
+                />
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary" class="cursor-pointer">
+                    Perbarui Penerimaan
                 </flux:button>
             </div>
         </form>

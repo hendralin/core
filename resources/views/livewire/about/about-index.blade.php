@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About WOTO v1.14.0') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About WOTO v1.15.0') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -141,6 +141,10 @@
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💳 Purchase Payments</flux:text>
                             <flux:text class="text-lg font-semibold text-purple-600 dark:text-purple-400">{{ number_format($stats['purchase_payments_count'] ?? 0) }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💰 Payment Receipts</flux:text>
+                            <flux:text class="text-lg font-semibold text-green-600 dark:text-green-400">{{ number_format($stats['payment_receipts_count'] ?? 0) }}</flux:text>
                         </div>
                     </div>
 
@@ -319,7 +323,7 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.14.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian kendaraan dengan multiple file upload dan auto-numbering, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, salesmen management dengan auto-create user account, vehicle completeness checklist, dan database transactions untuk data consistency.
+                            <strong>WOTO v1.15.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, salesmen management dengan auto-create user account, vehicle completeness checklist, dan database transactions untuk data consistency.
                         </flux:text>
                     </div>
 
@@ -441,10 +445,10 @@
                     Version History
                 </flux:heading>
 
-                <div class="space-y-4">
+                <div class="space-y-4"></div>
                     <div class="border-l-4 border-emerald-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <flux:text class="font-semibold text-emerald-600 dark:text-emerald-400">v1.14.0 - Purchase Payment Management System</flux:text>
+                            <flux:text class="font-semibold text-emerald-600 dark:text-emerald-400">v1.15.0 - Payment Receipt Management System</flux:text>
                             <span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
