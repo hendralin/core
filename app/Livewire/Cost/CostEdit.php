@@ -97,6 +97,17 @@ class CostEdit extends Component
         // Parse formatted number back to numeric
         $totalPrice = Str::replace(',', '', $this->total_price);
 
+        // Store old values before update (since update() clears dirty attributes)
+        $oldValues = [
+            'cost_type' => $this->cost->getOriginal('cost_type'),
+            'vehicle_id' => $this->cost->getOriginal('vehicle_id'),
+            'cost_date' => $this->cost->getOriginal('cost_date'),
+            'vendor_id' => $this->cost->getOriginal('vendor_id'),
+            'description' => $this->cost->getOriginal('description'),
+            'total_price' => $this->cost->getOriginal('total_price'),
+            'document' => $this->cost->getOriginal('document'),
+        ];
+
         $this->cost->update([
             'cost_type' => $this->cost_type,
             'vehicle_id' => $this->vehicle_id,
@@ -112,15 +123,7 @@ class CostEdit extends Component
             ->performedOn($this->cost)
             ->causedBy(Auth::user())
             ->withProperties([
-                'old' => [
-                    'cost_type' => $this->cost->getOriginal('cost_type'),
-                    'vehicle_id' => $this->cost->getOriginal('vehicle_id'),
-                    'cost_date' => $this->cost->getOriginal('cost_date'),
-                    'vendor_id' => $this->cost->getOriginal('vendor_id'),
-                    'description' => $this->cost->getOriginal('description'),
-                    'total_price' => $this->cost->getOriginal('total_price'),
-                    'document' => $this->cost->getOriginal('document'),
-                ],
+                'old' => $oldValues,
                 'attributes' => [
                     'cost_type' => $this->cost_type,
                     'vehicle_id' => $this->vehicle_id,
