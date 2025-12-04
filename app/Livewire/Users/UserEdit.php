@@ -39,10 +39,10 @@ class UserEdit extends Component
         $this->status = $user->status;
 
         $this->allRoles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
-        $this->roles = $user->roles()->pluck('name');
+        $this->roles = $user->roles()->pluck('name')->toArray();
 
         $this->allWarehouses = Warehouse::all();
-        $this->warehouses = $user->warehouses()->pluck('id');
+        $this->warehouses = $user->warehouses()->pluck('id')->toArray();
     }
 
     public function submit()
