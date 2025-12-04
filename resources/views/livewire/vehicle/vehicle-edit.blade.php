@@ -67,7 +67,7 @@
                             <flux:subheading size="sm">Data identitas kendaraan</flux:subheading>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <flux:input wire:model.live.debounce.1500ms="police_number"
                                    label="Nomor Polisi *"
                                    icon="hashtag"
@@ -84,6 +84,7 @@
                                 <flux:select.option value="{{ $year }}">{{ $year }}</flux:select.option>
                             @endfor
                         </flux:select>
+                        <flux:input wire:model.live.debounce.1500ms="kilometer" label="Kilometer *" icon="ticket" placeholder="15.000" />
                     </div>
                 </div>
 
@@ -163,27 +164,26 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <flux:input wire:model.live.debounce.1500ms="kilometer" label="Kilometer *" icon="ticket" placeholder="15.000" />
                         <flux:select wire:model="warehouse_id" label="Warehouse *" icon="building-storefront">
                             <flux:select.option value="">{{ __('Pilih Warehouse') }}</flux:select.option>
                             @foreach($warehouses as $warehouse)
                                 <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
                             @endforeach
                         </flux:select>
+                        <flux:input wire:model="bpkb_number" label="No. BPKB *" icon="hashtag" placeholder="Masukkan nomor BPKB" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <flux:input wire:model="vehicle_registration_date" label="Tanggal Registrasi *" icon="calendar" type="date" />
-                        <flux:input wire:model="vehicle_registration_expiry_date" label="Tanggal Kadaluarsa *" icon="clock" type="date" />
+                        <flux:input wire:model="vehicle_registration_date" label="Tanggal STNK *" icon="calendar" type="date" />
+                        <flux:input wire:model="vehicle_registration_expiry_date" label="Tanggal Pajak STNK *" icon="clock" type="date" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <flux:label>File STNK</flux:label>
-                            <flux:input type="file" wire:model="file_stnk"
+                            <flux:input type="file" wire:model="file_stnk" label="File STNK *"
                                       accept=".pdf,.jpg,.jpeg,.png"
                                       icon="document"
-                                      helper="Upload file STNK baru jika ingin mengganti (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
+                                      description:trailing="Upload file STNK baru jika ingin mengganti (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
                             @if($existing_file_stnk)
                                 <div class="text-sm text-green-600 flex items-center gap-1">
                                     <flux:icon.check-circle class="w-4 h-4" />
@@ -196,7 +196,24 @@
                                     File dipilih: {{ $file_stnk->getClientOriginalName() }}
                                 </div>
                             @endif
-                            <flux:error name="file_stnk" />
+                        </div>
+                        <div class="space-y-2">
+                            <flux:input type="file" wire:model="bpkb_file" label="File BPKB *"
+                                      accept=".pdf,.jpg,.jpeg,.png"
+                                      icon="document"
+                                      description:trailing="Upload file BPKB baru jika ingin mengganti (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
+                            @if($existing_bpkb_file)
+                                <div class="text-sm text-green-600 flex items-center gap-1">
+                                    <flux:icon.check-circle class="w-4 h-4" />
+                                    File existing: <a href="{{ asset('photos/bpkb/' . $existing_bpkb_file) }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">Lihat BPKB</a>
+                                </div>
+                            @endif
+                            @if($bpkb_file)
+                                <div class="text-sm text-green-600 flex items-center gap-1">
+                                    <flux:icon.check-circle class="w-4 h-4" />
+                                    File dipilih: {{ $bpkb_file->getClientOriginalName() }}
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -497,7 +514,7 @@
                         </li>
                         <li class="flex items-start gap-2">
                             <span class="text-blue-600 mt-1">•</span>
-                            <span>Upload STNK baru jika ingin mengganti file existing</span>
+                            <span>Upload STNK atau BPKB baru jika ingin mengganti file existing</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <span class="text-blue-600 mt-1">•</span>
@@ -535,7 +552,8 @@
                         <li>• Nomor Rangka & Mesin</li>
                         <li>• Kilometer</li>
                         <li>• Warehouse</li>
-                        <li>• Tanggal Registrasi & Kadaluarsa</li>
+                        <li>• No. BPKB</li>
+                        <li>• Tanggal STNK & Pajak STNK</li>
                         <li>• Tanggal & Harga Beli</li>
                         <li>• Harga Tunai & Harga Kredit</li>
                         <li>• Biaya Uang Jalan</li>

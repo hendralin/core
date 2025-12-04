@@ -50,6 +50,9 @@ class VehicleCreate extends Component
     public $status = '1';
     public $description;
 
+    public $bpkb_number;
+    public $bpkb_file;
+
     public $images = []; // Array of uploaded images
     public $tempImages = []; // Temporary storage for new images
 
@@ -69,7 +72,7 @@ class VehicleCreate extends Component
     public function updateProgress()
     {
         // Calculate total required fields based on status
-        $baseFields = 13; // Basic (6) + Technical (3) + Registration (4)
+        $baseFields = 15; // Basic (6) + Technical (3) + Registration (6)
         $totalFields = $baseFields + 5; // Financial (5) + Status (always required)
 
         // Add selling fields if status is sold
@@ -94,11 +97,13 @@ class VehicleCreate extends Component
         if ($this->engine_number) $filledFields++;
         if ($this->kilometer) $filledFields++;
 
-        // Registration (4 required fields)
+        // Registration (6 required fields)
         if ($this->warehouse_id) $filledFields++;
         if ($this->vehicle_registration_date) $filledFields++;
         if ($this->vehicle_registration_expiry_date) $filledFields++;
         if ($this->file_stnk) $filledFields++;
+        if ($this->bpkb_number) $filledFields++;
+        if ($this->bpkb_file) $filledFields++;
 
         // Financial (5 required fields)
         if ($this->purchase_date) $filledFields++;
@@ -167,6 +172,8 @@ class VehicleCreate extends Component
         'salesman_id' => 'required_if:status,0|nullable|exists:salesmen,id',
         'status' => 'required|in:0,1',
         'description' => 'nullable|string',
+        'bpkb_number' => 'required|string|max:255|unique:vehicles,bpkb_number',
+        'bpkb_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         'images.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB per image
         'images' => 'nullable|array|max:10', // Max 10 images
     ];
@@ -206,6 +213,11 @@ class VehicleCreate extends Component
         'images.*.max' => 'Ukuran gambar tidak boleh lebih dari 5MB.',
         'images.array' => 'Format upload gambar tidak valid.',
         'images.max' => 'Maksimal 10 gambar yang dapat diupload.',
+        'bpkb_number.required' => 'Nomor BPKB wajib diisi.',
+        'bpkb_number.unique' => 'Nomor BPKB sudah ada.',
+        'bpkb_file.required' => 'File BPKB wajib diisi.',
+        'bpkb_file.mimes' => 'File BPKB harus dalam format PDF, JPG, JPEG, atau PNG.',
+        'bpkb_file.max' => 'File BPKB tidak boleh lebih dari 2MB.',
     ];
 
     public function updatedBrandId()
@@ -342,7 +354,7 @@ class VehicleCreate extends Component
             'police_number', 'year', 'brand_id', 'type_id', 'category_id', 'vehicle_model_id',
             'chassis_number', 'engine_number', 'cylinder_capacity', 'color', 'fuel_type',
             'kilometer', 'warehouse_id', 'vehicle_registration_date', 'vehicle_registration_expiry_date',
-            'file_stnk', 'purchase_date', 'purchase_price', 'selling_date', 'selling_price',
+            'file_stnk', 'bpkb_number', 'bpkb_file', 'purchase_date', 'purchase_price', 'selling_date', 'selling_price',
             'display_price', 'loan_price', 'roadside_allowance', 'salesman_id', 'status', 'description', 'images', 'tempImages',
             'stnk_asli', 'kunci_roda', 'ban_serep', 'kunci_serep', 'dongkrak'
         ]);
@@ -486,6 +498,12 @@ class VehicleCreate extends Component
             $fileStnkPath = basename($storedPath);
         }
 
+        $fileBpkbPath = null;
+        if ($this->bpkb_file) {
+            $storedPath = $this->bpkb_file->store('photos/bpkb', 'public');
+            $fileBpkbPath = basename($storedPath);
+        }
+
         $vehicleImages = [];
         if (!empty($this->images)) {
             foreach ($this->images as $image) {
@@ -516,6 +534,8 @@ class VehicleCreate extends Component
                 'vehicle_registration_date' => $this->vehicle_registration_date,
                 'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
                 'file_stnk' => $fileStnkPath,
+                'bpkb_number' => $this->bpkb_number,
+                'bpkb_file' => $fileBpkbPath,
                 'warehouse_id' => $this->warehouse_id,
                 'salesman_id' => $this->salesman_id,
                 'purchase_date' => $this->purchase_date,
@@ -569,6 +589,8 @@ class VehicleCreate extends Component
                         'vehicle_registration_date' => $this->vehicle_registration_date,
                         'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
                         'file_stnk' => $fileStnkPath,
+                        'bpkb_number' => $this->bpkb_number,
+                        'bpkb_file' => $fileBpkbPath,
                         'warehouse_id' => $this->warehouse_id,
                         'salesman_id' => $this->salesman_id,
                         'purchase_date' => $this->purchase_date,
@@ -600,6 +622,10 @@ class VehicleCreate extends Component
             // Clean up uploaded files if transaction failed
             if ($fileStnkPath && file_exists(storage_path('app/public/photos/stnk/' . $fileStnkPath))) {
                 unlink(storage_path('app/public/photos/stnk/' . $fileStnkPath));
+            }
+
+            if ($fileBpkbPath && file_exists(storage_path('app/public/photos/bpkb/' . $fileBpkbPath))) {
+                unlink(storage_path('app/public/photos/bpkb/' . $fileBpkbPath));
             }
 
             foreach ($vehicleImages as $imagePath) {

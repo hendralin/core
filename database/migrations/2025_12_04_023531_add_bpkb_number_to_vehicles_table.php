@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->tinyInteger('payment_type')->comment('1=Cash/Tunai, 2=Kredit/Leasing')->nullable()->after('buyer_address');
+            $table->string('bpkb_number', 20)->after('file_stnk');
+            $table->string('bpkb_file')->after('bpkb_number')->nullable();
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->dropColumn('payment_type');
+            $table->dropColumn('bpkb_number');
+            $table->dropColumn('bpkb_file');
         });
     }
 };

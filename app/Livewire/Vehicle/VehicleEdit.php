@@ -60,6 +60,9 @@ class VehicleEdit extends Component
     public $description;
 
     public $existing_file_stnk;
+    public $bpkb_number;
+    public $bpkb_file;
+    public $existing_bpkb_file;
 
     public $images = []; // Array of uploaded images
     public $tempImages = []; // Temporary storage for new images
@@ -84,7 +87,7 @@ class VehicleEdit extends Component
     public function updateProgress()
     {
         // Calculate total required fields based on status
-        $baseFields = 13; // Basic (6) + Technical (3) + Registration (4)
+        $baseFields = 15; // Basic (6) + Technical (3) + Registration (6)
         $totalFields = $baseFields + 5; // Financial (5) + Status (always required)
 
         // Add selling fields if status is sold
@@ -107,11 +110,13 @@ class VehicleEdit extends Component
         if ($this->engine_number) $filledFields++;
         if ($this->kilometer) $filledFields++;
 
-        // Registration (4 required fields)
+        // Registration (6 required fields)
         if ($this->warehouse_id) $filledFields++;
         if ($this->vehicle_registration_date) $filledFields++;
         if ($this->vehicle_registration_expiry_date) $filledFields++;
         if ($this->file_stnk || $this->existing_file_stnk) $filledFields++;
+        if ($this->bpkb_number) $filledFields++;
+        if ($this->bpkb_file || $this->existing_bpkb_file) $filledFields++;
 
         // Financial (5 required fields)
         if ($this->purchase_date) $filledFields++;
@@ -176,6 +181,8 @@ class VehicleEdit extends Component
         'vehicle_registration_expiry_date' => 'required|date|after:vehicle_registration_date',
         'file_stnk' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         'warehouse_id' => 'required|exists:warehouses,id',
+        'bpkb_number' => 'required|string|max:255',
+        'bpkb_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         'purchase_date' => 'required|date|before_or_equal:today',
         'purchase_price' => 'required|numeric|min:0|max:99999999999999.99',
         'selling_date' => 'required_if:status,0|nullable|date|after_or_equal:purchase_date',
@@ -241,6 +248,9 @@ class VehicleEdit extends Component
         'status.in' => 'Status must be either Sold or Available.',
         'file_stnk.mimes' => 'File STNK must be a PDF, JPG, JPEG, or PNG file.',
         'file_stnk.max' => 'File STNK size must not exceed 2MB.',
+        'bpkb_number.required' => 'BPKB number is required.',
+        'bpkb_file.mimes' => 'File BPKB must be a PDF, JPG, JPEG, or PNG file.',
+        'bpkb_file.max' => 'File BPKB size must not exceed 2MB.',
         'fuel_type.in' => 'Fuel type must be either Bensin or Solar.',
         'tempImages.*.image' => 'File must be an image.',
         'tempImages.*.mimes' => 'Image format must be JPEG, JPG, PNG, GIF, or WebP.',
@@ -275,6 +285,8 @@ class VehicleEdit extends Component
         $this->vehicle_registration_date = $vehicle->vehicle_registration_date;
         $this->vehicle_registration_expiry_date = $vehicle->vehicle_registration_expiry_date;
         $this->existing_file_stnk = $vehicle->file_stnk;
+        $this->bpkb_number = $vehicle->bpkb_number;
+        $this->existing_bpkb_file = $vehicle->bpkb_file;
         $this->warehouse_id = $vehicle->warehouse_id;
         $this->salesman_id = $vehicle->salesman_id;
         $this->buyer_name = $vehicle->buyer_name;
@@ -480,6 +492,7 @@ class VehicleEdit extends Component
     {
         // Update unique validation to exclude current vehicle
         $this->rules['police_number'] = 'required|string|max:11|unique:vehicles,police_number,' . $this->vehicle->id;
+        $this->rules['bpkb_number'] = 'required|string|max:255|unique:vehicles,bpkb_number,' . $this->vehicle->id;
 
         // Parse formatted values before validation
         $this->kilometer = $this->parseFormatted($this->kilometer);
@@ -520,6 +533,19 @@ class VehicleEdit extends Component
             $fileStnkPath = basename($storedPath);
         }
 
+        $fileBpkbPath = $this->vehicle->bpkb_file;
+
+        // Handle BPKB file upload
+        if ($this->bpkb_file) {
+            // Delete old file if exists
+            if ($this->vehicle->bpkb_file && Storage::disk('public')->exists($this->vehicle->bpkb_file)) {
+                Storage::disk('public')->delete($this->vehicle->bpkb_file);
+            }
+
+            $storedPath = $this->bpkb_file->store('photos/bpkb', 'public');
+            $fileBpkbPath = basename($storedPath);
+        }
+
         // Handle new image uploads before transaction
         $uploadedImagePaths = [];
         if (!empty($this->images)) {
@@ -550,6 +576,8 @@ class VehicleEdit extends Component
                 'vehicle_registration_date' => $this->vehicle->vehicle_registration_date,
                 'vehicle_registration_expiry_date' => $this->vehicle->vehicle_registration_expiry_date,
                 'file_stnk' => $this->vehicle->file_stnk,
+                'bpkb_number' => $this->vehicle->bpkb_number,
+                'bpkb_file' => $this->vehicle->bpkb_file,
                 'warehouse_id' => $this->vehicle->warehouse_id,
                 'salesman_id' => $this->vehicle->salesman_id,
                 'buyer_name' => $this->vehicle->buyer_name,
@@ -585,6 +613,8 @@ class VehicleEdit extends Component
                 'vehicle_registration_date' => $this->vehicle_registration_date,
                 'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
                 'file_stnk' => $fileStnkPath,
+                'bpkb_number' => $this->bpkb_number,
+                'bpkb_file' => $fileBpkbPath,
                 'warehouse_id' => $this->warehouse_id,
                 'salesman_id' => $this->status == '0' ? $this->salesman_id : null,
                 'buyer_name' => $this->status == '0' ? $this->buyer_name : null,
@@ -663,6 +693,8 @@ class VehicleEdit extends Component
                         'vehicle_registration_date' => $this->vehicle_registration_date,
                         'vehicle_registration_expiry_date' => $this->vehicle_registration_expiry_date,
                         'file_stnk' => $fileStnkPath,
+                        'bpkb_number' => $this->bpkb_number,
+                        'bpkb_file' => $fileBpkbPath,
                         'warehouse_id' => $this->warehouse_id,
                         'salesman_id' => $this->status == '0' ? $this->salesman_id : null,
                         'buyer_name' => $this->status == '0' ? $this->buyer_name : null,
@@ -704,6 +736,10 @@ class VehicleEdit extends Component
             // Clean up uploaded files if transaction failed
             if ($this->file_stnk && $fileStnkPath !== $this->vehicle->file_stnk && file_exists(storage_path('app/public/photos/stnk/' . $fileStnkPath))) {
                 unlink(storage_path('app/public/photos/stnk/' . $fileStnkPath));
+            }
+
+            if ($this->bpkb_file && $fileBpkbPath !== $this->vehicle->bpkb_file && file_exists(storage_path('app/public/photos/bpkb/' . $fileBpkbPath))) {
+                unlink(storage_path('app/public/photos/bpkb/' . $fileBpkbPath));
             }
 
             foreach ($uploadedImagePaths as $imagePath) {
@@ -750,6 +786,11 @@ class VehicleEdit extends Component
         $this->roadside_allowance = $this->formatNumber($this->vehicle->roadside_allowance);
         $this->selling_price = $this->vehicle->selling_price ? $this->formatNumber($this->vehicle->selling_price) : null;
         $this->cylinder_capacity = $this->formatNumber($this->vehicle->cylinder_capacity);
+
+        // Reset BPKB data
+        $this->bpkb_number = $this->vehicle->bpkb_number;
+        $this->bpkb_file = null;
+        $this->existing_bpkb_file = $this->vehicle->bpkb_file;
 
         // Load buyer data
         $this->buyer_name = $this->vehicle->buyer_name;

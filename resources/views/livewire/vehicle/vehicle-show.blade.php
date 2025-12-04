@@ -223,12 +223,12 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <flux:heading size="md">Tanggal Registrasi</flux:heading>
+                            <flux:heading size="md">Tanggal STNK</flux:heading>
                             <flux:text class="mt-1">{{ $vehicle->vehicle_registration_date ? Carbon\Carbon::parse($vehicle->vehicle_registration_date)->format('M d, Y') : '-' }}</flux:text>
                         </div>
 
                         <div>
-                            <flux:heading size="md">Tanggal Kadaluarsa</flux:heading>
+                            <flux:heading size="md">Tanggal Pajak STNK</flux:heading>
                             <flux:text class="mt-1">{{ $vehicle->vehicle_registration_expiry_date ? Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->format('M d, Y') : '-' }}</flux:text>
                         </div>
 
@@ -238,10 +238,26 @@
                         </div>
 
                         <div>
+                            <flux:heading size="md">No. BPKB</flux:heading>
+                            <flux:text class="mt-1">{{ $vehicle->bpkb_number ?? '-' }}</flux:text>
+                        </div>
+
+                        <div>
                             <flux:heading size="md">File STNK</flux:heading>
                             @if($vehicle->file_stnk && Storage::disk('public')->exists('photos/stnk/'.$vehicle->file_stnk))
                                 <flux:text class="mt-1">
                                     <a href="{{ asset('photos/stnk/'.$vehicle->file_stnk) }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">Lihat STNK</a>
+                                </flux:text>
+                            @else
+                                <flux:text class="mt-1">-</flux:text>
+                            @endif
+                        </div>
+
+                        <div>
+                            <flux:heading size="md">File BPKB</flux:heading>
+                            @if($vehicle->bpkb_file && Storage::disk('public')->exists('photos/bpkb/'.$vehicle->bpkb_file))
+                                <flux:text class="mt-1">
+                                    <a href="{{ asset('photos/bpkb/'.$vehicle->bpkb_file) }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">Lihat BPKB</a>
                                 </flux:text>
                             @else
                                 <flux:text class="mt-1">-</flux:text>

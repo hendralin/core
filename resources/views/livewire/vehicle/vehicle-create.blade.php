@@ -67,7 +67,7 @@
                             <flux:subheading size="sm">Data identitas kendaraan</flux:subheading>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <flux:input wire:model.live.debounce.1500ms="police_number"
                                    label="Nomor Polisi *"
                                    icon="hashtag"
@@ -84,6 +84,7 @@
                                 <flux:select.option value="{{ $year }}">{{ $year }}</flux:select.option>
                             @endfor
                         </flux:select>
+                        <flux:input wire:model.live.debounce.1500ms="kilometer" label="Kilometer *" icon="ticket" placeholder="15.000" />
                     </div>
                 </div>
 
@@ -163,27 +164,23 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <flux:input wire:model.live.debounce.1500ms="kilometer" label="Kilometer *" icon="ticket" placeholder="15.000" />
                         <flux:select wire:model="warehouse_id" label="Warehouse *" icon="building-storefront">
                             <flux:select.option value="">{{ __('Pilih Warehouse') }}</flux:select.option>
                             @foreach($warehouses as $warehouse)
                                 <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
                             @endforeach
                         </flux:select>
+                        <flux:input wire:model="bpkb_number" label="No. BPKB *" icon="hashtag" placeholder="Masukkan nomor BPKB" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <flux:input wire:model="vehicle_registration_date" label="Tanggal Registrasi *" icon="calendar" type="date" />
-                        <flux:input wire:model="vehicle_registration_expiry_date" label="Tanggal Kadaluarsa *" icon="clock" type="date" />
+                        <flux:input wire:model="vehicle_registration_date" label="Tanggal STNK *" icon="calendar" type="date" />
+                        <flux:input wire:model="vehicle_registration_expiry_date" label="Tanggal Pajak STNK *" icon="clock" type="date" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <flux:label>File STNK *</flux:label>
-                            <flux:input type="file" wire:model="file_stnk"
-                                      accept=".pdf,.jpg,.jpeg,.png"
-                                      icon="document"
-                                      helper="Upload file STNK (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
+                            <flux:input type="file" wire:model="file_stnk" label="File STNK *" accept=".pdf,.jpg,.jpeg,.png" icon="document" description:trailing="Upload file STNK (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
                             @if($file_stnk)
                                 <div class="text-sm text-green-600 flex items-center gap-1">
                                     <flux:icon.check-circle class="w-4 h-4" />
@@ -191,6 +188,16 @@
                                 </div>
                             @endif
                             <flux:error name="file_stnk" />
+                        </div>
+                        <div class="space-y-2">
+                            <flux:input type="file" wire:model="bpkb_file" accept=".pdf,.jpg,.jpeg,.png" icon="document" label="File BPKB *" description:trailing="Upload file BPKB (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
+                            @if($bpkb_file)
+                                <div class="text-sm text-green-600 flex items-center gap-1">
+                                    <flux:icon.check-circle class="w-4 h-4" />
+                                    File dipilih: {{ $bpkb_file->getClientOriginalName() }}
+                                </div>
+                            @endif
+                            <flux:error name="bpkb_file" />
                         </div>
                     </div>
                 </div>
@@ -420,7 +427,7 @@
                         </li>
                         <li class="flex items-start gap-2">
                             <span class="text-blue-600 mt-1">•</span>
-                            <span>Upload STNK yang jelas dan masih berlaku</span>
+                            <span>Upload STNK dan BPKB yang jelas dan masih berlaku</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <span class="text-blue-600 mt-1">•</span>
@@ -450,7 +457,8 @@
                         <li>• Nomor Rangka & Mesin</li>
                         <li>• Kilometer</li>
                         <li>• Warehouse</li>
-                        <li>• Tanggal Registrasi & Kadaluarsa</li>
+                        <li>• Tanggal STNK & Pajak STNK</li>
+                        <li>• No. BPKB & File BPKB</li>
                         <li>• File STNK</li>
                         <li>• Tanggal & Harga Beli</li>
                         <li>• Harga Tunai & Harga Kredit</li>
