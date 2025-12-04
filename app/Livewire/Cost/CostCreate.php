@@ -100,7 +100,7 @@ class CostCreate extends Component
                     'document' => $documentPath,
                 ]
             ])
-            ->log('created pembukuan modal');
+            ->log('created cost record');
 
         session()->flash('success', 'Pembukuan modal berhasil ditambahkan.');
 

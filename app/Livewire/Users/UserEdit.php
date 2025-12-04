@@ -47,7 +47,7 @@ class UserEdit extends Component
 
     public function submit()
     {
-        $this->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:users,email,' . $this->user->id,
             'phone' => 'nullable|string|regex:/^[\d\s\-\+\(\)]{10,15}$/',
@@ -57,8 +57,9 @@ class UserEdit extends Component
             'status' => 'required|integer|in:0,1,2',
             'roles' => 'required|array',
             'warehouses' => 'required|array|min:1',
-            'password' => 'nullable|string|min:8|same:confirm_password',
-        ], [
+        ];
+
+        $messages = [
             'name.required' => 'Nama lengkap wajib diisi.',
             'name.string' => 'Nama lengkap harus berupa teks.',
             'name.max' => 'Nama lengkap tidak boleh lebih dari 255 karakter.',
@@ -88,11 +89,22 @@ class UserEdit extends Component
 
             'warehouses.required' => 'Setidaknya satu gudang harus dipilih.',
             'warehouses.array' => 'Format gudang tidak valid.',
+            'warehouses.min' => 'Setidaknya satu gudang harus dipilih.',
+        ];
 
-            'password.min' => 'Kata sandi minimal 8 karakter.',
-            'password.regex' => 'Kata sandi harus mengandung huruf besar, huruf kecil, dan angka.',
-            'password.same' => 'Konfirmasi kata sandi tidak cocok.',
-        ]);
+        // Add password validation only if password is provided
+        if ($this->password) {
+            $rules['password'] = 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/|same:confirm_password';
+            $messages = array_merge($messages, [
+                'password.required' => 'Kata sandi wajib diisi.',
+                'password.string' => 'Kata sandi harus berupa teks.',
+                'password.min' => 'Kata sandi minimal 8 karakter.',
+                'password.regex' => 'Kata sandi harus mengandung setidaknya satu huruf kecil, satu huruf besar, dan satu angka.',
+                'password.same' => 'Konfirmasi kata sandi tidak cocok.',
+            ]);
+        }
+
+        $this->validate($rules, $messages);
 
         // Store old values for logging
         $oldValues = [

@@ -134,7 +134,7 @@ class CostEdit extends Component
                     'document' => $documentPath,
                 ]
             ])
-            ->log('updated pembukuan modal');
+            ->log('updated cost record');
 
         session()->flash('success', 'Pembukuan modal berhasil diubah.');
 
