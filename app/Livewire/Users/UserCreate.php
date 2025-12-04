@@ -36,7 +36,7 @@ class UserCreate extends Component
             'address' => 'nullable|string|max:500',
             'timezone' => 'required|string',
             'roles' => 'required|array',
-            'warehouses' => 'required|array',
+            'warehouses' => 'required|array|min:1',
             'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/|same:confirm_password',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',

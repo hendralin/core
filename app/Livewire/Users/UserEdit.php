@@ -56,7 +56,7 @@ class UserEdit extends Component
             'timezone' => 'required|string',
             'status' => 'required|integer|in:0,1,2',
             'roles' => 'required|array',
-            'warehouses' => 'required|array',
+            'warehouses' => 'required|array|min:1',
             'password' => 'nullable|string|min:8|same:confirm_password',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
