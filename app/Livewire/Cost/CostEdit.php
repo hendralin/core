@@ -141,7 +141,7 @@ class CostEdit extends Component
     public function removeDocument()
     {
         if ($this->existing_document) {
-            Storage::disk('public')->delete('photos/cost-documents/' . $this->existing_document);
+            Storage::disk('public')->delete('photos/costs/' . $this->existing_document);
             $this->cost->update(['document' => null]);
             $this->existing_document = null;
             $this->document = null;
