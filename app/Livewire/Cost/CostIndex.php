@@ -69,13 +69,13 @@ class CostIndex extends Component
             }
 
             DB::transaction(function () {
-                $cost = Cost::findOrFail($this->costIdToDelete);
+                $cost = Cost::with('vendor')->findOrFail($this->costIdToDelete);
 
                 // Store cost data for logging before deletion
                 $costData = [
                     'vehicle_id' => $cost->vehicle_id,
                     'cost_date' => $cost->cost_date,
-                    'vendor_name' => $cost->vendor_name,
+                    'vendor_name' => $cost->vendor?->name,
                     'description' => $cost->description,
                     'total_price' => $cost->total_price,
                     'document' => $cost->document,
