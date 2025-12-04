@@ -2,7 +2,7 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.15.0** - Payment Receipt Management System
+**Version 1.16.0** - Certificate Receipt Management System
 
 ## ✨ Fitur Utama
 
@@ -63,6 +63,22 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
   - **Advanced Filtering**: Search by payment number/description/user, vehicle filter, pagination
   - **Permission-based Access**: vehicle-purchase-payment.* permissions untuk kontrol akses
   - **Database Integration**: Foreign key ke vehicles table dengan document management
+  - **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
+
+- **📋 Tanda Terima BPKB**: Sistem manajemen tanda terima BPKB kendaraan
+  - **Certificate Receipt CRUD**: Create, Read, Update, Delete tanda terima BPKB dengan interface lengkap
+  - **Auto Certificate Number Generation**: Generate nomor tanda terima otomatis dengan format 001/TT/BPKB/WOTO/XII/2025
+  - **Comprehensive Form Fields**: BPKB A/N, Faktur Asli A/N, Fotocopy KTP A/N, Blanko Kwitansi, NIK, Form A, Surat Pelepasan Hak, Lain-lain
+  - **Advanced Form Interface**: Modal form dengan validasi lengkap dan error handling
+  - **Single Receipt Rule**: Sistem mencegah pembuatan lebih dari satu tanda terima per kendaraan
+  - **Certificate Receipt Audit Trail**: Dedicated audit page dengan filtering berdasarkan vehicle
+  - **Advanced Filtering**: Search by certificate number/in_the_name_of/user, vehicle filter, pagination
+  - **Print Certificate Receipt**: Generate PDF tanda terima BPKB otomatis dalam format landscape
+  - **Dual Version PDF**: ORIGINAL dan COPY dalam satu halaman A4 landscape yang compact
+  - **Professional PDF Layout**: Template dengan logo perusahaan, data lengkap, dan signature sections
+  - **Permission-based Access**: vehicle-registration-certificate-receipt.* permissions untuk kontrol akses
+  - **Database Integration**: Foreign key ke vehicles table dengan relationship management
+  - **Audit Trail**: Activity logging lengkap untuk semua perubahan certificate receipts
   - **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
 
 - **💰 Penerimaan Pembayaran**: Sistem manajemen penerimaan pembayaran penjualan kendaraan
@@ -168,7 +184,7 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Database**: MySQL/PostgreSQL dengan Eloquent Relationships
 - **Authentication**: Laravel Sanctum
 - **File Storage**: Laravel Storage (local/cloud)
-- **PDF Generation**: DomPDF (dengan base64 image support untuk logo perusahaan)
+- **PDF Generation**: DomPDF (dengan base64 image support untuk logo perusahaan, landscape orientation untuk certificate receipts)
 - **Excel Export**: Laravel Excel (Maatwebsite)
 - **Activity Logging**: Spatie Laravel Activity Log (audit trail lengkap)
 - **Permissions**: Spatie Laravel Permission (role-based access)
@@ -177,7 +193,7 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **JavaScript**: Vanilla JS dengan Livewire integration, Quill.js editor, localStorage API
 - **Form Enhancement**: Auto-formatting, progress indicators, keyboard shortcuts, state persistence
 - **Multiple File Upload**: Livewire WithFileUploads untuk upload multiple files dengan comma-separated storage
-- **Auto Numbering**: Custom auto-increment numbering system dengan format 0001/PP/WOTO/XII/2025
+- **Auto Numbering**: Custom auto-increment numbering system dengan format 0001/PP/WOTO/XII/2025 dan 001/TT/BPKB/WOTO/XII/2025
 - **Database Transactions**: Atomic operations untuk multi-table updates dengan error handling dan rollback
 - **Indonesian Text Conversion**: Custom terbilang helper function untuk mata uang Rupiah
 - **Receipt Generation**: Sistem generate kwitansi PDF dengan nomor otomatis dan data perusahaan dinamis
@@ -285,6 +301,7 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Loan Calculations**: Audit trail lengkap untuk semua aktivitas perhitungan kredit kendaraan + Vehicle Filtering
 - **Purchase Payments**: Audit trail lengkap untuk semua aktivitas pembayaran pembelian kendaraan + Vehicle Filtering
 - **Payment Receipts**: Audit trail lengkap untuk semua aktivitas penerimaan pembayaran kendaraan + Vehicle Filtering
+- **Certificate Receipts**: Audit trail lengkap untuk semua aktivitas tanda terima BPKB kendaraan + Vehicle Filtering
 - **Brands**: Manajemen merek mobil (31+ brand Indonesia) + Audit Trail
 - **Vendors**: Manajemen vendor/supplier kendaraan + Audit Trail
 - **Salesmen**: Manajemen salesman dengan auto-create user account + Status management + Audit Trail
@@ -587,6 +604,44 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Documents**: Upload multiple file dokumen (PDF, JPG, PNG, max 2MB each, optional)
 - **Vehicle**: Kendaraan terkait (auto-assigned berdasarkan context)
 
+### 📋 Cara Menggunakan Certificate Receipt Module
+1. **Akses Vehicles**: Klik menu "Vehicles" di sidebar
+2. **Pilih Kendaraan**: Cari kendaraan yang akan dibuat tanda terima BPKB
+3. **Akses Certificate Receipts**: Pada halaman vehicle detail, lihat section "Tanda Terima BPKB"
+4. **Create Certificate Receipt**: Jika belum ada, klik "Buat Tanda Terima BPKB ->"
+   - **Auto Certificate Number**: Nomor tanda terima otomatis dengan format 001/TT/BPKB/WOTO/XII/2025
+   - **Single Receipt Rule**: Sistem mencegah pembuatan lebih dari satu tanda terima per kendaraan
+   - **Comprehensive Form**: Isi semua field yang diperlukan (BPKB A/N, Faktur Asli A/N, dll)
+   - **Real-time Validation**: Validasi otomatis untuk semua field yang required
+5. **View Certificate Receipt**: Lihat tabel certificate receipt dengan informasi lengkap
+6. **Edit Certificate Receipt**: Klik icon edit (pencil) untuk mengubah data
+   - **Form Pre-population**: Data otomatis terisi di form edit
+   - **Certificate Number Read-only**: Nomor tanda terima tidak dapat diubah (auto-generated)
+7. **Delete Certificate Receipt**: Klik icon trash untuk menghapus dengan confirmation modal
+8. **Print Certificate Receipt**: Klik icon printer untuk generate PDF
+   - **Landscape PDF**: Template landscape dengan layout professional
+   - **Dual Version**: ORIGINAL dan COPY dalam satu halaman A4
+   - **Compact Design**: Layout yang efisien untuk menghemat kertas
+   - **Company Branding**: Logo perusahaan dan informasi lengkap
+9. **Certificate Receipt Audit Trail**: Klik menu "Certificate Receipts" untuk melihat audit trail
+10. **Advanced Filtering**: Gunakan search, vehicle filter, dan pagination
+11. **Export Data**: Gunakan tombol Excel/PDF untuk export data certificate receipt audit
+
+### Form Fields Certificate Receipts
+- **Certificate Number**: Auto-generated (format: 001/TT/BPKB/WOTO/XII/2025)
+- **In The Name Of (BPKB A/N)**: Nama pada BPKB (required)
+- **Original Invoice Name (Faktur Asli A/N)**: Nama pada faktur asli (required)
+- **Photocopy ID Card Name (Fotocopy KTP A/N)**: Nama pada fotocopy KTP (required)
+- **Receipt Form (Blanko Kwitansi)**: Informasi blanko kwitansi (required)
+- **NIK**: Nomor Induk Kependudukan (required, max 16 characters)
+- **Form A**: Informasi Form A (required)
+- **Release of Title Letter (Surat Pelepasan Hak)**: Informasi surat pelepasan hak (required)
+- **Others (Lain-lain)**: Informasi tambahan (optional, max 255 characters)
+- **Receipt Date**: Tanggal tanda terima (required)
+- **Transferee (Yang Menyerahkan)**: Nama yang menyerahkan dokumen (required)
+- **Receiving Party (Yang Menerima)**: Nama yang menerima dokumen (required)
+- **Vehicle**: Kendaraan terkait (auto-assigned berdasarkan context)
+
 ### Fitur Khusus Vendors Module
 - **Vendor Management**: Database vendor/supplier kendaraan Indonesia
 - **Contact Information**: Informasi lengkap vendor (name, contact, phone, email, address)
@@ -638,6 +693,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicle-loan-calculation.*` - Manajemen loan calculation records (view, create, edit, delete, audit)
 - `vehicle-purchase-payment.*` - Manajemen purchase payment records (view, create, edit, delete, audit)
 - `vehicle-payment-receipt.*` - Manajemen payment receipt records (view, create, edit, delete, audit)
+- `vehicle-registration-certificate-receipt.*` - Manajemen certificate receipt records (view, create, edit, delete, audit, print)
 - `cost.*` - Manajemen cost records (view, create, edit, delete)
 - `vehiclemodel.*` - Manajemen vehicle models (view, create, edit, delete)
 - `category.*` - Manajemen categories (view, create, edit, delete)
@@ -682,6 +738,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `commissions` - Data komisi kendaraan (sales/purchase) dengan relasi ke vehicles
 - `purchase_payments` - Data pembayaran pembelian kendaraan dengan multiple file upload dan auto-numbering
 - `payment_receipts` - Data penerimaan pembayaran penjualan kendaraan dengan multiple file upload dan auto-numbering
+- `certificate_receipts` - Data tanda terima BPKB kendaraan dengan auto-numbering dan comprehensive document tracking
 - `loan_calculations` - Data perhitungan kredit kendaraan dengan relasi ke vehicles dan leasings
 - `costs` - Data biaya kendaraan dengan approval workflow
 - `brands` - Merek mobil (31+ brand Indonesia)
@@ -749,6 +806,11 @@ GET    /api/payment-receipts/{id} - Detail payment receipt record tertentu
 POST   /api/payment-receipts  - Tambah payment receipt record baru
 PUT    /api/payment-receipts/{id} - Update payment receipt record
 DELETE /api/payment-receipts/{id} - Hapus payment receipt record
+GET    /api/certificate-receipts - List semua certificate receipt records
+GET    /api/certificate-receipts/{id} - Detail certificate receipt record tertentu
+POST   /api/certificate-receipts  - Tambah certificate receipt record baru
+PUT    /api/certificate-receipts/{id} - Update certificate receipt record
+DELETE /api/certificate-receipts/{id} - Hapus certificate receipt record
 GET    /api/leasings           - List semua data leasing
 POST   /api/models             - Tambah model kendaraan baru
 PUT    /api/models/{id}        - Update model kendaraan
@@ -814,22 +876,27 @@ FILESYSTEM_DISK=public
 
 ## 📝 Changelog
 
-### v1.13.0 - Loan Calculation Management System
-- ✅ **Complete Loan Calculation Module**: Sistem lengkap manajemen perhitungan kredit kendaraan
-- ✅ **Loan Calculation CRUD Operations**: Create, Read, Update, Delete perhitungan kredit dengan interface lengkap
-- ✅ **Leasing Integration**: Relasi dengan tabel leasings untuk data perusahaan pembiayaan
-- ✅ **Advanced Form Interface**: Modal form dengan validasi lengkap dan error handling
-- ✅ **Activity Logging**: Activity logging lengkap menggunakan Spatie Activity Log dengan HasActivity trait
-- ✅ **Loan Calculation Audit Trail**: Dedicated audit page dengan filtering, search, dan statistics dashboard
-- ✅ **Advanced Audit Filtering**: Search by description/user/leasing, vehicle filter, pagination dengan 10-100 items per page
+### v1.16.0 - Certificate Receipt Management System
+- ✅ **Complete Certificate Receipt Module**: Sistem lengkap manajemen tanda terima BPKB kendaraan
+- ✅ **Certificate Receipt CRUD Operations**: Create, Read, Update, Delete tanda terima BPKB dengan interface lengkap
+- ✅ **Auto Certificate Number Generation**: Generate nomor tanda terima otomatis dengan format 001/TT/BPKB/WOTO/XII/2025
+- ✅ **Single Receipt Validation**: Sistem mencegah pembuatan lebih dari satu tanda terima per kendaraan
+- ✅ **Comprehensive Form Fields**: BPKB A/N, Faktur Asli A/N, Fotocopy KTP A/N, Blanko Kwitansi, NIK, Form A, Surat Pelepasan Hak, Lain-lain
+- ✅ **Advanced Form Interface**: Modal form dengan validasi lengkap, error handling, dan resetValidation
+- ✅ **Certificate Receipt Audit Trail**: Dedicated audit page dengan filtering, search, dan statistics dashboard
+- ✅ **Advanced Audit Filtering**: Search by certificate number/in_the_name_of/user, vehicle filter, pagination
 - ✅ **Audit Trail Statistics**: Real-time dashboard dengan total activities, today count, created/updated/deleted counters
-- ✅ **Sorting by Leasing Name**: Data diurutkan berdasarkan nama leasing secara alfabetis untuk kemudahan pencarian
-- ✅ **Permission-based Access**: vehicle-loan-calculation.* permissions untuk kontrol akses CRUD operations dan audit
-- ✅ **Database Integration**: Foreign key ke vehicles dan leasings table dengan proper relationships
-- ✅ **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
+- ✅ **Print Certificate Receipt**: Generate PDF tanda terima BPKB otomatis dalam format landscape
+- ✅ **Compact Dual PDF Layout**: ORIGINAL dan COPY dalam satu halaman A4 landscape yang fit (8.5cm per section)
+- ✅ **Professional PDF Template**: Template dengan logo perusahaan, data lengkap kendaraan, dan signature sections
+- ✅ **Landscape PDF Optimization**: Layout landscape dengan two-column data arrangement untuk space efficiency
+- ✅ **Permission-based Access**: vehicle-registration-certificate-receipt.* permissions untuk kontrol akses CRUD operations dan audit
+- ✅ **Database Integration**: Foreign key ke vehicles table dengan relationship management
+- ✅ **Print Count Tracking**: Track jumlah cetak tanda terima dengan timestamp untuk audit trail
+- ✅ **Real-time Updates**: Auto-refresh data setelah create/update/delete operations dengan proper validation
 - ✅ **UI Integration**: Seamless integration dengan vehicle detail page dan audit system
-- ✅ **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan
-- ✅ **Model Relationships**: Proper Eloquent relationships antara Vehicle, LoanCalculation, dan Leasing
+- ✅ **Error Handling**: Comprehensive validation dan user feedback untuk semua operations
+- ✅ **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan certificate receipts
 
 ### v1.15.0 - Payment Receipt Management System
 - ✅ **Complete Payment Receipt Module**: Sistem lengkap manajemen penerimaan pembayaran penjualan kendaraan
@@ -873,6 +940,23 @@ FILESYSTEM_DISK=public
 - ✅ **Error Handling**: Comprehensive validation dan user feedback untuk semua operations
 - ✅ **Leasing Management**: Database leasings untuk menyimpan data perusahaan leasing/pembiayaan
 
+### v1.13.0 - Loan Calculation Management System
+- ✅ **Complete Loan Calculation Module**: Sistem lengkap manajemen perhitungan kredit kendaraan
+- ✅ **Loan Calculation CRUD Operations**: Create, Read, Update, Delete perhitungan kredit dengan interface lengkap
+- ✅ **Leasing Integration**: Relasi dengan tabel leasings untuk data perusahaan pembiayaan
+- ✅ **Advanced Form Interface**: Modal form dengan validasi lengkap dan error handling
+- ✅ **Activity Logging**: Activity logging lengkap menggunakan Spatie Activity Log dengan HasActivity trait
+- ✅ **Loan Calculation Audit Trail**: Dedicated audit page dengan filtering, search, dan statistics dashboard
+- ✅ **Advanced Audit Filtering**: Search by description/user/leasing, vehicle filter, pagination dengan 10-100 items per page
+- ✅ **Audit Trail Statistics**: Real-time dashboard dengan total activities, today count, created/updated/deleted counters
+- ✅ **Sorting by Leasing Name**: Data diurutkan berdasarkan nama leasing secara alfabetis untuk kemudahan pencarian
+- ✅ **Permission-based Access**: vehicle-loan-calculation.* permissions untuk kontrol akses CRUD operations dan audit
+- ✅ **Database Integration**: Foreign key ke vehicles dan leasings table dengan proper relationships
+- ✅ **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
+- ✅ **UI Integration**: Seamless integration dengan vehicle detail page dan audit system
+- ✅ **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan
+- ✅ **Model Relationships**: Proper Eloquent relationships antara Vehicle, LoanCalculation, dan Leasing
+  
 ### v1.12.0 - Vehicle Completeness Checklist & Database Transactions
 - ✅ **Vehicle Completeness Checklist System**: Sistem lengkap pencatatan kelengkapan peralatan kendaraan
 - ✅ **Equipment Items Management**: 5 item kelengkapan (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak)

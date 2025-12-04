@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About WOTO v1.15.0') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About WOTO v1.16.0') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -145,6 +145,13 @@
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💰 Payment Receipts</flux:text>
                             <flux:text class="text-lg font-semibold text-green-600 dark:text-green-400">{{ number_format($stats['payment_receipts_count'] ?? 0) }}</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">📋 Certificate Receipts</flux:text>
+                            <flux:text class="text-lg font-semibold text-amber-600 dark:text-amber-400">{{ number_format($stats['certificate_receipts_count'] ?? 0) }}</flux:text>
                         </div>
                     </div>
 
@@ -296,8 +303,16 @@
                     <div class="flex items-start gap-3">
                         <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
                         <div>
+                            <flux:text class="font-medium">📋 Certificate Receipt Management</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Sistem tanda terima BPKB dengan auto-numbering format 001/TT/BPKB/WOTO/XII/2025, print PDF landscape, single receipt validation, dan audit trail lengkap</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                        <div>
                             <flux:text class="font-medium">Audit Trail</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Tracking lengkap semua perubahan data dengan before/after untuk semua module termasuk commissions, loan calculations, dan purchase payments</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Tracking lengkap semua perubahan data dengan before/after untuk semua module termasuk commissions, loan calculations, purchase payments, dan certificate receipts</flux:text>
                         </div>
                     </div>
 
@@ -323,7 +338,7 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.15.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, salesmen management dengan auto-create user account, vehicle completeness checklist, dan database transactions untuk data consistency.
+                            <strong>WOTO v1.16.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan print PDF landscape, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, salesmen management dengan auto-create user account, vehicle completeness checklist, dan database transactions untuk data consistency.
                         </flux:text>
                     </div>
 
@@ -337,7 +352,8 @@
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Commission module lengkap dengan sales/purchase types, modal forms, audit trail, dan vehicle filtering</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Loan Calculation module dengan leasing integration, audit trail, sorting by leasing name, dan CRUD operations</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💳 Purchase Payment dengan multiple file upload, auto-numbering format 0001/PP/WOTO/XII/2025, dan purchase price validation</flux:text>
-                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Database {{ $stats['brands_count'] }} brand, {{ $stats['vendors_count'] }} vendor, {{ $stats['salesmen_count'] }} salesman, {{ $stats['vehicle_models_count'] }} model STNK, {{ $stats['categories_count'] }} kategori STNK, dan {{ $stats['types_count'] }} tipe kendaraan Indonesia</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 📋 Certificate Receipt dengan auto-numbering format 001/TT/BPKB/WOTO/XII/2025, print PDF landscape, dan single receipt validation</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Database {{ $stats['brands_count'] }} brand, {{ $stats['vendors_count'] }} vendor, {{ $stats['salesmen_count'] }} salesman, {{ $stats['vehicle_models_count'] }} model STNK, {{ $stats['categories_count'] }} kategori STNK, dan {{ $stats['types_count'] }} tipe kendaraan Indonesia</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Audit trail lengkap dengan before/after tracking untuk semua module termasuk Vehicles & Costs</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Export data ke Excel dan PDF dengan template konsisten di semua module</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Advanced form features: auto-formatting prices, keyboard shortcuts, conditional validation, cascading dropdowns</flux:text>
@@ -446,10 +462,29 @@
                 </flux:heading>
 
                 <div class="space-y-4"></div>
+                    <div class="border-l-4 border-orange-500 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <flux:text class="font-semibold text-orange-600 dark:text-orange-400">v1.16.0 - Certificate Receipt Management System</flux:text>
+                            <span class="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 text-xs rounded-full">Latest</span>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
+                            <flux:text>• ✅ Complete Certificate Receipt Module: Sistem lengkap manajemen tanda terima BPKB kendaraan</flux:text>
+                            <flux:text>• ✅ Certificate Receipt CRUD Operations: Create, Read, Update, Delete tanda terima BPKB dengan interface lengkap</flux:text>
+                            <flux:text>• ✅ Auto Certificate Number Generation: Generate nomor tanda terima otomatis dengan format 001/TT/BPKB/WOTO/XII/2025</flux:text>
+                            <flux:text>• ✅ Single Receipt Validation: Sistem mencegah pembuatan lebih dari satu tanda terima per kendaraan</flux:text>
+                            <flux:text>• ✅ Comprehensive Form Fields: BPKB A/N, Faktur Asli A/N, Fotocopy KTP A/N, Blanko Kwitansi, NIK, Form A, Surat Pelepasan Hak, Lain-lain</flux:text>
+                            <flux:text>• ✅ Print Certificate Receipt: Generate PDF tanda terima BPKB otomatis dalam format landscape</flux:text>
+                            <flux:text>• ✅ Compact Dual PDF Layout: ORIGINAL dan COPY dalam satu halaman A4 landscape yang fit (8.5cm per section)</flux:text>
+                            <flux:text>• ✅ Professional PDF Template: Template dengan logo perusahaan, data lengkap kendaraan, dan signature sections</flux:text>
+                            <flux:text>• ✅ Certificate Receipt Audit Trail: Dedicated audit page dengan filtering, search, dan statistics dashboard</flux:text>
+                            <flux:text>• ✅ Permission-based Access: vehicle-registration-certificate-receipt.* permissions untuk kontrol akses</flux:text>
+                            <flux:text>• ✅ Real-time Updates: Auto-refresh data setelah create/update/delete operations</flux:text>
+                        </div>
+                    </div>
+
                     <div class="border-l-4 border-emerald-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
                             <flux:text class="font-semibold text-emerald-600 dark:text-emerald-400">v1.15.0 - Payment Receipt Management System</flux:text>
-                            <span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
                             <flux:text>• ✅ Complete Purchase Payment Module: Sistem lengkap manajemen pembayaran pembelian kendaraan</flux:text>

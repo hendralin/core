@@ -67,6 +67,7 @@ use App\Livewire\BackupRestore\BackupRestoreIndex;
 use App\Livewire\PaymentReceipt\PaymentReceiptAudit;
 use App\Livewire\LoanCalculation\LoanCalculationAudit;
 use App\Livewire\PurchasePayment\PurchasePaymentAudit;
+use App\Livewire\CertificateReceipt\CertificateReceiptAudit;
 
 // License expired page (accessible even when license is expired)
 Route::get('/license-expired', function () {
@@ -166,6 +167,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('loan-calculations/audit', LoanCalculationAudit::class)->name('loan-calculations.audit')->middleware(['permission:vehicle-loan-calculation.audit']);
     Route::get('purchase-payments/audit', PurchasePaymentAudit::class)->name('purchase-payments.audit')->middleware(['permission:vehicle-purchase-payment.audit']);
     Route::get('payment-receipts/audit', PaymentReceiptAudit::class)->name('payment-receipts.audit')->middleware(['permission:vehicle-payment-receipt.audit']);
+    Route::get('certificate-receipts/audit', CertificateReceiptAudit::class)->name('certificate-receipts.audit')->middleware(['permission:vehicle-registration-certificate-receipt.audit']);
 
     Route::get('costs', CostIndex::class)->name('costs.index')->middleware(['permission:cost.view|cost.create|cost.edit|cost.delete']);
     Route::get('costs/audit', CostAudit::class)->name('costs.audit')->middleware(['permission:cost.audit']);

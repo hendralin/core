@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use App\Models\PaymentReceipt;
+use App\Models\VehicleCertificateReceipt;
 use Livewire\Attributes\Title;
 use App\Models\LoanCalculation;
 use App\Models\PurchasePayment;
@@ -80,9 +81,30 @@ class VehicleShow extends Component
     public $showEditPaymentReceiptModal = false;
     public $editingPaymentReceiptId = null;
 
+    // Certificate receipt modal properties
+    public $showCertificateReceiptModal = false;
+
+    // Edit certificate receipt properties
+    public $showEditCertificateReceiptModal = false;
+    public $editingCertificateReceiptId = null;
+
+    // Certificate receipt form properties
+    public $certificate_receipt_number = '';
+    public $in_the_name_of = '';
+    public $original_invoice_name = '';
+    public $photocopy_id_card_name = '';
+    public $receipt_form = '';
+    public $nik = '';
+    public $form_a = '';
+    public $release_of_title_letter = '';
+    public $others = '';
+    public $receipt_date = '';
+    public $transferee = '';
+    public $receiving_party = '';
+
     public function mount(Vehicle $vehicle): void
     {
-        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments', 'paymentReceipts']);
+        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments', 'paymentReceipts', 'vehicleCertificateReceipts']);
 
         // Get cost summary for this vehicle
         $this->loadCostSummary();
@@ -429,6 +451,163 @@ class VehicleShow extends Component
 
         // Show success message
         session()->flash('message', 'Komisi ' . ($commission->type == 1 ? 'Penjualan' : 'Pembelian') . ' berhasil dihapus.');
+    }
+
+    // Certificate Receipt Methods
+    public function createCertificateReceipt()
+    {
+        // Check if certificate receipt already exists for this vehicle
+        if ($this->vehicle->vehicleCertificateReceipts && $this->vehicle->vehicleCertificateReceipts->count() > 0) {
+            session()->flash('error', 'Tanda Terima BPKB sudah dibuat untuk kendaraan ini.');
+            $this->closeCertificateReceiptModal();
+            return;
+        }
+
+        $this->validate([
+            'in_the_name_of' => 'required|string|max:255',
+            'original_invoice_name' => 'required|string|max:255',
+            'photocopy_id_card_name' => 'required|string|max:255',
+            'receipt_form' => 'required|string|max:255',
+            'nik' => 'required|string|max:16',
+            'form_a' => 'required|string|max:255',
+            'release_of_title_letter' => 'required|string|max:255',
+            'others' => 'nullable|string|max:255',
+            'receipt_date' => 'required|date',
+            'transferee' => 'required|string|max:255',
+            'receiving_party' => 'required|string|max:255',
+        ], [
+            'in_the_name_of.required' => 'BPKB A/N harus diisi.',
+            'original_invoice_name.required' => 'Faktur Asli A/N harus diisi.',
+            'photocopy_id_card_name.required' => 'Fotocopy KTP A/N harus diisi.',
+            'receipt_form.required' => 'Blanko Kwitansi harus diisi.',
+            'nik.required' => 'NIK harus diisi.',
+            'nik.max' => 'NIK maksimal 16 karakter.',
+            'form_a.required' => 'Form A harus diisi.',
+            'release_of_title_letter.required' => 'Surat Pelepasan Hak harus diisi.',
+            'others.max' => 'Lain-lain maksimal 255 karakter.',
+            'receipt_date.required' => 'Tanggal tanda terima harus diisi.',
+            'receipt_date.date' => 'Format tanggal tidak valid.',
+            'transferee.required' => 'Yang menyerahkan harus diisi.',
+            'receiving_party.required' => 'Yang menerima harus diisi.',
+        ]);
+
+        // Generate certificate receipt number
+        $certificateReceiptNumber = $this->generateCertificateReceiptNumber();
+
+        $certificateReceipt = VehicleCertificateReceipt::create([
+            'vehicle_id' => $this->vehicle->id,
+            'certificate_receipt_number' => $certificateReceiptNumber,
+            'in_the_name_of' => $this->in_the_name_of,
+            'original_invoice_name' => $this->original_invoice_name,
+            'photocopy_id_card_name' => $this->photocopy_id_card_name,
+            'receipt_form' => $this->receipt_form,
+            'nik' => $this->nik,
+            'form_a' => $this->form_a,
+            'release_of_title_letter' => $this->release_of_title_letter,
+            'others' => $this->others,
+            'receipt_date' => $this->receipt_date,
+            'transferee' => $this->transferee,
+            'receiving_party' => $this->receiving_party,
+            'created_by' => Auth::id(),
+        ]);
+
+        // Reload vehicle with certificate receipts
+        $this->vehicle->load('vehicleCertificateReceipts');
+
+        // Log the creation activity
+        activity()
+            ->performedOn($certificateReceipt)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'attributes' => [
+                    'certificate_receipt_number' => $certificateReceiptNumber,
+                    'in_the_name_of' => $this->in_the_name_of,
+                    'original_invoice_name' => $this->original_invoice_name,
+                    'photocopy_id_card_name' => $this->photocopy_id_card_name,
+                    'receipt_form' => $this->receipt_form,
+                    'nik' => $this->nik,
+                    'form_a' => $this->form_a,
+                    'release_of_title_letter' => $this->release_of_title_letter,
+                    'others' => $this->others,
+                    'receipt_date' => $this->receipt_date,
+                    'transferee' => $this->transferee,
+                    'receiving_party' => $this->receiving_party,
+                ]
+            ])
+            ->log('created vehicle certificate receipt');
+
+        // Show success message
+        session()->flash('message', 'Tanda Terima BPKB berhasil dibuat.');
+
+        // Close modal
+        $this->closeCertificateReceiptModal();
+    }
+
+    public function openCertificateReceiptModal()
+    {
+        $this->resetCertificateReceiptForm();
+        $this->showCertificateReceiptModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeCertificateReceiptModal()
+    {
+        $this->showCertificateReceiptModal = false;
+        $this->resetCertificateReceiptForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    private function resetCertificateReceiptForm()
+    {
+        $this->reset([
+            'certificate_receipt_number',
+            'in_the_name_of',
+            'original_invoice_name',
+            'photocopy_id_card_name',
+            'receipt_form',
+            'nik',
+            'form_a',
+            'release_of_title_letter',
+            'others',
+            'receipt_date',
+            'transferee',
+            'receiving_party'
+        ]);
+    }
+
+    private function generateCertificateReceiptNumber()
+    {
+        $currentYear = date('Y');
+        $currentMonth = date('m');
+
+        // Convert month to Roman numerals
+        $romanMonths = [
+            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV', '05' => 'V',
+            '06' => 'VI', '07' => 'VII', '08' => 'VIII', '09' => 'IX', '10' => 'X',
+            '11' => 'XI', '12' => 'XII'
+        ];
+
+        $romanMonth = $romanMonths[$currentMonth];
+
+        // Get the next sequential number for this year
+        $lastReceipt = VehicleCertificateReceipt::whereYear('created_at', $currentYear)
+            ->orderBy('certificate_receipt_number', 'desc')
+            ->first();
+
+        $nextNumber = 1;
+        if ($lastReceipt) {
+            // Extract the sequential number from the last receipt number
+            $parts = explode('/', $lastReceipt->certificate_receipt_number);
+            if (count($parts) >= 1) {
+                $lastNumber = (int) $parts[0];
+                $nextNumber = $lastNumber + 1;
+            }
+        }
+
+        // Format: 001/TT/BPKB/WOTO/XII/2025
+        return str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . '/TT/BPKB/WOTO/' . $romanMonth . '/' . $currentYear;
     }
 
     // Loan Calculation Methods
@@ -1201,6 +1380,157 @@ class VehicleShow extends Component
         session()->flash('message', 'Penerimaan pembayaran berhasil dihapus.');
     }
 
+    public function deleteCertificateReceipt($certificateReceiptId)
+    {
+        $certificateReceipt = VehicleCertificateReceipt::findOrFail($certificateReceiptId);
+
+        // Check if certificate receipt belongs to this vehicle
+        if ($certificateReceipt->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $oldCertificateReceipt = $certificateReceipt->toArray();
+
+        // Delete file if exists
+        if ($certificateReceipt->receipt_file) {
+            Storage::disk('public')->delete('documents/registration-certificate-receipts/' . $certificateReceipt->receipt_file);
+        }
+
+        $certificateReceipt->delete();
+
+        // Reload vehicle with certificate receipts
+        $this->vehicle->load('vehicleCertificateReceipts');
+
+        // Log the deletion activity
+        activity()
+            ->performedOn($certificateReceipt)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldCertificateReceipt,
+            ])
+            ->log('deleted vehicle certificate receipt');
+
+        // Show success message
+        session()->flash('message', 'Tanda Terima BPKB berhasil dihapus.');
+    }
+
+    public function editRegistrationCertificateReceipt($certificateReceiptId)
+    {
+        $certificateReceipt = VehicleCertificateReceipt::findOrFail($certificateReceiptId);
+
+        // Check if certificate receipt belongs to this vehicle
+        if ($certificateReceipt->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->editingCertificateReceiptId = $certificateReceiptId;
+        $this->in_the_name_of = $certificateReceipt->in_the_name_of;
+        $this->original_invoice_name = $certificateReceipt->original_invoice_name;
+        $this->photocopy_id_card_name = $certificateReceipt->photocopy_id_card_name;
+        $this->receipt_form = $certificateReceipt->receipt_form;
+        $this->nik = $certificateReceipt->nik;
+        $this->form_a = $certificateReceipt->form_a;
+        $this->release_of_title_letter = $certificateReceipt->release_of_title_letter;
+        $this->others = $certificateReceipt->others;
+        $this->receipt_date = $certificateReceipt->receipt_date ? date('Y-m-d', strtotime($certificateReceipt->receipt_date)) : '';
+        $this->transferee = $certificateReceipt->transferee;
+        $this->receiving_party = $certificateReceipt->receiving_party;
+
+        $this->showEditCertificateReceiptModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeEditCertificateReceiptModal()
+    {
+        $this->showEditCertificateReceiptModal = false;
+        $this->editingCertificateReceiptId = null;
+        $this->resetCertificateReceiptForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function updateCertificateReceipt()
+    {
+        $this->validate([
+            'in_the_name_of' => 'required|string|max:255',
+            'original_invoice_name' => 'required|string|max:255',
+            'photocopy_id_card_name' => 'required|string|max:255',
+            'receipt_form' => 'required|string|max:255',
+            'nik' => 'required|string|max:16',
+            'form_a' => 'required|string|max:255',
+            'release_of_title_letter' => 'required|string|max:255',
+            'others' => 'nullable|string|max:255',
+            'receipt_date' => 'required|date',
+            'transferee' => 'required|string|max:255',
+            'receiving_party' => 'required|string|max:255',
+        ], [
+            'in_the_name_of.required' => 'BPKB A/N harus diisi.',
+            'original_invoice_name.required' => 'Faktur Asli A/N harus diisi.',
+            'photocopy_id_card_name.required' => 'Fotocopy KTP A/N harus diisi.',
+            'receipt_form.required' => 'Blanko Kwitansi harus diisi.',
+            'nik.required' => 'NIK harus diisi.',
+            'nik.max' => 'NIK maksimal 16 karakter.',
+            'form_a.required' => 'Form A harus diisi.',
+            'release_of_title_letter.required' => 'Surat Pelepasan Hak harus diisi.',
+            'others.max' => 'Lain-lain maksimal 255 karakter.',
+            'receipt_date.required' => 'Tanggal tanda terima harus diisi.',
+            'receipt_date.date' => 'Format tanggal tidak valid.',
+            'transferee.required' => 'Yang menyerahkan harus diisi.',
+            'receiving_party.required' => 'Yang menerima harus diisi.',
+        ]);
+
+        $certificateReceipt = VehicleCertificateReceipt::findOrFail($this->editingCertificateReceiptId);
+
+        $oldCertificateReceipt = $certificateReceipt->toArray();
+
+        $certificateReceipt->update([
+            'in_the_name_of' => $this->in_the_name_of,
+            'original_invoice_name' => $this->original_invoice_name,
+            'photocopy_id_card_name' => $this->photocopy_id_card_name,
+            'receipt_form' => $this->receipt_form,
+            'nik' => $this->nik,
+            'form_a' => $this->form_a,
+            'release_of_title_letter' => $this->release_of_title_letter,
+            'others' => $this->others,
+            'receipt_date' => $this->receipt_date,
+            'transferee' => $this->transferee,
+            'receiving_party' => $this->receiving_party,
+        ]);
+
+        // Reload vehicle with certificate receipts
+        $this->vehicle->load('vehicleCertificateReceipts');
+
+        // Log the update activity
+        activity()
+            ->performedOn($certificateReceipt)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldCertificateReceipt,
+                'attributes' => [
+                    'certificate_receipt_number' => $this->certificate_receipt_number,
+                    'in_the_name_of' => $this->in_the_name_of,
+                    'original_invoice_name' => $this->original_invoice_name,
+                    'photocopy_id_card_name' => $this->photocopy_id_card_name,
+                    'receipt_form' => $this->receipt_form,
+                    'nik' => $this->nik,
+                    'form_a' => $this->form_a,
+                    'release_of_title_letter' => $this->release_of_title_letter,
+                    'others' => $this->others,
+                    'receipt_date' => $this->receipt_date,
+                    'transferee' => $this->transferee,
+                    'receiving_party' => $this->receiving_party,
+                ]
+            ])
+            ->log('updated vehicle certificate receipt');
+
+        // Show success message
+        session()->flash('message', 'Tanda Terima BPKB berhasil diperbarui.');
+
+        // Close modal
+        $this->closeEditCertificateReceiptModal();
+    }
+
     public function printPaymentReceipt($paymentReceiptId)
     {
         try {
@@ -1250,6 +1580,64 @@ class VehicleShow extends Component
 
             // Show error message
             session()->flash('error', 'Gagal mencetak kwitansi penerimaan pembayaran.');
+            return redirect()->back();
+        }
+    }
+
+    public function printRegistrationCertificateReceipt($certificateReceiptId)
+    {
+        try {
+            $certificateReceipt = VehicleCertificateReceipt::with(['vehicle.brand', 'vehicle.type', 'vehicle.salesman'])->findOrFail($certificateReceiptId);
+
+            // Check permissions
+            if (!auth()->user()->can('vehicle-registration-certificate-receipt.print')) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Check if certificate receipt belongs to this vehicle
+            if ($certificateReceipt->vehicle_id !== $this->vehicle->id) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Update print count
+            if ($certificateReceipt->print_count == 0) {
+                $certificateReceipt->update(['printed_at' => now()]);
+            }
+            $certificateReceipt->increment('print_count');
+
+            // Generate PDF
+            $pdf = Pdf::loadView('exports.tanda-terima-bpkb', compact('certificateReceipt'));
+
+            // Set PDF options for better formatting
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true
+            ]);
+
+            // Log the print activity
+            activity()
+                ->performedOn($certificateReceipt)
+                ->causedBy(auth()->user())
+                ->withProperties(['print_count' => $certificateReceipt->print_count])
+                ->log('printed vehicle certificate receipt');
+
+            // Return PDF download
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->output();
+            }, 'Tanda_Terima_BPKB_' . str_replace(['/', '\\'], '_', $certificateReceipt->certificate_receipt_number) . '.pdf');
+
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Failed to print certificate receipt', [
+                'error' => $e->getMessage(),
+                'certificate_receipt_id' => $certificateReceiptId,
+                'user_id' => auth()->id(),
+            ]);
+
+            // Show error message
+            session()->flash('error', 'Gagal mencetak tanda terima BPKB.');
             return redirect()->back();
         }
     }

@@ -441,7 +441,7 @@
                             @endif
                             <div class="flex items-center justify-between mt-6 mb-2">
                                 <flux:heading size="md">Rincian Pembayaran Pembelian</flux:heading>
-                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->purchasePayments->sum('amount'), 0) }}</flux:text>
+                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->purchasePayments->sum('amount'), 0, ',', '.') }}</flux:text>
                             </div>
                             <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
                                 <table class="w-full">
@@ -634,7 +634,7 @@
                             @endif
                             <div class="flex items-center justify-between mt-6 mb-2">
                                 <flux:heading size="md">Rincian Penerimaan Pembayaran</flux:heading>
-                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->paymentReceipts->sum('amount'), 0) }}</flux:text>
+                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->paymentReceipts->sum('amount'), 0, ',', '.') }}</flux:text>
                             </div>
                             <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
                                 <table class="w-full">
@@ -644,7 +644,7 @@
                                             <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
                                             <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Jumlah</th>
                                             <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Dokumen</th>
-                                            @if(auth()->user()->can('vehicle-payment-receipt.edit') || auth()->user()->can('vehicle-payment-receipt.delete'))
+                                            @if(auth()->user()->can('vehicle-payment-receipt.edit') || auth()->user()->can('vehicle-payment-receipt.delete') || auth()->user()->can('vehicle-payment-receipt.print'))
                                             <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
                                             @endif
                                         </tr>
@@ -693,7 +693,7 @@
                                                     <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
                                                 @endif
                                             </td>
-                                            @if(auth()->user()->can('vehicle-payment-receipt.edit') || auth()->user()->can('vehicle-payment-receipt.delete'))
+                                            @if(auth()->user()->can('vehicle-payment-receipt.edit') || auth()->user()->can('vehicle-payment-receipt.delete') || auth()->user()->can('vehicle-payment-receipt.print'))
                                             <td class="px-4 py-1 text-center">
                                                 <div class="flex items-center justify-center space-x-1">
                                                 @can('vehicle-payment-receipt.edit')
@@ -740,7 +740,151 @@
                         @endif
                     @endif
 
+                    <!-- Vehicle Registration Certificate Receipts -->
+                    @if(auth()->user()->can('vehicle-registration-certificate-receipt.view') || auth()->user()->can('vehicle-registration-certificate-receipt.create') || auth()->user()->can('vehicle-registration-certificate-receipt.edit') || auth()->user()->can('vehicle-registration-certificate-receipt.delete') || auth()->user()->can('vehicle-registration-certificate-receipt.audit'))
+                        @if(($vehicle->paymentReceipts->sum('amount') == $vehicle->selling_price) && $vehicle->vehicleCertificateReceipts && $vehicle->vehicleCertificateReceipts->count() > 0)
+                            <div class="flex items-center justify-between mt-6 mb-2">
+                                <flux:heading size="md">Tanda Terima BPKB</flux:heading>
+                                <flux:button variant="filled" size="sm" icon="document-text" class="cursor-pointer" href="{{ route('certificate-receipts.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate tooltip="Audit Trail">Audit</flux:button>
+                            </div>
+                            <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Tanggal</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">No. Tanda Terima</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">No. BPKB</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Dokumen</th>
+                                            @if(auth()->user()->can('vehicle-registration-certificate-receipt.edit') || auth()->user()->can('vehicle-registration-certificate-receipt.delete') || auth()->user()->can('vehicle-registration-certificate-receipt.print'))
+                                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                        @foreach($vehicle->vehicleCertificateReceipts as $receipt)
+                                        <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm whitespace-nowrap">
+                                                    {{ $receipt->receipt_date ? \Carbon\Carbon::parse($receipt->receipt_date)->format('d-m-Y') : '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm whitespace-nowrap md:whitespace-normal">
+                                                    {{ $receipt->certificate_receipt_number ?? '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                <flux:text class="text-sm font-medium whitespace-nowrap">
+                                                    {{ $receipt->vehicle->bpkb_number ?? '-' }}
+                                                </flux:text>
+                                            </td>
+                                            <td class="px-4 py-1">
+                                                @if($receipt->document)
+                                                    @php
+                                                        $files = explode(',', $receipt->document);
+                                                    @endphp
+                                                    <div class="flex space-x-1 space-y-1">
+                                                        @foreach($files as $file)
+                                                            @php
+                                                                $fileName = trim($file);
+                                                                $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                                                            @endphp
+                                                            <a href="{{ asset('documents/registration-certificate-receipts/' . $fileName) }}" target="_blank" class="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                                                @if($extension === 'pdf')
+                                                                    <flux:icon.document class="w-4 h-4" />
+                                                                @elseif(in_array($extension, ['jpg', 'jpeg', 'png']))
+                                                                    <flux:icon.photo class="w-4 h-4" />
+                                                                @else
+                                                                    <flux:icon.document class="w-4 h-4" />
+                                                                @endif
+                                                            </a>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                                @endif
+                                            </td>
+                                            @if(auth()->user()->can('vehicle-registration-certificate-receipt.edit') || auth()->user()->can('vehicle-registration-certificate-receipt.delete') || auth()->user()->can('vehicle-registration-certificate-receipt.print'))
+                                            <td class="px-4 py-1 text-center">
+                                                <div class="flex items-center justify-center space-x-1">
+                                                    @can('vehicle-registration-certificate-receipt.edit')
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="pencil-square"
+                                                        tooltip="Edit"
+                                                        wire:click="editRegistrationCertificateReceipt({{ $receipt->id }})"
+                                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                    ></flux:button>
+                                                    @endcan
+                                                    @can('vehicle-registration-certificate-receipt.print')
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="printer"
+                                                        tooltip="Print"
+                                                        wire:click="printRegistrationCertificateReceipt({{ $receipt->id }})"
+                                                        class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 cursor-pointer"
+                                                    ></flux:button>
+                                                    @endcan
+                                                    @can('vehicle-registration-certificate-receipt.delete')
+                                                    <flux:modal.trigger name="delete-registration-certificate-receipt-{{ $receipt->id }}">
+                                                        <flux:button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            icon="trash"
+                                                            tooltip="Hapus"
+                                                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                        ></flux:button>
+                                                    </flux:modal.trigger>
+                                                    @endcan
+                                                </div>
+                                            </td>
+                                            @endif
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <flux:callout icon="exclamation-triangle" variant="warning" class="mt-4" inline>
+                                <flux:callout.heading>Tanda Terima BPKB</flux:callout.heading>
+                                <flux:callout.text>Belum ada Tanda Terima BPKB untuk kendaraan ini. Silakan buat Tanda Terima.</flux:callout.heading>
+                                <x-slot name="actions">
+                                    <flux:button wire:click="openCertificateReceiptModal" variant="primary" color="sky" size="sm" class="cursor-pointer">Buat Tanda Terima BPKB -></flux:button>
+                                </x-slot>
+                            </flux:callout>
+                        @endif
+                    @endif
                 </div>
+                @endif
+
+                <!-- Delete Certificate Receipt Confirmation Modals -->
+                @if($vehicle->vehicleCertificateReceipts && $vehicle->vehicleCertificateReceipts->count() > 0)
+                    @foreach($vehicle->vehicleCertificateReceipts as $receipt)
+                    <flux:modal name="delete-registration-certificate-receipt-{{ $receipt->id }}" class="min-w-88">
+                        <div class="space-y-6">
+                            <div>
+                                <flux:heading size="lg">Hapus Tanda Terima BPKB?</flux:heading>
+                                <flux:text class="mt-2">
+                                    Apakah Anda yakin ingin menghapus tanda terima BPKB ini? Tindakan ini tidak dapat dibatalkan.
+                                </flux:text>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <flux:modal.close>
+                                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                                </flux:modal.close>
+                                <flux:button
+                                    wire:click="deleteCertificateReceipt({{ $receipt->id }})"
+                                    variant="danger"
+                                    class="cursor-pointer"
+                                >
+                                    Hapus Tanda Terima BPKB
+                                </flux:button>
+                            </div>
+                        </div>
+                    </flux:modal>
+                    @endforeach
                 @endif
 
                 <!-- Delete Payment Receipt Confirmation Modals -->
@@ -792,7 +936,7 @@
                         <div class="mb-8">
                             <div class="flex items-center justify-between">
                                 <flux:heading size="md" class="mb-2">Komisi Pembelian (Max 4)</flux:heading>
-                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->commissions->where('type', 2)->sum('amount'), 0) }}</flux:text>
+                                <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->commissions->where('type', 2)->sum('amount'), 0, ',', '.') }}</flux:text>
                             </div>
                             <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
                                 <table class="w-full">
@@ -891,7 +1035,7 @@
                         @if($vehicle->commissions->where('type', 1)->count() > 0)
                         <div class="flex items-center justify-between">
                             <flux:heading size="md" class="mb-2">Komisi Penjualan</flux:heading>
-                            <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->commissions->where('type', 1)->sum('amount'), 0) }}</flux:text>
+                            <flux:text class="text-sm">Total: Rp {{ number_format($vehicle->commissions->where('type', 1)->sum('amount'), 0, ',', '.') }}</flux:text>
                         </div>
                         <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
                             <table class="w-full">
@@ -1802,6 +1946,350 @@
                         >
                             <span wire:loading.remove>Cetak Kwitansi</span>
                             <span wire:loading>Memproses...</span>
+                        </flux:button>
+                    </div>
+                </div>
+            </form>
+        </flux:modal>
+
+        <!-- Certificate Receipt Modal -->
+        <flux:modal name="certificate-receipt-modal" flyout variant="floating" class="md:w-md" wire:model="showCertificateReceiptModal" @open="resetValidation(); resetErrorBag()">
+            <form wire:submit.prevent="createCertificateReceipt">
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">Tanda Terima BPKB</flux:heading>
+                        <flux:text class="mt-2">
+                            Masukkan informasi yang dibutuhkan untuk membuat Tanda Terima BPKB.
+                        </flux:text>
+                    </div>
+
+                    <!-- Receipt Date -->
+                    <flux:field>
+                        <flux:label>
+                            Tanggal Tanda Terima
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="receipt_date"
+                            type="date"
+                        />
+                        <flux:error name="receipt_date" />
+                    </flux:field>
+
+                    <!-- In The Name Of -->
+                    <flux:field>
+                        <flux:label>
+                            BPKB A/N
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="in_the_name_of"
+                            placeholder="BPKB atas nama"
+                        />
+                        <flux:error name="in_the_name_of" />
+                    </flux:field>
+
+                    <!-- Original Invoice Name -->
+                    <flux:field>
+                        <flux:label>
+                            Faktur Asli A/N
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="original_invoice_name"
+                            placeholder="Nama pada faktur asli"
+                        />
+                        <flux:error name="original_invoice_name" />
+                    </flux:field>
+
+                    <!-- Photocopy ID Card Name -->
+                    <flux:field>
+                        <flux:label>
+                            Fotocopy KTP A/N
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="photocopy_id_card_name"
+                            placeholder="Nama pada fotocopy KTP"
+                        />
+                        <flux:error name="photocopy_id_card_name" />
+                    </flux:field>
+
+                    <!-- Receipt Form -->
+                    <flux:field>
+                        <flux:label>
+                            Blanko Kwitansi
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="receipt_form"
+                            placeholder="Informasi blanko kwitansi"
+                        />
+                        <flux:error name="receipt_form" />
+                    </flux:field>
+
+                    <!-- NIK -->
+                    <flux:field>
+                        <flux:label>
+                            NIK
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="nik"
+                            placeholder="Nomor Induk Kependudukan"
+                        />
+                        <flux:error name="nik" />
+                    </flux:field>
+
+                    <!-- Form A -->
+                    <flux:field>
+                        <flux:label>
+                            Form A
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="form_a"
+                            placeholder="Informasi Form A"
+                        />
+                        <flux:error name="form_a" />
+                    </flux:field>
+
+                    <!-- Release of Title Letter -->
+                    <flux:field>
+                        <flux:label>
+                            Surat Pelepasan Hak
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="release_of_title_letter"
+                            placeholder="Informasi surat pelepasan hak"
+                        />
+                        <flux:error name="release_of_title_letter" />
+                    </flux:field>
+
+                    <!-- Others -->
+                    <flux:field>
+                        <flux:label>
+                            Lain-lain
+                        </flux:label>
+                        <flux:input
+                            wire:model="others"
+                            placeholder="Informasi tambahan lainnya"
+                        />
+                        <flux:error name="others" />
+                    </flux:field>
+
+                    <!-- Transferee -->
+                    <flux:field>
+                        <flux:label>
+                            Yang Menyerahkan
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="transferee"
+                            placeholder="Nama yang menyerahkan"
+                        />
+                        <flux:error name="transferee" />
+                    </flux:field>
+
+                    <!-- Receiving Party -->
+                    <flux:field>
+                        <flux:label>
+                            Yang Menerima
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="receiving_party"
+                            placeholder="Nama yang menerima"
+                        />
+                        <flux:error name="receiving_party" />
+                    </flux:field>
+
+                    <div class="flex gap-2">
+                        <flux:spacer />
+                        <flux:modal.close>
+                            <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                        </flux:modal.close>
+                        <flux:button
+                            type="submit"
+                            variant="primary"
+                            wire:loading.attr="disabled"
+                            class="cursor-pointer"
+                        >
+                            <span wire:loading.remove>Buat Tanda Terima BPKB</span>
+                            <span wire:loading>Menyimpan...</span>
+                        </flux:button>
+                    </div>
+                </div>
+            </form>
+        </flux:modal>
+
+        <!-- Edit Certificate Receipt Modal -->
+        <flux:modal name="edit-certificate-receipt-modal" flyout variant="floating" class="md:w-md" wire:model="showEditCertificateReceiptModal" @open="resetValidation(); resetErrorBag()">
+            <form wire:submit.prevent="updateCertificateReceipt">
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">Edit Tanda Terima BPKB</flux:heading>
+                        <flux:text class="mt-2">
+                            Perbarui informasi Tanda Terima BPKB.
+                        </flux:text>
+                    </div>
+
+                    <!-- Receipt Date -->
+                    <flux:field>
+                        <flux:label>
+                            Tanggal Tanda Terima
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="receipt_date"
+                            type="date"
+                        />
+                        <flux:error name="receipt_date" />
+                    </flux:field>
+
+                    <!-- In The Name Of -->
+                    <flux:field>
+                        <flux:label>
+                            BPKB A/N
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="in_the_name_of"
+                            placeholder="BPKB atas nama"
+                        />
+                        <flux:error name="in_the_name_of" />
+                    </flux:field>
+
+                    <!-- Original Invoice Name -->
+                    <flux:field>
+                        <flux:label>
+                            Faktur Asli A/N
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="original_invoice_name"
+                            placeholder="Nama pada faktur asli"
+                        />
+                        <flux:error name="original_invoice_name" />
+                    </flux:field>
+
+                    <!-- Photocopy ID Card Name -->
+                    <flux:field>
+                        <flux:label>
+                            Fotocopy KTP A/N
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="photocopy_id_card_name"
+                            placeholder="Nama pada fotocopy KTP"
+                        />
+                        <flux:error name="photocopy_id_card_name" />
+                    </flux:field>
+
+                    <!-- Receipt Form -->
+                    <flux:field>
+                        <flux:label>
+                            Blanko Kwitansi
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="receipt_form"
+                            placeholder="Informasi blanko kwitansi"
+                        />
+                        <flux:error name="receipt_form" />
+                    </flux:field>
+
+                    <!-- NIK -->
+                    <flux:field>
+                        <flux:label>
+                            NIK
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="nik"
+                            placeholder="Nomor Induk Kependudukan"
+                        />
+                        <flux:error name="nik" />
+                    </flux:field>
+
+                    <!-- Form A -->
+                    <flux:field>
+                        <flux:label>
+                            Form A
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="form_a"
+                            placeholder="Informasi Form A"
+                        />
+                        <flux:error name="form_a" />
+                    </flux:field>
+
+                    <!-- Release of Title Letter -->
+                    <flux:field>
+                        <flux:label>
+                            Surat Pelepasan Hak
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="release_of_title_letter"
+                            placeholder="Informasi surat pelepasan hak"
+                        />
+                        <flux:error name="release_of_title_letter" />
+                    </flux:field>
+
+                    <!-- Others -->
+                    <flux:field>
+                        <flux:label>
+                            Lain-lain
+                        </flux:label>
+                        <flux:input
+                            wire:model="others"
+                            placeholder="Informasi tambahan lainnya"
+                        />
+                        <flux:error name="others" />
+                    </flux:field>
+
+                    <!-- Transferee -->
+                    <flux:field>
+                        <flux:label>
+                            Yang Menyerahkan
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="transferee"
+                            placeholder="Nama yang menyerahkan"
+                        />
+                        <flux:error name="transferee" />
+                    </flux:field>
+
+                    <!-- Receiving Party -->
+                    <flux:field>
+                        <flux:label>
+                            Yang Menerima
+                            <span class="text-red-600 ml-1">*</span>
+                        </flux:label>
+                        <flux:input
+                            wire:model="receiving_party"
+                            placeholder="Nama yang menerima"
+                        />
+                        <flux:error name="receiving_party" />
+                    </flux:field>
+
+                    <div class="flex gap-2">
+                        <flux:spacer />
+                        <flux:modal.close>
+                            <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                        </flux:modal.close>
+                        <flux:button
+                            type="submit"
+                            variant="primary"
+                            wire:loading.attr="disabled"
+                            class="cursor-pointer"
+                        >
+                            <span wire:loading.remove>Perbarui Tanda Terima</span>
+                            <span wire:loading>Menyimpan...</span>
                         </flux:button>
                     </div>
                 </div>

@@ -211,4 +211,9 @@ class Vehicle extends Model
     {
         return $this->hasMany(PaymentReceipt::class);
     }
+
+    public function vehicleCertificateReceipts(): HasMany
+    {
+        return $this->hasMany(VehicleCertificateReceipt::class);
+    }
 }

@@ -482,20 +482,6 @@
         <div class="kwitansi-wrapper">
             <div class="watermark">COPY</div>
             <div class="kwitansi-content">
-                @php
-                    $company = \App\Models\Company::first();
-                    $logoData = null;
-                    if ($company && $company->logo) {
-                        // $logoPath = public_path('logos/' . $company->logo);
-                        $logoPath = public_path('logos/logo.jpg');
-                        // Check if file exists and get base64 encoded data
-                        if (file_exists($logoPath)) {
-                            $imageData = file_get_contents($logoPath);
-                            $mimeType = mime_content_type($logoPath);
-                            $logoData = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
-                        }
-                    }
-                @endphp
                 <div class="header">
                     @if($logoData)
                         <img src="{{ $logoData }}" alt="Company Logo" class="company-logo" />
