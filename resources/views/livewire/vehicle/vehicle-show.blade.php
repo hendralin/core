@@ -779,9 +779,9 @@
                                                 </flux:text>
                                             </td>
                                             <td class="px-4 py-1">
-                                                @if($receipt->document)
+                                                @if($receipt->receipt_file)
                                                     @php
-                                                        $files = explode(',', $receipt->document);
+                                                        $files = explode(',', $receipt->receipt_file);
                                                     @endphp
                                                     <div class="flex space-x-1 space-y-1">
                                                         @foreach($files as $file)
@@ -815,6 +815,14 @@
                                                         tooltip="Edit"
                                                         wire:click="editRegistrationCertificateReceipt({{ $receipt->id }})"
                                                         class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                    ></flux:button>
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="arrow-up-tray"
+                                                        tooltip="Upload"
+                                                        wire:click="uploadRegistrationCertificateReceiptFile({{ $receipt->id }})"
+                                                        class="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 cursor-pointer"
                                                     ></flux:button>
                                                     @endcan
                                                     @can('vehicle-registration-certificate-receipt.print')
@@ -856,7 +864,166 @@
                             </flux:callout>
                         @endif
                     @endif
+
+                    <!-- Vehicle Handovers -->
+                    @if(auth()->user()->can('vehicle-handover.view') || auth()->user()->can('vehicle-handover.create') || auth()->user()->can('vehicle-handover.edit') || auth()->user()->can('vehicle-handover.delete') || auth()->user()->can('vehicle-handover.print') || auth()->user()->can('vehicle-handover.audit'))
+                        @if(($vehicle->paymentReceipts->sum('amount') == $vehicle->selling_price) && $vehicle->vehicleHandovers && $vehicle->vehicleHandovers->count() > 0)
+                            <div class="flex items-center justify-between mt-6 mb-2">
+                                <flux:heading size="md">Berita Acara Serah Terima Kendaraan</flux:heading>
+                                <flux:button variant="filled" size="sm" icon="document-text" class="cursor-pointer" href="{{ route('handovers.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate tooltip="Audit Trail">Audit</flux:button>
+                            </div>
+                            <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Tanggal</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">No. Berita Acara</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Dari</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Ke</th>
+                                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Dokumen</th>
+                                            @if(auth()->user()->can('vehicle-handover.edit') || auth()->user()->can('vehicle-handover.delete') || auth()->user()->can('vehicle-handover.print'))
+                                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                        @foreach($vehicle->vehicleHandovers as $handover)
+                                            <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                                <td class="px-4 py-1">
+                                                    <flux:text class="text-sm whitespace-nowrap">
+                                                        {{ Carbon\Carbon::parse($handover->handover_date)->format('d-m-Y') }}
+                                                    </flux:text>
+                                                </td>
+                                                <td class="px-4 py-1">
+                                                    <flux:text class="text-sm whitespace-nowrap">
+                                                        {{ $handover->handover_number ?? '-' }}
+                                                    </flux:text>
+                                                </td>
+                                                <td class="px-4 py-1">
+                                                    <flux:text class="text-sm whitespace-nowrap">
+                                                        {{ $handover->handover_from ?? '-' }}
+                                                    </flux:text>
+                                                </td>
+                                                <td class="px-4 py-1">
+                                                    <flux:text class="text-sm whitespace-nowrap">
+                                                        {{ $handover->handover_to ?? '-' }}
+                                                    </flux:text>
+                                                </td>
+                                                <td class="px-4 py-1">
+                                                    @if($handover->handover_file)
+                                                        @php
+                                                            $files = explode(',', $handover->handover_file);
+                                                        @endphp
+                                                        <div class="flex space-x-1 space-y-1">
+                                                            @foreach($files as $file)
+                                                                @php
+                                                                    $fileName = trim($file);
+                                                                    $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                                                                @endphp
+                                                                <a href="{{ asset('documents/handovers/' . $fileName) }}" target="_blank" class="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                                                    @if($extension === 'pdf')
+                                                                        <flux:icon.document class="w-4 h-4" />
+                                                                    @elseif(in_array($extension, ['jpg', 'jpeg', 'png']))
+                                                                        <flux:icon.photo class="w-4 h-4" />
+                                                                    @else
+                                                                        <flux:icon.document class="w-4 h-4" />
+                                                                    @endif
+                                                                </a>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                                    @endif
+                                                </td>
+                                                @if(auth()->user()->can('vehicle-handover.edit') || auth()->user()->can('vehicle-handover.delete') || auth()->user()->can('vehicle-handover.print'))
+                                                <td class="px-4 py-1 text-center">
+                                                    <div class="flex items-center justify-center space-x-1">
+                                                        @can('vehicle-handover.edit')
+                                                        <flux:button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            icon="pencil-square"
+                                                            tooltip="Edit"
+                                                            wire:click="editHandover({{ $handover->id }})"
+                                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                        ></flux:button>
+                                                        <flux:button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            icon="arrow-up-tray"
+                                                            tooltip="Upload"
+                                                            wire:click="uploadHandoverFile({{ $handover->id }})"
+                                                            class="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 cursor-pointer"
+                                                        ></flux:button>
+                                                        @endcan
+                                                        @can('vehicle-handover.print')
+                                                        <flux:button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            icon="printer"
+                                                            tooltip="Print"
+                                                            wire:click="printHandover({{ $handover->id }})"
+                                                            class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 cursor-pointer"
+                                                        ></flux:button>
+                                                        @endcan
+                                                        @can('vehicle-handover.delete')
+                                                        <flux:modal.trigger name="delete-handover-{{ $handover->id }}">
+                                                            <flux:button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                icon="trash"
+                                                                tooltip="Hapus"
+                                                                class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                            ></flux:button>
+                                                        </flux:modal.trigger>
+                                                        @endcan
+                                                    </div>
+                                                </td>
+                                                @endif
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <flux:callout icon="exclamation-triangle" variant="warning" class="mt-4" inline>
+                                <flux:callout.heading>Berita Acara Serah Terima Kendaraan</flux:callout.heading>
+                                <flux:callout.text>Belum ada Berita Acara Serah Terima Kendaraan untuk kendaraan ini. Silakan buat Berita Acara Serah Terima.</flux:callout.text>
+                                <x-slot name="actions">
+                                    <flux:button wire:click="openHandoverModal" variant="primary" color="sky" size="sm" class="cursor-pointer">Buat BA Serah Terima Kendaraan -></flux:button>
+                                </x-slot>
+                            </flux:callout>
+                        @endif
+                    @endif
                 </div>
+                @endif
+
+                <!-- Delete Handover Confirmation Modals -->
+                @if($vehicle->vehicleHandovers && $vehicle->vehicleHandovers->count() > 0)
+                    @foreach($vehicle->vehicleHandovers as $handover)
+                    <flux:modal name="delete-handover-{{ $handover->id }}" class="min-w-88">
+                        <div class="space-y-6">
+                            <div>
+                                <flux:heading size="lg">Hapus Berita Acara Serah Terima Kendaraan?</flux:heading>
+                                <flux:text class="mt-2">
+                                    Apakah Anda yakin ingin menghapus berita acara serah terima kendaraan ini? Tindakan ini tidak dapat dibatalkan.
+                                </flux:text>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <flux:modal.close>
+                                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                                </flux:modal.close>
+                                <flux:button
+                                    wire:click="deleteHandover({{ $handover->id }})"
+                                    variant="danger"
+                                    class="cursor-pointer"
+                                >
+                                    Hapus Berita Acara Serah Terima
+                                </flux:button>
+                            </div>
+                        </div>
+                    </flux:modal>
+                    @endforeach
                 @endif
 
                 <!-- Delete Certificate Receipt Confirmation Modals -->
@@ -2721,6 +2888,292 @@
             </div>
         </form>
     </div>
+</flux:modal>
+
+<!-- Handover Modal -->
+<flux:modal name="handover-modal" flyout variant="floating" class="md:w-md" wire:model="showHandoverModal" @open="resetValidation(); resetErrorBag()">
+    <form wire:submit.prevent="createHandover">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Berita Acara Serah Terima Kendaraan</flux:heading>
+                <flux:text class="mt-2">
+                    Masukkan informasi yang dibutuhkan untuk membuat Berita Acara Serah Terima Kendaraan.
+                </flux:text>
+            </div>
+
+            <!-- Handover Date -->
+            <flux:field>
+                <flux:label>
+                    Tanggal
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_date"
+                    type="date"
+                />
+                <flux:error name="handover_date" />
+            </flux:field>
+
+            <!-- Handover From -->
+            <flux:field>
+                <flux:label>
+                    Serah Terima Dari
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_from"
+                    placeholder="Dari"
+                />
+                <flux:error name="handover_from" />
+            </flux:field>
+
+            <!-- Handover To -->
+            <flux:field>
+                <flux:label>
+                    Kepada
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_to"
+                    placeholder="Kepada"
+                />
+                <flux:error name="handover_to" />
+            </flux:field>
+
+            <!-- Transferee (Yang Menyerahkan) -->
+            <flux:field>
+                <flux:label>
+                    Yang Menyerahkan
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_transferee"
+                    placeholder="Nama yang menyerahkan"
+                />
+                <flux:error name="handover_transferee" />
+            </flux:field>
+
+            <!-- Receiving Party (Yang Menerima) -->
+            <flux:field>
+                <flux:label>
+                    Yang Menerima
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_receiving_party"
+                    placeholder="Nama yang menerima"
+                />
+                <flux:error name="handover_receiving_party" />
+            </flux:field>
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    type="submit"
+                    variant="primary"
+                    wire:loading.attr="disabled"
+                    class="cursor-pointer"
+                >
+                    <span wire:loading.remove>Buat Berita Acara Serah Terima</span>
+                    <span wire:loading>Menyimpan...</span>
+                </flux:button>
+            </div>
+        </div>
+    </form>
+</flux:modal>
+
+<!-- Edit Handover Modal -->
+<flux:modal name="edit-handover-modal" flyout variant="floating" class="md:w-md" wire:model="showEditHandoverModal" @open="resetValidation(); resetErrorBag()">
+    <form wire:submit.prevent="updateHandover">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Edit Berita Acara Serah Terima Kendaraan</flux:heading>
+                <flux:text class="mt-2">
+                    Perbarui informasi Berita Acara Serah Terima Kendaraan.
+                </flux:text>
+            </div>
+
+            <!-- Handover Date -->
+            <flux:field>
+                <flux:label>
+                    Tanggal
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_date"
+                    type="date"
+                />
+                <flux:error name="handover_date" />
+            </flux:field>
+
+            <!-- Handover From -->
+            <flux:field>
+                <flux:label>
+                    Serah Terima Dari
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_from"
+                    placeholder="Dari"
+                />
+                <flux:error name="handover_from" />
+            </flux:field>
+
+            <!-- Handover To -->
+            <flux:field>
+                <flux:label>
+                    Kepada
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_to"
+                    placeholder="Kepada"
+                />
+                <flux:error name="handover_to" />
+            </flux:field>
+
+            <!-- Transferee (Yang Menyerahkan) -->
+            <flux:field>
+                <flux:label>
+                    Yang Menyerahkan
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_transferee"
+                    placeholder="Nama yang menyerahkan"
+                />
+                <flux:error name="handover_transferee" />
+            </flux:field>
+
+            <!-- Receiving Party (Yang Menerima) -->
+            <flux:field>
+                <flux:label>
+                    Yang Menerima
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_receiving_party"
+                    placeholder="Nama yang menerima"
+                />
+                <flux:error name="handover_receiving_party" />
+            </flux:field>
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    type="submit"
+                    variant="primary"
+                    wire:loading.attr="disabled"
+                    class="cursor-pointer"
+                >
+                    <span wire:loading.remove>Perbarui Berita Acara Serah Terima</span>
+                    <span wire:loading>Menyimpan...</span>
+                </flux:button>
+            </div>
+        </div>
+    </form>
+</flux:modal>
+
+<!-- Upload Handover File Modal -->
+<flux:modal name="upload-handover-modal" class="md:w-md" wire:model="showUploadHandoverModal" @open="resetValidation(); resetErrorBag()">
+    <form wire:submit.prevent="uploadHandoverDocument">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Upload File Berita Acara Serah Terima</flux:heading>
+                <flux:text class="mt-2">
+                    Upload file berita acara serah terima kendaraan yang telah ditandatangani.
+                </flux:text>
+            </div>
+
+            <!-- File Upload -->
+            <flux:field>
+                <flux:label>
+                    File Berita Acara
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="handover_file"
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                />
+                <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Format: PDF, JPG, JPEG, PNG. Maksimal 5 file, ukuran maksimal 2MB per file.
+                </flux:text>
+                <flux:error name="handover_file" />
+            </flux:field>
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    type="submit"
+                    variant="primary"
+                    wire:loading.attr="disabled"
+                    class="cursor-pointer"
+                >
+                    <span wire:loading.remove>Upload File</span>
+                    <span wire:loading>Mengupload...</span>
+                </flux:button>
+            </div>
+        </div>
+    </form>
+</flux:modal>
+
+<!-- Upload Certificate Receipt File Modal -->
+<flux:modal name="upload-certificate-receipt-modal" class="md:w-md" wire:model="showUploadCertificateReceiptModal" @open="resetValidation(); resetErrorBag()">
+    <form wire:submit.prevent="uploadCertificateReceiptDocument">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Upload File Tanda Terima BPKB</flux:heading>
+                <flux:text class="mt-2">
+                    Upload file tanda terima BPKB yang telah ditandatangani.
+                </flux:text>
+            </div>
+
+            <!-- File Upload -->
+            <flux:field>
+                <flux:label>
+                    File Tanda Terima BPKB
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:input
+                    wire:model="certificate_receipt_file"
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                />
+                <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Format: PDF, JPG, JPEG, PNG. Maksimal 5 file, ukuran maksimal 2MB per file.
+                </flux:text>
+                <flux:error name="certificate_receipt_file" />
+            </flux:field>
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    type="submit"
+                    variant="primary"
+                    wire:loading.attr="disabled"
+                    class="cursor-pointer"
+                >
+                    <span wire:loading.remove>Upload File</span>
+                    <span wire:loading>Mengupload...</span>
+                </flux:button>
+            </div>
+        </div>
+    </form>
 </flux:modal>
 
 </div>

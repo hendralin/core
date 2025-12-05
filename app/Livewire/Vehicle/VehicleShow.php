@@ -20,6 +20,7 @@ use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\VehicleHandover;
 
 #[Title('Show Vehicle')]
 class VehicleShow extends Component
@@ -102,9 +103,34 @@ class VehicleShow extends Component
     public $transferee = '';
     public $receiving_party = '';
 
+    // Handover modal properties
+    public $showHandoverModal = false;
+
+    // Edit handover properties
+    public $showEditHandoverModal = false;
+    public $editingHandoverId = null;
+
+    // Handover form properties
+    public $handover_number = '';
+    public $handover_date = '';
+    public $handover_from = '';
+    public $handover_to = '';
+    public $handover_transferee = '';
+    public $handover_receiving_party = '';
+
+    // Handover file upload properties
+    public $showUploadHandoverModal = false;
+    public $uploadingHandoverId = null;
+    public $handover_file = [];
+
+    // Certificate receipt file upload properties
+    public $showUploadCertificateReceiptModal = false;
+    public $uploadingCertificateReceiptId = null;
+    public $certificate_receipt_file = [];
+
     public function mount(Vehicle $vehicle): void
     {
-        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments', 'paymentReceipts', 'vehicleCertificateReceipts']);
+        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments', 'paymentReceipts', 'vehicleCertificateReceipts', 'vehicleHandovers']);
 
         // Get cost summary for this vehicle
         $this->loadCostSummary();
@@ -1529,6 +1555,517 @@ class VehicleShow extends Component
 
         // Close modal
         $this->closeEditCertificateReceiptModal();
+    }
+
+    // Handover Methods
+    public function createHandover()
+    {
+        $this->validate([
+            'handover_date' => 'required|date',
+            'handover_from' => 'required|string|max:255',
+            'handover_to' => 'required|string|max:255',
+            'handover_transferee' => 'required|string|max:255',
+            'handover_receiving_party' => 'required|string|max:255',
+        ], [
+            'handover_date.required' => 'Tanggal serah terima harus diisi.',
+            'handover_date.date' => 'Format tanggal tidak valid.',
+            'handover_from.required' => 'Serah terima dari harus diisi.',
+            'handover_from.max' => 'Serah terima dari maksimal 255 karakter.',
+            'handover_to.required' => 'Kepada harus diisi.',
+            'handover_to.max' => 'Kepada maksimal 255 karakter.',
+            'handover_transferee.required' => 'Yang menyerahkan harus diisi.',
+            'handover_transferee.max' => 'Yang menyerahkan maksimal 255 karakter.',
+            'handover_receiving_party.required' => 'Yang menerima harus diisi.',
+            'handover_receiving_party.max' => 'Yang menerima maksimal 255 karakter.',
+        ]);
+
+        // Check if handover already exists for this vehicle
+        if ($this->vehicle->vehicleHandovers && $this->vehicle->vehicleHandovers->count() > 0) {
+            session()->flash('error', 'Berita Acara Serah Terima Kendaraan sudah dibuat untuk kendaraan ini.');
+            $this->closeHandoverModal();
+            return;
+        }
+
+        // Generate handover number
+        $handoverNumber = $this->generateHandoverNumber();
+
+        $handover = VehicleHandover::create([
+            'vehicle_id' => $this->vehicle->id,
+            'handover_number' => $handoverNumber,
+            'handover_date' => $this->handover_date,
+            'handover_from' => $this->handover_from,
+            'handover_to' => $this->handover_to,
+            'transferee' => $this->handover_transferee,
+            'receiving_party' => $this->handover_receiving_party,
+            'created_by' => Auth::id(),
+        ]);
+
+        // Reload vehicle with handovers
+        $this->vehicle->load('vehicleHandovers');
+
+        // Log the creation activity
+        activity()
+            ->performedOn($handover)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'attributes' => [
+                    'handover_number' => $handoverNumber,
+                    'handover_date' => $this->handover_date,
+                    'handover_from' => $this->handover_from,
+                    'handover_to' => $this->handover_to,
+                    'transferee' => $this->handover_transferee,
+                    'receiving_party' => $this->handover_receiving_party,
+                ]
+            ])
+            ->log('created vehicle handover');
+
+        // Show success message
+        session()->flash('message', 'Berita Acara Serah Terima Kendaraan berhasil dibuat.');
+
+        // Close modal
+        $this->closeHandoverModal();
+    }
+
+    public function openHandoverModal()
+    {
+        $this->resetHandoverForm();
+        $this->showHandoverModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeHandoverModal()
+    {
+        $this->showHandoverModal = false;
+        $this->resetHandoverForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    private function resetHandoverForm()
+    {
+        $this->reset([
+            'handover_number',
+            'handover_date',
+            'handover_from',
+            'handover_to',
+            'handover_transferee',
+            'handover_receiving_party'
+        ]);
+    }
+
+    private function generateHandoverNumber()
+    {
+        $currentYear = date('Y');
+        $currentMonth = date('m');
+
+        // Convert month to Roman numerals
+        $romanMonths = [
+            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV', '05' => 'V',
+            '06' => 'VI', '07' => 'VII', '08' => 'VIII', '09' => 'IX', '10' => 'X',
+            '11' => 'XI', '12' => 'XII'
+        ];
+
+        $romanMonth = $romanMonths[$currentMonth];
+
+        // Get the next sequential number for this year
+        $lastHandover = VehicleHandover::whereYear('created_at', $currentYear)
+            ->orderBy('handover_number', 'desc')
+            ->first();
+
+        $nextNumber = 1;
+        if ($lastHandover) {
+            // Extract the sequential number from the last handover number
+            $parts = explode('/', $lastHandover->handover_number);
+            if (count($parts) >= 1) {
+                $lastNumber = (int) $parts[0];
+                $nextNumber = $lastNumber + 1;
+            }
+        }
+
+        // Format: 001/BAST/WOTO/XII/2025
+        return str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . '/BAST/WOTO/' . $romanMonth . '/' . $currentYear;
+    }
+
+    public function editHandover($handoverId)
+    {
+        $handover = VehicleHandover::findOrFail($handoverId);
+
+        // Check if handover belongs to this vehicle
+        if ($handover->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->editingHandoverId = $handoverId;
+        $this->handover_number = $handover->handover_number;
+        $this->handover_date = $handover->handover_date ? date('Y-m-d', strtotime($handover->handover_date)) : '';
+        $this->handover_from = $handover->handover_from;
+        $this->handover_to = $handover->handover_to;
+        $this->handover_transferee = $handover->transferee;
+        $this->handover_receiving_party = $handover->receiving_party;
+
+        $this->showEditHandoverModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeEditHandoverModal()
+    {
+        $this->showEditHandoverModal = false;
+        $this->editingHandoverId = null;
+        $this->resetHandoverForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function updateHandover()
+    {
+        $this->validate([
+            'handover_date' => 'required|date',
+            'handover_from' => 'required|string|max:255',
+            'handover_to' => 'required|string|max:255',
+            'handover_transferee' => 'required|string|max:255',
+            'handover_receiving_party' => 'required|string|max:255',
+        ], [
+            'handover_date.required' => 'Tanggal serah terima harus diisi.',
+            'handover_date.date' => 'Format tanggal tidak valid.',
+            'handover_from.required' => 'Serah terima dari harus diisi.',
+            'handover_from.max' => 'Serah terima dari maksimal 255 karakter.',
+            'handover_to.required' => 'Kepada harus diisi.',
+            'handover_to.max' => 'Kepada maksimal 255 karakter.',
+            'handover_transferee.required' => 'Yang menyerahkan harus diisi.',
+            'handover_transferee.max' => 'Yang menyerahkan maksimal 255 karakter.',
+            'handover_receiving_party.required' => 'Yang menerima harus diisi.',
+            'handover_receiving_party.max' => 'Yang menerima maksimal 255 karakter.',
+        ]);
+
+        $handover = VehicleHandover::findOrFail($this->editingHandoverId);
+
+        // Check if handover belongs to this vehicle
+        if ($handover->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $oldHandover = $handover->toArray();
+
+        // Update handover data
+        $handover->update([
+            'handover_date' => $this->handover_date,
+            'handover_from' => $this->handover_from,
+            'handover_to' => $this->handover_to,
+            'transferee' => $this->handover_transferee,
+            'receiving_party' => $this->handover_receiving_party,
+        ]);
+
+        // Reload vehicle with handovers
+        $this->vehicle->load('vehicleHandovers');
+
+        // Log the update activity
+        activity()
+            ->performedOn($handover)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldHandover,
+                'attributes' => [
+                    'handover_number' => $this->handover_number,
+                    'handover_date' => $this->handover_date,
+                    'handover_from' => $this->handover_from,
+                    'handover_to' => $this->handover_to,
+                    'transferee' => $this->handover_transferee,
+                    'receiving_party' => $this->handover_receiving_party,
+                ]
+            ])
+            ->log('updated vehicle handover');
+
+        // Show success message
+        session()->flash('message', 'Berita Acara Serah Terima Kendaraan berhasil diperbarui.');
+
+        // Close modal
+        $this->closeEditHandoverModal();
+    }
+
+    public function deleteHandover($handoverId)
+    {
+        $handover = VehicleHandover::findOrFail($handoverId);
+
+        // Check if handover belongs to this vehicle
+        if ($handover->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $oldHandover = $handover->toArray();
+
+        // Delete file if exists
+        if ($handover->handover_file) {
+            Storage::disk('public')->delete('documents/handovers/' . $handover->handover_file);
+        }
+
+        $handover->delete();
+
+        // Reload vehicle with handovers
+        $this->vehicle->load('vehicleHandovers');
+
+        // Log the deletion activity
+        activity()
+            ->performedOn($handover)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldHandover,
+            ])
+            ->log('deleted vehicle handover');
+
+        // Show success message
+        session()->flash('message', 'Berita Acara Serah Terima Kendaraan berhasil dihapus.');
+    }
+
+    public function printHandover($handoverId)
+    {
+        try {
+            $handover = VehicleHandover::with(['vehicle.brand', 'vehicle.type', 'vehicle.salesman'])->findOrFail($handoverId);
+
+            // Check permissions
+            if (!auth()->user()->can('vehicle-handover.print')) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Check if handover belongs to this vehicle
+            if ($handover->vehicle_id !== $this->vehicle->id) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Update print count
+            if ($handover->print_count == 0) {
+                $handover->update(['printed_at' => now()]);
+            }
+            $handover->increment('print_count');
+
+            // Generate PDF
+            $pdf = Pdf::loadView('exports.berita-acara-serah-terima', compact('handover'));
+
+            // Set PDF options for better formatting
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true
+            ]);
+
+            // Log the print activity
+            activity()
+                ->performedOn($handover)
+                ->causedBy(auth()->user())
+                ->withProperties(['print_count' => $handover->print_count])
+                ->log('printed vehicle handover');
+
+            // Return PDF download
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->output();
+            }, 'Berita_Acara_Serah_Terima_' . str_replace(['/', '\\'], '_', $handover->handover_number) . '.pdf');
+
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Failed to print handover', [
+                'error' => $e->getMessage(),
+                'handover_id' => $handoverId,
+                'user_id' => auth()->id(),
+            ]);
+
+            // Show error message
+            session()->flash('error', 'Gagal mencetak berita acara serah terima.');
+            return redirect()->back();
+        }
+    }
+
+    public function uploadHandoverFile($handoverId)
+    {
+        $handover = VehicleHandover::findOrFail($handoverId);
+
+        // Check if handover belongs to this vehicle
+        if ($handover->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->uploadingHandoverId = $handoverId;
+        $this->handover_file = [];
+        $this->showUploadHandoverModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeUploadHandoverModal()
+    {
+        $this->showUploadHandoverModal = false;
+        $this->uploadingHandoverId = null;
+        $this->handover_file = [];
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function uploadHandoverDocument()
+    {
+        $this->validate([
+            'handover_file' => 'required|array|max:5',
+            'handover_file.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ], [
+            'handover_file.required' => 'File berita acara harus dipilih.',
+            'handover_file.array' => 'File berita acara harus berupa array.',
+            'handover_file.max' => 'Maksimal 5 file yang dapat diupload.',
+            'handover_file.*.required' => 'File berita acara harus dipilih.',
+            'handover_file.*.file' => 'File berita acara harus berupa file.',
+            'handover_file.*.mimes' => 'File berita acara harus berupa file PDF, JPG, JPEG, atau PNG.',
+            'handover_file.*.max' => 'Ukuran file maksimal 2MB.',
+        ]);
+
+        $handover = VehicleHandover::findOrFail($this->uploadingHandoverId);
+
+        // Check if handover belongs to this vehicle
+        if ($handover->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Handle file upload
+        $fileNames = [];
+        if ($this->handover_file) {
+            foreach ($this->handover_file as $file) {
+                if ($file && is_object($file)) { // Make sure it's a valid file object
+                    $storedPath = $file->store('documents/handovers', 'public');
+                    $fileNames[] = basename($storedPath);
+                }
+            }
+        }
+
+        if (!empty($fileNames)) {
+            $documentPath = implode(',', $fileNames);
+
+            // Store old file paths for cleanup
+            $oldFiles = $handover->handover_file ? explode(',', $handover->handover_file) : [];
+
+            // Update handover with file path
+            $handover->update([
+                'handover_file' => $documentPath,
+            ]);
+
+            // Delete old files if they exist
+            foreach ($oldFiles as $oldFile) {
+                Storage::disk('public')->delete('documents/handovers/' . trim($oldFile));
+            }
+
+            // Reload vehicle with handovers
+            $this->vehicle->load('vehicleHandovers');
+
+            // Log the upload activity
+            activity()
+                ->performedOn($handover)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'handover_file' => $documentPath,
+                    ]
+                ])
+                ->log('uploaded handover document');
+
+            // Show success message
+            session()->flash('message', 'File berita acara serah terima berhasil diupload.');
+
+            // Close modal
+            $this->closeUploadHandoverModal();
+        }
+    }
+
+    public function uploadRegistrationCertificateReceiptFile($certificateReceiptId)
+    {
+        $certificateReceipt = VehicleCertificateReceipt::findOrFail($certificateReceiptId);
+
+        // Check if certificate receipt belongs to this vehicle
+        if ($certificateReceipt->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->uploadingCertificateReceiptId = $certificateReceiptId;
+        $this->certificate_receipt_file = [];
+        $this->showUploadCertificateReceiptModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeUploadCertificateReceiptModal()
+    {
+        $this->showUploadCertificateReceiptModal = false;
+        $this->uploadingCertificateReceiptId = null;
+        $this->certificate_receipt_file = [];
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function uploadCertificateReceiptDocument()
+    {
+        $this->validate([
+            'certificate_receipt_file' => 'required|array|max:5',
+            'certificate_receipt_file.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ], [
+            'certificate_receipt_file.required' => 'File tanda terima BPKB harus dipilih.',
+            'certificate_receipt_file.array' => 'File tanda terima BPKB harus berupa array.',
+            'certificate_receipt_file.max' => 'Maksimal 5 file yang dapat diupload.',
+            'certificate_receipt_file.*.required' => 'File tanda terima BPKB harus dipilih.',
+            'certificate_receipt_file.*.file' => 'File tanda terima BPKB harus berupa file.',
+            'certificate_receipt_file.*.mimes' => 'File tanda terima BPKB harus berupa file PDF, JPG, JPEG, atau PNG.',
+            'certificate_receipt_file.*.max' => 'Ukuran file maksimal 2MB.',
+        ]);
+
+        $certificateReceipt = VehicleCertificateReceipt::findOrFail($this->uploadingCertificateReceiptId);
+
+        // Check if certificate receipt belongs to this vehicle
+        if ($certificateReceipt->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Handle file upload
+        $fileNames = [];
+        if ($this->certificate_receipt_file) {
+            foreach ($this->certificate_receipt_file as $file) {
+                if ($file && is_object($file)) { // Make sure it's a valid file object
+                    $storedPath = $file->store('documents/registration-certificate-receipts', 'public');
+                    $fileNames[] = basename($storedPath);
+                }
+            }
+        }
+
+        if (!empty($fileNames)) {
+            $documentPath = implode(',', $fileNames);
+
+            // Store old file paths for cleanup
+            $oldFiles = $certificateReceipt->receipt_file ? explode(',', $certificateReceipt->receipt_file) : [];
+
+            // Update certificate receipt with file path
+            $certificateReceipt->update([
+                'receipt_file' => $documentPath,
+            ]);
+
+            // Delete old files if they exist
+            foreach ($oldFiles as $oldFile) {
+                Storage::disk('public')->delete('documents/registration-certificate-receipts/' . trim($oldFile));
+            }
+
+            // Reload vehicle with certificate receipts
+            $this->vehicle->load('vehicleCertificateReceipts');
+
+            // Log the upload activity
+            activity()
+                ->performedOn($certificateReceipt)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'receipt_file' => $documentPath,
+                    ]
+                ])
+                ->log('uploaded certificate receipt document');
+
+            // Show success message
+            session()->flash('message', 'File tanda terima BPKB berhasil diupload.');
+
+            // Close modal
+            $this->closeUploadCertificateReceiptModal();
+        }
     }
 
     public function printPaymentReceipt($paymentReceiptId)

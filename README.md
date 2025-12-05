@@ -2,7 +2,7 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.16.0** - Certificate Receipt Management System
+**Version 1.17.0** - File Upload Management System
 
 ## ✨ Fitur Utama
 
@@ -71,6 +71,8 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
   - **Comprehensive Form Fields**: BPKB A/N, Faktur Asli A/N, Fotocopy KTP A/N, Blanko Kwitansi, NIK, Form A, Surat Pelepasan Hak, Lain-lain
   - **Advanced Form Interface**: Modal form dengan validasi lengkap dan error handling
   - **Single Receipt Rule**: Sistem mencegah pembuatan lebih dari satu tanda terima per kendaraan
+  - **Certificate Receipt File Upload**: Upload multiple berkas tanda terima dengan validasi lengkap (PDF, JPG, JPEG, PNG, max 2MB)
+  - **File Type Icons**: Display icon berdasarkan tipe file dengan nama file lengkap
   - **Certificate Receipt Audit Trail**: Dedicated audit page dengan filtering berdasarkan vehicle
   - **Advanced Filtering**: Search by certificate number/in_the_name_of/user, vehicle filter, pagination
   - **Print Certificate Receipt**: Generate PDF tanda terima BPKB otomatis dalam format landscape
@@ -96,6 +98,21 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
   - **Payment Receipt Audit Trail**: Dedicated audit page dengan filtering berdasarkan vehicle
   - **Advanced Filtering**: Search by payment number/description/user, vehicle filter, pagination
   - **Permission-based Access**: vehicle-payment-receipt.* permissions untuk kontrol akses
+  - **Database Integration**: Foreign key ke vehicles table dengan document management
+  - **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
+
+- **📝 Berita Acara Serah Terima**: Sistem manajemen berita acara serah terima kendaraan
+  - **Handover CRUD**: Create, Read, Update, Delete berita acara serah terima dengan interface lengkap
+  - **Auto Handover Number Generation**: Generate nomor berita acara otomatis dengan format 001/BAST/WOTO/XII/2025
+  - **Comprehensive Form Fields**: Tanggal, Serah Terima Dari, Kepada, Yang Menyerahkan, Yang Menerima
+  - **Advanced Form Interface**: Modal form dengan validasi lengkap dan error handling
+  - **Single Handover Rule**: Sistem mencegah pembuatan lebih dari satu berita acara per kendaraan
+  - **Handover File Upload**: Upload multiple berkas berita acara dengan validasi lengkap (PDF, JPG, JPEG, PNG, max 2MB)
+  - **File Type Icons**: Display icon berdasarkan tipe file dengan nama file lengkap
+  - **Payment Completion Conditional**: Section handover hanya muncul setelah pembayaran lunas
+  - **Print Handover**: Generate PDF berita acara serah terima otomatis
+  - **Audit Trail**: Activity logging lengkap untuk semua perubahan handovers
+  - **Permission-based Access**: vehicle-handover.* permissions untuk kontrol akses
   - **Database Integration**: Foreign key ke vehicles table dengan document management
   - **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
 
@@ -193,10 +210,11 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **JavaScript**: Vanilla JS dengan Livewire integration, Quill.js editor, localStorage API
 - **Form Enhancement**: Auto-formatting, progress indicators, keyboard shortcuts, state persistence
 - **Multiple File Upload**: Livewire WithFileUploads untuk upload multiple files dengan comma-separated storage
-- **Auto Numbering**: Custom auto-increment numbering system dengan format 0001/PP/WOTO/XII/2025 dan 001/TT/BPKB/WOTO/XII/2025
+- **Auto Numbering**: Custom auto-increment numbering system dengan format 0001/PP/WOTO/XII/2025, 001/TT/BPKB/WOTO/XII/2025, dan 001/BAST/WOTO/XII/2025
 - **Database Transactions**: Atomic operations untuk multi-table updates dengan error handling dan rollback
 - **Indonesian Text Conversion**: Custom terbilang helper function untuk mata uang Rupiah
 - **Receipt Generation**: Sistem generate kwitansi PDF dengan nomor otomatis dan data perusahaan dinamis
+- **File Upload Management**: Advanced file upload system dengan multiple file support, auto-cleanup, dan type validation
 - **Data Seeding**: Laravel Seeders untuk data master (Brands, Types, Vehicles, Companies)
 
 ## 📋 Prasyarat Sistem
@@ -694,6 +712,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicle-purchase-payment.*` - Manajemen purchase payment records (view, create, edit, delete, audit)
 - `vehicle-payment-receipt.*` - Manajemen payment receipt records (view, create, edit, delete, audit)
 - `vehicle-registration-certificate-receipt.*` - Manajemen certificate receipt records (view, create, edit, delete, audit, print)
+- `vehicle-handover.*` - Manajemen handover records (view, create, edit, delete, audit, print)
 - `cost.*` - Manajemen cost records (view, create, edit, delete)
 - `vehiclemodel.*` - Manajemen vehicle models (view, create, edit, delete)
 - `category.*` - Manajemen categories (view, create, edit, delete)
@@ -740,6 +759,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `payment_receipts` - Data penerimaan pembayaran penjualan kendaraan dengan multiple file upload dan auto-numbering
 - `certificate_receipts` - Data tanda terima BPKB kendaraan dengan auto-numbering dan comprehensive document tracking
 - `loan_calculations` - Data perhitungan kredit kendaraan dengan relasi ke vehicles dan leasings
+- `vehicle_handovers` - Data berita acara serah terima kendaraan dengan auto-numbering dan file upload support
 - `costs` - Data biaya kendaraan dengan approval workflow
 - `brands` - Merek mobil (31+ brand Indonesia)
 - `vendors` - Vendor/supplier kendaraan (25+ vendor Indonesia)
@@ -811,6 +831,11 @@ GET    /api/certificate-receipts/{id} - Detail certificate receipt record terten
 POST   /api/certificate-receipts  - Tambah certificate receipt record baru
 PUT    /api/certificate-receipts/{id} - Update certificate receipt record
 DELETE /api/certificate-receipts/{id} - Hapus certificate receipt record
+GET    /api/vehicle-handovers - List semua vehicle handover records
+GET    /api/vehicle-handovers/{id} - Detail vehicle handover record tertentu
+POST   /api/vehicle-handovers  - Tambah vehicle handover record baru
+PUT    /api/vehicle-handovers/{id} - Update vehicle handover record
+DELETE /api/vehicle-handovers/{id} - Hapus vehicle handover record
 GET    /api/leasings           - List semua data leasing
 POST   /api/models             - Tambah model kendaraan baru
 PUT    /api/models/{id}        - Update model kendaraan
@@ -875,6 +900,23 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.17.0 - File Upload Management System
+- ✅ **Complete Handover File Upload System**: Sistem upload berkas berita acara serah terima kendaraan
+- ✅ **Handover Document Upload**: Upload multiple berkas handover dengan validasi lengkap (PDF, JPG, JPEG, PNG, max 2MB per file)
+- ✅ **Handover File Management**: Storage management dengan auto-naming dan cleanup file lama
+- ✅ **File Type Icons**: Display icon berdasarkan tipe file (PDF/document icons) untuk handover documents
+- ✅ **Certificate Receipt File Upload System**: Sistem upload berkas tanda terima BPKB kendaraan
+- ✅ **Certificate Receipt Document Upload**: Upload multiple berkas certificate receipt dengan validasi lengkap
+- ✅ **Payment Completion Conditional Logic**: Section handover hanya muncul setelah pembayaran kendaraan lunas
+- ✅ **File Validation & Security**: Comprehensive validation untuk file type, size, dan security
+- ✅ **Audit Trail for File Operations**: Activity logging lengkap untuk semua upload/delete file operations
+- ✅ **Real-time File Display**: Auto-refresh file display setelah upload/delete operations
+- ✅ **Multiple File Support**: Support upload hingga 5 file per operation dengan comma-separated storage
+- ✅ **File Cleanup Automation**: Automatic deletion of old files saat di-replace dengan file baru
+- ✅ **Permission-based File Access**: vehicle-handover.* dan vehicle-registration-certificate-receipt.* permissions
+- ✅ **Database Integration**: File paths stored as comma-separated strings dalam handover_file dan receipt_file columns
+- ✅ **UI Enhancement**: Consistent file display dengan proper icons dan responsive layout
 
 ### v1.16.0 - Certificate Receipt Management System
 - ✅ **Complete Certificate Receipt Module**: Sistem lengkap manajemen tanda terima BPKB kendaraan
