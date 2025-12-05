@@ -115,6 +115,8 @@ class VehicleShow extends Component
     public $handover_date = '';
     public $handover_from = '';
     public $handover_to = '';
+    public $handover_from_address = '';
+    public $handover_to_address = '';
     public $handover_transferee = '';
     public $handover_receiving_party = '';
 
@@ -1564,6 +1566,8 @@ class VehicleShow extends Component
             'handover_date' => 'required|date',
             'handover_from' => 'required|string|max:255',
             'handover_to' => 'required|string|max:255',
+            'handover_from_address' => 'required|string|max:60',
+            'handover_to_address' => 'required|string|max:60',
             'handover_transferee' => 'required|string|max:255',
             'handover_receiving_party' => 'required|string|max:255',
         ], [
@@ -1573,6 +1577,10 @@ class VehicleShow extends Component
             'handover_from.max' => 'Serah terima dari maksimal 255 karakter.',
             'handover_to.required' => 'Kepada harus diisi.',
             'handover_to.max' => 'Kepada maksimal 255 karakter.',
+            'handover_from_address.required' => 'Alamat dari harus diisi.',
+            'handover_from_address.max' => 'Alamat dari maksimal 60 karakter.',
+            'handover_to_address.required' => 'Alamat kepada harus diisi.',
+            'handover_to_address.max' => 'Alamat kepada maksimal 60 karakter.',
             'handover_transferee.required' => 'Yang menyerahkan harus diisi.',
             'handover_transferee.max' => 'Yang menyerahkan maksimal 255 karakter.',
             'handover_receiving_party.required' => 'Yang menerima harus diisi.',
@@ -1595,6 +1603,8 @@ class VehicleShow extends Component
             'handover_date' => $this->handover_date,
             'handover_from' => $this->handover_from,
             'handover_to' => $this->handover_to,
+            'handover_from_address' => $this->handover_from_address,
+            'handover_to_address' => $this->handover_to_address,
             'transferee' => $this->handover_transferee,
             'receiving_party' => $this->handover_receiving_party,
             'created_by' => Auth::id(),
@@ -1613,6 +1623,8 @@ class VehicleShow extends Component
                     'handover_date' => $this->handover_date,
                     'handover_from' => $this->handover_from,
                     'handover_to' => $this->handover_to,
+                    'handover_from_address' => $this->handover_from_address,
+                    'handover_to_address' => $this->handover_to_address,
                     'transferee' => $this->handover_transferee,
                     'receiving_party' => $this->handover_receiving_party,
                 ]
@@ -1649,6 +1661,8 @@ class VehicleShow extends Component
             'handover_date',
             'handover_from',
             'handover_to',
+            'handover_from_address',
+            'handover_to_address',
             'handover_transferee',
             'handover_receiving_party'
         ]);
@@ -1701,6 +1715,8 @@ class VehicleShow extends Component
         $this->handover_date = $handover->handover_date ? date('Y-m-d', strtotime($handover->handover_date)) : '';
         $this->handover_from = $handover->handover_from;
         $this->handover_to = $handover->handover_to;
+        $this->handover_from_address = $handover->handover_from_address ?? '';
+        $this->handover_to_address = $handover->handover_to_address ?? '';
         $this->handover_transferee = $handover->transferee;
         $this->handover_receiving_party = $handover->receiving_party;
 
@@ -1724,6 +1740,8 @@ class VehicleShow extends Component
             'handover_date' => 'required|date',
             'handover_from' => 'required|string|max:255',
             'handover_to' => 'required|string|max:255',
+            'handover_from_address' => 'required|string|max:60',
+            'handover_to_address' => 'required|string|max:60',
             'handover_transferee' => 'required|string|max:255',
             'handover_receiving_party' => 'required|string|max:255',
         ], [
@@ -1733,6 +1751,10 @@ class VehicleShow extends Component
             'handover_from.max' => 'Serah terima dari maksimal 255 karakter.',
             'handover_to.required' => 'Kepada harus diisi.',
             'handover_to.max' => 'Kepada maksimal 255 karakter.',
+            'handover_from_address.required' => 'Alamat dari harus diisi.',
+            'handover_from_address.max' => 'Alamat dari maksimal 60 karakter.',
+            'handover_to_address.required' => 'Alamat kepada harus diisi.',
+            'handover_to_address.max' => 'Alamat kepada maksimal 60 karakter.',
             'handover_transferee.required' => 'Yang menyerahkan harus diisi.',
             'handover_transferee.max' => 'Yang menyerahkan maksimal 255 karakter.',
             'handover_receiving_party.required' => 'Yang menerima harus diisi.',
@@ -1753,6 +1775,8 @@ class VehicleShow extends Component
             'handover_date' => $this->handover_date,
             'handover_from' => $this->handover_from,
             'handover_to' => $this->handover_to,
+            'handover_from_address' => $this->handover_from_address,
+            'handover_to_address' => $this->handover_to_address,
             'transferee' => $this->handover_transferee,
             'receiving_party' => $this->handover_receiving_party,
         ]);
@@ -1771,6 +1795,8 @@ class VehicleShow extends Component
                     'handover_date' => $this->handover_date,
                     'handover_from' => $this->handover_from,
                     'handover_to' => $this->handover_to,
+                    'handover_from_address' => $this->handover_from_address,
+                    'handover_to_address' => $this->handover_to_address,
                     'transferee' => $this->handover_transferee,
                     'receiving_party' => $this->handover_receiving_party,
                 ]

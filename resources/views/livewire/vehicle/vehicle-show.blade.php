@@ -2940,6 +2940,42 @@
                 <flux:error name="handover_to" />
             </flux:field>
 
+            <!-- Handover From Address -->
+            <flux:field>
+                <flux:label>
+                    Alamat Dari
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:textarea
+                    wire:model.live.debounce.500ms="handover_from_address"
+                    placeholder="Alamat lengkap dari"
+                    maxlength="60"
+                    rows="2"
+                />
+                <flux:error name="handover_from_address" />
+                <div class="text-xs text-gray-500 mt-1">
+                    {{ strlen($handover_from_address ?? '') }}/60 karakter
+                </div>
+            </flux:field>
+
+            <!-- Handover To Address -->
+            <flux:field>
+                <flux:label>
+                    Alamat Kepada
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:textarea
+                    wire:model.live.debounce.500ms="handover_to_address"
+                    placeholder="Alamat lengkap kepada"
+                    maxlength="60"
+                    rows="2"
+                />
+                <flux:error name="handover_to_address" />
+                <div class="text-xs text-gray-500 mt-1">
+                    {{ strlen($handover_to_address ?? '') }}/60 karakter
+                </div>
+            </flux:field>
+
             <!-- Transferee (Yang Menyerahkan) -->
             <flux:field>
                 <flux:label>
@@ -3033,6 +3069,42 @@
                     placeholder="Kepada"
                 />
                 <flux:error name="handover_to" />
+            </flux:field>
+
+            <!-- Handover From Address -->
+            <flux:field>
+                <flux:label>
+                    Alamat Dari
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:textarea
+                    wire:model.live.debounce.500ms="handover_from_address"
+                    placeholder="Alamat lengkap dari"
+                    maxlength="60"
+                    rows="2"
+                />
+                <flux:error name="handover_from_address" />
+                <div class="text-xs text-gray-500 mt-1">
+                    {{ strlen($handover_from_address ?? '') }}/60 karakter
+                </div>
+            </flux:field>
+
+            <!-- Handover To Address -->
+            <flux:field>
+                <flux:label>
+                    Alamat Kepada
+                    <span class="text-red-600 ml-1">*</span>
+                </flux:label>
+                <flux:textarea
+                    wire:model.live.debounce.500ms="handover_to_address"
+                    placeholder="Alamat lengkap kepada"
+                    maxlength="60"
+                    rows="2"
+                />
+                <flux:error name="handover_to_address" />
+                <div class="text-xs text-gray-500 mt-1">
+                    {{ strlen($handover_to_address ?? '') }}/60 karakter
+                </div>
             </flux:field>
 
             <!-- Transferee (Yang Menyerahkan) -->

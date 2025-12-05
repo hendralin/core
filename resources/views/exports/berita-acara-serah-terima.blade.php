@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 landscape;
-            margin: 10mm;
+            margin: 5mm;
         }
 
         * {
@@ -17,20 +17,34 @@
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 11pt;
+            font-size: 10pt;
+            page-break-inside: avoid;
+            page-break-after: avoid;
+        }
+
+        @page {
+            margin: 0;
+            size: A4 landscape;
         }
 
         .container {
-            display: table;
             width: 100%;
-            height: 100%;
+            height: auto;
+            display: table;
+            page-break-inside: avoid;
         }
 
         .kwitansi {
             display: table-cell;
             width: 50%;
-            padding: 15px;
+            min-height: 21cm;
+            position: relative;
+            padding: 10px 15px;
             vertical-align: top;
+            page-break-inside: avoid;
+        }
+
+        .kwitansi:first-child {
             border-right: 1px dashed #000;
         }
 
@@ -40,7 +54,8 @@
 
         .header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
+            margin-top: 20px;
         }
 
         .logo {
@@ -78,10 +93,11 @@
         .content {
             font-size: 10pt;
             line-height: 1.6;
+            page-break-inside: avoid;
         }
 
         .field {
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
 
         .field-inline {
@@ -100,7 +116,7 @@
         }
 
         .kepada-section {
-            margin: 15px 0;
+            margin: 1px 0;
         }
 
         .specification {
@@ -109,8 +125,8 @@
 
         .box-field {
             border: 1px solid #000;
-            padding: 8px;
-            min-height: 40px;
+            padding: 7px;
+            min-height: 20px;
             margin-bottom: 1px;
         }
 
@@ -125,13 +141,13 @@
         }
 
         .perhatian {
-            margin: 15px 0;
+            margin: 5px 0;
             font-size: 9pt;
             line-height: 1.5;
         }
 
         .signature-section {
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .signature-row {
@@ -148,7 +164,7 @@
 
         .signature-title {
             font-size: 10pt;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
         }
 
         .signature-line {
@@ -159,8 +175,30 @@
 
         .city-date {
             text-align: right;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             font-size: 10pt;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 72pt;
+            color: rgba(200, 200, 200, 0.3);
+            z-index: -1;
+            pointer-events: none;
+            font-weight: bold;
+        }
+
+        .kwitansi {
+            position: relative;
+        }
+
+        .company-logo {
+            max-height: 110px;
+            max-width: 350px;
+            object-fit: contain;
         }
     </style>
 </head>
@@ -168,11 +206,28 @@
     <div class="container">
         <!-- ORIGINAL -->
         <div class="kwitansi">
+            <div class="watermark">ORIGINAL</div>
+            @php
+                $company = \App\Models\Company::first();
+                $logoData = null;
+                if ($company && $company->logo) {
+                    // $logoPath = public_path('logos/' . $company->logo);
+                    $logoPath = public_path('logos/logo.jpg');
+                    // Check if file exists and get base64 encoded data
+                    if (file_exists($logoPath)) {
+                        $imageData = file_get_contents($logoPath);
+                        $mimeType = mime_content_type($logoPath);
+                        $logoData = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+                    }
+                }
+            @endphp
             <div class="header">
-                <div class="logo">
-                    <span class="w">W</span><span class="oto">OTO</span>
-                </div>
-                <div class="tagline">WAHANA.OTO</div>
+                @if($logoData)
+                    <img src="{{ $logoData }}" alt="Company Logo" class="company-logo" />
+                @else
+                    <h1>W<span class="oto">OTO</span></h1>
+                    <div class="subtitle">WAHANA.OTO</div>
+                @endif
             </div>
 
             <div class="title-box">
@@ -181,28 +236,40 @@
 
             <div class="content">
                 <div class="field">
-                    Pada hari ini <span class="dots" style="width: 100px;">&nbsp;</span>
-                    tanggal <span class="dots" style="width: 120px;">&nbsp;</span>
+                    @if($handover && $handover->handover_date)
+                        @php
+                            $date = \Carbon\Carbon::parse($handover->handover_date);
+                            $days = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+                            $months = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
+                            $dayName = $days[$date->format('l')] ?? $date->format('l');
+                            $monthName = $months[$date->format('F')] ?? $date->format('F');
+                        @endphp
+                        Pada hari ini {{ $dayName }}, Tanggal {{ $date->format('j') }} {{ $monthName }} {{ $date->format('Y') }}
+                    @else
+                        Pada hari ini _____________, Tanggal _____________
+                    @endif
                     telah dilakukan serah terima dari.
                 </div>
 
                 <div class="field">
-                    <span class="label">Nama</span> :
-                    <span class="dots" style="width: 250px;">&nbsp;</span>
+                    <span class="label" style="margin-left: 40px;">Nama</span> :
+                    {{ $handover->handover_from }}
                 </div>
 
                 <div class="field">
-                    <span class="label">Alamat</span> :
-                    <span class="dots" style="width: 300px;">&nbsp;</span>
+                    <span class="label" style="margin-left: 40px;">Alamat</span> :
+                    {{ $handover->handover_from_address }}
                 </div>
 
                 <div class="kepada-section">
-                    <div style="margin-bottom: 8px;">Kepada :</div>
-                    <div class="field" style="margin-left: 20px;">
-                        Nama <span class="dots" style="width: 260px; margin-left: 40px;">&nbsp;</span>
+                    <div style="margin-bottom: 8px;">Kepada</div>
+                    <div class="field" style="margin-left: 40px;">
+                        <span class="label">Nama</span> :
+                        {{ $handover->handover_to }}
                     </div>
-                    <div class="field" style="margin-left: 20px;">
-                        Alamat <span class="dots" style="width: 300px; margin-left: 26px;">&nbsp;</span>
+                    <div class="field" style="margin-left: 40px;">
+                        <span class="label">Alamat</span> :
+                        {{ $handover->handover_to_address }}
                     </div>
                 </div>
 
@@ -211,27 +278,27 @@
                 </div>
 
                 <div class="field">
-                    Merk / Type : <span class="dots" style="width: 150px;">&nbsp;</span>
-                    ..Tahun : <span class="dots" style="width: 80px;">&nbsp;</span>
-                    Nopol : <span class="dots" style="width: 80px;">&nbsp;</span>
+                    Merk / Type : {{ $handover->vehicle->brand->name }} {{ $handover->vehicle->type->name }}
+                    Tahun : {{ $handover->vehicle->year }}
+                    Nopol : {{ $handover->vehicle->police_number }}
                 </div>
 
                 <div class="box-field">
-                    Nomor Rangka :
+                    Nomor Rangka : <span style="font-weight: bold; font-size: 11pt;">{{ $handover->vehicle->chassis_number }}</span>
                 </div>
 
                 <div class="box-field">
-                    Nomor Mesin :
+                    Nomor Mesin : <span style="font-weight: bold; font-size: 11pt;">{{ $handover->vehicle->engine_number }}</span>
                 </div>
 
                 <div class="accessories">
                     Berikut segala kelengkapan kendaraan yang berupa :<br>
                     <div style="margin-top: 5px;">
-                        <span class="accessories-item">STNK Asli &nbsp;&nbsp;&nbsp; (Ada / Tidak);</span>
-                        <span class="accessories-item">Ban Serep &nbsp;&nbsp;&nbsp; (Ada/Tidak);</span>
-                        <span class="accessories-item">Dongkrak &nbsp;&nbsp;&nbsp; (Ada/Tidak);</span><br>
-                        <span class="accessories-item">Kunci Roda &nbsp;&nbsp; (Ada / Tidak);</span>
-                        <span class="accessories-item">Kunci Serep &nbsp;&nbsp; (Ada/Tidak);</span>
+                        <span class="accessories-item">STNK Asli &nbsp;&nbsp;&nbsp; ({{ $handover->vehicle->file_stnk ? 'Ada' : 'Tidak' }});</span>
+                        <span class="accessories-item">Ban Serep &nbsp;&nbsp;&nbsp; ({{ $handover->vehicle->vehicleEquipment->ban_serep ? 'Ada' : 'Tidak' }});</span>
+                        <span class="accessories-item">Dongkrak &nbsp;&nbsp;&nbsp; ({{ $handover->vehicle->vehicleEquipment->dongkrak ? 'Ada' : 'Tidak' }});</span><br>
+                        <span class="accessories-item">Kunci Roda &nbsp;&nbsp; ({{ $handover->vehicle->vehicleEquipment->kunci_roda ? 'Ada' : 'Tidak' }});</span>
+                        <span class="accessories-item">Kunci Serep &nbsp;&nbsp; ({{ $handover->vehicle->vehicleEquipment->kunci_serep ? 'Ada' : 'Tidak' }});</span>
                     </div>
                 </div>
 
@@ -241,18 +308,18 @@
                 </div>
 
                 <div class="city-date">
-                    Palembang, <span class="dots" style="width: 100px;">&nbsp;</span>
+                    Palembang, {{ \Carbon\Carbon::parse($handover->handover_date)->format('d F Y') }}
                 </div>
 
                 <div class="signature-section">
                     <div class="signature-row">
                         <div class="signature-col">
                             <div class="signature-title">Yang menyerahkan,</div>
-                            <div>(<span class="dots" style="width: 120px;">&nbsp;</span>)</div>
+                            <div>( {{ $handover->transferee }} )</div>
                         </div>
                         <div class="signature-col">
                             <div class="signature-title">Yang menerima,</div>
-                            <div>(<span class="dots" style="width: 120px;">&nbsp;</span>)</div>
+                            <div>( {{ $handover->receiving_party }} )</div>
                         </div>
                     </div>
                 </div>
@@ -261,11 +328,14 @@
 
         <!-- COPY -->
         <div class="kwitansi">
+            <div class="watermark">COPY</div>
             <div class="header">
-                <div class="logo">
-                    <span class="w">W</span><span class="oto">OTO</span>
-                </div>
-                <div class="tagline">WAHANA.OTO</div>
+                @if($logoData)
+                    <img src="{{ $logoData }}" alt="Company Logo" class="company-logo" />
+                @else
+                    <h1>W<span class="oto">OTO</span></h1>
+                    <div class="subtitle">WAHANA.OTO</div>
+                @endif
             </div>
 
             <div class="title-box">
@@ -274,28 +344,40 @@
 
             <div class="content">
                 <div class="field">
-                    Pada hari ini <span class="dots" style="width: 100px;">&nbsp;</span>
-                    tanggal <span class="dots" style="width: 120px;">&nbsp;</span>
+                    @if($handover && $handover->handover_date)
+                        @php
+                            $date = \Carbon\Carbon::parse($handover->handover_date);
+                            $days = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+                            $months = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
+                            $dayName = $days[$date->format('l')] ?? $date->format('l');
+                            $monthName = $months[$date->format('F')] ?? $date->format('F');
+                        @endphp
+                        Pada hari ini {{ $dayName }}, Tanggal {{ $date->format('j') }} {{ $monthName }} {{ $date->format('Y') }}
+                    @else
+                        Pada hari ini _____________, Tanggal _____________
+                    @endif
                     telah dilakukan serah terima dari.
                 </div>
 
                 <div class="field">
-                    <span class="label">Nama</span> :
-                    <span class="dots" style="width: 250px;">&nbsp;</span>
+                    <span class="label" style="margin-left: 40px;">Nama</span> :
+                    {{ $handover->handover_from }}
                 </div>
 
                 <div class="field">
-                    <span class="label">Alamat</span> :
-                    <span class="dots" style="width: 300px;">&nbsp;</span>
+                    <span class="label" style="margin-left: 40px;">Alamat</span> :
+                    {{ $handover->handover_from_address }}
                 </div>
 
                 <div class="kepada-section">
-                    <div style="margin-bottom: 8px;">Kepada :</div>
-                    <div class="field" style="margin-left: 20px;">
-                        Nama <span class="dots" style="width: 260px; margin-left: 40px;">&nbsp;</span>
+                    <div style="margin-bottom: 8px;">Kepada</div>
+                    <div class="field" style="margin-left: 40px;">
+                        <span class="label">Nama</span> :
+                        {{ $handover->handover_to }}
                     </div>
-                    <div class="field" style="margin-left: 20px;">
-                        Alamat <span class="dots" style="width: 300px; margin-left: 26px;">&nbsp;</span>
+                    <div class="field" style="margin-left: 40px;">
+                        <span class="label">Alamat</span> :
+                        {{ $handover->handover_to_address }}
                     </div>
                 </div>
 
@@ -304,27 +386,27 @@
                 </div>
 
                 <div class="field">
-                    Merk / Type : <span class="dots" style="width: 150px;">&nbsp;</span>
-                    ..Tahun : <span class="dots" style="width: 80px;">&nbsp;</span>
-                    Nopol : <span class="dots" style="width: 80px;">&nbsp;</span>
+                    Merk / Type : {{ $handover->vehicle->brand->name }} {{ $handover->vehicle->type->name }}
+                    Tahun : {{ $handover->vehicle->year }}
+                    Nopol : {{ $handover->vehicle->police_number }}
                 </div>
 
                 <div class="box-field">
-                    Nomor Rangka :
+                    Nomor Rangka : <span style="font-weight: bold; font-size: 11pt;">{{ $handover->vehicle->chassis_number }}</span>
                 </div>
 
                 <div class="box-field">
-                    Nomor Mesin :
+                    Nomor Mesin : <span style="font-weight: bold; font-size: 11pt;">{{ $handover->vehicle->engine_number }}</span>
                 </div>
 
                 <div class="accessories">
                     Berikut segala kelengkapan kendaraan yang berupa :<br>
                     <div style="margin-top: 5px;">
-                        <span class="accessories-item">STNK Asli &nbsp;&nbsp;&nbsp; (Ada / Tidak);</span>
-                        <span class="accessories-item">Ban Serep &nbsp;&nbsp;&nbsp; (Ada/Tidak);</span>
-                        <span class="accessories-item">Dongkrak &nbsp;&nbsp;&nbsp; (Ada/Tidak);</span><br>
-                        <span class="accessories-item">Kunci Roda &nbsp;&nbsp; (Ada / Tidak);</span>
-                        <span class="accessories-item">Kunci Serep &nbsp;&nbsp; (Ada/Tidak);</span>
+                        <span class="accessories-item">STNK Asli &nbsp;&nbsp;&nbsp; ({{ $handover->vehicle->file_stnk ? 'Ada' : 'Tidak' }});</span>
+                        <span class="accessories-item">Ban Serep &nbsp;&nbsp;&nbsp; ({{ $handover->vehicle->vehicleEquipment->ban_serep ? 'Ada' : 'Tidak' }});</span>
+                        <span class="accessories-item">Dongkrak &nbsp;&nbsp;&nbsp; ({{ $handover->vehicle->vehicleEquipment->dongkrak ? 'Ada' : 'Tidak' }});</span><br>
+                        <span class="accessories-item">Kunci Roda &nbsp;&nbsp; ({{ $handover->vehicle->vehicleEquipment->kunci_roda ? 'Ada' : 'Tidak' }});</span>
+                        <span class="accessories-item">Kunci Serep &nbsp;&nbsp; ({{ $handover->vehicle->vehicleEquipment->kunci_serep ? 'Ada' : 'Tidak' }});</span>
                     </div>
                 </div>
 
@@ -334,18 +416,18 @@
                 </div>
 
                 <div class="city-date">
-                    Palembang, <span class="dots" style="width: 100px;">&nbsp;</span>
+                    Palembang, {{ \Carbon\Carbon::parse($handover->handover_date)->format('d F Y') }}
                 </div>
 
                 <div class="signature-section">
                     <div class="signature-row">
                         <div class="signature-col">
                             <div class="signature-title">Yang menyerahkan,</div>
-                            <div>(<span class="dots" style="width: 120px;">&nbsp;</span>)</div>
+                            <div>( {{ $handover->transferee }} )</div>
                         </div>
                         <div class="signature-col">
                             <div class="signature-title">Yang menerima,</div>
-                            <div>(<span class="dots" style="width: 120px;">&nbsp;</span>)</div>
+                            <div>( {{ $handover->receiving_party }} )</div>
                         </div>
                     </div>
                 </div>

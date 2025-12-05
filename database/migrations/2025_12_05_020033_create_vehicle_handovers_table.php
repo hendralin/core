@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('handover_number')->unique(); // Nomor Serah Terima Kendaraan
             $table->date('handover_date'); // Tanggal Serah Terima Kendaraan
             $table->string('handover_from'); // Dari
+            $table->string('handover_from_address'); // Alamat Dari
             $table->string('handover_to'); // Ke
+            $table->string('handover_to_address'); // Alamat Ke
             $table->string('transferee'); // Yang menyerahkan
             $table->string('receiving_party'); // Yang menerima
             $table->string('handover_file')->nullable(); // File tanda terima yang telah di sign kemudian diupload ke server
