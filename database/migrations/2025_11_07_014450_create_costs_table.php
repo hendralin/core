@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('costs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vehicle_id')->constrained();
+            $table->foreignId('vehicle_id')->nullable()->constrained();
             $table->date('cost_date');
             $table->foreignId('vendor_id')->nullable()->constrained();
             $table->string('description');

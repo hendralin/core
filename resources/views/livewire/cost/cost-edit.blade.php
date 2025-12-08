@@ -39,12 +39,12 @@
                                 <flux:select.option value="service_parts">Service & Parts</flux:select.option>
                                 <flux:select.option value="other_cost">Biaya Lainnya</flux:select.option>
                             </flux:select>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Apa tipe pembukuan modal yang ingin diubah?</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Apa tipe pembukuan modal yang ingin diubah?</p>
                         </div>
 
                         <div class="space-y-1">
                             <flux:input wire:model="cost_date" type="date" label="Tanggal Pembukuan Modal" class="w-full" />
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Kapan pembukuan modal dilakukan?</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Kapan pembukuan modal dilakukan?</p>
                         </div>
 
                         <div class="space-y-1">
@@ -66,7 +66,7 @@
                                     </flux:select.option>
                                 @endforeach
                             </flux:select>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Pilih kendaraan untuk pembukuan modal ini</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih kendaraan untuk pembukuan modal ini</p>
                         </div>
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                                     </flux:select.option>
                                 @endforeach
                             </flux:select>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Vendor mana yang menyediakan jasa/barang?</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Vendor mana yang menyediakan jasa/barang?</p>
                         </div>
                         @endif
 
@@ -116,7 +116,7 @@
                                 class="w-full"
                                 helper="Masukkan jumlah biaya yang dikeluarkan"
                             />
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Total biaya yang dikeluarkan</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Total biaya yang dikeluarkan</p>
                         </div>
                     </div>
 
@@ -181,7 +181,7 @@
                                 </div>
                             @else
                                 <!-- No document placeholder -->
-                                <div class="w-24 h-24 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center">
+                                <div class="w-24 h-24 border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-lg flex items-center justify-center">
                                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
@@ -198,7 +198,7 @@
                                 placeholder="Choose file..."
                                 accept=".pdf,.jpg,.jpeg,.png"
                             />
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">
                                 Format yang didukung: PDF, JPG, JPEG, PNG. Maksimal ukuran: 5MB
                             </p>
                             @error('document')
@@ -209,7 +209,7 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-zinc-700">
                     <flux:button variant="ghost" href="{{ route('costs.index') }}" wire:navigate>
                         <flux:icon.arrow-left class="w-4 h-4 mr-2" />
                         Batal

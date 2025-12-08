@@ -68,6 +68,11 @@ use App\Livewire\BackupRestore\BackupRestoreIndex;
 use App\Livewire\PaymentReceipt\PaymentReceiptAudit;
 use App\Livewire\LoanCalculation\LoanCalculationAudit;
 use App\Livewire\PurchasePayment\PurchasePaymentAudit;
+use App\Livewire\CashDisbursement\CashDisbursementEdit;
+use App\Livewire\CashDisbursement\CashDisbursementShow;
+use App\Livewire\CashDisbursement\CashDisbursementAudit;
+use App\Livewire\CashDisbursement\CashDisbursementIndex;
+use App\Livewire\CashDisbursement\CashDisbursementCreate;
 use App\Livewire\CertificateReceipt\CertificateReceiptAudit;
 
 // License expired page (accessible even when license is expired)
@@ -176,6 +181,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('costs/create', CostCreate::class)->name('costs.create')->middleware(['permission:cost.create']);
     Route::get('costs/{cost}/edit', CostEdit::class)->name('costs.edit')->middleware(['permission:cost.edit']);
     Route::get('costs/{cost}', CostShow::class)->name('costs.show')->middleware(['permission:cost.view']);
+
+    Route::get('cash-disbursements', CashDisbursementIndex::class)->name('cash-disbursements.index')->middleware(['permission:cashdisbursement.view|cashdisbursement.create|cashdisbursement.edit|cashdisbursement.delete']);
+    Route::get('cash-disbursements/audit', CashDisbursementAudit::class)->name('cash-disbursements.audit')->middleware(['permission:cashdisbursement.audit']);
+    Route::get('cash-disbursements/create', CashDisbursementCreate::class)->name('cash-disbursements.create')->middleware(['permission:cashdisbursement.create']);
+    Route::get('cash-disbursements/{cost}/edit', CashDisbursementEdit::class)->name('cash-disbursements.edit')->middleware(['permission:cashdisbursement.edit']);
+    Route::get('cash-disbursements/{cost}', CashDisbursementShow::class)->name('cash-disbursements.show')->middleware(['permission:cashdisbursement.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);

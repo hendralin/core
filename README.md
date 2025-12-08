@@ -2,7 +2,7 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.17.0** - File Upload Management System
+**Version 1.18.0** - Cash Disbursement Management System
 
 ## ✨ Fitur Utama
 
@@ -140,6 +140,21 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Status Tracking**: Pending/Approved/Rejected dengan workflow approval
 - **Status Badges**: Visual indicator warna untuk status cost (Green=Approved, Yellow=Pending, Red=Rejected)
 - **Export Features**: Excel dan PDF dengan template yang konsisten
+
+### 💵 Sistem Cash Disbursement (Pengeluaran Kas)
+- **Cash Disbursement Management**: Sistem lengkap pencatatan pengeluaran kas perusahaan (operasional, biaya administrasi, dll)
+- **Advanced Form Features**:
+  - **Cost Type Selection**: Pilih tipe pengeluaran (Cash/Other Cost)
+  - **Auto-formatting Amount**: Format mata uang Rupiah otomatis dengan thousand separator
+  - **Document Upload**: Upload bukti pengeluaran dengan validasi file
+  - **Date Validation**: Tanggal pengeluaran tidak boleh di masa depan
+- **Complete Cash Disbursement Records**: Tanggal, tipe, deskripsi, total pengeluaran, document, status
+- **Approval Workflow**: Sistem approval pending/approved/rejected untuk cash disbursement records
+- **Audit Trail**: Activity logging lengkap untuk semua perubahan cash disbursement records
+- **Status Management**: Pending/Approved/Rejected dengan conditional actions
+- **Advanced Filtering**: Filter berdasarkan status, tipe, tanggal dengan clear filters
+- **Export Features**: Excel dan PDF dengan template yang konsisten dan filter aktif
+- **Real-time Totals**: Hitung total pengeluaran berdasarkan filter aktif
 
 ### 💎 Sistem Komisi (Commission Management)
 - **Commission Management**: Sistem lengkap manajemen komisi kendaraan (komisi penjualan dan pembelian)
@@ -315,6 +330,7 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Dashboard**: Overview bisnis dan statistik
 - **Vehicles**: Manajemen inventori kendaraan lengkap dengan CRUD + Commission Management + Loan Calculation Management + Audit Trail
 - **Costs**: Manajemen biaya kendaraan (service, spare parts, maintenance) + Approval Workflow + Audit Trail
+- **Cash Disbursements**: Manajemen pengeluaran kas perusahaan + Approval Workflow + Audit Trail
 - **Commissions**: Audit trail lengkap untuk semua aktivitas komisi kendaraan + Vehicle Filtering
 - **Loan Calculations**: Audit trail lengkap untuk semua aktivitas perhitungan kredit kendaraan + Vehicle Filtering
 - **Purchase Payments**: Audit trail lengkap untuk semua aktivitas pembayaran pembelian kendaraan + Vehicle Filtering
@@ -563,6 +579,39 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Approved**: Record telah disetujui, tidak bisa di-edit lagi
 - **Rejected**: Record ditolak, masih bisa di-edit untuk diperbaiki
 
+### 💵 Cara Menggunakan Cash Disbursement Module
+1. **Akses Cash Disbursements**: Klik menu "Pengeluaran Kas" di sidebar
+2. **View All Records**: Lihat daftar pengeluaran kas dengan pagination, search, dan filtering
+3. **Add New Cash Disbursement**: Klik "Tambah" untuk menambah record pengeluaran baru
+   - **Cost Type**: Otomatis diset ke "Other Cost" (tidak perlu dipilih)
+   - **Date**: Tanggal pengeluaran dengan validasi (tidak boleh di masa depan)
+   - **Description**: Deskripsi detail pengeluaran (required)
+   - **Total Price**: Jumlah pengeluaran (auto-format Rupiah)
+   - **Document**: Upload bukti pengeluaran (PDF, JPG, PNG, max 5MB, optional)
+4. **Edit Cash Disbursement**: Klik icon edit untuk mengubah data (hanya status "Pending")
+5. **View Details**: Klik icon eye untuk melihat detail lengkap cash disbursement
+6. **Approval Actions**: Gunakan tombol Approve/Reject untuk mengubah status record
+7. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan lengkap
+8. **Export Data**: Gunakan tombol Excel/PDF untuk export data dengan filter aktif
+9. **Advanced Filtering**:
+   - **Status Filter**: Filter berdasarkan Pending/Approved/Rejected
+   - **Date Filter**: Filter berdasarkan periode tanggal
+   - **Clear Filters**: Reset semua filter dengan satu klik
+
+### Form Fields Cash Disbursements
+- **Cost Type**: Otomatis "Other Cost" (hidden field)
+- **Cost Date**: Tanggal pengeluaran (required, tidak boleh di masa depan)
+- **Description**: Deskripsi detail pengeluaran (required, max 255 characters)
+- **Total Price**: Jumlah pengeluaran (required, auto-format Rupiah)
+- **Document**: Upload file bukti pengeluaran (optional, PDF/JPG/PNG, max 5MB)
+- **Status**: Pending/Approved/Rejected (managed by approval workflow)
+- **Created By**: User yang membuat record (auto-fill)
+
+### Approval Workflow Cash Disbursements
+- **Pending**: Status default untuk record baru, bisa di-edit dan dihapus
+- **Approved**: Record telah disetujui, tidak bisa di-edit lagi
+- **Rejected**: Record ditolak, masih bisa di-edit untuk diperbaiki
+
 ### 💎 Cara Menggunakan Commission Module
 1. **Akses Commissions**: Klik menu "Commissions" di sidebar untuk melihat audit trail
 2. **View Commission Tables**: Di halaman vehicle detail, lihat tabel komisi penjualan dan pembelian
@@ -714,6 +763,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicle-registration-certificate-receipt.*` - Manajemen certificate receipt records (view, create, edit, delete, audit, print)
 - `vehicle-handover.*` - Manajemen handover records (view, create, edit, delete, audit, print)
 - `cost.*` - Manajemen cost records (view, create, edit, delete)
+- `cashdisbursement.*` - Manajemen cash disbursement records (view, create, edit, delete)
 - `vehiclemodel.*` - Manajemen vehicle models (view, create, edit, delete)
 - `category.*` - Manajemen categories (view, create, edit, delete)
 - `type.*` - Manajemen types (view, create, edit, delete)
@@ -760,7 +810,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `certificate_receipts` - Data tanda terima BPKB kendaraan dengan auto-numbering dan comprehensive document tracking
 - `loan_calculations` - Data perhitungan kredit kendaraan dengan relasi ke vehicles dan leasings
 - `vehicle_handovers` - Data berita acara serah terima kendaraan dengan auto-numbering dan file upload support
-- `costs` - Data biaya kendaraan dengan approval workflow
+- `costs` - Data biaya kendaraan dan pengeluaran kas dengan approval workflow (cost_type: service_parts/other_cost/cash)
 - `brands` - Merek mobil (31+ brand Indonesia)
 - `vendors` - Vendor/supplier kendaraan (25+ vendor Indonesia)
 - `salesmen` - Data salesman dengan auto-create user account (relasi ke users)
@@ -795,6 +845,13 @@ PUT    /api/costs/{id}        - Update cost record
 DELETE /api/costs/{id}        - Hapus cost record
 POST   /api/costs/{id}/approve - Approve cost record
 POST   /api/costs/{id}/reject  - Reject cost record
+GET    /api/cash-disbursements - List semua cash disbursement records
+GET    /api/cash-disbursements/{id} - Detail cash disbursement record tertentu
+POST   /api/cash-disbursements - Tambah cash disbursement record baru
+PUT    /api/cash-disbursements/{id} - Update cash disbursement record
+DELETE /api/cash-disbursements/{id} - Hapus cash disbursement record
+POST   /api/cash-disbursements/{id}/approve - Approve cash disbursement record
+POST   /api/cash-disbursements/{id}/reject - Reject cash disbursement record
 POST   /api/vendors            - Tambah vendor baru
 PUT    /api/vendors/{id}       - Update vendor
 DELETE /api/vendors/{id}       - Hapus vendor
@@ -900,6 +957,24 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.18.0 - Cash Disbursement Management System
+- ✅ **Complete Cash Disbursement Module**: Sistem lengkap manajemen pengeluaran kas perusahaan
+- ✅ **Cash Disbursement CRUD Operations**: Create, Read, Update, Delete pengeluaran kas dengan interface lengkap
+- ✅ **Cost Type Management**: Implementasi cost_type 'other_cost' untuk pengeluaran kas (vehicle_id NULL, vendor_id NULL)
+- ✅ **Advanced Form Interface**: Modal form dengan validasi lengkap, error handling, dan auto-formatting
+- ✅ **Cost Separation**: Pemisahan data cost kendaraan vs pengeluaran kas berdasarkan vehicle_id dan vendor_id
+- ✅ **Cash Disbursement Audit Trail**: Dedicated audit page dengan filtering, search, dan statistics dashboard
+- ✅ **Advanced Audit Filtering**: Search by description/user, date filtering, pagination dengan 10-100 items per page
+- ✅ **Audit Trail Statistics**: Real-time dashboard dengan total activities, today count, created/updated/deleted counters
+- ✅ **Permission-based Access**: cashdisbursement.* permissions untuk kontrol akses CRUD operations dan audit
+- ✅ **Database Integration**: Foreign key constraints dengan vehicle_id NULL, vendor_id NULL untuk cash disbursements
+- ✅ **Export Features**: Excel dan PDF dengan template yang konsisten dan filter support
+- ✅ **Real-time Updates**: Auto-refresh data setelah create/update/delete operations dengan proper validation
+- ✅ **UI Integration**: Seamless integration dengan sidebar navigation dan permission system
+- ✅ **Form Validation**: Comprehensive validation dengan cost_type hardcoded, date validation, amount formatting
+- ✅ **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan cash disbursements
+- ✅ **Module Separation**: Cost Index menampilkan data vehicle_id NOT NULL, Cash Disbursement menampilkan vehicle_id NULL
 
 ### v1.17.0 - File Upload Management System
 - ✅ **Complete Handover File Upload System**: Sistem upload berkas berita acara serah terima kendaraan

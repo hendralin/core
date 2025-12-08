@@ -139,6 +139,13 @@
                             <flux:navlist.item icon="beaker" :href="route('costs.index')" :current="request()->routeIs('costs.*')" wire:navigate>{{ __('Pembukuan Modal') }}</flux:navlist.item>
                         @endif
 
+                        @if (auth()->user()->can('cashdisbursement.view') ||
+                        auth()->user()->can('cashdisbursement.create') ||
+                        auth()->user()->can('cashdisbursement.edit') ||
+                        auth()->user()->can('cashdisbursement.delete'))
+                            <flux:navlist.item icon="credit-card" :href="route('cash-disbursements.index')" :current="request()->routeIs('cash-disbursements.*')" wire:navigate>{{ __('Pengeluaran Kas') }}</flux:navlist.item>
+                        @endif
+
                     </flux:navlist.group>
                 @endif
 

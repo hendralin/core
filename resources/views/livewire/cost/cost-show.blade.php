@@ -163,12 +163,12 @@
                         @if($cost->status === 'pending')
                             <div class="space-y-2">
                                 @can('cost.approve')
-                                    <flux:button variant="primary" color="blue" size="sm" icon="check" wire:click="approve" tooltip="Approve" class="w-full" wire:confirm="Are you sure you want to approve this cost record?">
+                                    <flux:button variant="primary" size="sm" icon="check" wire:click="approve" tooltip="Approve" class="w-full cursor-pointer" wire:confirm="Are you sure you want to approve this cost record?">
                                         Approve
                                     </flux:button>
                                 @endcan
                                 @can('cost.reject')
-                                    <flux:button variant="danger" color="red" size="sm" icon="x-mark" wire:click="reject" tooltip="Reject" class="w-full mt-2" wire:confirm="Are you sure you want to reject this cost record?">
+                                    <flux:button variant="danger" size="sm" icon="x-mark" wire:click="reject" tooltip="Reject" class="w-full mt-2 cursor-pointer" wire:confirm="Are you sure you want to reject this cost record?">
                                         Reject
                                     </flux:button>
                                 @endcan
