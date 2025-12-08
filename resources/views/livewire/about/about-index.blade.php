@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About WOTO v1.19.0') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About WOTO v1.20.0') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -69,6 +69,10 @@
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💎 Cash Injects</flux:text>
                             <flux:text class="text-lg font-semibold text-violet-600 dark:text-violet-400">{{ number_format($stats['cash_injects_count'] ?? 0) }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💰 Cash Reports</flux:text>
+                            <flux:text class="text-lg font-semibold text-slate-600 dark:text-slate-400">{{ number_format($stats['cash_reports_count'] ?? 0) }}</flux:text>
                         </div>
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">👥 Total Users</flux:text>
@@ -247,6 +251,14 @@
                     <div class="flex items-start gap-3">
                         <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
                         <div>
+                            <flux:text class="font-medium">💰 Advanced Cash Report & Analytics System</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Sistem pelaporan arus kas lengkap dengan analytics dashboard, cost type statistics, opening balance, running balance, professional report layout, dan export Excel/PDF</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                        <div>
                             <flux:text class="font-medium">Manajemen Brand</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Database {{ $stats['brands_count'] }} merek mobil populer di Indonesia</flux:text>
                         </div>
@@ -394,7 +406,7 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.19.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem pengeluaran kas perusahaan dengan approval workflow, sistem inject kas perusahaan dengan auto approval, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan file upload, sistem berita acara serah terima kendaraan dengan auto-numbering dan file upload, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, handover management, file upload management system, salesmen management dengan auto-create user account, vehicle completeness checklist, database transactions untuk data consistency, dan cash inject management dengan card-based audit UI dan bahasa Indonesia support.
+                            <strong>WOTO v1.20.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem pengeluaran kas perusahaan dengan approval workflow, sistem inject kas perusahaan dengan auto approval, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan file upload, sistem berita acara serah terima kendaraan dengan auto-numbering dan file upload, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, handover management, file upload management system, salesmen management dengan auto-create user account, vehicle completeness checklist, database transactions untuk data consistency, cash inject management dengan card-based audit UI dan bahasa Indonesia support, serta advanced cash report & analytics system dengan cost type statistics, opening balance, running balance, dan professional report layout.
                         </flux:text>
                     </div>
 
@@ -407,6 +419,7 @@
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Costs module dengan approval workflow, auto-formatting price (150.000), dan vendor integration</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💵 Cash Disbursement module dengan approval workflow, auto-formatting amount, dan audit trail lengkap untuk pengeluaran kas perusahaan</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Cash Inject module dengan auto approval, auto-formatting amount, card-based audit UI, bahasa Indonesia support, dan filter tanggal untuk inject kas perusahaan</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Advanced Cash Report & Analytics System dengan cost type statistics, opening balance, running balance, professional report layout, dan export Excel/PDF</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Commission module lengkap dengan sales/purchase types, modal forms, audit trail, dan vehicle filtering</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Loan Calculation module dengan leasing integration, audit trail, sorting by leasing name, dan CRUD operations</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💳 Purchase Payment dengan multiple file upload, auto-numbering format 0001/PP/WOTO/XII/2025, dan purchase price validation</flux:text>
@@ -523,10 +536,35 @@
                 </flux:heading>
 
                 <div class="space-y-4">
+                    <div class="border-l-4 border-teal-500 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <flux:text class="font-semibold text-teal-600 dark:text-teal-400">v1.20.0 - Advanced Cash Report & Analytics System</flux:text>
+                            <span class="px-2 py-1 bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 text-xs rounded-full">Latest</span>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
+                            <flux:text>• ✅ Complete Cash Report Module: Sistem lengkap pelaporan arus kas dengan analytics dashboard</flux:text>
+                            <flux:text>• ✅ Cost Type Analytics Dashboard: 4 stat cards untuk Service Parts, Showroom, Other Cost, dan Cash In dengan icon dan warna yang berbeda</flux:text>
+                            <flux:text>• ✅ Advanced Cash Flow Analysis: Debet (pengeluaran), Kredit (pemasukan), Balance (saldo berjalan) dengan perhitungan akurat</flux:text>
+                            <flux:text>• ✅ Opening Balance Integration: Saldo awal sebelum periode pelaporan dengan perhitungan kumulatif</flux:text>
+                            <flux:text>• ✅ Running Balance Calculation: Perhitungan saldo berjalan per transaksi dengan logika yang tepat</flux:text>
+                            <flux:text>• ✅ Transaction Details Enhancement: Integrasi nomor polisi kendaraan (police_number) dan nama vendor dalam deskripsi</flux:text>
+                            <flux:text>• ✅ Professional Report Layout: Opening balance row (hanya di halaman 1), color-coded balances (hijau/merah), responsive design</flux:text>
+                            <flux:text>• ✅ Advanced Export Features: Excel dan PDF dengan template profesional, opening balance integration, dan detail transaksi lengkap</flux:text>
+                            <flux:text>• ✅ Real-time Statistics Dashboard: 4 stat cards dengan metrics real-time (total amount, transaction count, active indicators)</flux:text>
+                            <flux:text>• ✅ Pagination-aware Opening Balance: Opening balance konsisten di semua halaman dengan perhitungan running balance yang akurat</flux:text>
+                            <flux:text>• ✅ Audit Trail Integration: Activity logging lengkap untuk semua operasi cash report</flux:text>
+                            <flux:text>• ✅ Permission-based Access: cash-report.view permission untuk kontrol akses laporan kas</flux:text>
+                            <flux:text>• ✅ UI/UX Excellence: Interface modern dengan hover effects, smooth transitions, dan visual hierarchy yang jelas</flux:text>
+                            <flux:text>• ✅ Responsive Design: Grid layout 4 columns desktop → 2 columns tablet → 1 column mobile</flux:text>
+                            <flux:text>• ✅ Database Optimization: Query optimization dengan proper indexing dan relationship loading</flux:text>
+                            <flux:text>• ✅ Error Handling: Comprehensive error handling untuk semua edge cases dan validation</flux:text>
+                            <flux:text>• ✅ Bahasa Indonesia Support: Semua label, pesan, dan interface menggunakan bahasa Indonesia yang konsisten</flux:text>
+                        </div>
+                    </div>
+
                     <div class="border-l-4 border-purple-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
                             <flux:text class="font-semibold text-purple-600 dark:text-purple-400">v1.19.0 - Cash Inject Management System</flux:text>
-                            <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
                             <flux:text>• ✅ Complete Cash Inject Module: Sistem lengkap manajemen inject kas perusahaan</flux:text>

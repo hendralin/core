@@ -160,6 +160,9 @@ class PermissionSeeder extends Seeder
             'cash-inject.edit',
             'cash-inject.delete',
             'cash-inject.audit',
+
+            // CASH REPORT
+            'cash-report.view',
         ];
 
         foreach ($permissions as $key => $value) {

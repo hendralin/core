@@ -2,7 +2,7 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.19.0** - Cash Inject Management System
+**Version 1.20.0** - Advanced Cash Report & Analytics System
 
 ## ✨ Fitur Utama
 
@@ -156,6 +156,39 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Export Features**: Excel dan PDF dengan template yang konsisten dan filter aktif
 - **Real-time Totals**: Hitung total inject berdasarkan filter aktif
 
+### 💰 Sistem Laporan Kas (Cash Report)
+- **Advanced Cash Report System**: Sistem lengkap pelaporan arus kas perusahaan dengan analytics dashboard
+- **Cost Type Analytics Dashboard**: Stat cards untuk setiap tipe biaya (Service Parts, Showroom, Other Cost, Cash In)
+  - **Service Parts Card**: Tracking biaya service dan spare parts dengan icon wrench-screwdriver
+  - **Showroom Card**: Monitoring biaya operasional showroom dengan icon building-storefront
+  - **Other Cost Card**: Analisis biaya lainnya dengan icon receipt-percent
+  - **Cash In Card**: Tracking pemasukan kas dengan icon banknotes dan currency-dollar
+- **Comprehensive Cash Flow Analysis**: Debet (pengeluaran), Kredit (pemasukan), Balance (saldo berjalan)
+  - **Opening Balance**: Saldo awal sebelum periode pelaporan
+  - **Running Balance**: Perhitungan saldo kumulatif per transaksi
+  - **Net Balance Calculation**: Total pengeluaran dikurangi total pemasukan
+- **Advanced Transaction Details**: Informasi lengkap untuk setiap transaksi
+  - **Vehicle Integration**: Nomor polisi kendaraan (police_number) untuk transaksi terkait kendaraan
+  - **Vendor Integration**: Nama vendor/supplier untuk transaksi pembelian
+  - **Cost Type Classification**: Kategori biaya (service_parts, showroom, other_cost, cash)
+  - **Date-based Filtering**: Filter berdasarkan periode tanggal dengan opening balance calculation
+- **Professional Report Layout**: Design laporan yang rapi dengan visual hierarchy
+  - **Opening Balance Row**: Baris khusus untuk saldo awal (hanya di halaman 1)
+  - **Color-coded Balance**: Hijau untuk positif, merah untuk negatif
+  - **Responsive Table**: Tabel yang responsive dengan pagination
+- **Advanced Export Features**: Export Excel dan PDF dengan template profesional
+  - **Excel Export**: Template Excel dengan formatting yang konsisten
+  - **PDF Export**: Template PDF landscape dengan layout yang rapi
+  - **Opening Balance Integration**: Opening balance tercantum di export
+  - **Transaction Details**: Semua informasi vendor dan vehicle disertakan
+- **Real-time Statistics**: Dashboard metrics yang update secara real-time
+  - **Transaction Counts**: Jumlah transaksi per kategori
+  - **Total Amounts**: Total nominal per tipe biaya
+  - **Active Period Indicator**: Visual indicator untuk transaksi aktif
+- **Audit Trail Integration**: Activity logging lengkap untuk semua operasi laporan
+- **Permission-based Access**: cash-report.view permission untuk kontrol akses
+- **UI/UX Excellence**: Interface modern dengan hover effects dan smooth transitions
+
 ### 💵 Sistem Cash Disbursement (Pengeluaran Kas)
 - **Cash Disbursement Management**: Sistem lengkap pencatatan pengeluaran kas perusahaan (operasional, biaya administrasi, dll)
 - **Advanced Form Features**:
@@ -214,6 +247,13 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Responsive Grid Layout**: 4 columns desktop → 2 columns tablet → 1 column mobile
 - **Transition Optimization**: Fixed flickering issues dengan transition-shadow dan transition-transform
 - **Business Intelligence**: Comprehensive operational overview untuk decision making
+- **Advanced Cash Report System v1.20.0**: Sistem pelaporan arus kas lengkap dengan analytics dashboard
+  - **Cost Type Analytics Cards**: 4 stat cards untuk Service Parts, Showroom, Other Cost, dan Cash In
+  - **Cash Flow Analysis**: Debet (pengeluaran), Kredit (pemasukan), Balance (saldo berjalan)
+  - **Opening Balance Integration**: Saldo awal sebelum periode pelaporan
+  - **Running Balance Calculation**: Perhitungan saldo kumulatif per transaksi
+  - **Transaction Details Enhancement**: Integrasi nomor polisi kendaraan dan nama vendor
+  - **Professional Report Layout**: Opening balance row, color-coded balances, responsive design
 - **Export Data**: Export laporan ke Excel dan PDF dengan template yang konsisten
 - **Audit Trail**: Riwayat lengkap semua perubahan data (Brands, Vendors, Categories, Types, Vehicles, Costs, dll)
 - **Activity Logging**: Tracking detail perubahan dengan before/after values
@@ -245,6 +285,7 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Indonesian Text Conversion**: Custom terbilang helper function untuk mata uang Rupiah
 - **Receipt Generation**: Sistem generate kwitansi PDF dengan nomor otomatis dan data perusahaan dinamis
 - **File Upload Management**: Advanced file upload system dengan multiple file support, auto-cleanup, dan type validation
+- **Cash Flow Analytics**: Advanced cash report system dengan opening balance, running balance, dan cost type analytics
 - **Data Seeding**: Laravel Seeders untuk data master (Brands, Types, Vehicles, Companies)
 
 ## 📋 Prasyarat Sistem
@@ -347,6 +388,7 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Costs**: Manajemen biaya kendaraan (service, spare parts, maintenance) + Approval Workflow + Audit Trail
 - **Cash Inject**: Manajemen inject kas perusahaan (setoran, pemasukan) + Auto Approval + Audit Trail
 - **Cash Disbursements**: Manajemen pengeluaran kas perusahaan + Approval Workflow + Audit Trail
+- **Cash Report**: Laporan arus kas lengkap dengan analytics dashboard, stat cards, dan opening balance
 - **Commissions**: Audit trail lengkap untuk semua aktivitas komisi kendaraan + Vehicle Filtering
 - **Loan Calculations**: Audit trail lengkap untuk semua aktivitas perhitungan kredit kendaraan + Vehicle Filtering
 - **Purchase Payments**: Audit trail lengkap untuk semua aktivitas pembayaran pembelian kendaraan + Vehicle Filtering
@@ -627,6 +669,25 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Edit Anytime**: Record bisa di-edit kapan saja tanpa batasan status
 - **Delete Anytime**: Record bisa dihapus kapan saja tanpa batasan status
 
+### 💰 Cara Menggunakan Cash Report Module
+1. **Akses Cash Report**: Klik menu "Cash Report" di sidebar untuk melihat laporan arus kas
+2. **Analytics Dashboard**: Lihat 4 stat cards di bagian atas untuk overview setiap cost type:
+   - **Service Parts**: Biaya service dan spare parts
+   - **Showroom**: Biaya operasional showroom
+   - **Other Cost**: Biaya lainnya
+   - **Cash In**: Pemasukan kas
+3. **Filter by Date**: Gunakan filter tanggal From/To untuk melihat laporan periode tertentu
+4. **Opening Balance**: Baris pertama menunjukkan saldo awal sebelum periode yang dipilih
+5. **Transaction Details**: Setiap baris menampilkan:
+   - **Date**: Tanggal transaksi
+   - **Description**: Deskripsi + nomor polisi kendaraan (jika ada) + nama vendor (jika ada)
+   - **Debet**: Pengeluaran (untuk cost_type selain cash)
+   - **Kredit**: Pemasukan (untuk cost_type cash)
+   - **Balance**: Saldo berjalan (kumulatif)
+6. **Color Coding**: Balance hijau untuk positif, merah untuk negatif
+7. **Pagination**: Navigasi halaman dengan opening balance konsisten
+8. **Export Features**: Export ke Excel atau PDF dengan semua detail dan opening balance
+
 ### 💵 Cara Menggunakan Cash Disbursement Module
 1. **Akses Cash Disbursements**: Klik menu "Pengeluaran Kas" di sidebar
 2. **View All Records**: Lihat daftar pengeluaran kas dengan pagination, search, dan filtering
@@ -894,6 +955,8 @@ PUT    /api/costs/{id}        - Update cost record
 DELETE /api/costs/{id}        - Hapus cost record
 POST   /api/costs/{id}/approve - Approve cost record
 POST   /api/costs/{id}/reject  - Reject cost record
+GET    /api/cash-report       - List laporan kas dengan analytics dan opening balance
+GET    /api/cash-report/stats - Statistik cost type (service_parts, showroom, other_cost, cash)
 GET    /api/cash-injects - List semua cash inject records
 GET    /api/cash-injects/{id} - Detail cash inject record tertentu
 POST   /api/cash-injects - Tambah cash inject record baru
@@ -1011,6 +1074,25 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.20.0 - Advanced Cash Report & Analytics System
+- ✅ **Complete Cash Report Module**: Sistem lengkap pelaporan arus kas dengan analytics dashboard
+- ✅ **Cost Type Analytics Dashboard**: 4 stat cards untuk Service Parts, Showroom, Other Cost, dan Cash In dengan icon dan warna yang berbeda
+- ✅ **Advanced Cash Flow Analysis**: Debet (pengeluaran), Kredit (pemasukan), Balance (saldo berjalan) dengan perhitungan akurat
+- ✅ **Opening Balance Integration**: Saldo awal sebelum periode pelaporan dengan perhitungan kumulatif
+- ✅ **Running Balance Calculation**: Perhitungan saldo berjalan per transaksi dengan logika yang tepat
+- ✅ **Transaction Details Enhancement**: Integrasi nomor polisi kendaraan (police_number) dan nama vendor dalam deskripsi
+- ✅ **Professional Report Layout**: Opening balance row (hanya di halaman 1), color-coded balances (hijau/merah), responsive design
+- ✅ **Advanced Export Features**: Excel dan PDF dengan template profesional, opening balance integration, dan detail transaksi lengkap
+- ✅ **Real-time Statistics Dashboard**: 4 stat cards dengan metrics real-time (total amount, transaction count, active indicators)
+- ✅ **Pagination-aware Opening Balance**: Opening balance konsisten di semua halaman dengan perhitungan running balance yang akurat
+- ✅ **Audit Trail Integration**: Activity logging lengkap untuk semua operasi cash report
+- ✅ **Permission-based Access**: cash-report.view permission untuk kontrol akses laporan kas
+- ✅ **UI/UX Excellence**: Interface modern dengan hover effects, smooth transitions, dan visual hierarchy yang jelas
+- ✅ **Responsive Design**: Grid layout 4 columns desktop → 2 columns tablet → 1 column mobile
+- ✅ **Database Optimization**: Query optimization dengan proper indexing dan relationship loading
+- ✅ **Error Handling**: Comprehensive error handling untuk semua edge cases dan validation
+- ✅ **Bahasa Indonesia Support**: Semua label, pesan, dan interface menggunakan bahasa Indonesia yang konsisten
 
 ### v1.19.0 - Cash Inject Management System
 - ✅ **Complete Cash Inject Module**: Sistem lengkap manajemen inject kas perusahaan

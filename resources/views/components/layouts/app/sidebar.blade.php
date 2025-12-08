@@ -130,7 +130,9 @@
                     </flux:navlist.group>
                 @endif
 
-                @if (auth()->user()->can('cost.view'))
+                @if (auth()->user()->can('cost.view') ||
+                auth()->user()->can('cashdisbursement.view') ||
+                auth()->user()->can('cash-inject.view'))
                     <flux:navlist.group :heading="__('Activity')" class="grid">
                         @if (auth()->user()->can('cost.view') ||
                         auth()->user()->can('cost.create') ||
@@ -153,6 +155,14 @@
                             <flux:navlist.item icon="currency-dollar" :href="route('cash-injects.index')" :current="request()->routeIs('cash-injects.*')" wire:navigate>{{ __('Inject Kas') }}</flux:navlist.item>
                         @endif
 
+                    </flux:navlist.group>
+                @endif
+
+                @if (auth()->user()->can('cash-report.view'))
+                    <flux:navlist.group :heading="__('Report')" class="grid">
+                        @if (auth()->user()->can('cash-report.view'))
+                            <flux:navlist.item icon="document-chart-bar" :href="route('cash-report.index')" :current="request()->routeIs('cash-report.*')" wire:navigate>{{ __('Laporan Kas') }}</flux:navlist.item>
+                        @endif
                     </flux:navlist.group>
                 @endif
 

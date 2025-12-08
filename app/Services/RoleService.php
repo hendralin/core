@@ -19,6 +19,7 @@ class RoleService
         'Cost Management' => ['cost'],
         'Cash Management' => ['cashdisbursement'],
         'Cash Inject Management' => ['cash-inject'],
+        'Reports' => ['cash-report'],
     ];
     /**
      * Check if a role can be deleted
