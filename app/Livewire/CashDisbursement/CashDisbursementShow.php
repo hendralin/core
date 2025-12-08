@@ -16,8 +16,8 @@ class CashDisbursementShow extends Component
         $this->cost = $cost->load(['createdBy']);
 
         // Check if this is actually a cash disbursement
-        if (!in_array($cost->cost_type, ['cash', 'other_cost'])) {
-            abort(403, 'Record ini bukan merupakan pengeluaran kas.');
+        if (!in_array($cost->cost_type, ['showroom'])) {
+            abort(403, 'Record ini bukan merupakan pengeluaran kas showroom.');
         }
     }
 

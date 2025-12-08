@@ -146,6 +146,13 @@
                             <flux:navlist.item icon="credit-card" :href="route('cash-disbursements.index')" :current="request()->routeIs('cash-disbursements.*')" wire:navigate>{{ __('Pengeluaran Kas') }}</flux:navlist.item>
                         @endif
 
+                        @if (auth()->user()->can('cash-inject.view') ||
+                        auth()->user()->can('cash-inject.create') ||
+                        auth()->user()->can('cash-inject.edit') ||
+                        auth()->user()->can('cash-inject.delete'))
+                            <flux:navlist.item icon="currency-dollar" :href="route('cash-injects.index')" :current="request()->routeIs('cash-injects.*')" wire:navigate>{{ __('Inject Kas') }}</flux:navlist.item>
+                        @endif
+
                     </flux:navlist.group>
                 @endif
 

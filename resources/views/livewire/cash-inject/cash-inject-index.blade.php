@@ -1,7 +1,7 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('Pengeluaran Kas') }}</flux:heading>
-        <flux:subheading size="lg" class="mb-6">{{ __('Kelola pengeluaran kas perusahaan') }}</flux:subheading>
+        <flux:heading size="xl" level="1">{{ __('Inject Kas') }}</flux:heading>
+        <flux:subheading size="lg" class="mb-6">{{ __('Kelola inject kas perusahaan') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
 
@@ -20,15 +20,9 @@
             <flux:input type="date" wire:model.live="dateFrom" label="From" size="sm" />
             <flux:input type="date" wire:model.live="dateTo" label="To" size="sm" />
 
-            <!-- Status Filter -->
-            <flux:select wire:model.live="statusFilter" label="Status" size="sm" class="w-full">
-                @foreach($this->statusOptions as $value => $label)
-                    <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
-                @endforeach
-            </flux:select>
 
             <!-- Clear Filters Button -->
-            @if($statusFilter || $dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d'))
+            @if($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d'))
             <div class="space-y-2 flex flex-col justify-end">
                 <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full cursor-pointer">
                     Clear Filter
@@ -43,14 +37,14 @@
         <div class="flex flex-col lg:flex-row gap-3">
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
-                @can('cashdisbursement.create')
-                    <flux:button variant="primary" size="sm" href="{{ route('cash-disbursements.create') }}" wire:navigate icon="plus" class="w-full sm:w-auto" tooltip="Tambah Pengeluaran Kas">Tambah</flux:button>
+                @can('cash-inject.create')
+                    <flux:button variant="primary" size="sm" href="{{ route('cash-injects.create') }}" wire:navigate icon="plus" class="w-full sm:w-auto" tooltip="Tambah Inject Kas">Tambah</flux:button>
                 @endcan
 
                 <!-- Button Actions -->
                 <div class="flex gap-1">
-                    @can('cashdisbursement.audit')
-                        <flux:button variant="ghost" size="sm" href="{{ route('cash-disbursements.audit') }}" wire:navigate icon="document-text" class="w-full sm:w-auto" tooltip="Audit Trail">Audit</flux:button>
+                    @can('cash-inject.audit')
+                        <flux:button variant="ghost" size="sm" href="{{ route('cash-injects.audit') }}" wire:navigate icon="document-text" class="w-full sm:w-auto" tooltip="Audit Trail">Audit</flux:button>
                     @endcan
                     <flux:button variant="ghost" size="sm" wire:click="exportExcel" icon="document-arrow-down" tooltip="Export to Excel" class="flex-1 sm:flex-none cursor-pointer">
                         <span class="hidden sm:inline">Excel</span>
@@ -84,7 +78,7 @@
         <flux:spacer class="hidden md:inline" />
         <div class="flex items-center">
             <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300 mr-2">Search:</label>
-            <flux:input wire:model.live.debounce.500ms="search" placeholder="Cari pengeluaran kas..." clearable />
+            <flux:input wire:model.live.debounce.500ms="search" placeholder="Cari inject kas..." clearable />
         </div>
     </div>
 
@@ -115,16 +109,6 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-4 py-3 w-32">
-                        <div class="flex items-center justify-center cursor-pointer @if ($sortField == 'status') {{ $sortDirection }} @endif" wire:click="sortBy('status')">
-                            Status
-                            @if ($sortField == 'status' && $sortDirection == 'asc')
-                                <flux:icon.chevron-up class="ml-2 size-4" />
-                            @elseif ($sortField == 'status' && $sortDirection == 'desc')
-                                <flux:icon.chevron-down class="ml-2 size-4" />
-                            @endif
-                        </div>
-                    </th>
                     <th scope="col" class="px-4 py-3 w-1/12">Actions</th>
                 </tr>
             </thead>
@@ -136,65 +120,36 @@
                             <td class="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</td>
                             <td class="px-4 py-2 whitespace-nowrap lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs truncate" title="{{ $cost->description }}">{{ $cost->description }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-gray-900 dark:text-white">Rp {{ number_format($cost->total_price, 0) }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-center w-32">
-                                @if($cost->status === 'approved')
-                                    <flux:badge size="sm" color="green">Approved</flux:badge>
-                                @elseif($cost->status === 'rejected')
-                                    <flux:badge size="sm" color="red">Rejected</flux:badge>
-                                @else
-                                    <flux:badge size="sm" color="yellow">Pending</flux:badge>
-                                @endif
-                            </td>
                             <td class="px-4 py-2 whitespace-nowrap">
-                                @can('cashdisbursement.view')
-                                    <flux:button variant="ghost" size="xs" square href="{{ route('cash-disbursements.show', $cost) }}" wire:navigate tooltip="View Details">
+                                @can('cash-inject.view')
+                                    <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.show', $cost) }}" wire:navigate tooltip="View Details">
                                         <flux:icon.eye variant="mini" class="text-green-500 dark:text-green-300" />
                                     </flux:button>
                                 @endcan
 
-                                @if($cost->status === 'pending')
-                                    @can('cashdisbursement.edit')
-                                        <flux:button variant="ghost" size="xs" square href="{{ route('cash-disbursements.edit', $cost) }}" wire:navigate tooltip="Edit">
-                                            <flux:icon.pencil-square variant="mini" class="text-indigo-500 dark:text-indigo-300" />
-                                        </flux:button>
-                                    @endcan
+                                @can('cash-inject.edit')
+                                    <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.edit', $cost) }}" wire:navigate tooltip="Edit">
+                                        <flux:icon.pencil-square variant="mini" class="text-indigo-500 dark:text-indigo-300" />
+                                    </flux:button>
+                                @endcan
 
-                                    @can('cashdisbursement.approve')
-                                        <flux:modal.trigger name="approve-cost">
-                                            <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setCostToApprove({{ $cost->id }})" tooltip="Approve">
-                                                <flux:icon.check variant="mini" class="text-green-500 dark:text-green-300" />
-                                            </flux:button>
-                                        </flux:modal.trigger>
-                                    @endcan
-
-                                    @can('cashdisbursement.reject')
-                                        <flux:modal.trigger name="reject-cost">
-                                            <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setCostToReject({{ $cost->id }})" tooltip="Reject">
-                                                <flux:icon.x-mark variant="mini" class="text-red-500 dark:text-red-300" />
-                                            </flux:button>
-                                        </flux:modal.trigger>
-                                    @endcan
-                                @endif
-
-                                @can('cashdisbursement.delete')
-                                    @if($cost->status === 'pending')
+                                @can('cash-inject.delete')
                                     <flux:modal.trigger name="delete-cost">
                                         <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setCostToDelete({{ $cost->id }})" tooltip="Delete">
                                             <flux:icon.trash variant="mini" class="text-red-500 dark:text-red-300" />
                                         </flux:button>
                                     </flux:modal.trigger>
-                                    @endif
                                 @endcan
                             </td>
                         </tr>
                     @endforeach
                 @else
                     <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 border-gray-200">
-                        <td class="px-4 py-2 text-gray-600 dark:text-zinc-300 text-center" colspan="7">
+                        <td class="px-4 py-2 text-gray-600 dark:text-zinc-300 text-center" colspan="5">
                             @if(isset($search) && !empty($search))
                                 No results found for "{{ $search }}"
                             @else
-                                Tidak ada Pengeluaran Kas yang ditemukan.
+                                Tidak ada Inject Kas yang ditemukan.
                             @endif
                         </td>
                     </tr>
@@ -208,9 +163,6 @@
                                 $activeFilters = [];
                                 if ($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')) {
                                     $activeFilters[] = 'period (' . \Carbon\Carbon::parse($dateFrom)->format('d/m/Y') . ' - ' . \Carbon\Carbon::parse($dateTo)->format('d/m/Y') . ')';
-                                }
-                                if ($statusFilter) {
-                                    $activeFilters[] = 'status (' . ucfirst($statusFilter) . ')';
                                 }
                                 if (empty($activeFilters)) {
                                     $activeFilters[] = 'current month';
@@ -228,7 +180,7 @@
                         <td class="px-4 py-3 text-right font-bold text-zinc-900 dark:text-zinc-100">
                             Rp {{ number_format($totalForFilters, 0) }}
                         </td>
-                        <td colspan="2" class="px-4 py-3"></td>
+                        <td class="px-4 py-3"></td>
                     </tr>
                 @endif
             </tbody>
@@ -240,53 +192,14 @@
         {{ $costs->links(data: ['scrollTo' => false]) }}
     </div>
 
-    <!-- Approve Modal -->
-    <flux:modal name="approve-cost" class="min-w-88">
-        <div class="space-y-6">
-            <div>
-                <flux:heading size="lg">Approve cash disbursement record?</flux:heading>
-                <flux:text class="mt-2">
-                    <p>You're about to approve this cash disbursement record.</p>
-                    <p>This will mark the record as approved and cannot be edited anymore.</p>
-                </flux:text>
-            </div>
-            <div class="flex gap-2">
-                <flux:spacer />
-                <flux:modal.close>
-                    <flux:button variant="ghost">Cancel</flux:button>
-                </flux:modal.close>
-                <flux:button wire:click="approve" variant="primary" color="blue">Approve Record</flux:button>
-            </div>
-        </div>
-    </flux:modal>
-
-    <!-- Reject Modal -->
-    <flux:modal name="reject-cost" class="min-w-88">
-        <div class="space-y-6">
-            <div>
-                <flux:heading size="lg">Reject cash disbursement record?</flux:heading>
-                <flux:text class="mt-2">
-                    <p>You're about to reject this cash disbursement record.</p>
-                    <p>This will mark the record as rejected and cannot be edited anymore.</p>
-                </flux:text>
-            </div>
-            <div class="flex gap-2">
-                <flux:spacer />
-                <flux:modal.close>
-                    <flux:button variant="ghost">Cancel</flux:button>
-                </flux:modal.close>
-                <flux:button wire:click="reject" variant="danger">Reject Record</flux:button>
-            </div>
-        </div>
-    </flux:modal>
 
     <!-- Delete Modal -->
     <flux:modal name="delete-cost" class="min-w-88">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">Delete cash disbursement record?</flux:heading>
+                <flux:heading size="lg">Delete cash inject record?</flux:heading>
                 <flux:text class="mt-2">
-                    <p>You're about to delete this cash disbursement record.</p>
+                    <p>You're about to delete this cash inject record.</p>
                     <p>This action cannot be reversed.</p>
                 </flux:text>
             </div>

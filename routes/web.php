@@ -57,8 +57,13 @@ use App\Livewire\Warehouse\WarehouseEdit;
 use App\Livewire\Warehouse\WarehouseShow;
 use App\Livewire\Warehouse\WarehouseAudit;
 use App\Livewire\Warehouse\WarehouseIndex;
+use App\Livewire\CashInject\CashInjectEdit;
+use App\Livewire\CashInject\CashInjectShow;
 use App\Livewire\Warehouse\WarehouseCreate;
+use App\Livewire\CashInject\CashInjectAudit;
+use App\Livewire\CashInject\CashInjectIndex;
 use App\Livewire\Commission\CommissionAudit;
+use App\Livewire\CashInject\CashInjectCreate;
 use App\Livewire\VehicleModel\VehicleModelEdit;
 use App\Livewire\VehicleModel\VehicleModelShow;
 use App\Livewire\VehicleModel\VehicleModelAudit;
@@ -187,6 +192,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('cash-disbursements/create', CashDisbursementCreate::class)->name('cash-disbursements.create')->middleware(['permission:cashdisbursement.create']);
     Route::get('cash-disbursements/{cost}/edit', CashDisbursementEdit::class)->name('cash-disbursements.edit')->middleware(['permission:cashdisbursement.edit']);
     Route::get('cash-disbursements/{cost}', CashDisbursementShow::class)->name('cash-disbursements.show')->middleware(['permission:cashdisbursement.view']);
+
+    Route::get('cash-injects', CashInjectIndex::class)->name('cash-injects.index')->middleware(['permission:cash-inject.view|cash-inject.create|cash-inject.edit|cash-inject.delete']);
+    Route::get('cash-injects/audit', CashInjectAudit::class)->name('cash-injects.audit')->middleware(['permission:cash-inject.audit']);
+    Route::get('cash-injects/create', CashInjectCreate::class)->name('cash-injects.create')->middleware(['permission:cash-inject.create']);
+    Route::get('cash-injects/{cost}/edit', CashInjectEdit::class)->name('cash-injects.edit')->middleware(['permission:cash-inject.edit']);
+    Route::get('cash-injects/{cost}', CashInjectShow::class)->name('cash-injects.show')->middleware(['permission:cash-inject.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);

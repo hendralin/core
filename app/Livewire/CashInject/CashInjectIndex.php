@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Livewire\CashDisbursement;
+namespace App\Livewire\CashInject;
 
 use App\Models\Cost;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\CostDisbursementExport;
+use App\Exports\CostInjectExport;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
-#[Title('Pengeluaran Kas')]
-class CashDisbursementIndex extends Component
+#[Title('Inject Kas')]
+class CashInjectIndex extends Component
 {
     use WithPagination, WithoutUrlPagination;
 
@@ -23,7 +23,6 @@ class CashDisbursementIndex extends Component
     public $sortField = 'cost_date';
     public $sortDirection = 'desc';
     public $perPage = 10;
-    public $statusFilter = '';
     public $dateFrom;
     public $dateTo;
 
@@ -35,7 +34,7 @@ class CashDisbursementIndex extends Component
 
     public function updating($field)
     {
-        if (in_array($field, ['search', 'perPage', 'statusFilter', 'dateFrom', 'dateTo'])) {
+        if (in_array($field, ['search', 'perPage', 'dateFrom', 'dateTo'])) {
             $this->resetPage();
         }
     }
@@ -60,7 +59,7 @@ class CashDisbursementIndex extends Component
     {
         try {
             if (!$this->costIdToDelete) {
-                session()->flash('error', 'Tidak ada pengeluaran kas yang dipilih untuk dihapus.');
+                session()->flash('error', 'Tidak ada inject kas yang dipilih untuk dihapus.');
                 return;
             }
 
@@ -87,82 +86,31 @@ class CashDisbursementIndex extends Component
                     ->withProperties([
                         'attributes' => $costData
                     ])
-                    ->log('deleted cash disbursement record');
+                    ->log('deleted cash inject record');
             });
 
             $this->reset(['costIdToDelete']);
 
-            session()->flash('success', 'Pengeluaran kas berhasil dihapus.');
+            session()->flash('success', 'Inject kas berhasil dihapus.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            session()->flash('error', 'Pengeluaran kas tidak ditemukan.');
+            session()->flash('error', 'Inject kas tidak ditemukan.');
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
         }
     }
 
-    public $costIdToApprove = null;
-    public $costIdToReject = null;
-
-    public function setCostToApprove($costId)
-    {
-        $this->costIdToApprove = $costId;
-    }
-
-    public function setCostToReject($costId)
-    {
-        $this->costIdToReject = $costId;
-    }
-
     public function clearFilters()
     {
-        $this->reset(['search', 'statusFilter']);
+        $this->reset(['search']);
         $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
         $this->dateTo = now()->endOfMonth()->format('Y-m-d');
         $this->resetPage();
     }
 
-    public function approve()
-    {
-        try {
-            if (!$this->costIdToApprove) {
-                session()->flash('error', 'Tidak ada pengeluaran kas yang dipilih untuk disetujui.');
-                return;
-            }
-
-            $cost = Cost::findOrFail($this->costIdToApprove);
-            $cost->update(['status' => 'approved']);
-
-            $this->reset(['costIdToApprove']);
-
-            session()->flash('success', 'Pengeluaran kas berhasil disetujui.');
-        } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
-        }
-    }
-
-    public function reject()
-    {
-        try {
-            if (!$this->costIdToReject) {
-                session()->flash('error', 'Tidak ada pengeluaran kas yang dipilih untuk ditolak.');
-                return;
-            }
-
-            $cost = Cost::findOrFail($this->costIdToReject);
-            $cost->update(['status' => 'rejected']);
-
-            $this->reset(['costIdToReject']);
-
-            session()->flash('success', 'Pengeluaran kas berhasil ditolak.');
-        } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
-        }
-    }
-
     public function render()
     {
         $costs = Cost::query()
-            ->where('cost_type', 'showroom')
+            ->where('cost_type', 'cash')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
             ->with(['createdBy'])
@@ -174,7 +122,6 @@ class CashDisbursementIndex extends Component
                         ->orWhereHas('createdBy', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
                 })
             )
-            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->orderBy($this->sortField, $this->sortDirection)
@@ -182,33 +129,32 @@ class CashDisbursementIndex extends Component
 
         // Calculate total for current filters (always show for default period)
         $totalForFilters = Cost::query()
-            ->where('cost_type', 'showroom')
+            ->where('cost_type', 'cash')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
             ->when($this->search, fn($q) => $q->where(function ($query) {
                 $query->where('description', 'like', '%' . $this->search . '%')
                     ->orWhereHas('createdBy', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
             }))
-            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->sum('total_price');
 
-        return view('livewire.cash-disbursement.cash-disbursement-index', compact('costs', 'totalForFilters'));
+        return view('livewire.cash-inject.cash-inject-index', compact('costs', 'totalForFilters'));
     }
 
     public function exportExcel()
     {
         return Excel::download(
-            new CostDisbursementExport($this->search, $this->sortField, $this->sortDirection, $this->statusFilter, null, $this->dateFrom, $this->dateTo),
-            'cash_disbursements_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
+            new CostInjectExport($this->search, $this->sortField, $this->sortDirection, null, $this->dateFrom, $this->dateTo),
+            'cash_injects_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
 
     public function exportPdf()
     {
         $costs = Cost::query()
-            ->where('cost_type', 'showroom')
+            ->where('cost_type', 'cash')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
             ->with(['createdBy'])
@@ -220,32 +166,20 @@ class CashDisbursementIndex extends Component
                         ->orWhereHas('createdBy', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
                 })
             )
-            ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->orderBy($this->sortField, $this->sortDirection)
             ->get();
 
-        $pdf = Pdf::loadView('exports.cash-disbursements-pdf', compact('costs'));
+        $pdf = Pdf::loadView('exports.cash-injects-pdf', compact('costs'));
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
-        }, 'cash_disbursements_' . now()->format('Y-m-d_H-i-s') . '.pdf');
+        }, 'cash_injects_' . now()->format('Y-m-d_H-i-s') . '.pdf');
     }
 
     public function getPerPageOptionsProperty()
     {
         return [5, 10, 25, 50];
     }
-
-    public function getStatusOptionsProperty()
-    {
-        return [
-            '' => 'Pilih Status',
-            'pending' => 'Pending',
-            'approved' => 'Approved',
-            'rejected' => 'Rejected',
-        ];
-    }
-
 }

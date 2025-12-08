@@ -44,7 +44,7 @@
             <!-- Clear Filters Button -->
             @if($statusFilter || $vehicleFilter || $vendorFilter || $dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d'))
             <div class="space-y-2 flex flex-col justify-end">
-                <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full">
+                <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full cursor-pointer">
                     Clear Filter
                 </flux:button>
             </div>
@@ -66,11 +66,11 @@
                     @can('cost.audit')
                         <flux:button variant="ghost" size="sm" href="{{ route('costs.audit') }}" wire:navigate icon="document-text" class="w-full sm:w-auto" tooltip="Audit Trail">Audit</flux:button>
                     @endcan
-                    <flux:button variant="ghost" size="sm" wire:click="exportExcel" icon="document-arrow-down" tooltip="Export to Excel" class="flex-1 sm:flex-none">
+                    <flux:button variant="ghost" size="sm" wire:click="exportExcel" icon="document-arrow-down" tooltip="Export to Excel" class="flex-1 sm:flex-none cursor-pointer">
                         <span class="hidden sm:inline">Excel</span>
                         <span class="sm:hidden">Excel</span>
                     </flux:button>
-                    <flux:button variant="ghost" size="sm" wire:click="exportPdf" icon="document-arrow-down" tooltip="Export to PDF" class="flex-1 sm:flex-none">
+                    <flux:button variant="ghost" size="sm" wire:click="exportPdf" icon="document-arrow-down" tooltip="Export to PDF" class="flex-1 sm:flex-none cursor-pointer">
                         <span class="hidden sm:inline">PDF</span>
                         <span class="sm:hidden">PDF</span>
                     </flux:button>

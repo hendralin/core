@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About WOTO v1.18.0') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About WOTO v1.19.0') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -65,6 +65,10 @@
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💵 Cash Disbursements</flux:text>
                             <flux:text class="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{{ number_format($stats['cash_disbursements_count'] ?? 0) }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💎 Cash Injects</flux:text>
+                            <flux:text class="text-lg font-semibold text-violet-600 dark:text-violet-400">{{ number_format($stats['cash_injects_count'] ?? 0) }}</flux:text>
                         </div>
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">👥 Total Users</flux:text>
@@ -235,6 +239,14 @@
                     <div class="flex items-start gap-3">
                         <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
                         <div>
+                            <flux:text class="font-medium">💎 Cash Inject Management</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Sistem lengkap inject kas perusahaan (setoran, pemasukan) dengan auto approval, auto-formatting amount, card-based audit UI, dan bahasa Indonesia support</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                        <div>
                             <flux:text class="font-medium">Manajemen Brand</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Database {{ $stats['brands_count'] }} merek mobil populer di Indonesia</flux:text>
                         </div>
@@ -382,7 +394,7 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.18.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem pengeluaran kas perusahaan dengan approval workflow, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan file upload, sistem berita acara serah terima kendaraan dengan auto-numbering dan file upload, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, handover management, file upload management system, salesmen management dengan auto-create user account, vehicle completeness checklist, dan database transactions untuk data consistency.
+                            <strong>WOTO v1.19.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem pengeluaran kas perusahaan dengan approval workflow, sistem inject kas perusahaan dengan auto approval, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan file upload, sistem berita acara serah terima kendaraan dengan auto-numbering dan file upload, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, handover management, file upload management system, salesmen management dengan auto-create user account, vehicle completeness checklist, database transactions untuk data consistency, dan cash inject management dengan card-based audit UI dan bahasa Indonesia support.
                         </flux:text>
                     </div>
 
@@ -394,6 +406,7 @@
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 🛠️ Vehicle Completeness Checklist: Sistem pencatatan kelengkapan peralatan kendaraan (STNK Asli, Kunci Roda, Ban Serep, Kunci Serep, Dongkrak) dengan visual status indicators</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Costs module dengan approval workflow, auto-formatting price (150.000), dan vendor integration</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💵 Cash Disbursement module dengan approval workflow, auto-formatting amount, dan audit trail lengkap untuk pengeluaran kas perusahaan</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Cash Inject module dengan auto approval, auto-formatting amount, card-based audit UI, bahasa Indonesia support, dan filter tanggal untuk inject kas perusahaan</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Commission module lengkap dengan sales/purchase types, modal forms, audit trail, dan vehicle filtering</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Loan Calculation module dengan leasing integration, audit trail, sorting by leasing name, dan CRUD operations</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💳 Purchase Payment dengan multiple file upload, auto-numbering format 0001/PP/WOTO/XII/2025, dan purchase price validation</flux:text>
@@ -401,7 +414,7 @@
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 📝 Vehicle Handover dengan auto-numbering format 001/BAST/WOTO/XII/2025, file upload, payment completion conditional, dan print PDF</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 📁 File Upload Management System dengan multiple file support, auto-cleanup, type validation, dan real-time display</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Database {{ $stats['brands_count'] }} brand, {{ $stats['vendors_count'] }} vendor, {{ $stats['salesmen_count'] }} salesman, {{ $stats['vehicle_models_count'] }} model STNK, {{ $stats['categories_count'] }} kategori STNK, dan {{ $stats['types_count'] }} tipe kendaraan Indonesia</flux:text>
-                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Sistem terpisah untuk Cost Records kendaraan vs Cash Disbursements pengeluaran kas perusahaan</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Sistem terpisah untuk Cost Records kendaraan (service_parts), Cash Disbursements pengeluaran kas (other_cost), dan Cash Injects pemasukan kas (cash)</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Audit trail lengkap dengan before/after tracking untuk semua module termasuk Vehicles & Costs</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Export data ke Excel dan PDF dengan template konsisten di semua module</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• Advanced form features: auto-formatting prices, keyboard shortcuts, conditional validation, cascading dropdowns</flux:text>
@@ -509,11 +522,37 @@
                     Version History
                 </flux:heading>
 
-                <div class="space-y-4"></div>
+                <div class="space-y-4">
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <flux:text class="font-semibold text-purple-600 dark:text-purple-400">v1.19.0 - Cash Inject Management System</flux:text>
+                            <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">Latest</span>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
+                            <flux:text>• ✅ Complete Cash Inject Module: Sistem lengkap manajemen inject kas perusahaan</flux:text>
+                            <flux:text>• ✅ Cash Inject CRUD Operations: Create, Read, Update, Delete inject kas dengan interface lengkap</flux:text>
+                            <flux:text>• ✅ Cost Type Management: Implementasi cost_type 'cash' untuk inject kas (vehicle_id NULL, vendor_id NULL)</flux:text>
+                            <flux:text>• ✅ Auto Approval Workflow: Sistem langsung set status "approved" tanpa approval process</flux:text>
+                            <flux:text>• ✅ Advanced Form Interface: Modal form dengan validasi lengkap, error handling, dan auto-formatting</flux:text>
+                            <flux:text>• ✅ Cash Inject Audit Trail: Dedicated audit page dengan filtering, search, dan statistics dashboard</flux:text>
+                            <flux:text>• ✅ Advanced Audit Filtering: Search by description/user, date filtering, pagination dengan 10-100 items per page</flux:text>
+                            <flux:text>• ✅ Audit Trail Statistics: Real-time dashboard dengan total activities, today count, created/updated/deleted counters</flux:text>
+                            <flux:text>• ✅ Card-based Audit UI: Audit trail menggunakan card-based layout dengan hover effects dan modern styling</flux:text>
+                            <flux:text>• ✅ Bahasa Indonesia Support: Semua label dan pesan menggunakan bahasa Indonesia yang konsisten</flux:text>
+                            <flux:text>• ✅ Permission-based Access: cash-inject.* permissions untuk kontrol akses CRUD operations dan audit</flux:text>
+                            <flux:text>• ✅ Database Integration: Foreign key constraints dengan vehicle_id NULL, vendor_id NULL untuk cash injects</flux:text>
+                            <flux:text>• ✅ Export Features: Excel dan PDF dengan template yang konsisten dan filter support</flux:text>
+                            <flux:text>• ✅ Real-time Updates: Auto-refresh data setelah create/update/delete operations dengan proper validation</flux:text>
+                            <flux:text>• ✅ UI Integration: Seamless integration dengan sidebar navigation dan permission system</flux:text>
+                            <flux:text>• ✅ Form Validation: Comprehensive validation dengan cost_type hardcoded, date validation, amount formatting</flux:text>
+                            <flux:text>• ✅ Audit Trail: Activity logging lengkap dengan before/after values untuk semua perubahan cash injects</flux:text>
+                            <flux:text>• ✅ Module Separation: Cost Index menampilkan data vehicle_id NOT NULL, Cash Inject menampilkan cost_type 'cash'</flux:text>
+                        </div>
+                    </div>
+
                     <div class="border-l-4 border-green-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
                             <flux:text class="font-semibold text-green-600 dark:text-green-400">v1.18.0 - Cash Disbursement Management System</flux:text>
-                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
                             <flux:text>• ✅ Complete Cash Disbursement Module: Sistem lengkap manajemen pengeluaran kas perusahaan</flux:text>

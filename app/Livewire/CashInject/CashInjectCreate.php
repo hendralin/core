@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\CashDisbursement;
+namespace App\Livewire\CashInject;
 
 use App\Models\Cost;
 use Livewire\Component;
@@ -9,12 +9,12 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 
-#[Title('Tambah Pengeluaran Kas')]
-class CashDisbursementCreate extends Component
+#[Title('Tambah Inject Kas')]
+class CashInjectCreate extends Component
 {
     use WithFileUploads;
 
-    public $cost_type = 'showroom';
+    public $cost_type = 'cash';
     public $cost_date;
     public $description;
     public $total_price;
@@ -36,13 +36,13 @@ class CashDisbursementCreate extends Component
         ];
 
         $messages = [
-            'cost_date.required' => 'Tanggal pengeluaran kas harus dipilih.',
-            'cost_date.date' => 'Tanggal pengeluaran kas harus berupa tanggal.',
-            'cost_date.before_or_equal' => 'Tanggal pengeluaran kas tidak boleh lebih dari hari ini.',
-            'description.required' => 'Deskripsi pengeluaran harus diisi.',
-            'description.string' => 'Deskripsi pengeluaran harus berupa teks.',
-            'total_price.required' => 'Total pengeluaran harus diisi.',
-            'total_price.string' => 'Total pengeluaran harus berupa angka.',
+            'cost_date.required' => 'Tanggal inject kas harus dipilih.',
+            'cost_date.date' => 'Tanggal inject kas harus berupa tanggal.',
+            'cost_date.before_or_equal' => 'Tanggal inject kas tidak boleh lebih dari hari ini.',
+            'description.required' => 'Deskripsi inject harus diisi.',
+            'description.string' => 'Deskripsi inject harus berupa teks.',
+            'total_price.required' => 'Total inject harus diisi.',
+            'total_price.string' => 'Total inject harus berupa angka.',
             'document.file' => 'Dokumen harus berupa file.',
             'document.mimes' => 'Dokumen harus berupa PDF, JPG, JPEG, atau PNG.',
             'document.max' => 'Dokumen maksimal ukuran 5MB.',
@@ -61,12 +61,13 @@ class CashDisbursementCreate extends Component
 
         $cost = Cost::create([
             'cost_type' => $this->cost_type,
-            'vehicle_id' => null, // No vehicle for cash disbursements
+            'vehicle_id' => null, // No vehicle for cash injects
             'cost_date' => $this->cost_date,
-            'vendor_id' => null, // No vendor for cash disbursements
+            'vendor_id' => null, // No vendor for cash injects
             'description' => $this->description,
             'total_price' => $totalPrice,
             'document' => $documentPath,
+            'status' => 'approved',
             'created_by' => Auth::id(),
         ]);
 
@@ -81,13 +82,14 @@ class CashDisbursementCreate extends Component
                     'description' => $this->description,
                     'total_price' => $totalPrice,
                     'document' => $documentPath,
+                    'status' => 'approved',
                 ]
             ])
-            ->log('created cash disbursement record');
+            ->log('created cash inject record');
 
-        session()->flash('success', 'Pengeluaran kas berhasil ditambahkan.');
+        session()->flash('success', 'Inject kas berhasil ditambahkan.');
 
-        return $this->redirect('/cash-disbursements', true);
+        return $this->redirect('/cash-injects', true);
     }
 
     public function removeDocument()
@@ -97,6 +99,6 @@ class CashDisbursementCreate extends Component
 
     public function render()
     {
-        return view('livewire.cash-disbursement.cash-disbursement-create');
+        return view('livewire.cash-inject.cash-inject-create');
     }
 }

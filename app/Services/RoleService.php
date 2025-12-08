@@ -18,6 +18,7 @@ class RoleService
         'Vehicles' => ['vehicle', 'vehicle-modal', 'vehicle-commission', 'vehicle-loan-calculation', 'vehicle-purchase-payment', 'vehicle-payment-receipt', 'vehicle-registration-certificate-receipt', 'vehicle-handover'],
         'Cost Management' => ['cost'],
         'Cash Management' => ['cashdisbursement'],
+        'Cash Inject Management' => ['cash-inject'],
     ];
     /**
      * Check if a role can be deleted

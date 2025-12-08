@@ -2,7 +2,7 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.18.0** - Cash Disbursement Management System
+**Version 1.19.0** - Cash Inject Management System
 
 ## ✨ Fitur Utama
 
@@ -140,6 +140,21 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Status Tracking**: Pending/Approved/Rejected dengan workflow approval
 - **Status Badges**: Visual indicator warna untuk status cost (Green=Approved, Yellow=Pending, Red=Rejected)
 - **Export Features**: Excel dan PDF dengan template yang konsisten
+
+### 💎 Sistem Cash Inject (Inject Kas)
+- **Cash Inject Management**: Sistem lengkap pencatatan inject kas perusahaan (setoran, pemasukan, dll)
+- **Advanced Form Features**:
+  - **Cost Type Selection**: Pilih tipe inject (Cash/Other Cost)
+  - **Auto-formatting Amount**: Format mata uang Rupiah otomatis dengan thousand separator
+  - **Document Upload**: Upload bukti inject dengan validasi file
+  - **Date Validation**: Tanggal inject tidak boleh di masa depan
+- **Complete Cash Inject Records**: Tanggal inject, tipe, deskripsi, total inject, document, status
+- **Auto Approval Workflow**: Sistem langsung set status "approved" tanpa approval process
+- **Audit Trail**: Activity logging lengkap untuk semua perubahan cash inject records
+- **Status Management**: Otomatis approved untuk semua inject kas records
+- **Advanced Filtering**: Filter berdasarkan tanggal dengan clear filters
+- **Export Features**: Excel dan PDF dengan template yang konsisten dan filter aktif
+- **Real-time Totals**: Hitung total inject berdasarkan filter aktif
 
 ### 💵 Sistem Cash Disbursement (Pengeluaran Kas)
 - **Cash Disbursement Management**: Sistem lengkap pencatatan pengeluaran kas perusahaan (operasional, biaya administrasi, dll)
@@ -330,6 +345,7 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Dashboard**: Overview bisnis dan statistik
 - **Vehicles**: Manajemen inventori kendaraan lengkap dengan CRUD + Commission Management + Loan Calculation Management + Audit Trail
 - **Costs**: Manajemen biaya kendaraan (service, spare parts, maintenance) + Approval Workflow + Audit Trail
+- **Cash Inject**: Manajemen inject kas perusahaan (setoran, pemasukan) + Auto Approval + Audit Trail
 - **Cash Disbursements**: Manajemen pengeluaran kas perusahaan + Approval Workflow + Audit Trail
 - **Commissions**: Audit trail lengkap untuk semua aktivitas komisi kendaraan + Vehicle Filtering
 - **Loan Calculations**: Audit trail lengkap untuk semua aktivitas perhitungan kredit kendaraan + Vehicle Filtering
@@ -579,6 +595,38 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Approved**: Record telah disetujui, tidak bisa di-edit lagi
 - **Rejected**: Record ditolak, masih bisa di-edit untuk diperbaiki
 
+### 💎 Cara Menggunakan Cash Inject Module
+1. **Akses Cash Inject**: Klik menu "Inject Kas" di sidebar
+2. **View All Records**: Lihat daftar inject kas dengan pagination, search, dan filtering
+3. **Add New Cash Inject**: Klik "Tambah" untuk menambah record inject baru
+   - **Cost Type**: Otomatis diset ke "Cash" (tidak perlu dipilih)
+   - **Date**: Tanggal inject dengan validasi (tidak boleh di masa depan)
+   - **Description**: Deskripsi detail inject (required)
+   - **Total Price**: Jumlah inject (auto-format Rupiah)
+   - **Document**: Upload bukti inject (PDF, JPG, PNG, max 5MB, optional)
+4. **Edit Cash Inject**: Klik icon edit untuk mengubah data kapan saja
+5. **View Details**: Klik icon eye untuk melihat detail lengkap cash inject
+6. **Delete Cash Inject**: Klik icon trash untuk menghapus dengan confirmation modal
+7. **Audit Trail**: Klik "Audit Trail" untuk melihat riwayat perubahan lengkap
+8. **Export Data**: Gunakan tombol Excel/PDF untuk export data dengan filter aktif
+9. **Advanced Filtering**:
+   - **Date Filter**: Filter berdasarkan periode tanggal
+   - **Clear Filters**: Reset semua filter dengan satu klik
+
+### Form Fields Cash Inject
+- **Cost Type**: Otomatis "Cash" (hidden field)
+- **Cost Date**: Tanggal inject (required, tidak boleh di masa depan)
+- **Description**: Deskripsi detail inject (required, max 255 characters)
+- **Total Price**: Jumlah inject (required, auto-format Rupiah)
+- **Document**: Upload file bukti inject (optional, PDF/JPG/PNG, max 5MB)
+- **Status**: Approved (auto-set, tidak bisa diubah)
+- **Created By**: User yang membuat record (auto-fill)
+
+### Auto Approval Workflow
+- **Approved**: Semua inject kas langsung mendapat status "Approved" saat dibuat
+- **Edit Anytime**: Record bisa di-edit kapan saja tanpa batasan status
+- **Delete Anytime**: Record bisa dihapus kapan saja tanpa batasan status
+
 ### 💵 Cara Menggunakan Cash Disbursement Module
 1. **Akses Cash Disbursements**: Klik menu "Pengeluaran Kas" di sidebar
 2. **View All Records**: Lihat daftar pengeluaran kas dengan pagination, search, dan filtering
@@ -763,6 +811,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicle-registration-certificate-receipt.*` - Manajemen certificate receipt records (view, create, edit, delete, audit, print)
 - `vehicle-handover.*` - Manajemen handover records (view, create, edit, delete, audit, print)
 - `cost.*` - Manajemen cost records (view, create, edit, delete)
+- `cash-inject.*` - Manajemen cash inject records (view, create, edit, delete)
 - `cashdisbursement.*` - Manajemen cash disbursement records (view, create, edit, delete)
 - `vehiclemodel.*` - Manajemen vehicle models (view, create, edit, delete)
 - `category.*` - Manajemen categories (view, create, edit, delete)
@@ -810,7 +859,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `certificate_receipts` - Data tanda terima BPKB kendaraan dengan auto-numbering dan comprehensive document tracking
 - `loan_calculations` - Data perhitungan kredit kendaraan dengan relasi ke vehicles dan leasings
 - `vehicle_handovers` - Data berita acara serah terima kendaraan dengan auto-numbering dan file upload support
-- `costs` - Data biaya kendaraan dan pengeluaran kas dengan approval workflow (cost_type: service_parts/other_cost/cash)
+- `costs` - Data biaya kendaraan, pengeluaran kas, dan inject kas dengan approval workflow (cost_type: service_parts/other_cost/cash)
 - `brands` - Merek mobil (31+ brand Indonesia)
 - `vendors` - Vendor/supplier kendaraan (25+ vendor Indonesia)
 - `salesmen` - Data salesman dengan auto-create user account (relasi ke users)
@@ -845,6 +894,11 @@ PUT    /api/costs/{id}        - Update cost record
 DELETE /api/costs/{id}        - Hapus cost record
 POST   /api/costs/{id}/approve - Approve cost record
 POST   /api/costs/{id}/reject  - Reject cost record
+GET    /api/cash-injects - List semua cash inject records
+GET    /api/cash-injects/{id} - Detail cash inject record tertentu
+POST   /api/cash-injects - Tambah cash inject record baru
+PUT    /api/cash-injects/{id} - Update cash inject record
+DELETE /api/cash-injects/{id} - Hapus cash inject record
 GET    /api/cash-disbursements - List semua cash disbursement records
 GET    /api/cash-disbursements/{id} - Detail cash disbursement record tertentu
 POST   /api/cash-disbursements - Tambah cash disbursement record baru
@@ -957,6 +1011,26 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.19.0 - Cash Inject Management System
+- ✅ **Complete Cash Inject Module**: Sistem lengkap manajemen inject kas perusahaan
+- ✅ **Cash Inject CRUD Operations**: Create, Read, Update, Delete inject kas dengan interface lengkap
+- ✅ **Cost Type Management**: Implementasi cost_type 'cash' untuk inject kas (vehicle_id NULL, vendor_id NULL)
+- ✅ **Auto Approval Workflow**: Sistem langsung set status "approved" tanpa approval process
+- ✅ **Advanced Form Interface**: Modal form dengan validasi lengkap, error handling, dan auto-formatting
+- ✅ **Cash Inject Audit Trail**: Dedicated audit page dengan filtering, search, dan statistics dashboard
+- ✅ **Advanced Audit Filtering**: Search by description/user, date filtering, pagination dengan 10-100 items per page
+- ✅ **Audit Trail Statistics**: Real-time dashboard dengan total activities, today count, created/updated/deleted counters
+- ✅ **Permission-based Access**: cash-inject.* permissions untuk kontrol akses CRUD operations dan audit
+- ✅ **Database Integration**: Foreign key constraints dengan vehicle_id NULL, vendor_id NULL untuk cash injects
+- ✅ **Export Features**: Excel dan PDF dengan template yang konsisten dan filter support
+- ✅ **Real-time Updates**: Auto-refresh data setelah create/update/delete operations dengan proper validation
+- ✅ **UI Integration**: Seamless integration dengan sidebar navigation dan permission system
+- ✅ **Form Validation**: Comprehensive validation dengan cost_type hardcoded, date validation, amount formatting
+- ✅ **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan cash injects
+- ✅ **Module Separation**: Cost Index menampilkan data vehicle_id NOT NULL, Cash Inject menampilkan cost_type 'cash'
+- ✅ **Card-based Audit UI**: Audit trail menggunakan card-based layout dengan hover effects dan modern styling
+- ✅ **Bahasa Indonesia Support**: Semua label dan pesan menggunakan bahasa Indonesia yang konsisten
 
 ### v1.18.0 - Cash Disbursement Management System
 - ✅ **Complete Cash Disbursement Module**: Sistem lengkap manajemen pengeluaran kas perusahaan

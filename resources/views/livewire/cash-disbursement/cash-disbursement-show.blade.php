@@ -89,7 +89,7 @@
                         @endphp
 
                         @if($isImage)
-                            <img src="{{ asset('storage/photos/costs/' . $cost->document) }}" alt="Document" class="w-24 h-24 object-contain rounded-lg border-2 border-gray-200 dark:border-zinc-700">
+                            <img src="{{ asset('photos/costs/' . $cost->document) }}" alt="Document" class="w-24 h-24 object-contain rounded-lg border-2 border-gray-200 dark:border-zinc-700">
                         @else
                             <div class="w-24 h-24 border-2 border-gray-200 dark:border-zinc-700 rounded-lg flex items-center justify-center bg-gray-50 dark:bg-zinc-800">
                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +102,7 @@
                             <flux:heading size="sm">File Dokumen</flux:heading>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">{{ $cost->document }}</flux:text>
                             <div class="mt-2">
-                                <a href="{{ asset('storage/photos/costs/' . $cost->document) }}" target="_blank" class="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800">
+                                <a href="{{ asset('photos/costs/' . $cost->document) }}" target="_blank" class="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                     </svg>

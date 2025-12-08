@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\CashDisbursement;
+namespace App\Livewire\CashInject;
 
 use Livewire\Component;
 use App\Models\Activity;
@@ -10,8 +10,8 @@ use Livewire\Attributes\Title;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Str;
 
-#[Title('Audit Trail Pengeluaran Kas')]
-class CashDisbursementAudit extends Component
+#[Title('Audit Trail Inject Kas')]
+class CashInjectAudit extends Component
 {
     use WithPagination, WithoutUrlPagination;
 
@@ -41,7 +41,7 @@ class CashDisbursementAudit extends Component
             ->whereRaw("EXISTS (
                 SELECT 1 FROM costs c
                 WHERE c.id = activity_log.subject_id
-                AND c.cost_type = 'showroom'
+                AND c.cost_type = 'cash'
                 AND c.vehicle_id IS NULL
                 AND c.vendor_id IS NULL
             )", [])
@@ -68,8 +68,8 @@ class CashDisbursementAudit extends Component
             ->orderBy('created_at', 'desc')
             ->paginate($this->perPage);
 
-        // Get cash disbursements for dropdown
-        $costs = Cost::where('cost_type', 'showroom')
+        // Get cash injects for dropdown
+        $costs = Cost::where('cost_type', 'cash')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
             ->orderBy('cost_date', 'desc')
@@ -81,7 +81,7 @@ class CashDisbursementAudit extends Component
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'showroom'
+                    AND c.cost_type = 'cash'
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
@@ -90,44 +90,44 @@ class CashDisbursementAudit extends Component
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'showroom'
+                    AND c.cost_type = 'cash'
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
                 ->whereDate('created_at', today())->count(),
             'created_count' => Activity::where('subject_type', Cost::class)
-                ->where('description', 'created cash disbursement record')
+                ->where('description', 'created cash inject record')
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'showroom'
+                    AND c.cost_type = 'cash'
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
                 ->count(),
             'updated_count' => Activity::where('subject_type', Cost::class)
-                ->where('description', 'updated cash disbursement record')
+                ->where('description', 'updated cash inject record')
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'showroom'
+                    AND c.cost_type = 'cash'
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
                 ->count(),
             'deleted_count' => Activity::where('subject_type', Cost::class)
-                ->where('description', 'deleted cash disbursement record')
+                ->where('description', 'deleted cash inject record')
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'showroom'
+                    AND c.cost_type = 'cash'
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
                 ->count(),
         ];
 
-        return view('livewire.cash-disbursement.cash-disbursement-audit', compact('activities', 'costs', 'stats'));
+        return view('livewire.cash-inject.cash-inject-audit', compact('activities', 'costs', 'stats'));
     }
 
     public function getPerPageOptionsProperty()

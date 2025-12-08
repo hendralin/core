@@ -153,6 +153,13 @@ class PermissionSeeder extends Seeder
             'cashdisbursement.audit',
             'cashdisbursement.approve',
             'cashdisbursement.reject',
+
+            // CASH INJECT
+            'cash-inject.view',
+            'cash-inject.create',
+            'cash-inject.edit',
+            'cash-inject.delete',
+            'cash-inject.audit',
         ];
 
         foreach ($permissions as $key => $value) {
