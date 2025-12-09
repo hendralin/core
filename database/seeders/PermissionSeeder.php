@@ -170,6 +170,9 @@ class PermissionSeeder extends Seeder
 
             // CASH REPORT
             'cash-report.view',
+
+            // SALES REPORT
+            'sales-report.view',
         ];
 
         foreach ($permissions as $key => $value) {

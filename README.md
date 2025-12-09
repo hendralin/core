@@ -2,7 +2,7 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.21.0** - Vehicle File Management System
+**Version 1.22.0** - Advanced Sales Report & Profit Analytics System
 
 ## ✨ Fitur Utama
 
@@ -208,6 +208,42 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Permission-based Access**: cash-report.view permission untuk kontrol akses
 - **UI/UX Excellence**: Interface modern dengan hover effects dan smooth transitions
 
+### 📈 Sistem Laporan Penjualan (Sales Report)
+- **Comprehensive Sales Analytics System**: Sistem lengkap pelaporan penjualan kendaraan dengan dashboard statistik
+- **Advanced Sales Metrics Dashboard**: 4 stat cards untuk overview penjualan lengkap
+  - **Total Penjualan**: Total nilai penjualan kendaraan dengan icon currency-dollar
+  - **Total Kendaraan Terjual**: Jumlah unit kendaraan terjual dengan icon truck
+  - **Total Keuntungan**: Total keuntungan bersih dari penjualan dengan icon banknotes
+  - **% Margin Keuntungan**: Persentase margin keuntungan rata-rata dengan icon chart-pie
+- **Detailed Vehicle Sales Records**: Informasi lengkap untuk setiap kendaraan terjual
+  - **Vehicle Information**: Merek, model, tahun, nomor polisi, harga jual
+  - **Cost Analysis**: Modal (harga beli + biaya + komisi), keuntungan per unit
+  - **Buyer Information**: Data pembeli (nama, telepon, alamat, metode pembayaran)
+  - **Salesman Tracking**: Informasi salesman yang menangani penjualan
+  - **Date-based Filtering**: Filter berdasarkan periode tanggal penjualan
+- **Advanced Profit Analysis**: Perhitungan keuntungan komprehensif
+  - **Total Modal Calculation**: Harga beli + biaya approved + komisi pembelian
+  - **Profit per Vehicle**: Keuntungan bersih per unit kendaraan
+  - **Average Margin Calculation**: Margin keuntungan rata-rata terhadap harga jual
+  - **Color-coded Profit Display**: Hijau untuk profit, merah untuk loss
+- **Professional Card Layout**: Design kartu yang modern dan informatif
+  - **2-Column Grid**: Layout responsif untuk desktop dan mobile
+  - **Rich Vehicle Details**: Spesifikasi lengkap kendaraan (warna, kilometer, bahan bakar)
+  - **Cost Breakdown**: Rincian modal dan keuntungan per kendaraan
+  - **Buyer & Salesman Info**: Informasi lengkap pembeli dan salesman
+- **Advanced Export Features**: Export Excel dan PDF dengan template lengkap
+  - **Excel Export**: Tabel terstruktur dengan kolom modal, keuntungan, dan statistik
+  - **PDF Export**: Layout kartu dengan informasi lengkap per kendaraan
+  - **Summary Statistics**: Total penjualan, keuntungan, dan margin di setiap export
+  - **Date Range Integration**: Periode tanggal tercantum di header export
+- **Real-time Calculations**: Perhitungan otomatis berdasarkan data penjualan terkini
+  - **Margin Against Selling Price**: Margin dihitung terhadap harga jual aktual
+  - **Commission Integration**: Komisi pembelian termasuk dalam perhitungan modal
+  - **Cost Status Awareness**: Hanya biaya approved yang dihitung dalam modal
+- **Audit Trail Integration**: Activity logging lengkap untuk semua operasi laporan
+- **Permission-based Access**: sales-reports.view permission untuk kontrol akses
+- **Responsive Design**: Interface modern dengan hover effects dan smooth transitions
+
 ### 💵 Sistem Cash Disbursement (Pengeluaran Kas)
 - **Cash Disbursement Management**: Sistem lengkap pencatatan pengeluaran kas perusahaan (operasional, biaya administrasi, dll)
 - **Advanced Form Features**:
@@ -408,6 +444,7 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Cash Inject**: Manajemen inject kas perusahaan (setoran, pemasukan) + Auto Approval + Audit Trail
 - **Cash Disbursements**: Manajemen pengeluaran kas perusahaan + Approval Workflow + Audit Trail
 - **Cash Report**: Laporan arus kas lengkap dengan analytics dashboard, stat cards, dan opening balance
+- **Sales Reports**: Laporan penjualan kendaraan lengkap dengan profit analysis, margin calculation, dan buyer tracking
 - **Commissions**: Audit trail lengkap untuk semua aktivitas komisi kendaraan + Vehicle Filtering
 - **Loan Calculations**: Audit trail lengkap untuk semua aktivitas perhitungan kredit kendaraan + Vehicle Filtering
 - **Purchase Payments**: Audit trail lengkap untuk semua aktivitas pembayaran pembelian kendaraan + Vehicle Filtering
@@ -741,6 +778,29 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Approved**: Record telah disetujui, tidak bisa di-edit lagi
 - **Rejected**: Record ditolak, masih bisa di-edit untuk diperbaiki
 
+### 📈 Cara Menggunakan Sales Report Module
+1. **Akses Sales Report**: Klik menu "Sales Reports" di sidebar untuk melihat laporan penjualan
+2. **Analytics Dashboard**: Lihat 4 stat cards di bagian atas untuk overview penjualan:
+   - **Total Penjualan**: Total nilai penjualan kendaraan
+   - **Total Kendaraan Terjual**: Jumlah unit kendaraan yang terjual
+   - **Total Keuntungan**: Total keuntungan bersih dari semua penjualan
+   - **% Margin Keuntungan**: Persentase margin keuntungan rata-rata
+3. **Filter by Date**: Gunakan filter tanggal From/To untuk melihat laporan periode tertentu
+4. **Vehicle Sales Cards**: Lihat detail setiap kendaraan terjual dalam format kartu 2 kolom
+   - **Vehicle Info**: Merek, model, tahun, nomor polisi, harga jual
+   - **Cost Analysis**: Modal (harga beli + biaya + komisi) dan keuntungan
+   - **Buyer Details**: Nama, telepon, alamat pembeli dan metode pembayaran
+   - **Salesman Info**: Nama salesman yang menangani penjualan
+5. **Pagination**: Navigasi halaman dengan sistem paginasi untuk data yang banyak
+6. **Export Features**: Export ke Excel atau PDF dengan semua detail lengkap
+   - **Excel Export**: Tabel terstruktur dengan kolom Modal dan Keuntungan
+   - **PDF Export**: Layout kartu dengan informasi lengkap per kendaraan
+7. **Real-time Updates**: Data ter-update secara real-time berdasarkan filter aktif
+8. **Advanced Calculations**:
+   - **Margin vs Selling Price**: Margin dihitung terhadap harga jual aktual
+   - **Total Modal**: Harga beli + biaya approved + komisi pembelian
+   - **Profit per Vehicle**: Keuntungan bersih per unit dengan color coding
+
 ### 💎 Cara Menggunakan Commission Module
 1. **Akses Commissions**: Klik menu "Commissions" di sidebar untuk melihat audit trail
 2. **View Commission Tables**: Di halaman vehicle detail, lihat tabel komisi penjualan dan pembelian
@@ -1050,6 +1110,10 @@ DELETE /api/categories/{id}    - Hapus kategori kendaraan
 POST   /api/types              - Tambah tipe kendaraan baru
 PUT    /api/types/{id}         - Update tipe kendaraan
 DELETE /api/types/{id}         - Hapus tipe kendaraan
+GET    /api/sales-reports       - List laporan penjualan kendaraan dengan profit analytics
+GET    /api/sales-reports/stats - Statistik penjualan (total sales, vehicles sold, profit, margin)
+POST   /api/sales-reports/export/excel - Export laporan penjualan ke Excel
+POST   /api/sales-reports/export/pdf - Export laporan penjualan ke PDF
 ```
 
 ## 🧪 Testing
@@ -1104,6 +1168,25 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.22.0 - Advanced Sales Report & Profit Analytics System
+- ✅ **Complete Sales Report Module**: Sistem lengkap laporan penjualan kendaraan dengan profit analytics dashboard
+- ✅ **Advanced Sales Analytics Dashboard**: 4 stat cards modern untuk overview penjualan lengkap (Total Penjualan, Total Kendaraan Terjual, Total Keuntungan, % Margin Keuntungan)
+- ✅ **Comprehensive Profit Analysis**: Perhitungan keuntungan komprehensif dengan margin terhadap harga jual aktual
+- ✅ **Vehicle Sales Cards Layout**: Format kartu 2 kolom dengan informasi lengkap kendaraan, modal, keuntungan, buyer, dan salesman
+- ✅ **Advanced Cost Integration**: Modal = harga beli + biaya approved + komisi pembelian untuk perhitungan akurat
+- ✅ **Color-coded Profit Display**: Visual indicator hijau untuk profit, merah untuk loss per kendaraan
+- ✅ **Date-based Filtering**: Filter periode tanggal dengan real-time calculation untuk semua metrics
+- ✅ **Advanced Export Features**: Excel dan PDF export dengan template lengkap dan statistik summary
+- ✅ **Excel Export Enhancement**: Tabel terstruktur dengan kolom Modal, Keuntungan, dan statistik lengkap
+- ✅ **PDF Export Enhancement**: Layout kartu dengan informasi lengkap per kendaraan dan summary statistics
+- ✅ **Margin Calculation Optimization**: Margin profit dihitung terhadap harga jual aktual bukan modal
+- ✅ **Real-time Statistics**: Dashboard metrics yang update secara real-time berdasarkan filter aktif
+- ✅ **Responsive Card Layout**: Grid 4 columns desktop → 2 columns tablet → 1 column mobile
+- ✅ **Audit Trail Integration**: Activity logging lengkap untuk semua operasi sales report
+- ✅ **Permission-based Access**: sales-reports.view permission untuk kontrol akses laporan penjualan
+- ✅ **UI/UX Excellence**: Interface modern dengan hover effects, smooth transitions, dan visual hierarchy yang jelas
+- ✅ **Bahasa Indonesia Support**: Semua interface, pesan, dan labels menggunakan bahasa Indonesia yang konsisten
 
 ### v1.21.0 - Vehicle File Management System
 - ✅ **Complete Vehicle File Module**: Sistem lengkap manajemen file kendaraan dengan multiple upload support

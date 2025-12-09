@@ -1472,9 +1472,9 @@
                         <table class="w-full">
                             <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white w-32">Created at</th>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Title</th>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Files</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white w-32">Tanggal dibuat</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Judul</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Dokumen</th>
                                     <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
                                 </tr>
                             </thead>
@@ -1689,6 +1689,15 @@
                             </div>
                             @endif
 
+                            @if($vehicle->commissions->where('type', 2)->count() > 0)
+                            <div class="flex items-center justify-between">
+                                <flux:text>Komisi Pembelian</flux:text>
+                                <span class="text-lg font-bold text-orange-600 dark:text-orange-400">
+                                    Rp {{ number_format($vehicle->commissions->where('type', 2)->sum('amount'), 0, ',', '.') }}
+                                </span>
+                            </div>
+                            @endif
+
                             @if($vehicle->selling_price)
                             <div class="flex items-center justify-between">
                                 <flux:text>Harga Jual</flux:text>
@@ -1701,7 +1710,7 @@
                             <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-zinc-700">
                                 <flux:text>Keuntungan/Kerugian</flux:text>
                                 @php
-                                    $totalModal = $vehicle->purchase_price + $costSummary['total'];
+                                    $totalModal = $vehicle->purchase_price + $costSummary['total'] + $vehicle->commissions->where('type', 2)->sum('amount');
                                     $profit = $vehicle->selling_price - $totalModal;
                                     $profitClasses = $vehicle->selling_price > $totalModal
                                         ? 'text-green-600 dark:text-green-400'
@@ -1944,11 +1953,41 @@
 
                         <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
                             <div class="flex items-center justify-between">
-                                <flux:text class="text-sm font-medium text-purple-600 dark:text-purple-400">Profit Margin</flux:text>
-                                <flux:badge size="sm" color="purple">{{ number_format($priceAnalysis['display_profit_margin'], 1, ',', '.') }}%</flux:badge>
+                                <flux:text class="text-sm font-medium text-purple-600 dark:text-purple-400">
+                                    @if($priceAnalysis['has_selling_price'])
+                                        @if($priceAnalysis['selling_price_difference'] >= 0)
+                                            Actual Profit
+                                        @else
+                                            Actual Loss
+                                        @endif
+                                    @else
+                                        Potential Profit
+                                    @endif
+                                </flux:text>
+                                @if($priceAnalysis['has_selling_price'])
+                                    <flux:badge size="sm" :color="$priceAnalysis['selling_price_difference'] >= 0 ? 'purple' : 'red'">
+                                        @if($priceAnalysis['selling_price_difference'] >= 0)
+                                            {{ number_format($priceAnalysis['selling_profit_margin'], 1, ',', '.') }}%
+                                        @else
+                                            {{ number_format(abs($priceAnalysis['selling_profit_margin']), 1, ',', '.') }}%
+                                        @endif
+                                    </flux:badge>
+                                @else
+                                    <flux:badge size="sm" color="blue">
+                                        {{ number_format($priceAnalysis['display_profit_margin'], 1, ',', '.') }}%
+                                    </flux:badge>
+                                @endif
                             </div>
                             <flux:text class="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                                Rp {{ number_format($priceAnalysis['display_price_difference'], 0, ',', '.') }}
+                                @if($priceAnalysis['has_selling_price'])
+                                    @if($priceAnalysis['selling_price_difference'] >= 0)
+                                        +Rp {{ number_format($priceAnalysis['selling_price_difference'], 0, ',', '.') }}
+                                    @else
+                                        -Rp {{ number_format(abs($priceAnalysis['selling_price_difference']), 0, ',', '.') }}
+                                    @endif
+                                @else
+                                    Rp {{ number_format($priceAnalysis['display_price_difference'], 0, ',', '.') }}
+                                @endif
                             </flux:text>
                         </div>
                     </div>
@@ -1975,6 +2014,12 @@
                                         <flux:text class="text-sm">Total Cost (Approved):</flux:text>
                                         <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['total_cost_approved'], 0, ',', '.') }}</flux:text>
                                     </div>
+                                    @if($priceAnalysis['purchase_commission'] > 0)
+                                    <div class="flex justify-between">
+                                        <flux:text class="text-sm">Komisi Pembelian:</flux:text>
+                                        <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['purchase_commission'], 0, ',', '.') }}</flux:text>
+                                    </div>
+                                    @endif
                                     <div class="flex justify-between border-t border-gray-300 dark:border-zinc-600 pt-2">
                                         <flux:text class="text-sm font-medium text-gray-900 dark:text-white">Total Modal:</flux:text>
                                         <flux:text class="text-sm font-bold text-blue-600 dark:text-blue-400">Rp {{ number_format($priceAnalysis['recommended_min_price'], 0, ',', '.') }}</flux:text>
@@ -2086,7 +2131,7 @@
                                     <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
                                         Harga display kurang Rp {{ number_format(abs($priceAnalysis['display_price_difference']), 0, ',', '.') }} dari total modal.
                                         <strong>Rekomendasi:</strong> Set harga minimal Rp {{ number_format($priceAnalysis['recommended_min_price'], 0, ',', '.') }}
-                                        untuk mencapai breakeven point.
+                                        untuk mencapai breakeven point (sudah termasuk komisi pembelian).
                                     </flux:text>
                                 @endif
 
@@ -3399,10 +3444,10 @@
             <div class="space-y-4">
                 <flux:field>
                     <flux:label>
-                        Tipe File
+                        Title File
                         <span class="text-red-600 ml-1">*</span>
                     </flux:label>
-                    <flux:select wire:model="vehicle_file_title_id" placeholder="Pilih tipe file">
+                    <flux:select wire:model="vehicle_file_title_id" placeholder="Pilih title file">
                         @if(isset($vehicleFileTitles))
                             @foreach($vehicleFileTitles as $title)
                                 <flux:select.option value="{{ $title->id }}">{{ $title->title }}</flux:select.option>

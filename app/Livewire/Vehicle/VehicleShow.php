@@ -185,15 +185,18 @@ class VehicleShow extends Component
         $displayPrice = $this->vehicle->display_price ?? 0;
         $sellingPrice = $this->vehicle->selling_price ?? 0;
 
-        // Total modal = harga beli + total cost (semua status)
-        $totalModal = $purchasePrice + $this->costSummary['total'];
+        // Hitung komisi pembelian (type = 2)
+        $purchaseCommission = $this->vehicle->commissions->where('type', 2)->sum('amount');
 
-        // Total modal approved = harga beli + cost approved saja
+        // Total modal = harga beli + total cost (semua status) + komisi pembelian
+        $totalModal = $purchasePrice + $this->costSummary['total'] + $purchaseCommission;
+
+        // Total modal approved = harga beli + cost approved saja + komisi pembelian
         $approvedCosts = Cost::query()
             ->where('vehicle_id', $this->vehicle->id)
             ->where('status', 'approved')
             ->sum('total_price');
-        $totalModalApproved = $purchasePrice + $approvedCosts;
+        $totalModalApproved = $purchasePrice + $approvedCosts + $purchaseCommission;
 
         $recommendedMinPrice = max($totalModal, $totalModalApproved);
 
@@ -204,6 +207,7 @@ class VehicleShow extends Component
             'has_selling_price' => $sellingPrice > 0,
             'total_cost_all' => $this->costSummary['total'],
             'total_cost_approved' => $approvedCosts,
+            'purchase_commission' => $purchaseCommission,
             'total_modal_all' => $totalModal,
             'total_modal_approved' => $totalModalApproved,
             'recommended_min_price' => $recommendedMinPrice,
@@ -211,8 +215,8 @@ class VehicleShow extends Component
             'is_selling_price_correct' => $sellingPrice > 0 ? $sellingPrice >= $recommendedMinPrice : null,
             'display_price_difference' => $displayPrice - $recommendedMinPrice,
             'selling_price_difference' => $sellingPrice > 0 ? $sellingPrice - $recommendedMinPrice : 0,
-            'display_profit_margin' => $displayPrice > 0 ? (($displayPrice - $recommendedMinPrice) / $recommendedMinPrice) * 100 : 0,
-            'selling_profit_margin' => $sellingPrice > 0 ? (($sellingPrice - $recommendedMinPrice) / $recommendedMinPrice) * 100 : 0,
+            'display_profit_margin' => $displayPrice > 0 ? (($displayPrice - $recommendedMinPrice) / $displayPrice) * 100 : 0,
+            'selling_profit_margin' => $sellingPrice > 0 ? (($sellingPrice - $recommendedMinPrice) / $sellingPrice) * 100 : 0,
             'price_vs_selling_gap' => $sellingPrice > 0 ? $displayPrice - $sellingPrice : 0,
         ];
 
@@ -2141,8 +2145,8 @@ class VehicleShow extends Component
             'vehicle_file' => 'required|array|max:5',
             'vehicle_file.*' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120', // 5MB max per file
         ], [
-            'vehicle_file_title_id.required' => 'Tipe file harus dipilih.',
-            'vehicle_file_title_id.exists' => 'Tipe file tidak valid.',
+            'vehicle_file_title_id.required' => 'Title file harus dipilih.',
+            'vehicle_file_title_id.exists' => 'Title file tidak valid.',
             'vehicle_file.required' => 'File harus dipilih.',
             'vehicle_file.array' => 'File harus berupa array.',
             'vehicle_file.max' => 'Maksimal 5 file yang dapat diupload.',

@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About WOTO v1.21.0') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About WOTO v1.22.0') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -97,6 +97,14 @@
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💵 Total Cost This Month</flux:text>
                             <flux:text class="text-lg font-semibold text-orange-600 dark:text-orange-400">Rp {{ number_format($stats['total_cost_this_month'] ?? 0, 0, ',', '.') }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">📈 Total Vehicles Sold</flux:text>
+                            <flux:text class="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{{ number_format($stats['total_vehicles_sold'] ?? 0) }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">💰 Total Sales All Time</flux:text>
+                            <flux:text class="text-lg font-semibold text-blue-600 dark:text-blue-400">Rp {{ number_format($stats['total_sales_all_time'] ?? 0, 0, ',', '.') }}</flux:text>
                         </div>
                     </div>
 
@@ -263,6 +271,14 @@
                     <div class="flex items-start gap-3">
                         <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
                         <div>
+                            <flux:text class="font-medium">📈 Advanced Sales Report & Profit Analytics System</flux:text>
+                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Sistem laporan penjualan lengkap dengan profit analysis, margin calculation terhadap harga jual aktual, vehicle sales cards, buyer tracking, dan export Excel/PDF dengan statistik lengkap</flux:text>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <flux:icon.check-circle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+                        <div>
                             <flux:text class="font-medium">Manajemen Brand</flux:text>
                             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">Database {{ $stats['brands_count'] }} merek mobil populer di Indonesia</flux:text>
                         </div>
@@ -410,7 +426,7 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.21.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, manajemen file kendaraan dengan multiple upload support, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem pengeluaran kas perusahaan dengan approval workflow, sistem inject kas perusahaan dengan auto approval, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan file upload, sistem berita acara serah terima kendaraan dengan auto-numbering dan file upload, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, handover management, file upload management system, salesmen management dengan auto-create user account, vehicle completeness checklist, database transactions untuk data consistency, cash inject management dengan card-based audit UI dan bahasa Indonesia support, serta advanced cash report & analytics system dengan cost type statistics, opening balance, running balance, dan professional report layout.
+                            <strong>WOTO v1.22.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, manajemen file kendaraan dengan multiple upload support, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem pengeluaran kas perusahaan dengan approval workflow, sistem inject kas perusahaan dengan auto approval, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan file upload, sistem berita acara serah terima kendaraan dengan auto-numbering dan file upload, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, handover management, file upload management system, salesmen management dengan auto-create user account, vehicle completeness checklist, database transactions untuk data consistency, cash inject management dengan card-based audit UI dan bahasa Indonesia support, advanced cash report & analytics system dengan cost type statistics, opening balance, running balance, dan professional report layout, serta advanced sales report & profit analytics system dengan profit analysis, margin calculation terhadap harga jual aktual, vehicle sales cards, buyer tracking, dan export Excel/PDF dengan statistik lengkap.
                         </flux:text>
                     </div>
 
@@ -424,6 +440,7 @@
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💵 Cash Disbursement module dengan approval workflow, auto-formatting amount, dan audit trail lengkap untuk pengeluaran kas perusahaan</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Cash Inject module dengan auto approval, auto-formatting amount, card-based audit UI, bahasa Indonesia support, dan filter tanggal untuk inject kas perusahaan</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Advanced Cash Report & Analytics System dengan cost type statistics, opening balance, running balance, professional report layout, dan export Excel/PDF</flux:text>
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 📈 Advanced Sales Report & Profit Analytics System dengan profit analysis, margin calculation terhadap harga jual aktual, vehicle sales cards 2 kolom, buyer tracking, dan export Excel/PDF dengan statistik lengkap</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💎 Commission module lengkap dengan sales/purchase types, modal forms, audit trail, dan vehicle filtering</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💰 Loan Calculation module dengan leasing integration, audit trail, sorting by leasing name, dan CRUD operations</flux:text>
                         <flux:text class="text-sm text-gray-600 dark:text-zinc-400">• 💳 Purchase Payment dengan multiple file upload, auto-numbering format 0001/PP/WOTO/XII/2025, dan purchase price validation</flux:text>
@@ -540,10 +557,35 @@
                 </flux:heading>
 
                 <div class="space-y-4">
+                    <div class="border-l-4 border-emerald-500 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <flux:text class="font-semibold text-emerald-600 dark:text-emerald-400">v1.22.0 - Advanced Sales Report & Profit Analytics System</flux:text>
+                            <span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs rounded-full">Latest</span>
+                        </div>
+                        <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
+                            <flux:text>• ✅ Complete Sales Report Module: Sistem lengkap laporan penjualan kendaraan dengan profit analytics dashboard</flux:text>
+                            <flux:text>• ✅ Advanced Sales Analytics Dashboard: 4 stat cards modern untuk overview penjualan lengkap (Total Penjualan, Total Kendaraan Terjual, Total Keuntungan, % Margin Keuntungan)</flux:text>
+                            <flux:text>• ✅ Comprehensive Profit Analysis: Perhitungan keuntungan komprehensif dengan margin terhadap harga jual aktual</flux:text>
+                            <flux:text>• ✅ Vehicle Sales Cards Layout: Format kartu 2 kolom dengan informasi lengkap kendaraan, modal, keuntungan, buyer, dan salesman</flux:text>
+                            <flux:text>• ✅ Advanced Cost Integration: Modal = harga beli + biaya approved + komisi pembelian untuk perhitungan akurat</flux:text>
+                            <flux:text>• ✅ Color-coded Profit Display: Visual indicator hijau untuk profit, merah untuk loss per kendaraan</flux:text>
+                            <flux:text>• ✅ Date-based Filtering: Filter periode tanggal dengan real-time calculation untuk semua metrics</flux:text>
+                            <flux:text>• ✅ Advanced Export Features: Excel dan PDF export dengan template lengkap dan statistik summary</flux:text>
+                            <flux:text>• ✅ Excel Export Enhancement: Tabel terstruktur dengan kolom Modal, Keuntungan, dan statistik lengkap</flux:text>
+                            <flux:text>• ✅ PDF Export Enhancement: Layout kartu dengan informasi lengkap per kendaraan dan summary statistics</flux:text>
+                            <flux:text>• ✅ Margin Calculation Optimization: Margin profit dihitung terhadap harga jual aktual bukan modal</flux:text>
+                            <flux:text>• ✅ Real-time Statistics: Dashboard metrics yang update secara real-time berdasarkan filter aktif</flux:text>
+                            <flux:text>• ✅ Responsive Card Layout: Grid 4 columns desktop → 2 columns tablet → 1 column mobile</flux:text>
+                            <flux:text>• ✅ Audit Trail Integration: Activity logging lengkap untuk semua operasi sales report</flux:text>
+                            <flux:text>• ✅ Permission-based Access: sales-reports.view permission untuk kontrol akses laporan penjualan</flux:text>
+                            <flux:text>• ✅ UI/UX Excellence: Interface modern dengan hover effects, smooth transitions, dan visual hierarchy yang jelas</flux:text>
+                            <flux:text>• ✅ Bahasa Indonesia Support: Semua interface, pesan, dan labels menggunakan bahasa Indonesia yang konsisten</flux:text>
+                        </div>
+                    </div>
+
                     <div class="border-l-4 border-teal-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
                             <flux:text class="font-semibold text-teal-600 dark:text-teal-400">v1.21.0 - Vehicle File Management System</flux:text>
-                            <span class="px-2 py-1 bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">
                             <flux:text>• ✅ Complete Cash Report Module: Sistem lengkap pelaporan arus kas dengan analytics dashboard</flux:text>

@@ -5,13 +5,13 @@ namespace App\Livewire\About;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 
-    #[Title('About WOTO v1.21.0')]
+    #[Title('About WOTO v1.22.0')]
 class AboutIndex extends Component
 {
     public function render()
     {
         $systemInfo = [
-            'version' => '1.21.0',
+            'version' => '1.22.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
@@ -50,6 +50,9 @@ class AboutIndex extends Component
             'new_vehicles_this_month' => \App\Models\Vehicle::whereYear('purchase_date', now()->year)->whereMonth('purchase_date', now()->month)->count(),
             'vehicles_ready_for_sale' => \App\Models\Vehicle::where('status', 1)->count(),
             'total_cost_this_month' => \App\Models\Cost::whereYear('cost_date', now()->year)->whereIn('cost_type', ['service_parts', 'other_cost', 'showroom'])->whereMonth('cost_date', now()->month)->sum('total_price'),
+            // Sales Report Statistics
+            'total_vehicles_sold' => \App\Models\Vehicle::where('status', 0)->whereNotNull('selling_date')->count(),
+            'total_sales_all_time' => \App\Models\Vehicle::where('status', 0)->whereNotNull('selling_date')->sum('selling_price'),
         ];
 
         return view('livewire.about.about-index', compact('systemInfo', 'stats'));

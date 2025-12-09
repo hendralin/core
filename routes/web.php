@@ -73,6 +73,7 @@ use App\Livewire\VehicleModel\VehicleModelCreate;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
 use App\Livewire\Report\CashReport\CashReportIndex;
 use App\Livewire\PaymentReceipt\PaymentReceiptAudit;
+use App\Livewire\Report\SalesReport\SalesReportIndex;
 use App\Livewire\LoanCalculation\LoanCalculationAudit;
 use App\Livewire\PurchasePayment\PurchasePaymentAudit;
 use App\Livewire\CashDisbursement\CashDisbursementEdit;
@@ -203,6 +204,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('cash-injects/{cost}', CashInjectShow::class)->name('cash-injects.show')->middleware(['permission:cash-inject.view']);
 
     Route::get('cash-reports', CashReportIndex::class)->name('cash-reports.index')->middleware(['permission:cash-report.view']);
+    Route::get('sales-reports', SalesReportIndex::class)->name('sales-reports.index')->middleware(['permission:sales-report.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
