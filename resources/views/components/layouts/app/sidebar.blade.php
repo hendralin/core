@@ -161,7 +161,7 @@
                 @if (auth()->user()->can('cash-report.view'))
                     <flux:navlist.group :heading="__('Report')" class="grid">
                         @if (auth()->user()->can('cash-report.view'))
-                            <flux:navlist.item icon="document-chart-bar" :href="route('cash-report.index')" :current="request()->routeIs('cash-report.*')" wire:navigate>{{ __('Laporan Kas') }}</flux:navlist.item>
+                            <flux:navlist.item icon="document-chart-bar" :href="route('cash-reports.index')" :current="request()->routeIs('cash-reports.*')" wire:navigate>{{ __('Laporan Kas') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

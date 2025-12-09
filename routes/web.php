@@ -27,7 +27,6 @@ use App\Livewire\Roles\RoleCreate;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Users\UserCreate;
 use App\Livewire\Brand\BrandCreate;
-use App\Livewire\Report\CashReport;
 use App\Livewire\Settings\Password;
 use App\Livewire\Vendor\VendorEdit;
 use App\Livewire\Vendor\VendorShow;
@@ -72,6 +71,7 @@ use App\Livewire\VehicleModel\VehicleModelAudit;
 use App\Livewire\VehicleModel\VehicleModelIndex;
 use App\Livewire\VehicleModel\VehicleModelCreate;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
+use App\Livewire\Report\CashReport\CashReportIndex;
 use App\Livewire\PaymentReceipt\PaymentReceiptAudit;
 use App\Livewire\LoanCalculation\LoanCalculationAudit;
 use App\Livewire\PurchasePayment\PurchasePaymentAudit;
@@ -202,7 +202,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('cash-injects/{cost}/edit', CashInjectEdit::class)->name('cash-injects.edit')->middleware(['permission:cash-inject.edit']);
     Route::get('cash-injects/{cost}', CashInjectShow::class)->name('cash-injects.show')->middleware(['permission:cash-inject.view']);
 
-    Route::get('cash-report', CashReport::class)->name('cash-report.index')->middleware(['permission:cash-report.view']);
+    Route::get('cash-reports', CashReportIndex::class)->name('cash-reports.index')->middleware(['permission:cash-report.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);

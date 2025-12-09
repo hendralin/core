@@ -141,9 +141,9 @@
                 @if($costs->currentPage() === 1)
                     <!-- Opening Balance Row -->
                     <tr class="bg-blue-50 dark:bg-zinc-900/30 border-b-2 border-blue-200 dark:border-zinc-700">
-                        <td class="px-4 py-3 text-center font-semibold text-blue-900 dark:text-blue-100">-</td>
-                        <td class="px-4 py-3 font-semibold text-blue-900 dark:text-blue-100" colspan="4">Opening Balance</td>
-                        <td class="px-4 py-3 text-right font-bold @if($openingBalance >= 0) text-green-600 dark:text-green-400 @else text-red-600 dark:text-red-400 @endif">
+                        <td class="px-4 py-2 text-center font-semibold text-blue-900 dark:text-blue-100">-</td>
+                        <td class="px-4 py-2 font-semibold text-blue-900 dark:text-blue-100" colspan="4">Opening Balance</td>
+                        <td class="px-4 py-2 text-right font-bold @if($openingBalance >= 0) text-green-600 dark:text-green-400 @else text-red-600 dark:text-red-400 @endif">
                             @if($openingBalance >= 0)
                                 Rp {{ number_format($openingBalance, 0) }}
                             @else

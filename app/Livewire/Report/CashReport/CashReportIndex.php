@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Report;
+namespace App\Livewire\Report\CashReport;
 
 use App\Models\Cost;
 use Livewire\Component;
@@ -8,12 +8,11 @@ use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\CashReportExport;
-use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Maatwebsite\Excel\Facades\Excel;
 
 #[Title('Laporan Kas')]
-class CashReport extends Component
+class CashReportIndex extends Component
 {
     use WithPagination, WithoutUrlPagination;
 
@@ -161,7 +160,7 @@ class CashReport extends Component
             ]
         ];
 
-        return view('livewire.report.cash-report', compact('costs', 'totalDebet', 'totalKredit', 'netBalance', 'costsWithBalance', 'openingBalance', 'stats'));
+        return view('livewire.report.cash-report.cash-report-index', compact('costs', 'totalDebet', 'totalKredit', 'netBalance', 'costsWithBalance', 'openingBalance', 'stats'));
     }
 
     public function exportExcel()
