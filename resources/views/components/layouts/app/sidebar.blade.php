@@ -174,6 +174,7 @@
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
                         <flux:navlist.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup & Restore') }}</flux:navlist.item>
                     @endif
+                    <flux:navlist.item icon="book-open-text" :href="route('change-log.index')" :current="request()->routeIs('change-log.index')" wire:navigate>{{ __('Change Log') }}</flux:navlist.item>
                     <flux:navlist.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>

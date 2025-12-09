@@ -55,6 +55,7 @@ use App\Livewire\Category\CategoryCreate;
 use App\Livewire\Salesman\SalesmanCreate;
 use App\Livewire\Warehouse\WarehouseEdit;
 use App\Livewire\Warehouse\WarehouseShow;
+use App\Livewire\ChangeLog\ChangeLogIndex;
 use App\Livewire\Warehouse\WarehouseAudit;
 use App\Livewire\Warehouse\WarehouseIndex;
 use App\Livewire\CashInject\CashInjectEdit;
@@ -211,6 +212,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('about', AboutIndex::class)->name('about.index');
+    Route::get('change-log', ChangeLogIndex::class)->name('change-log.index');
 });
 
 require __DIR__ . '/auth.php';
