@@ -12,6 +12,8 @@ use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use App\Models\PaymentReceipt;
 use App\Models\VehicleCertificateReceipt;
+use App\Models\VehicleFile;
+use App\Models\VehicleFileTitle;
 use Livewire\Attributes\Title;
 use App\Models\LoanCalculation;
 use App\Models\PurchasePayment;
@@ -30,6 +32,7 @@ class VehicleShow extends Component
     public Vehicle $vehicle;
     public $recentActivities;
     public $costSummary;
+    public $vehicleFileTitles;
 
     // Modal properties
     public $showBuyerModal = false;
@@ -130,9 +133,20 @@ class VehicleShow extends Component
     public $uploadingCertificateReceiptId = null;
     public $certificate_receipt_file = [];
 
+    // Vehicle file modal properties
+    public $showFileModal = false;
+    public $vehicle_file_title_id = '';
+    public $vehicle_file = [];
+
+    // Edit vehicle file properties
+    public $editingVehicleFileId = null;
+
     public function mount(Vehicle $vehicle): void
     {
-        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments', 'paymentReceipts', 'vehicleCertificateReceipts', 'vehicleHandovers']);
+        $this->vehicle = $vehicle->load(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'commissions', 'equipment', 'loanCalculations', 'purchasePayments', 'paymentReceipts', 'vehicleCertificateReceipts', 'vehicleHandovers', 'vehicleFiles']);
+
+        // Load vehicle file titles
+        $this->vehicleFileTitles = VehicleFileTitle::all();
 
         // Get cost summary for this vehicle
         $this->loadCostSummary();
@@ -209,7 +223,9 @@ class VehicleShow extends Component
     {
         return view('livewire.vehicle.vehicle-show', [
             'costs' => $this->getCosts(),
-            'priceAnalysis' => $this->getPriceAnalysis()
+            'priceAnalysis' => $this->getPriceAnalysis(),
+            'vehicleFileTitles' => $this->vehicleFileTitles,
+            'editingVehicleFileId' => $this->editingVehicleFileId
         ]);
     }
 
@@ -2092,6 +2108,210 @@ class VehicleShow extends Component
             // Close modal
             $this->closeUploadCertificateReceiptModal();
         }
+    }
+
+    // Vehicle File Modal Methods
+    public function openFileModal()
+    {
+        $this->resetFileForm();
+        $this->showFileModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function closeFileModal()
+    {
+        $this->showFileModal = false;
+        $this->resetFileForm();
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    private function resetFileForm()
+    {
+        $this->vehicle_file_title_id = '';
+        $this->vehicle_file = [];
+        $this->editingVehicleFileId = null;
+    }
+
+    public function saveVehicleFile()
+    {
+        $this->validate([
+            'vehicle_file_title_id' => 'required|exists:vehicle_file_titles,id',
+            'vehicle_file' => 'required|array|max:5',
+            'vehicle_file.*' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120', // 5MB max per file
+        ], [
+            'vehicle_file_title_id.required' => 'Tipe file harus dipilih.',
+            'vehicle_file_title_id.exists' => 'Tipe file tidak valid.',
+            'vehicle_file.required' => 'File harus dipilih.',
+            'vehicle_file.array' => 'File harus berupa array.',
+            'vehicle_file.max' => 'Maksimal 5 file yang dapat diupload.',
+            'vehicle_file.*.required' => 'File harus dipilih.',
+            'vehicle_file.*.file' => 'File harus berupa file yang valid.',
+            'vehicle_file.*.mimes' => 'File harus berupa PDF, JPG, JPEG, PNG, DOC, atau DOCX.',
+            'vehicle_file.*.max' => 'Ukuran file maksimal 5MB.',
+        ]);
+
+        // Handle multiple file uploads
+        $documentPath = null;
+        if ($this->vehicle_file) {
+            $fileNames = [];
+
+            // Always treat as array since we use multiple attribute
+            $files = (array) $this->vehicle_file;
+
+            foreach ($files as $file) {
+                if ($file && is_object($file)) { // Make sure it's a valid file object
+                    $storedPath = $file->store('documents/vehicle-files', 'public');
+                    $fileNames[] = basename($storedPath);
+                }
+            }
+
+            if (!empty($fileNames)) {
+                $documentPath = implode(',', $fileNames);
+            }
+        }
+
+        if ($this->editingVehicleFileId) {
+            // Update existing vehicle file
+            $vehicleFile = VehicleFile::findOrFail($this->editingVehicleFileId);
+
+            // Check if vehicle file belongs to this vehicle
+            if ($vehicleFile->vehicle_id !== $this->vehicle->id) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Store old data for logging
+            $oldVehicleFile = $vehicleFile->toArray();
+
+            // Delete old files if new files are uploaded
+            if ($documentPath && $vehicleFile->file_path) {
+                $oldFileNames = explode(',', $vehicleFile->file_path);
+                foreach ($oldFileNames as $oldFileName) {
+                    Storage::disk('public')->delete('documents/vehicle-files/' . trim($oldFileName));
+                }
+            }
+
+            // Update vehicle file record
+            $vehicleFile->update([
+                'vehicle_file_title_id' => $this->vehicle_file_title_id,
+                'file_path' => $documentPath ?: $vehicleFile->file_path, // Keep old files if no new files uploaded
+            ]);
+
+            // Log the update activity
+            activity()
+                ->performedOn($vehicleFile)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'old' => $oldVehicleFile,
+                    'attributes' => [
+                        'vehicle_file_title_id' => $this->vehicle_file_title_id,
+                        'file_path' => $vehicleFile->file_path,
+                    ]
+                ])
+                ->log('updated vehicle file');
+
+            $action = 'diperbarui';
+        } else {
+            // Create new vehicle file record
+            $vehicleFile = VehicleFile::create([
+                'vehicle_id' => $this->vehicle->id,
+                'vehicle_file_title_id' => $this->vehicle_file_title_id,
+                'file_path' => $documentPath,
+                'created_by' => Auth::id(),
+            ]);
+
+            // Log the creation activity
+            activity()
+                ->performedOn($vehicleFile)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'vehicle_id' => $this->vehicle->id,
+                        'vehicle_file_title_id' => $this->vehicle_file_title_id,
+                        'file_path' => $documentPath,
+                    ]
+                ])
+                ->log('created vehicle file');
+
+            $action = 'ditambahkan';
+        }
+
+        // Reload vehicle with vehicle files
+        $this->vehicle->load('vehicleFiles');
+
+        // Show success message
+        $fileCount = $this->vehicle_file ? count((array) $this->vehicle_file) : 0;
+        if ($this->editingVehicleFileId) {
+            session()->flash('message', 'File kendaraan berhasil diperbarui.');
+        } else {
+            session()->flash('message', $fileCount > 1 ? "{$fileCount} file kendaraan berhasil ditambahkan." : 'File kendaraan berhasil ditambahkan.');
+        }
+
+        // Close modal
+        $this->closeFileModal();
+    }
+
+    public function editVehicleFile($vehicleFileId)
+    {
+        $vehicleFile = VehicleFile::findOrFail($vehicleFileId);
+
+        // Check if vehicle file belongs to this vehicle
+        if ($vehicleFile->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->editingVehicleFileId = $vehicleFileId;
+        $this->vehicle_file_title_id = $vehicleFile->vehicle_file_title_id;
+        // Note: We can't restore the original files for editing, so we leave vehicle_file empty
+        // Users will need to re-upload files if they want to change them
+
+        $this->showFileModal = true;
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    public function deleteVehicleFile($vehicleFileId)
+    {
+        $vehicleFile = VehicleFile::findOrFail($vehicleFileId);
+
+        // Check if vehicle file belongs to this vehicle
+        if ($vehicleFile->vehicle_id !== $this->vehicle->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Store old file paths for cleanup
+        $oldFilePaths = [];
+        if ($vehicleFile->file_path) {
+            $fileNames = explode(',', $vehicleFile->file_path);
+            foreach ($fileNames as $fileName) {
+                $oldFilePaths[] = 'documents/vehicle-files/' . trim($fileName);
+            }
+        }
+
+        $oldVehicleFile = $vehicleFile->toArray();
+
+        // Delete files from storage
+        foreach ($oldFilePaths as $filePath) {
+            Storage::disk('public')->delete($filePath);
+        }
+
+        $vehicleFile->delete();
+
+        // Reload vehicle with vehicle files
+        $this->vehicle->load('vehicleFiles');
+
+        // Log the deletion activity
+        activity()
+            ->performedOn($vehicleFile)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldVehicleFile,
+            ])
+            ->log('deleted vehicle file');
+
+        // Show success message
+        session()->flash('message', 'File kendaraan berhasil dihapus.');
     }
 
     public function printPaymentReceipt($paymentReceiptId)

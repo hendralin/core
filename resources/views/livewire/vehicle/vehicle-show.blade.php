@@ -1451,6 +1451,140 @@
                     </div>
                 </div>
                 @endif
+
+                <!-- Vehicle Files -->
+                @if(auth()->user()->can('vehicle-file.view') || auth()->user()->can('vehicle-file.create') || auth()->user()->can('vehicle-file.edit') || auth()->user()->can('vehicle-file.delete') || auth()->user()->can('vehicle-file.audit'))
+                <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <flux:heading size="lg">File Management</flux:heading>
+                        <div class="flex items-center gap-2">
+                            @can('vehicle-file.audit')
+                                @if(isset($vehicle->vehicleFiles) && $vehicle->vehicleFiles->count() > 0)
+                                    <flux:button variant="filled" size="sm" href="{{ route('vehicle-files.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
+                                @endif
+                            @endcan
+                            @can('vehicle-file.create')
+                                <flux:button wire:click="openFileModal" variant="filled" size="sm" icon="plus" class="cursor-pointer" tooltip="Tambah File">Tambah</flux:button>
+                            @endcan
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white w-32">Created at</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Title</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Files</th>
+                                    <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                @if(isset($vehicle->vehicleFiles) && $vehicle->vehicleFiles->count() > 0)
+                                    @foreach($vehicle->vehicleFiles as $file)
+                                    <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                        <td class="px-4 py-1">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                {{ Carbon\Carbon::parse($file->created_at)->format('d-m-Y H:i') }}
+                                            </flux:text>
+                                        </td>
+                                        <td class="px-4 py-1">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                {{ $file->vehicleFileTitle->title ?? '-' }}
+                                            </flux:text>
+                                        </td>
+                                        <td class="px-4 py-1">
+                                            @if($file->file_path)
+                                                @php
+                                                    $files = explode(',', $file->file_path);
+                                                @endphp
+                                                <div class="flex space-x-1 space-y-1">
+                                                    @foreach($files as $singleFile)
+                                                        @php
+                                                            $fileName = trim($singleFile);
+                                                            $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                                                        @endphp
+                                                        <a href="{{ asset('documents/vehicle-files/' . $fileName) }}" target="_blank" class="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                                            @if($extension === 'pdf')
+                                                                <flux:icon.document class="w-4 h-4" />
+                                                            @elseif(in_array($extension, ['jpg', 'jpeg', 'png']))
+                                                                <flux:icon.photo class="w-4 h-4" />
+                                                            @else
+                                                                <flux:icon.document class="w-4 h-4" />
+                                                            @endif
+                                                        </a>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-1 text-center">
+                                            <div class="flex items-center justify-center space-x-1">
+                                                @can('vehicle-file.edit')
+                                                <flux:button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    icon="pencil-square"
+                                                    tooltip="Edit"
+                                                    wire:click="editVehicleFile({{ $file->id }})"
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                ></flux:button>
+                                                @endcan
+                                                @can('vehicle-file.delete')
+                                                <flux:modal.trigger name="delete-vehicle-file-{{ $file->id }}">
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="trash"
+                                                        tooltip="Hapus"
+                                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                    ></flux:button>
+                                                </flux:modal.trigger>
+                                                @endcan
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                        <td class="px-4 py-1 text-center text-sm" colspan="4">
+                                            No data available in table
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Delete Vehicle File Confirmation Modals -->
+                    @if(isset($vehicle->vehicleFiles) && $vehicle->vehicleFiles->count() > 0)
+                        @foreach($vehicle->vehicleFiles as $file)
+                        <flux:modal name="delete-vehicle-file-{{ $file->id }}" class="min-w-88">
+                            <div class="space-y-6">
+                                <div>
+                                    <flux:heading size="lg">Hapus File Kendaraan?</flux:heading>
+                                    <flux:text class="mt-2">
+                                        Apakah Anda yakin ingin menghapus file kendaraan ini? Tindakan ini tidak dapat dibatalkan.
+                                    </flux:text>
+                                </div>
+                                <div class="flex justify-end gap-2">
+                                    <flux:modal.close>
+                                        <flux:button variant="ghost">Batal</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button
+                                        wire:click="deleteVehicleFile({{ $file->id }})"
+                                        variant="danger"
+                                        class="cursor-pointer"
+                                    >
+                                        Hapus File
+                                    </flux:button>
+                                </div>
+                            </div>
+                        </flux:modal>
+                        @endforeach
+                    @endif
+                </div>
+                @endif
             </div>
 
             <!-- Sidebar Information -->
@@ -3246,6 +3380,67 @@
             </div>
         </div>
     </form>
+</flux:modal>
+
+<flux:modal wire:model.self="showFileModal" class="md:w-md" @open="resetValidation(); resetErrorBag()">
+    <div class="space-y-6">
+        <div>
+            <flux:heading size="lg">{{ $editingVehicleFileId ? 'Edit File Kendaraan' : 'Tambah File Kendaraan' }}</flux:heading>
+            <flux:text class="mt-2">{{ $editingVehicleFileId ? 'Update file terkait kendaraan ini.' : 'Upload file terkait kendaraan ini.' }}</flux:text>
+        </div>
+
+        @if (session()->has('error'))
+            <div class="mb-6">
+                <flux:callout variant="warning" class="mb-4" icon="exclamation-circle" heading="{{ session('error') }}" />
+            </div>
+        @endif
+
+        <form wire:submit="saveVehicleFile">
+            <div class="space-y-4">
+                <flux:field>
+                    <flux:label>
+                        Tipe File
+                        <span class="text-red-600 ml-1">*</span>
+                    </flux:label>
+                    <flux:select wire:model="vehicle_file_title_id" placeholder="Pilih tipe file">
+                        @if(isset($vehicleFileTitles))
+                            @foreach($vehicleFileTitles as $title)
+                                <flux:select.option value="{{ $title->id }}">{{ $title->title }}</flux:select.option>
+                            @endforeach
+                        @endif
+                    </flux:select>
+                    <flux:error name="vehicle_file_title_id" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>
+                        File
+                        <span class="text-red-600 ml-1">*</span>
+                    </flux:label>
+                    <flux:input
+                        wire:model="vehicle_file"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                        multiple
+                    />
+                    <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Format: PDF, JPG, JPEG, PNG, DOC, DOCX. Maksimal 5 file, ukuran maksimal 5MB per file.
+                    </flux:text>
+                    <flux:error name="vehicle_file" />
+                </flux:field>
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary" class="cursor-pointer">
+                    <span wire:loading.remove>{{ $editingVehicleFileId ? 'Update File' : 'Simpan File' }}</span>
+                    <span wire:loading>{{ $editingVehicleFileId ? 'Mengupdate...' : 'Menyimpan...' }}</span>
+                </flux:button>
+            </div>
+        </form>
+    </div>
 </flux:modal>
 
 </div>

@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About WOTO v1.20.0') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About WOTO v1.21.0') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -172,7 +172,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="grid grid-cols-3 gap-4 pt-2">
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">📋 Certificate Receipts</flux:text>
                             <flux:text class="text-lg font-semibold text-amber-600 dark:text-amber-400">{{ number_format($stats['certificate_receipts_count'] ?? 0) }}</flux:text>
@@ -180,6 +180,10 @@
                         <div>
                             <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">📝 Vehicle Handovers</flux:text>
                             <flux:text class="text-lg font-semibold text-orange-600 dark:text-orange-400">{{ number_format($stats['vehicle_handovers_count'] ?? 0) }}</flux:text>
+                        </div>
+                        <div>
+                            <flux:text class="text-sm font-medium text-gray-600 dark:text-zinc-400">📎 Vehicle Files</flux:text>
+                            <flux:text class="text-lg font-semibold text-cyan-600 dark:text-cyan-400">{{ number_format($stats['vehicle_files_count'] ?? 0) }}</flux:text>
                         </div>
                     </div>
 
@@ -406,7 +410,7 @@
                 <div class="space-y-4">
                     <div>
                         <flux:text class="text-justify leading-relaxed">
-                            <strong>WOTO v1.20.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem pengeluaran kas perusahaan dengan approval workflow, sistem inject kas perusahaan dengan auto approval, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan file upload, sistem berita acara serah terima kendaraan dengan auto-numbering dan file upload, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, handover management, file upload management system, salesmen management dengan auto-create user account, vehicle completeness checklist, database transactions untuk data consistency, cash inject management dengan card-based audit UI dan bahasa Indonesia support, serta advanced cash report & analytics system dengan cost type statistics, opening balance, running balance, dan professional report layout.
+                            <strong>WOTO v1.21.0</strong> adalah sistem manajemen lengkap untuk showroom penjualan mobil bekas yang dirancang khusus untuk membantu mengelola operasional bisnis dengan efisien. Sistem ini menyediakan solusi terintegrasi untuk manajemen inventori kendaraan, manajemen file kendaraan dengan multiple upload support, pencatatan biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, sistem pengeluaran kas perusahaan dengan approval workflow, sistem inject kas perusahaan dengan auto approval, sistem komisi kendaraan lengkap (sales & purchase), perhitungan kredit kendaraan dengan leasing integration, sistem pembayaran pembelian dan penerimaan pembayaran kendaraan dengan multiple file upload dan auto-numbering, sistem tanda terima BPKB dengan auto-numbering dan file upload, sistem berita acara serah terima kendaraan dengan auto-numbering dan file upload, audit trail lengkap, dan pelaporan bisnis dengan teknologi modern Laravel 12 dan Livewire 3, kini dilengkapi dengan dashboard overview real-time, advanced form features, auto-formatting prices, vendor integration, commission management, loan calculation management, purchase payment management, payment receipt management, certificate receipt management, handover management, file upload management system, salesmen management dengan auto-create user account, vehicle completeness checklist, database transactions untuk data consistency, cash inject management dengan card-based audit UI dan bahasa Indonesia support, serta advanced cash report & analytics system dengan cost type statistics, opening balance, running balance, dan professional report layout.
                         </flux:text>
                     </div>
 
@@ -538,7 +542,7 @@
                 <div class="space-y-4">
                     <div class="border-l-4 border-teal-500 pl-4">
                         <div class="flex items-center gap-2 mb-2">
-                            <flux:text class="font-semibold text-teal-600 dark:text-teal-400">v1.20.0 - Advanced Cash Report & Analytics System</flux:text>
+                            <flux:text class="font-semibold text-teal-600 dark:text-teal-400">v1.21.0 - Vehicle File Management System</flux:text>
                             <span class="px-2 py-1 bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 text-xs rounded-full">Latest</span>
                         </div>
                         <div class="space-y-1 text-sm text-gray-600 dark:text-zinc-400">

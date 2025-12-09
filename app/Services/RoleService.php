@@ -15,7 +15,7 @@ class RoleService
         'System' => ['company', 'backup-restore'],
         'Users & Roles' => ['user', 'role'],
         'Master Data' => ['brand', 'type', 'category', 'vehiclemodel', 'vendor', 'salesman', 'warehouse'],
-        'Vehicles' => ['vehicle', 'vehicle-modal', 'vehicle-commission', 'vehicle-loan-calculation', 'vehicle-purchase-payment', 'vehicle-payment-receipt', 'vehicle-registration-certificate-receipt', 'vehicle-handover'],
+        'Vehicles' => ['vehicle', 'vehicle-modal', 'vehicle-commission', 'vehicle-loan-calculation', 'vehicle-purchase-payment', 'vehicle-payment-receipt', 'vehicle-registration-certificate-receipt', 'vehicle-handover', 'vehicle-file'],
         'Cost Management' => ['cost'],
         'Cash Management' => ['cashdisbursement'],
         'Cash Inject Management' => ['cash-inject'],

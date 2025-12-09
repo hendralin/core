@@ -2,7 +2,7 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.20.0** - Advanced Cash Report & Analytics System
+**Version 1.21.0** - Vehicle File Management System
 
 ## ✨ Fitur Utama
 
@@ -115,6 +115,25 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
   - **Permission-based Access**: vehicle-handover.* permissions untuk kontrol akses
   - **Database Integration**: Foreign key ke vehicles table dengan document management
   - **Real-time Updates**: Auto-refresh data setelah create/update/delete operations
+
+### 📎 Vehicle File Management System
+- **Complete Vehicle File Module**: Sistem lengkap manajemen file kendaraan dengan multiple upload
+- **Vehicle File CRUD Operations**: Create, Read, Update, Delete file kendaraan dengan interface lengkap
+- **Multiple File Upload**: Upload multiple file sekaligus dengan comma-separated storage (max 5 files, 5MB per file)
+- **File Type Support**: Support PDF, JPG, JPEG, PNG, DOC, DOCX dengan validation lengkap
+- **File Title Management**: Sistem file title untuk mengkategorikan jenis dokumen kendaraan
+- **Advanced Form Interface**: Modal form dengan validasi lengkap, error handling, dan resetValidation
+- **File Display Enhancement**: Tampilan file dengan icon berdasarkan tipe file dan multiple download links
+- **Vehicle File Audit Trail**: Dedicated audit page dengan filtering, search, dan statistics dashboard
+- **Advanced Audit Filtering**: Search by file path/user, vehicle filter, pagination dengan 10-100 items per page
+- **Audit Trail Statistics**: Real-time dashboard dengan total activities, today count, created/updated/deleted counters
+- **Permission-based Access**: vehicle-file.* permissions untuk kontrol akses CRUD operations dan audit
+- **Database Integration**: Foreign key ke vehicles dan vehicle_file_titles table dengan file path management
+- **File Cleanup Management**: Automatic deletion of old files saat update atau delete records
+- **Real-time Updates**: Auto-refresh data setelah create/update/delete operations dengan proper file handling
+- **UI Integration**: Seamless integration dengan vehicle detail page dan audit system
+- **Error Handling**: Comprehensive validation dan user feedback untuk semua operations
+- **Audit Trail**: Activity logging lengkap dengan before/after values untuk semua perubahan vehicle files
 
 ### 📋 Master Data Management
 - **Manajemen Brand**: Database merek mobil populer di Indonesia (31+ brand)
@@ -394,6 +413,7 @@ Aplikasi akan berjalan di `http://localhost:8000`
 - **Purchase Payments**: Audit trail lengkap untuk semua aktivitas pembayaran pembelian kendaraan + Vehicle Filtering
 - **Payment Receipts**: Audit trail lengkap untuk semua aktivitas penerimaan pembayaran kendaraan + Vehicle Filtering
 - **Certificate Receipts**: Audit trail lengkap untuk semua aktivitas tanda terima BPKB kendaraan + Vehicle Filtering
+- **Vehicle Files**: Audit trail lengkap untuk semua aktivitas file kendaraan + Vehicle Filtering
 - **Brands**: Manajemen merek mobil (31+ brand Indonesia) + Audit Trail
 - **Vendors**: Manajemen vendor/supplier kendaraan + Audit Trail
 - **Salesmen**: Manajemen salesman dengan auto-create user account + Status management + Audit Trail
@@ -871,6 +891,8 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `vehicle-payment-receipt.*` - Manajemen payment receipt records (view, create, edit, delete, audit)
 - `vehicle-registration-certificate-receipt.*` - Manajemen certificate receipt records (view, create, edit, delete, audit, print)
 - `vehicle-handover.*` - Manajemen handover records (view, create, edit, delete, audit, print)
+- `vehicle-file.*` - Manajemen vehicle file records (view, create, edit, delete, audit)
+- `vehicle-file.*` - Manajemen vehicle file records (view, create, edit, delete, audit)
 - `cost.*` - Manajemen cost records (view, create, edit, delete)
 - `cash-inject.*` - Manajemen cash inject records (view, create, edit, delete)
 - `cashdisbursement.*` - Manajemen cash disbursement records (view, create, edit, delete)
@@ -885,7 +907,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 ### Admin
 - Akses penuh ke semua fitur
 - Manajemen user dan role
-- Manajemen vehicles, costs, brands, vendors, salesmen, models, categories, types, dan warehouses
+- Manajemen vehicles, vehicle files, costs, brands, vendors, salesmen, models, categories, types, dan warehouses
 - Analisis harga jual dan modal kendaraan (vehicle-modal.view)
 - Backup & restore data
 - Audit trail lengkap
@@ -893,7 +915,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 
 ### Manager
 - Melihat semua data
-- CRUD lengkap kendaraan (vehicles) dan costs
+- CRUD lengkap kendaraan (vehicles), vehicle files, dan costs
 - Analisis harga jual dan modal kendaraan (vehicle-modal.view)
 - Manajemen brands, vendors, salesmen, models, categories, types, dan warehouses
 - Approve/reject cost records dan transaksi
@@ -901,6 +923,7 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 
 ### Staff
 - CRUD kendaraan (vehicles) dengan approval manager
+- CRUD vehicle files (create, edit, delete) dengan approval manager
 - CRUD cost records dengan approval manager
 - Manajemen vendors, models, categories dan types kendaraan
 - Pencatatan biaya kendaraan
@@ -920,6 +943,8 @@ Sistem menggunakan Role-Based Access Control dengan permissions berikut:
 - `certificate_receipts` - Data tanda terima BPKB kendaraan dengan auto-numbering dan comprehensive document tracking
 - `loan_calculations` - Data perhitungan kredit kendaraan dengan relasi ke vehicles dan leasings
 - `vehicle_handovers` - Data berita acara serah terima kendaraan dengan auto-numbering dan file upload support
+- `vehicle_files` - Data file kendaraan dengan multiple file support menggunakan comma-separated storage
+- `vehicle_file_titles` - Kategori/title untuk mengorganisir jenis dokumen kendaraan
 - `costs` - Data biaya kendaraan, pengeluaran kas, dan inject kas dengan approval workflow (cost_type: service_parts/other_cost/cash)
 - `brands` - Merek mobil (31+ brand Indonesia)
 - `vendors` - Vendor/supplier kendaraan (25+ vendor Indonesia)
@@ -1010,6 +1035,11 @@ GET    /api/vehicle-handovers/{id} - Detail vehicle handover record tertentu
 POST   /api/vehicle-handovers  - Tambah vehicle handover record baru
 PUT    /api/vehicle-handovers/{id} - Update vehicle handover record
 DELETE /api/vehicle-handovers/{id} - Hapus vehicle handover record
+GET    /api/vehicle-files - List semua vehicle file records
+GET    /api/vehicle-files/{id} - Detail vehicle file record tertentu
+POST   /api/vehicle-files  - Tambah vehicle file record baru
+PUT    /api/vehicle-files/{id} - Update vehicle file record
+DELETE /api/vehicle-files/{id} - Hapus vehicle file record
 GET    /api/leasings           - List semua data leasing
 POST   /api/models             - Tambah model kendaraan baru
 PUT    /api/models/{id}        - Update model kendaraan
@@ -1074,6 +1104,27 @@ FILESYSTEM_DISK=public
 5. Buat Pull Request
 
 ## 📝 Changelog
+
+### v1.21.0 - Vehicle File Management System
+- ✅ **Complete Vehicle File Module**: Sistem lengkap manajemen file kendaraan dengan multiple upload support
+- ✅ **Vehicle File CRUD Operations**: Create, Read, Update, Delete file kendaraan dengan interface lengkap
+- ✅ **Multiple File Upload System**: Upload hingga 5 file sekaligus dengan comma-separated storage dan auto-naming
+- ✅ **File Type Validation**: Support PDF, JPG, JPEG, PNG, DOC, DOCX dengan size limit 5MB per file
+- ✅ **File Title Management**: Sistem kategorisasi file dengan vehicle_file_titles untuk mengorganisir dokumen
+- ✅ **Advanced File Display**: Tampilan file dengan icon berdasarkan tipe file (PDF/document icons) dan multiple download links
+- ✅ **File Storage Optimization**: Efficient storage menggunakan comma-separated paths dalam single database record
+- ✅ **Vehicle File Audit Trail**: Dedicated audit page dengan comprehensive filtering, search, dan statistics dashboard
+- ✅ **Advanced Audit Filtering**: Search by file path/user, vehicle filter, pagination dengan 10-100 items per page
+- ✅ **Audit Trail Statistics**: Real-time dashboard dengan total activities, today count, created/updated/deleted counters
+- ✅ **Permission-based Access Control**: vehicle-file.* permissions untuk kontrol akses CRUD operations dan audit trail
+- ✅ **Database Integration**: Foreign key relationships ke vehicles dan vehicle_file_titles dengan proper file management
+- ✅ **File Cleanup Automation**: Automatic deletion of old files saat update/delete operations untuk storage optimization
+- ✅ **Real-time Updates**: Auto-refresh data setelah create/update/delete operations dengan proper file handling
+- ✅ **UI Integration**: Seamless integration dengan vehicle detail page dan audit system menggunakan Flux UI components
+- ✅ **Error Handling & Validation**: Comprehensive validation dengan user-friendly error messages dan file type checking
+- ✅ **Audit Trail Implementation**: Activity logging lengkap dengan before/after values untuk semua file operations
+- ✅ **Responsive Design**: Mobile-friendly interface dengan proper spacing dan Flux UI consistency
+- ✅ **Bahasa Indonesia Support**: Semua interface, pesan, dan labels menggunakan bahasa Indonesia yang konsisten
 
 ### v1.20.0 - Advanced Cash Report & Analytics System
 - ✅ **Complete Cash Report Module**: Sistem lengkap pelaporan arus kas dengan analytics dashboard

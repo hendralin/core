@@ -213,18 +213,35 @@ class Vehicle extends Model
         return $this->hasMany(PaymentReceipt::class);
     }
 
+    /**
+     * Get the certificate receipts for the vehicle
+     */
     public function vehicleCertificateReceipts(): HasMany
     {
         return $this->hasMany(VehicleCertificateReceipt::class);
     }
 
+    /**
+     * Get the handovers for the vehicle
+     */
     public function vehicleHandovers(): HasMany
     {
         return $this->hasMany(VehicleHandover::class);
     }
 
+    /**
+     * Get the equipment for the vehicle
+     */
     public function vehicleEquipment(): HasOne
     {
         return $this->hasOne(VehicleEquipment::class);
+    }
+
+    /**
+     * Get the files for the vehicle
+     */
+    public function vehicleFiles(): HasMany
+    {
+        return $this->hasMany(VehicleFile::class);
     }
 }

@@ -136,6 +136,13 @@ class PermissionSeeder extends Seeder
             'vehicle-handover.print',
             'vehicle-handover.audit',
 
+            // FILE KENDARAAN
+            'vehicle-file.view',
+            'vehicle-file.create',
+            'vehicle-file.edit',
+            'vehicle-file.delete',
+            'vehicle-file.audit',
+
             // PEMBUKUAN MODAL
             'cost.view',
             'cost.create',
