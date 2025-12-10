@@ -360,6 +360,18 @@ class VehicleEdit extends Component
         $this->updateProgress();
     }
 
+    public function updatedLoanPrice()
+    {
+        $this->loan_price = $this->formatNumber($this->loan_price);
+        $this->updateProgress();
+    }
+
+    public function updatedRoadsideAllowance()
+    {
+        $this->roadside_allowance = $this->formatNumber($this->roadside_allowance);
+        $this->updateProgress();
+    }
+
     public function updatedCylinderCapacity()
     {
         $this->cylinder_capacity = $this->formatNumber($this->cylinder_capacity);

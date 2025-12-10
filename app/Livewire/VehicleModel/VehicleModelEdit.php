@@ -56,7 +56,7 @@ class VehicleModelEdit extends Component
 
         session()->flash('success', 'Vehicle model updated.');
 
-        return $this->redirect('/vehicle-models', true);
+        return $this->redirect('/models', true);
     }
 
     public function render()

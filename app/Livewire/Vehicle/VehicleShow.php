@@ -917,9 +917,9 @@ class VehicleShow extends Component
         $this->authorize('vehicle-purchase-payment.create', $this->vehicle);
 
         // Check if total payments would exceed purchase price
-        $currentTotalPaid = $this->getTotalPurchasePayments();
-        $newPaymentAmount = Str::replace(',', '', $this->purchase_payment_amount);
-        $purchasePrice = $this->vehicle->purchase_price ?? 0;
+        $currentTotalPaid = (float) $this->getTotalPurchasePayments();
+        $newPaymentAmount = (float) Str::replace(',', '', $this->purchase_payment_amount);
+        $purchasePrice = (float) ($this->vehicle->purchase_price ?? 0);
 
         if (($currentTotalPaid + $newPaymentAmount) > $purchasePrice) {
             session()->flash('error', 'Total pembayaran tidak boleh melebihi harga beli kendaraan.');
@@ -1044,9 +1044,9 @@ class VehicleShow extends Component
         $purchasePayment = PurchasePayment::findOrFail($this->editingPurchasePaymentId);
 
         // Check if total payments would exceed purchase price after update
-        $currentTotalPaid = $this->getTotalPurchasePayments() - $purchasePayment->amount; // Subtract current amount
-        $newPaymentAmount = Str::replace(',', '', $this->purchase_payment_amount);
-        $purchasePrice = $this->vehicle->purchase_price ?? 0;
+        $currentTotalPaid = (float) $this->getTotalPurchasePayments() - (float) $purchasePayment->amount; // Subtract current amount
+        $newPaymentAmount = (float) Str::replace(',', '', $this->purchase_payment_amount);
+        $purchasePrice = (float) ($this->vehicle->purchase_price ?? 0);
 
         if (($currentTotalPaid + $newPaymentAmount) > $purchasePrice) {
             session()->flash('error', 'Total pembayaran tidak boleh melebihi harga beli kendaraan.');
@@ -1252,10 +1252,10 @@ class VehicleShow extends Component
         ]);
 
         // Additional validation: check total payments against selling price
-        $totalPaymentsIncludingCurrent = $this->getTotalPaymentReceipts() + Str::replace(',', '', $this->payment_receipt_amount);
+        $totalPaymentsIncludingCurrent = (float) $this->getTotalPaymentReceipts() + (float) Str::replace(',', '', $this->payment_receipt_amount);
 
         // Total pembayaran tidak boleh melebihi harga jual
-        if ($totalPaymentsIncludingCurrent > $this->vehicle->selling_price) {
+        if ($totalPaymentsIncludingCurrent > (float) $this->vehicle->selling_price) {
             $this->addError('payment_receipt_amount', 'Total pembayaran tidak boleh melebihi Harga Jual Kendaraan (Rp ' . number_format($this->vehicle->selling_price, 0, ',', '.') . ').');
             return;
         }
@@ -1284,7 +1284,7 @@ class VehicleShow extends Component
             'payment_date' => $this->payment_receipt_date,
             'amount' => Str::replace(',', '', $this->payment_receipt_amount),
             'description' => $this->payment_receipt_description,
-            'remaining_balance' => $this->vehicle->selling_price - ($this->getTotalPaymentReceipts() + Str::replace(',', '', $this->payment_receipt_amount)),
+            'remaining_balance' => (float) $this->vehicle->selling_price - ((float) $this->getTotalPaymentReceipts() + (float) Str::replace(',', '', $this->payment_receipt_amount)),
             'must_be_settled_date' => $this->payment_receipt_must_be_settled_date ?: null,
             'document' => $documentPaths ? implode(',', $documentPaths) : null,
             'created_by' => Auth::id(),
@@ -1339,11 +1339,11 @@ class VehicleShow extends Component
 
         // Additional validation: check total payments against selling price
         $paymentReceipt = PaymentReceipt::findOrFail($this->editingPaymentReceiptId);
-        $totalPaymentsExcludingCurrent = $this->getTotalPaymentReceipts() - $paymentReceipt->amount;
-        $totalPaymentsIncludingUpdated = $totalPaymentsExcludingCurrent + Str::replace(',', '', $this->payment_receipt_amount);
+        $totalPaymentsExcludingCurrent = (float) $this->getTotalPaymentReceipts() - (float) $paymentReceipt->amount;
+        $totalPaymentsIncludingUpdated = $totalPaymentsExcludingCurrent + (float) Str::replace(',', '', $this->payment_receipt_amount);
 
         // Total pembayaran tidak boleh melebihi harga jual
-        if ($totalPaymentsIncludingUpdated > $this->vehicle->selling_price) {
+        if ($totalPaymentsIncludingUpdated > (float) $this->vehicle->selling_price) {
             $this->addError('payment_receipt_amount', 'Total pembayaran tidak boleh melebihi Harga Jual Kendaraan (Rp ' . number_format($this->vehicle->selling_price, 0, ',', '.') . ').');
             return;
         }
@@ -1372,7 +1372,7 @@ class VehicleShow extends Component
             'payment_date' => $this->payment_receipt_date,
             'amount' => Str::replace(',', '', $this->payment_receipt_amount),
             'description' => $this->payment_receipt_description,
-            'remaining_balance' => $this->vehicle->selling_price - (($this->getTotalPaymentReceipts() - $paymentReceipt->amount) + Str::replace(',', '', $this->payment_receipt_amount)),
+            'remaining_balance' => (float) $this->vehicle->selling_price - (((float) $this->getTotalPaymentReceipts() - (float) $paymentReceipt->amount) + (float) Str::replace(',', '', $this->payment_receipt_amount)),
             'must_be_settled_date' => $this->payment_receipt_must_be_settled_date ?: null,
             'document' => $documentPaths ? implode(',', $documentPaths) : null,
         ]);

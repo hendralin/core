@@ -38,7 +38,7 @@ class VehicleModelCreate extends Component
 
         session()->flash('success', 'Vehicle model created.');
 
-        return $this->redirect('/vehicle-models', true);
+        return $this->redirect('/models', true);
     }
 
     public function render()

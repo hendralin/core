@@ -250,6 +250,7 @@
                     </div>
 
                     <!-- Cost Information -->
+                    @if($vehicle->costs->count() > 0)
                     <div class="border-t border-gray-100 dark:border-zinc-700 pt-4 mt-4">
                         <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Pembukuan Modal</h4>
                         <div class="space-y-2">
@@ -263,6 +264,7 @@
                             @endforeach
                         </div>
                     </div>
+                    @endif
 
                     <!-- Total Cost Information, Total Modal Keseluruhan, Harga Jual ALL IN, Keuntungan -->
                     <div class="border-t border-gray-100 dark:border-zinc-700 pt-4 mt-4">

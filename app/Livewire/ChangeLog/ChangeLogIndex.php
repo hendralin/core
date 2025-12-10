@@ -3,14 +3,15 @@
 namespace App\Livewire\ChangeLog;
 
 use Livewire\Component;
-use Livewire\Attributes\Title;
 use Livewire\WithPagination;
+use Livewire\Attributes\Title;
+use Livewire\WithoutUrlPagination;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 #[Title('Change Log - WOTO v1.22.0')]
 class ChangeLogIndex extends Component
 {
-    use WithPagination;
+    use WithPagination, WithoutUrlPagination;
 
     public $perPage = 5; // Jumlah versi per halaman
 
