@@ -14,6 +14,12 @@ class RoleService
     private const PERMISSION_GROUPS = [
         'System' => ['company', 'backup-restore'],
         'Users & Roles' => ['user', 'role'],
+        'WAHA Configuration' => ['waha'],
+        'Sessions' => ['session'],
+        'Templates' => ['template'],
+        'Contacts' => ['contact'],
+        'Groups' => ['group'],
+
     ];
     /**
      * Check if a role can be deleted
