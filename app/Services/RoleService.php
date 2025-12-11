@@ -7,6 +7,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class RoleService
 {
@@ -52,6 +53,7 @@ class RoleService
     {
         $permissions = Permission::all();
         $grouped = array_fill_keys(array_keys(self::PERMISSION_GROUPS), []);
+        $grouped = array_fill_keys(array_keys(self::PERMISSION_GROUPS), []);
 
         foreach ($permissions as $permission) {
             $parts = explode('.', $permission->name);
@@ -63,7 +65,19 @@ class RoleService
                     $grouped[$groupName][] = $permission;
                     $groupFound = true;
                     break;
+            $resource = $parts[0] ?? null;
+
+            $groupFound = false;
+            foreach (self::PERMISSION_GROUPS as $groupName => $resources) {
+                if (in_array($resource, $resources)) {
+                    $grouped[$groupName][] = $permission;
+                    $groupFound = true;
+                    break;
                 }
+            }
+
+            // If no specific group found, put in System
+            if (!$groupFound) {
             }
 
             // If no specific group found, put in System
@@ -87,6 +101,10 @@ class RoleService
             throw new \InvalidArgumentException('Role does not exist');
         }
 
+        if (!$role->exists) {
+            throw new \InvalidArgumentException('Role does not exist');
+        }
+
         return [
             'users_count' => $role->users()->count(),
             'permissions_count' => $role->permissions()->count(),
@@ -99,6 +117,7 @@ class RoleService
      * Get roles with user counts for index page
      */
     public function getRolesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
+    public function getRolesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
     {
         // Validate sort field
         $validSortFields = ['name', 'users_count', 'created_at', 'updated_at'];
@@ -107,6 +126,8 @@ class RoleService
         return Role::query()
             ->with('permissions')
             ->withCount('users')
+            ->when(auth()->check() && !auth()->user()->hasRole(RoleConstants::SUPERADMIN), function ($q) {
+                $q->whereNotIn('name', [RoleConstants::SALESMAN, RoleConstants::CUSTOMER, RoleConstants::SUPPLIER]);
             ->when(auth()->check() && !auth()->user()->hasRole(RoleConstants::SUPERADMIN), function ($q) {
                 $q->whereNotIn('name', [RoleConstants::SALESMAN, RoleConstants::CUSTOMER, RoleConstants::SUPPLIER]);
             })
@@ -120,6 +141,10 @@ class RoleService
      */
     public function formatPermissionsForDisplay(Collection $permissions, int $limit = 3): array
     {
+        if ($limit < 1) {
+            throw new \InvalidArgumentException('Limit must be at least 1');
+        }
+
         if ($limit < 1) {
             throw new \InvalidArgumentException('Limit must be at least 1');
         }
@@ -151,6 +176,10 @@ class RoleService
             throw new \InvalidArgumentException('Role does not exist');
         }
 
+        if (!$role->exists) {
+            throw new \InvalidArgumentException('Role does not exist');
+        }
+
         $rolePermissions = $role->permissions->pluck('name')->toArray();
         $groupedPermissions = $this->getGroupedPermissions();
 
@@ -172,6 +201,10 @@ class RoleService
      */
     public function getRoleUsageStatus(Role $role): array
     {
+        if (!$role->exists) {
+            throw new \InvalidArgumentException('Role does not exist');
+        }
+
         if (!$role->exists) {
             throw new \InvalidArgumentException('Role does not exist');
         }
@@ -201,6 +234,7 @@ class RoleService
     /**
      * Get enhanced roles data for index page
      */
+    public function getEnhancedRolesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
     public function getEnhancedRolesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
     {
         $roles = $this->getRolesForIndex($search, $sortField, $sortDirection);
