@@ -23,7 +23,7 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Theming')" class="grid" @keydown.window="if ($event.ctrlKey && ($event.key === 'd' || $event.key === 'D')) $flux.dark = !$flux.dark">
+                <flux:navlist.group :heading="__('Theming')" class="grid" @keydown.window="if ($event.shiftKey && ($event.key === 'd' || $event.key === 'D')) $flux.dark = !$flux.dark">
                     <flux:navlist.item x-show="$flux.dark" icon="moon" x-data>
                         <flux:switch x-model="$flux.dark" label="Dark" class="cursor-pointer" />
                     </flux:navlist.item>
