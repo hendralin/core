@@ -92,6 +92,10 @@ class ContactsIndex extends Component
             // Get the selected session
             $session = Session::find($this->selectedSessionId);
 
+            if (!$session) {
+                throw new \Exception('Selected session no longer exists. Please refresh the page and try again.');
+            }
+
             // Call WAHA API to get contacts
             $response = Http::withHeaders([
                 'accept' => '*/*',
