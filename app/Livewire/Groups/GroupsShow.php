@@ -50,7 +50,7 @@ class GroupsShow extends Component
             $response = Http::withHeaders([
                 'accept' => 'application/json',
                 'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->get(env('WAHA_API_URL') . '/api/' . $this->group->wahaSession->session_id . '/groups/' . $this->group->group_wa_id . '/picture', [
+            ])->get(env('WAHA_API_URL') . '/api/' . $this->group->wahaSession?->session_id . '/groups/' . $this->group->group_wa_id . '/picture', [
                 'refresh' => 'false'
             ]);
 
@@ -90,7 +90,7 @@ class GroupsShow extends Component
             ])->get(env('WAHA_API_URL') . '/api/contacts/profile-picture', [
                 'contactId' => $participantId,
                 'refresh' => 'false',
-                'session' => $this->group->wahaSession->session_id
+                'session' => $this->group->wahaSession?->session_id
             ]);
 
             if ($response->successful()) {

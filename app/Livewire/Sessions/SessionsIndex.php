@@ -85,6 +85,8 @@ class SessionsIndex extends Component
 
     public function delete($id = null)
     {
+        $this->authorize('session.delete');
+
         try {
             $sessionId = $id ?: $this->sessionIdToDelete;
 
@@ -142,7 +144,7 @@ class SessionsIndex extends Component
                 return;
             }
         } catch (\Throwable $e) {
-            if ($e->errorInfo[0] == 23000) {
+            if ($e instanceof \PDOException && isset($e->errorInfo[0]) && $e->errorInfo[0] == 23000) {
                 session()->flash('error', "The session cannot be deleted because it is already in use.");
             } else {
                 session()->flash('error', $e->getMessage());

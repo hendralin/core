@@ -38,7 +38,7 @@ class ContactsShow extends Component
             ])->get(env('WAHA_API_URL') . '/api/contacts/profile-picture', [
                 'contactId' => $this->contact->wa_id,
                 'refresh' => 'false',
-                'session' => $this->contact->wahaSession->session_id
+                'session' => $this->contact->wahaSession?->session_id
             ]);
 
             if ($response->successful()) {

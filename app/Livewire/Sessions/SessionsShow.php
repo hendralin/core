@@ -306,7 +306,6 @@ class SessionsShow extends Component
     {
         $this->authorize('session.delete');
 
-        try {
             // First, delete from WAHA API
             try {
                 $apiResponse = Http::withHeaders([
@@ -325,6 +324,8 @@ class SessionsShow extends Component
                 return;
             }
 
+        // API deletion successful, now delete from database
+        try {
             DB::transaction(function () {
                 // Log activity before deletion
                 activity()
@@ -344,13 +345,20 @@ class SessionsShow extends Component
             });
 
             session()->flash('success', 'Session deleted from database and WAHA API.');
-
             return $this->redirect('/sessions', true);
         } catch (\Throwable $e) {
-            if ($e->errorInfo[0] == 23000) {
-                session()->flash('error', "The session cannot be deleted because it is already in use.");
+            // Database deletion failed after successful API deletion
+            Log::critical('Database deletion failed after successful WAHA API deletion', [
+                'session_id' => $this->session->session_id,
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id(),
+                'ip' => Request::ip(),
+            ]);
+
+            if ($e instanceof \PDOException && isset($e->errorInfo[0]) && $e->errorInfo[0] == 23000) {
+                session()->flash('error', "The session cannot be deleted because it is already in use. The session was successfully deleted from WAHA API but remains in the database.");
             } else {
-                session()->flash('error', $e->getMessage());
+                session()->flash('error', "Session was deleted from WAHA API but database deletion failed: " . $e->getMessage() . ". Please contact an administrator.");
             }
         }
     }

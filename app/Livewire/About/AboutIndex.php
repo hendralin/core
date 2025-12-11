@@ -103,8 +103,8 @@ class AboutIndex extends Component
             'groups' => Group::count(),
             'templates' => Template::count(),
             'active_templates' => Template::where('is_active', true)->count(),
-            'communities' => Group::whereRaw("JSON_EXTRACT(detail, '$.isCommunity') = true")->count(),
-            'regular_groups' => Group::whereRaw("JSON_EXTRACT(detail, '$.isCommunity') = false")->count(),
+            'communities' => Group::where('detail->isCommunity', true)->count(),
+            'regular_groups' => Group::where('detail->isCommunity', false)->count(),
         ];
     }
 }

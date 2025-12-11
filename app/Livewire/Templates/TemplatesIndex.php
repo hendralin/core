@@ -90,8 +90,16 @@ class TemplatesIndex extends Component
 
     public function delete()
     {
+        $this->authorize('template.delete');
+
         try {
             $template = Template::find($this->templateToDelete);
+
+            if (!$template) {
+                session()->flash('error', 'Template not found or already deleted.');
+                $this->templateToDelete = null;
+                return;
+            }
 
             DB::transaction(function () use ($template) {
                 // Log activity before deletion
@@ -117,7 +125,7 @@ class TemplatesIndex extends Component
             session()->flash('success', 'Template deleted.');
             $this->templateToDelete = null;
         } catch (\Throwable $e) {
-            if ($e->errorInfo[0] == 23000) {
+            if ($e instanceof \PDOException && isset($e->errorInfo[0]) && $e->errorInfo[0] == 23000) {
                 session()->flash('error', "The {$template->name} cannot be deleted because it is already in use.");
             } else {
                 session()->flash('error', $e->getMessage());

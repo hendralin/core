@@ -17,6 +17,8 @@ class TemplatesEdit extends Component
 
     public function mount(Template $template): void
     {
+        $this->authorize('template.edit');
+
         $this->template = $template;
         $this->name = $template->name;
         $this->header = $template->header;

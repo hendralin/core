@@ -14,6 +14,8 @@ class TemplatesCreate extends Component
 
     public function submit()
     {
+        $this->authorize('template.create');
+
         $this->validate([
             'name' => 'required|string|max:255|unique:templates,name|regex:/^[a-z_]+$/',
             'header' => 'nullable|string|max:60',

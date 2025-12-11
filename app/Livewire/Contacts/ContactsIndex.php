@@ -79,6 +79,8 @@ class ContactsIndex extends Component
 
     public function syncContacts()
     {
+        $this->authorize('contact.sync');
+
         $this->validate([
             'selectedSessionId' => 'required|exists:waha_sessions,id',
         ], [
@@ -150,15 +152,14 @@ class ContactsIndex extends Component
                 ])
                 ->log('synchronized contacts from session');
 
-            // Reset selected session and close modal
-            $this->selectedSessionId = null;
-
-            $this->modal('sync-contacts-modal')->close();
-
             session()->flash('success', "Successfully synchronized {$syncedCount} contacts from {$session->name}.");
         } catch (\Throwable $e) {
             session()->flash('error', 'Failed to synchronize contacts: ' . $e->getMessage());
         }
+
+        // Reset selected session and close modal regardless of success/failure
+        $this->selectedSessionId = null;
+        $this->modal('sync-contacts-modal')->close();
     }
 
     public function render()

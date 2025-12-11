@@ -107,9 +107,6 @@ class RoleService
         return Role::query()
             ->with('permissions')
             ->withCount('users')
-            ->when(auth()->check() && !auth()->user()->hasRole(RoleConstants::SUPERADMIN), function ($q) {
-                $q->whereNotIn('name', [RoleConstants::SALESMAN, RoleConstants::CUSTOMER, RoleConstants::SUPPLIER]);
-            })
             ->when($search, fn($q) => $q->where('name', 'like', '%' . $search . '%'))
             ->orderBy($sortField, $sortDirection)
             ->paginate(10);

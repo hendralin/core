@@ -79,6 +79,8 @@ class GroupsIndex extends Component
 
     public function syncGroups()
     {
+        $this->authorize('group.sync');
+
         $this->validate([
             'selectedSessionId' => 'required|exists:waha_sessions,id',
         ], [
@@ -142,15 +144,14 @@ class GroupsIndex extends Component
                 ])
                 ->log('synchronized groups from session');
 
-            // Reset selected session and close modal
-            $this->selectedSessionId = null;
-
-            $this->modal('sync-groups-modal')->close();
-
             session()->flash('success', "Successfully synchronized {$syncedCount} groups from {$session->name}.");
         } catch (\Throwable $e) {
             session()->flash('error', 'Failed to synchronize groups: ' . $e->getMessage());
         }
+
+        // Reset selected session and close modal regardless of success/failure
+        $this->selectedSessionId = null;
+        $this->modal('sync-groups-modal')->close();
     }
 
     public function render()
@@ -164,8 +165,8 @@ class GroupsIndex extends Component
                 });
             })
             ->when($this->sessionFilter, fn($q) => $q->where('waha_session_id', $this->sessionFilter))
-            ->when($this->communityFilter === 'community', fn($q) => $q->whereRaw("JSON_EXTRACT(detail, '$.isCommunity') = true"))
-            ->when($this->communityFilter === 'group', fn($q) => $q->whereRaw("JSON_EXTRACT(detail, '$.isCommunity') = false"))
+            ->when($this->communityFilter === 'community', fn($q) => $q->where('detail->isCommunity', true))
+            ->when($this->communityFilter === 'group', fn($q) => $q->where('detail->isCommunity', false))
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
