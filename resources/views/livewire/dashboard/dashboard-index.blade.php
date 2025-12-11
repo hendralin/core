@@ -82,7 +82,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div class="text-center">
                     <p class="text-sm font-medium text-gray-500 dark:text-zinc-400">Total Sales</p>
-                    <p class="text-xl font-bold text-gray-800 dark:text-zinc-100 mt-1">Rp {{ number_format($this->totalSalesThisMonth, 0, ',', '.') }}</p>
+                    <p class="text-xl font-bold text-gray-800 dark:text-zinc-100 mt-1">Rp {{ number_format($this->totalSalesThisYear, 0, ',', '.') }}</p>
                 </div>
                 <div class="text-center">
                     <p class="text-sm font-medium text-gray-500 dark:text-zinc-400">This Month</p>

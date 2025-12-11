@@ -34,7 +34,15 @@ class DashboardIndex extends Component
     {
         return Cost::whereYear('cost_date', Carbon::now()->year)
             ->whereMonth('cost_date', Carbon::now()->month)
+            ->whereNotIn('cost_type', ['cash'])
             ->sum('total_price');
+    }
+
+    public function getTotalSalesThisYearProperty()
+    {
+        return Vehicle::where('status', '0')
+            ->whereYear('selling_date', Carbon::now()->year)
+            ->sum('selling_price') ?? 0;
     }
 
     public function getTotalSalesThisMonthProperty()
