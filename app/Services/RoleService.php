@@ -6,9 +6,15 @@ use App\Constants\RoleConstants;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class RoleService
 {
+    // Permission group constants based on PermissionSeeder
+    private const PERMISSION_GROUPS = [
+        'System' => ['company', 'backup-restore'],
+        'Users & Roles' => ['user', 'role'],
+    ];
     /**
      * Check if a role can be deleted
      */
@@ -39,73 +45,23 @@ class RoleService
     public function getGroupedPermissions(): array
     {
         $permissions = Permission::all();
-
-        $grouped = [
-            'System' => [],
-            'Users & Roles' => [],
-            'Master Data' => [],
-            'Inventory' => [],
-            'Cost Management' => [],
-            'Transactions' => [],
-            'Reports' => [],
-            'Sales & Cashier' => [],
-        ];
+        $grouped = array_fill_keys(array_keys(self::PERMISSION_GROUPS), []);
 
         foreach ($permissions as $permission) {
             $parts = explode('.', $permission->name);
+            $resource = $parts[0] ?? null;
 
-            if (count($parts) >= 2) {
-                $resource = $parts[0];
-
-                switch ($resource) {
-                    case 'company':
-                    case 'backup-restore':
-                        $grouped['System'][] = $permission;
-                        break;
-                    case 'user':
-                    case 'role':
-                        $grouped['Users & Roles'][] = $permission;
-                        break;
-                    case 'category':
-                    case 'merk':
-                    case 'brand':
-                    case 'type':
-                    case 'vehiclemodel':
-                    case 'warehouse':
-                    case 'customer':
-                    case 'supplier':
-                    case 'salesman':
-                    case 'vendor':
-                    case 'vehicle':
-                        $grouped['Master Data'][] = $permission;
-                        break;
-                    case 'item':
-                    case 'serial-number':
-                    case 'adjustment':
-                        $grouped['Inventory'][] = $permission;
-                        break;
-                    case 'cost':
-                        $grouped['Cost Management'][] = $permission;
-                        break;
-                    case 'purchase-order':
-                    case 'purchase-invoice':
-                    case 'sales-order':
-                    case 'received-item':
-                    case 'item-transfer':
-                    case 'vendor-payment':
-                        $grouped['Transactions'][] = $permission;
-                        break;
-                    case 'report':
-                        $grouped['Reports'][] = $permission;
-                        break;
-                    case 'cashier':
-                    case 'sale':
-                        $grouped['Sales & Cashier'][] = $permission;
-                        break;
-                    default:
-                        $grouped['System'][] = $permission;
+            $groupFound = false;
+            foreach (self::PERMISSION_GROUPS as $groupName => $resources) {
+                if (in_array($resource, $resources)) {
+                    $grouped[$groupName][] = $permission;
+                    $groupFound = true;
+                    break;
                 }
-            } else {
+            }
+
+            // If no specific group found, put in System
+            if (!$groupFound) {
                 $grouped['System'][] = $permission;
             }
         }
@@ -121,6 +77,10 @@ class RoleService
      */
     public function getRoleStatistics(Role $role): array
     {
+        if (!$role->exists) {
+            throw new \InvalidArgumentException('Role does not exist');
+        }
+
         return [
             'users_count' => $role->users()->count(),
             'permissions_count' => $role->permissions()->count(),
@@ -132,7 +92,7 @@ class RoleService
     /**
      * Get roles with user counts for index page
      */
-    public function getRolesForIndex($search = null, $sortField = 'name', $sortDirection = 'asc')
+    public function getRolesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
     {
         // Validate sort field
         $validSortFields = ['name', 'users_count', 'created_at', 'updated_at'];
@@ -141,8 +101,8 @@ class RoleService
         return Role::query()
             ->with('permissions')
             ->withCount('users')
-            ->when(!auth()->user()->hasRole('superadmin'), function ($q) {
-                $q->whereNotIn('name', ['salesman', 'customer', 'supplier']);
+            ->when(auth()->check() && !auth()->user()->hasRole(RoleConstants::SUPERADMIN), function ($q) {
+                $q->whereNotIn('name', [RoleConstants::SALESMAN, RoleConstants::CUSTOMER, RoleConstants::SUPPLIER]);
             })
             ->when($search, fn($q) => $q->where('name', 'like', '%' . $search . '%'))
             ->orderBy($sortField, $sortDirection)
@@ -154,6 +114,10 @@ class RoleService
      */
     public function formatPermissionsForDisplay(Collection $permissions, int $limit = 3): array
     {
+        if ($limit < 1) {
+            throw new \InvalidArgumentException('Limit must be at least 1');
+        }
+
         $permissionNames = $permissions->pluck('name')->toArray();
         $total = count($permissionNames);
 
@@ -177,6 +141,10 @@ class RoleService
      */
     public function getPermissionSummaryByGroups(Role $role): array
     {
+        if (!$role->exists) {
+            throw new \InvalidArgumentException('Role does not exist');
+        }
+
         $rolePermissions = $role->permissions->pluck('name')->toArray();
         $groupedPermissions = $this->getGroupedPermissions();
 
@@ -198,6 +166,10 @@ class RoleService
      */
     public function getRoleUsageStatus(Role $role): array
     {
+        if (!$role->exists) {
+            throw new \InvalidArgumentException('Role does not exist');
+        }
+
         $usersCount = $role->users()->count();
         $permissionsCount = $role->permissions()->count();
 
@@ -223,7 +195,7 @@ class RoleService
     /**
      * Get enhanced roles data for index page
      */
-    public function getEnhancedRolesForIndex($search = null, $sortField = 'name', $sortDirection = 'asc')
+    public function getEnhancedRolesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
     {
         $roles = $this->getRolesForIndex($search, $sortField, $sortDirection);
 

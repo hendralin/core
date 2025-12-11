@@ -22,6 +22,24 @@ class RoleEdit extends Component
 
     public $groupedPermissions = [];
 
+    public function toggleGroupPermissions($groupName)
+    {
+        if (!isset($this->groupedPermissions[$groupName])) {
+            return;
+        }
+
+        $groupPermissionNames = collect($this->groupedPermissions[$groupName])->pluck('name')->toArray();
+        $selectedInGroup = array_intersect($this->permissions, $groupPermissionNames);
+
+        if (count($selectedInGroup) === count($groupPermissionNames)) {
+            // All permissions in group are selected, deselect them
+            $this->permissions = array_diff($this->permissions, $groupPermissionNames);
+        } else {
+            // Not all permissions selected, select all
+            $this->permissions = array_unique(array_merge($this->permissions, $groupPermissionNames));
+        }
+    }
+
     public function boot(RoleService $roleService)
     {
         $this->roleService = $roleService;
