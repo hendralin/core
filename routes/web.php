@@ -33,6 +33,9 @@ use App\Livewire\Templates\TemplatesAudit;
 use App\Livewire\Templates\TemplatesIndex;
 use App\Livewire\Templates\TemplatesCreate;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
+use App\Livewire\Broadcast\Messages\MesssagesAudit;
+use App\Livewire\Broadcast\Messages\MesssagesIndex;
+use App\Livewire\Broadcast\Messages\MesssagesCreate;
 
 // License expired page (accessible even when license is expired)
 Route::get('/license-expired', function () {
@@ -99,6 +102,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('templates/create', TemplatesCreate::class)->name('templates.create')->middleware(['permission:template.create']);
     Route::get('templates/{template}/edit', TemplatesEdit::class)->name('templates.edit')->middleware(['permission:template.edit']);
     Route::get('templates/{template}', TemplatesShow::class)->name('templates.show')->middleware(['permission:template.view']);
+
+    Route::get('messages', MesssagesIndex::class)->name('messages.index')->middleware(['permission:message.view|message.send|message.audit']);
+    Route::get('messages/audit', MesssagesAudit::class)->name('messages.audit')->middleware(['permission:message.audit']);
+    Route::get('messages/create', MesssagesCreate::class)->name('messages.create')->middleware(['permission:message.send']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);

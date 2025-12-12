@@ -19,7 +19,7 @@ class RoleService
         'Templates' => ['template'],
         'Contacts' => ['contact'],
         'Groups' => ['group'],
-
+        'Broadcast' => ['message'],
     ];
     /**
      * Check if a role can be deleted

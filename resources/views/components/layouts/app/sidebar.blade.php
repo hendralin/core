@@ -102,6 +102,18 @@
                     </flux:navlist.group>
                 @endif
 
+                @if (auth()->user()->can('message.view') ||
+                auth()->user()->can('message.send') ||
+                auth()->user()->can('message.audit'))
+                    <flux:navlist.group :heading="__('Broadcast')" class="grid">
+                        @if (auth()->user()->can('message.view') ||
+                        auth()->user()->can('message.send') ||
+                        auth()->user()->can('message.audit'))
+                            <flux:navlist.item icon="chat-bubble-left-ellipsis" :href="route('messages.index')" :current="request()->routeIs('messages.*')" wire:navigate>{{ __('Messages') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
+
                 <flux:navlist.group :heading="__('Tool')" class="grid">
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
                         <flux:navlist.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup & Restore') }}</flux:navlist.item>

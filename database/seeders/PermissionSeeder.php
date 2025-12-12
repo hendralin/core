@@ -50,6 +50,9 @@ class PermissionSeeder extends Seeder
             'contact.sync',
             'group.view',
             'group.sync',
+            'message.view',
+            'message.send',
+            'message.audit',
         ];
 
         foreach ($permissions as $key => $value) {
