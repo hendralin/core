@@ -3,6 +3,7 @@
 namespace App\Livewire\Templates;
 
 use App\Models\Template;
+use App\Models\Session;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -19,20 +20,33 @@ class TemplatesIndex extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'statusFilter' => ['except' => ''],
+        'selectedSession' => ['except' => ''],
         'sortField' => ['except' => 'name'],
         'sortDirection' => ['except' => 'asc'],
     ];
 
     public $search = '';
     public $statusFilter = '';
+    public $selectedSession = '';
     public $sortField = 'name';
     public $sortDirection = 'asc';
     public $perPage = 10;
 
     public $templateToDelete;
     public $templateToPreview;
+    public $sessions = [];
+
+    public function mount()
+    {
+        $this->sessions = Session::all();
+    }
 
     public function updatedStatusFilter()
+    {
+        $this->clearPage();
+    }
+
+    public function updatedSelectedSession()
     {
         $this->clearPage();
     }
@@ -61,7 +75,8 @@ class TemplatesIndex extends Component
     {
         $this->reset([
             'search',
-            'statusFilter'
+            'statusFilter',
+            'selectedSession'
         ]);
 
         $this->resetPage();
@@ -135,7 +150,7 @@ class TemplatesIndex extends Component
 
     public function render()
     {
-        $templates = Template::with(['createdBy', 'updatedBy'])
+        $templates = Template::with(['createdBy', 'updatedBy', 'wahaSession'])
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')
@@ -144,6 +159,7 @@ class TemplatesIndex extends Component
                 });
             })
             ->when($this->statusFilter !== '', fn($q) => $q->where('is_active', $this->statusFilter === 'active' ? 1 : 0))
+            ->when($this->selectedSession !== '', fn($q) => $q->where('waha_session_id', $this->selectedSession))
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 

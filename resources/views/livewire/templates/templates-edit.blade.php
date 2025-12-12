@@ -16,6 +16,13 @@
                         <flux:heading size="lg" class="mb-6">Edit Template</flux:heading>
 
                         <form wire:submit="submit" class="space-y-6">
+                            <flux:select wire:model="waha_session_id" label="Session" description="Select the session for this template">
+                                <flux:select.option value="" label="Select Session" />
+                                @foreach($sessions as $session)
+                                    <flux:select.option value="{{ $session->id }}">{{ $session->name }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+
                             <flux:input wire:model="name" label="Template Name" placeholder="Enter template name..." required />
 
                             <flux:input wire:model.live="header" label="Header" placeholder="Enter template header (optional)..." />

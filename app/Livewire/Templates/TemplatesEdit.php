@@ -2,24 +2,25 @@
 
 namespace App\Livewire\Templates;
 
-use App\Models\Template;
+use App\Models\Session;
 use Livewire\Component;
+use App\Models\Template;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
 
 #[Title('Edit Template')]
 class TemplatesEdit extends Component
 {
     public Template $template;
 
-    public $name, $header, $body, $is_active;
+    public $waha_session_id, $name, $header, $body, $is_active;
 
     public function mount(Template $template): void
     {
         $this->authorize('template.edit');
 
         $this->template = $template;
+        $this->waha_session_id = $template->waha_session_id;
         $this->name = $template->name;
         $this->header = $template->header;
         $this->body = $template->body;
@@ -29,11 +30,15 @@ class TemplatesEdit extends Component
     public function submit()
     {
         $this->validate([
+            'waha_session_id' => 'required|exists:waha_sessions,id',
             'name' => 'required|string|max:255|unique:templates,name,' . $this->template->id . '|regex:/^[a-z_]+$/',
             'header' => 'nullable|string|max:60',
             'body' => 'required|string|max:1024',
             'is_active' => 'boolean',
         ], [
+            'waha_session_id.required' => 'Please select a session.',
+            'waha_session_id.exists' => 'Selected session does not exist.',
+
             'name.required' => 'Template name is required.',
             'name.string' => 'Template name must be text.',
             'name.max' => 'Template name cannot exceed 255 characters.',
@@ -52,12 +57,14 @@ class TemplatesEdit extends Component
 
         // Store old values for logging
         $oldValues = [
+            'waha_session_id' => $this->template->waha_session_id,
             'name' => $this->template->name,
             'header' => $this->template->header,
             'body' => $this->template->body,
             'is_active' => $this->template->is_active,
         ];
 
+        $this->template->waha_session_id = $this->waha_session_id;
         $this->template->name = $this->name;
         $this->template->header = $this->header;
         $this->template->body = $this->body;
@@ -73,6 +80,7 @@ class TemplatesEdit extends Component
             ->withProperties([
                 'old' => $oldValues,
                 'attributes' => [
+                    'waha_session_id' => $this->waha_session_id,
                     'name' => $this->name,
                     'header' => $this->header,
                     'body' => $this->body,
@@ -90,6 +98,8 @@ class TemplatesEdit extends Component
 
     public function render()
     {
-        return view('livewire.templates.templates-edit');
+        return view('livewire.templates.templates-edit', [
+            'sessions' => Session::all(),
+        ]);
     }
 }

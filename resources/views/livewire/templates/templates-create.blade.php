@@ -16,6 +16,13 @@
                         <flux:heading size="lg" class="mb-6">Create Template</flux:heading>
 
                         <form wire:submit="submit" class="space-y-6">
+                            <flux:select wire:model="waha_session_id" label="Session" description="Select the session for this template">
+                                <flux:select.option value="" label="Select Session" />
+                                @foreach($sessions as $session)
+                                    <flux:select.option value="{{ $session->id }}">{{ $session->name }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+
                             <flux:input wire:model="name" label="Template Name" description="Use only lowercase letters and underscores. No spaces, numbers or special characters allowed." placeholder="e.g., welcome_message" />
 
                             <flux:input wire:model.live="header" label="Header Text" description="Use @{{1}} for variables. Max 60 characters." placeholder="e.g., Welcome to @{{1}}!..." />

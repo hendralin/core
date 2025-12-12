@@ -62,9 +62,17 @@
 
     <!-- Filters -->
     <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <!-- Search -->
             <flux:input type="text" label="Search Activities" wire:model.live.debounce.300ms="search" placeholder="Search activities..." clearable />
+
+            <!-- Session Filter -->
+            <flux:select label="Session" wire:model.live="selectedSession">
+                <flux:select.option value="">All Sessions</flux:select.option>
+                @foreach($sessions as $session)
+                    <flux:select.option value="{{ $session->id }}">{{ $session->name }}</flux:select.option>
+                @endforeach
+            </flux:select>
 
             <!-- Template Filter -->
             <flux:select label="Template" wire:model.live="selectedTemplate">
@@ -148,6 +156,23 @@
                                                                 <span class="font-medium">{{ ucwords(str_replace('_', ' ', $field)) }}:</span>
                                                                 @if($field === 'is_active')
                                                                     {{ $value ? 'Active' : 'Inactive' }}
+                                                                @elseif($field === 'waha_session_id')
+                                                                    @php
+                                                                        $sessionName = null;
+                                                                        if ($value) {
+                                                                            foreach($sessions as $session) {
+                                                                                if ($session->id == $value) {
+                                                                                    $sessionName = $session->name;
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    @endphp
+                                                                    @if($sessionName)
+                                                                        {{ $sessionName }}
+                                                                    @else
+                                                                        Session ID: {{ $value ?: 'N/A' }}
+                                                                    @endif
                                                                 @else
                                                                     {{ $value ?: 'N/A' }}
                                                                 @endif
@@ -161,6 +186,23 @@
                                                                 <span class="font-medium">{{ ucwords(str_replace('_', ' ', $field)) }}:</span>
                                                                 @if($field === 'is_active')
                                                                     {{ $value ? 'Active' : 'Inactive' }}
+                                                                @elseif($field === 'waha_session_id')
+                                                                    @php
+                                                                        $sessionName = null;
+                                                                        if ($value) {
+                                                                            foreach($sessions as $session) {
+                                                                                if ($session->id == $value) {
+                                                                                    $sessionName = $session->name;
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    @endphp
+                                                                    @if($sessionName)
+                                                                        {{ $sessionName }}
+                                                                    @else
+                                                                        Session ID: {{ $value ?: 'N/A' }}
+                                                                    @endif
                                                                 @else
                                                                     {{ $value ?: 'N/A' }}
                                                                 @endif
@@ -174,6 +216,23 @@
                                                         <span class="font-medium">{{ ucwords(str_replace('_', ' ', $field)) }}:</span>
                                                         @if($field === 'is_active')
                                                             {{ $value ? 'Active' : 'Inactive' }}
+                                                        @elseif($field === 'waha_session_id')
+                                                            @php
+                                                                $sessionName = null;
+                                                                if ($value) {
+                                                                    foreach($sessions as $session) {
+                                                                        if ($session->id == $value) {
+                                                                            $sessionName = $session->name;
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            @endphp
+                                                            @if($sessionName)
+                                                                {{ $sessionName }}
+                                                            @else
+                                                                Session ID: {{ $value ?: 'N/A' }}
+                                                            @endif
                                                         @else
                                                             {{ $value ?: 'N/A' }}
                                                         @endif

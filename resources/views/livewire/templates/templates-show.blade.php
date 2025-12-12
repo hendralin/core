@@ -40,10 +40,23 @@
                             <flux:text class="text-sm text-gray-500 dark:text-zinc-500">by {{ $template->updatedBy->name ?? 'Unknown' }}</flux:text>
                         </div>
                         <div>
+                            <flux:heading size="sm">Session</flux:heading>
+                            <flux:text class="mt-1">
+                                @if($template->wahaSession)
+                                    {{ $template->wahaSession->name }}
+                                    @if(!$template->wahaSession->is_active)
+                                        <flux:badge color="red" size="sm" class="ml-2">Inactive</flux:badge>
+                                    @endif
+                                @else
+                                    <span class="text-gray-400 dark:text-zinc-400">No session assigned</span>
+                                @endif
+                            </flux:text>
+                        </div>
+                        <div>
                             <flux:heading size="sm">Usage Count</flux:heading>
                             <flux:text class="mt-1">{{ $template->usage_count }}</flux:text>
                         </div>
-                        <div>
+                        <div class="col-span-2">
                             <flux:heading size="sm">Last Used</flux:heading>
                             <flux:text class="mt-1">
                                 @if($template->last_used_at)

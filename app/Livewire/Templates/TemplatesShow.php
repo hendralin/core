@@ -13,7 +13,7 @@ class TemplatesShow extends Component
 
     public function mount(Template $template): void
     {
-        $this->template = $template->load(['createdBy', 'updatedBy']); // Eager load relationships
+        $this->template = $template->load(['createdBy', 'updatedBy', 'wahaSession']); // Eager load relationships
     }
 
     public function render()

@@ -2,26 +2,31 @@
 
 namespace App\Livewire\Templates;
 
-use App\Models\Template;
+use App\Models\Session;
 use Livewire\Component;
+use App\Models\Template;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 
 #[Title('Create Template')]
 class TemplatesCreate extends Component
 {
-    public $name, $header, $body, $is_active = true;
+    public $waha_session_id, $name, $header, $body, $is_active = true;
 
     public function submit()
     {
         $this->authorize('template.create');
 
         $this->validate([
+            'waha_session_id' => 'required|exists:waha_sessions,id',
             'name' => 'required|string|max:255|unique:templates,name|regex:/^[a-z_]+$/',
             'header' => 'nullable|string|max:60',
             'body' => 'required|string|max:1024',
             'is_active' => 'boolean',
         ], [
+            'waha_session_id.required' => 'Please select a session.',
+            'waha_session_id.exists' => 'Selected session does not exist.',
+
             'name.required' => 'Template name is required.',
             'name.string' => 'Template name must be text.',
             'name.max' => 'Template name cannot exceed 255 characters.',
@@ -39,6 +44,7 @@ class TemplatesCreate extends Component
         ]);
 
         $template = Template::create([
+            'waha_session_id' => $this->waha_session_id,
             'name' => $this->name,
             'header' => $this->header,
             'body' => $this->body,
@@ -70,6 +76,8 @@ class TemplatesCreate extends Component
 
     public function render()
     {
-        return view('livewire.templates.templates-create');
+        return view('livewire.templates.templates-create', [
+            'sessions' => Session::all(),
+        ]);
     }
 }

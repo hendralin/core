@@ -17,20 +17,31 @@
         <!-- Search & Filters -->
         <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 mb-6">
             <div class="p-4 border-b border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50">
-                <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="space-y-4 lg:space-y-0 lg:flex lg:flex-wrap lg:items-center lg:justify-between lg:gap-4">
                     <!-- Search -->
-                    <div class="flex-1 max-w-md">
+                    <div class="w-full lg:flex-1 lg:max-w-md">
                         <div class="relative">
                             <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Search templates..." clearable />
                         </div>
                     </div>
 
                     <!-- Filters -->
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
+                        <!-- Session Filter -->
+                        <div class="flex items-center">
+                            <label for="session-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2 min-w-fit">Session:</label>
+                            <flux:select wire:model.live="selectedSession" class="min-w-32">
+                                <flux:select.option value="">All Sessions</flux:select.option>
+                                @foreach($sessions as $session)
+                                    <flux:select.option value="{{ $session->id }}">{{ $session->name }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+                        </div>
+
                         <!-- Status Filter -->
                         <div class="flex items-center">
-                            <label for="status-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2">Status:</label>
-                            <flux:select wire:model.live="statusFilter">
+                            <label for="status-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2 min-w-fit">Status:</label>
+                            <flux:select wire:model.live="statusFilter" class="min-w-24">
                                 <flux:select.option value="">All Status</flux:select.option>
                                 <flux:select.option value="active">Active</flux:select.option>
                                 <flux:select.option value="inactive">Inactive</flux:select.option>
@@ -39,7 +50,7 @@
 
                         <!-- Per Page Filter -->
                         <div class="flex items-center">
-                            <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2">Show:</label>
+                            <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2 min-w-fit">Show:</label>
                             <flux:select wire:model.live="perPage" class="w-20">
                                 <flux:select.option value="10">10</flux:select.option>
                                 <flux:select.option value="25">25</flux:select.option>
@@ -49,10 +60,12 @@
                         </div>
 
                         <!-- Clear Filters -->
-                        @if($search || $statusFilter)
-                            <flux:button wire:click="clearFilters" variant="ghost" class="cursor-pointer" tooltip="Clear Filters">
-                                Clear Filters
-                            </flux:button>
+                        @if($search || $statusFilter || $selectedSession)
+                            <div class="flex justify-start sm:justify-end">
+                                <flux:button wire:click="clearFilters" variant="ghost" class="cursor-pointer" tooltip="Clear Filters">
+                                    Clear Filters
+                                </flux:button>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -92,6 +105,7 @@
                                     @endif
                                 </button>
                             </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Session</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Usage Count</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Last Used</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Status</th>
@@ -126,6 +140,13 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900 dark:text-zinc-100">{{ $template->name }}</div>
                                         <div class="text-sm text-gray-500 dark:text-zinc-400">{{ Str::limit($template->body, 50) }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
+                                        @if($template->wahaSession)
+                                            {{ $template->wahaSession->name }}
+                                        @else
+                                            <span class="text-gray-400">No session</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                         {{ $template->usage_count }}
@@ -192,7 +213,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-zinc-400">
+                                <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-zinc-400">
                                     @if(isset($search) && !empty($search))
                                         No results found for "{{ $search }}"
                                     @else

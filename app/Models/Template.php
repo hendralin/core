@@ -12,6 +12,7 @@ class Template extends Model
     use HasFactory, LogsActivity;
 
     protected $fillable = [
+        'waha_session_id',
         'name',
         'header',
         'body',
@@ -40,6 +41,7 @@ class Template extends Model
     {
         return LogOptions::defaults()
             ->logOnly([
+                'waha_session_id',
                 'name',
                 'header',
                 'body',
@@ -61,5 +63,10 @@ class Template extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function wahaSession()
+    {
+        return $this->belongsTo(Session::class, 'waha_session_id');
     }
 }
