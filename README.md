@@ -21,6 +21,19 @@
 - **Real-time Status**: Live connection status and session health monitoring
 - **QR Code Scanning**: Easy WhatsApp Web authentication via QR codes
 
+### Message Broadcasting 🎯
+- **WhatsApp Broadcasting**: Send messages to contacts, groups, or bulk recipients
+- **Multiple Message Types**: Direct messages or template-based messages with parameters
+- **Bulk Message Upload**: Excel/CSV upload for mass messaging campaigns
+- **Template Parameters**: Support for header and body variables (@{{name}}, @{{price}}, etc.)
+- **Recipient Management**: Individual contacts, groups, or custom recipient lists
+- **Typing Indicators**: Professional typing indicators before message delivery
+- **WAHA API Status**: Real-time connection monitoring with user alerts
+- **Message History**: Complete logging and tracking of all sent messages
+- **Session-based Filtering**: Send messages using specific WhatsApp sessions
+- **Smart Validation**: Intelligent form validation with contextual error messages
+- **Success Reporting**: Detailed delivery statistics and failure notifications
+
 ### Template Management
 - **Message Templates**: Create and manage WhatsApp message templates
 - **Template Variables**: Support for dynamic variables (@{{1}}, @{{2}}, etc.)
@@ -56,11 +69,15 @@
 - **Dark Mode Support**: Full dark/light theme support
 
 ### Advanced Features
-- **API Health Monitoring**: Real-time WAHA server connectivity checks
-- **Template System**: Dynamic message templates with variable substitution
+- **API Health Monitoring**: Real-time WAHA server connectivity checks with user alerts
+- **Typing Indicators**: Professional WhatsApp-style typing indicators for authentic UX
+- **Bulk Processing**: Excel/CSV file processing for mass message campaigns
+- **Template Variables**: Advanced parameter substitution (header & body variables)
+- **Session Management**: Multi-session WhatsApp broadcasting capabilities
+- **Real-time Validation**: Smart form validation with contextual feedback
 - **Caching System**: Optimized performance with intelligent caching
 - **Background Jobs**: Asynchronous processing for better UX
-- **Audit Trails**: Complete activity logging and tracking
+- **Audit Trails**: Complete activity logging and message delivery tracking
 
 ## 📋 Requirements
 
@@ -111,8 +128,9 @@ DB_USERNAME=your_db_user
 DB_PASSWORD=your_db_password
 
 # WAHA Configuration
-WAHA_API_URL=https://your-waha-instance.com
+WAHA_API_URL=https://your-waha-instance.com/api
 WAHA_API_KEY=your_waha_api_key_here
+WAHA_SESSION_ID=your_session_name
 
 # Cache & Session
 CACHE_DRIVER=redis
@@ -205,6 +223,69 @@ The application includes the following permission groups:
 4. **Sync Contacts**: Synchronize contacts from WhatsApp
 5. **Sync Groups**: Synchronize groups and communities
 6. **Monitor Status**: Check connection health and session status
+
+### Message Broadcasting 🎯
+
+The Message Broadcasting feature allows you to send WhatsApp messages to individual contacts, groups, or bulk recipients through your configured WAHA sessions.
+
+#### Sending Direct Messages
+
+1. **Navigate to Messages**: Click on the "Messages" section in your dashboard
+2. **Check WAHA Status**: Ensure the WAHA API connection shows "Connected" (green status)
+3. **Select Session**: Choose the WhatsApp session to use for broadcasting
+4. **Choose Recipient Type**:
+   - **Contact**: Select from dropdown or enter phone number manually
+   - **Group**: Choose from filtered list of groups for selected session
+   - **Recipients**: Upload Excel/CSV file for bulk messaging campaigns
+5. **Compose Message**: Write your message in the text area
+6. **Send**: Click "Send Message" - typing indicators will appear automatically
+
+#### Using Message Templates
+
+1. **Select Template**: Choose from available message templates in your system
+2. **Fill Parameters**: Enter values for any template variables (header/body parameters)
+3. **Preview Message**: Review the final formatted message before sending
+4. **Send**: Messages are sent with proper variable substitution and typing indicators
+
+#### Bulk Message Campaigns
+
+1. **Download Template**: Get the appropriate Excel template for your message type
+2. **Prepare Data**: Fill the template with recipient phone numbers and message content
+3. **Upload File**: Import your recipient list through the bulk upload interface
+4. **Review Recipients**: Preview all recipients and their messages before sending
+5. **Send Campaign**: Broadcast to all recipients with professional typing indicators
+
+#### Excel Template Formats
+
+**Direct Messages Template:**
+```csv
+Phone Number,Message
+6281234567890,Hello! Welcome to our service.
+6289876543210,Thank you for your registration.
+```
+
+**Template Messages Template:**
+```csv
+Phone Number,Header Var 1,Header Var 2,Body Var 1,Body Var 2
+6281234567890,John Doe,ABC Corp,Laptop,$999
+6289876543210,Jane Smith,XYZ Ltd,Phone,$599
+```
+
+#### WAHA API Monitoring
+
+- **Real-time Status**: Automatic WAHA API connectivity monitoring
+- **Connection Alerts**: Warning messages when API connection is lost
+- **Troubleshooting Guidance**: Clear instructions for fixing configuration issues
+- **Health Checks**: Regular API endpoint verification
+
+#### Best Practices
+
+- **Session Selection**: Choose appropriate WhatsApp sessions for your target audience
+- **Rate Limiting**: Avoid sending too many messages simultaneously to prevent blocking
+- **Template Variables**: Use descriptive variable names for clarity
+- **File Formats**: Always use the provided Excel templates for bulk uploads
+- **Phone Number Format**: Include country codes (e.g., 62812... for Indonesia)
+- **Message Preview**: Always preview messages before bulk sending campaigns
 
 ### Template Management
 
@@ -544,6 +625,94 @@ EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/var/www/html/docker/supervisord.conf"]
 ```
 
+## 🔌 WAHA API Reference
+
+This application integrates with WAHA (WhatsApp HTTP API) for WhatsApp messaging functionality.
+
+### Authentication
+All API requests require authentication via `X-Api-Key` header:
+```
+X-Api-Key: your_waha_api_key
+```
+
+### Messaging Endpoints
+
+#### Send Text Message
+```http
+POST /api/sendText
+Content-Type: application/json
+
+{
+  "chatId": "6281234567890@s.whatsapp.net",
+  "text": "Hello World!",
+  "session": "your_session_name",
+  "reply_to": null,
+  "linkPreview": true,
+  "linkPreviewHighQuality": false
+}
+```
+
+#### Typing Indicators
+
+**Start Typing:**
+```http
+POST /api/startTyping
+Content-Type: application/json
+
+{
+  "chatId": "6281234567890@s.whatsapp.net",
+  "session": "your_session_name"
+}
+```
+
+**Stop Typing:**
+```http
+POST /api/stopTyping
+Content-Type: application/json
+
+{
+  "chatId": "6281234567890@s.whatsapp.net",
+  "session": "your_session_name"
+}
+```
+
+#### Health Check
+```http
+GET /health
+```
+
+### Chat ID Formats
+
+- **Individual Contacts**: `6281234567890@s.whatsapp.net`
+- **WhatsApp Groups**: `120363XXXXXXX@g.us`
+
+### Response Format
+
+**Success Response:**
+```json
+{
+  "id": "true_6281234567890@s.whatsapp.net_ABC123DEF456",
+  "timestamp": 1703123456,
+  "from": "6281234567890@s.whatsapp.net",
+  "to": "6289876543210@s.whatsapp.net",
+  "ack": 1
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": "Chat not found",
+  "code": 404
+}
+```
+
+### Rate Limiting
+
+- WAHA API has built-in rate limiting to prevent WhatsApp blocking
+- Application includes additional safeguards for bulk messaging
+- Recommended: Max 50 messages per minute per session
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -560,6 +729,23 @@ CMD ["/usr/bin/supervisord", "-c", "/var/www/html/docker/supervisord.conf"]
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.4.0 🎯
+- **Message Broadcasting System**: Complete WhatsApp message broadcasting platform
+- **Bulk Message Campaigns**: Excel/CSV upload for mass messaging with custom parameters
+- **Template Parameter Support**: Advanced header and body variable substitution
+- **Typing Indicators**: Professional WhatsApp-style typing indicators for authentic UX
+- **WAHA API Integration**: Real-time message sending via WAHA HTTP API
+- **Session-based Broadcasting**: Send messages using specific WhatsApp sessions
+- **Smart Recipient Management**: Individual contacts, groups, or custom recipient lists
+- **Message Preview System**: WhatsApp-like message preview before sending
+- **WAHA Status Monitoring**: Real-time API connectivity checks with user alerts
+- **Advanced Validation**: Context-aware form validation with detailed error messages
+- **Success Reporting**: Comprehensive delivery statistics and failure notifications
+- **Excel Template Generator**: Dynamic Excel templates for different message types
+- **Contact Dropdown Selection**: Session-filtered contact selection with names
+- **Group Broadcasting**: Send messages to WhatsApp groups with session filtering
+- **Message History**: Complete logging and tracking of all broadcast activities
 
 ### Version 1.3.0
 - **Groups Management System**: Complete group and community synchronization from WhatsApp

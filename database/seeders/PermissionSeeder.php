@@ -51,7 +51,7 @@ class PermissionSeeder extends Seeder
             'group.view',
             'group.sync',
             'message.view',
-            'message.send',
+            'message.create',
             'message.audit',
         ];
 

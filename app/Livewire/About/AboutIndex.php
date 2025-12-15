@@ -5,18 +5,19 @@ namespace App\Livewire\About;
 use App\Models\Contact;
 use App\Models\Group;
 use App\Models\Template;
+use App\Models\Message;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-#[Title('About The Broadcaster System v1.3.0')]
+#[Title('About The Broadcaster System v1.4.0')]
 class AboutIndex extends Component
 {
     public function render()
     {
         $systemInfo = [
-            'version' => '1.3.0',
+            'version' => '1.4.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
@@ -26,9 +27,12 @@ class AboutIndex extends Component
                 'contacts_management' => true,
                 'groups_management' => true,
                 'templates_system' => true,
+                'broadcast_messaging' => true,
+                'bulk_messaging' => true,
                 'waha_integration' => true,
                 'profile_pictures' => true,
                 'activity_logging' => true,
+                'message_audit_trails' => true,
             ],
         ];
 
@@ -105,6 +109,10 @@ class AboutIndex extends Component
             'active_templates' => Template::where('is_active', true)->count(),
             'communities' => Group::where('detail->isCommunity', true)->count(),
             'regular_groups' => Group::where('detail->isCommunity', false)->count(),
+            'total_messages' => Message::count(),
+            'messages_today' => Message::whereDate('created_at', today())->count(),
+            'messages_this_week' => Message::where('created_at', '>=', now()->startOfWeek())->count(),
+            'successful_messages' => Message::whereNotNull('wa_id')->count(),
         ];
     }
 }
