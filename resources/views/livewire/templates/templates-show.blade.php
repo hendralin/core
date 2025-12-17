@@ -92,7 +92,7 @@
 
                             <div class="p-4 space-y-4">
                                 <!-- WhatsApp-like message bubble -->
-                                <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 max-w-xs ml-auto">
+                                <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 ml-auto">
                                     <div class="text-sm text-gray-900 dark:text-zinc-100">
                                         @if($template->header)
                                             <div class="font-semibold mb-2">{{ $template->header }}</div>

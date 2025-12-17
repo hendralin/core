@@ -8,7 +8,7 @@
     <div>
         <flux:button variant="primary" size="sm" href="{{ route('templates.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Back to Templates">Back</flux:button>
 
-        <div class="mt-4 w-full max-w-7xl">
+        <div class="mt-4 w-full">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Left Column - Edit Form -->
                 <div class="lg:col-span-2">
@@ -50,7 +50,7 @@
 
                             <div class="p-4 space-y-4">
                                 <!-- WhatsApp-like message bubble -->
-                                <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 max-w-xs ml-auto">
+                                <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 ml-auto">
                                     <div class="text-sm text-gray-900 dark:text-zinc-100">
                                         @if($header)
                                             <div class="font-semibold mb-2">{{ $header }}</div>
