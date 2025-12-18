@@ -46,7 +46,7 @@ class MesssagesAudit extends Component
     public function render()
     {
         $activities = Activity::query()
-            ->with(['causer', 'subject.wahaSession'])
+            ->with(['causer', 'subject.wahaSession', 'subject.template', 'subject.contact', 'subject.group'])
             ->where('subject_type', Message::class)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
@@ -78,7 +78,11 @@ class MesssagesAudit extends Component
             'sent_count' => Activity::where('subject_type', Message::class)
                 ->where('description', 'sent a message')->count(),
             'failed_count' => Activity::where('subject_type', Message::class)
-                ->where('description', 'like', '%failed%')->count(),
+                ->where(function ($query) {
+                    $query->where('description', 'like', '%failed%');
+                })->count(),
+            'resent_count' => Activity::where('subject_type', Message::class)
+                ->where('description', 'resent a message')->count(),
         ];
 
         return view('livewire.broadcast.messages.messsages-audit', compact('activities', 'stats'));

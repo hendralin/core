@@ -99,7 +99,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
                                 No.
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider w-1/3 min-w-[300px]">
                                 <button wire:click="sortBy('message')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-gray-300">
                                     <span>Message</span>
                                     @if($sortField === 'message')
@@ -111,6 +111,15 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Recipient</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Session</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Template</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                <button wire:click="sortBy('status')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-gray-300">
+                                    <span>Status</span>
+                                    @if($sortField === 'status')
+                                        <flux:icon.chevron-up class="h-4 w-4 {{ $sortDirection === 'asc' ? 'text-blue-600' : 'text-gray-400' }}" />
+                                        <flux:icon.chevron-down class="h-4 w-4 -mt-2 {{ $sortDirection === 'desc' ? 'text-blue-600' : 'text-gray-400' }}" />
+                                    @endif
+                                </button>
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
                                 <button wire:click="sortBy('created_at')" class="flex items-center space-x-1 cursor-pointer uppercase hover:text-gray-700 dark:hover:text-gray-300">
                                     <span>Sent At</span>
@@ -186,6 +195,25 @@
                                             Direct
                                         @endif
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($message->status === 'sent')
+                                            <flux:badge color="green" size="sm">Sent</flux:badge>
+                                        @elseif($message->status === 'failed')
+                                            <flux:modal.trigger name="resend-message-modal">
+                                                <flux:badge
+                                                    color="red"
+                                                    size="sm"
+                                                    class="cursor-pointer hover:opacity-80 transition-opacity"
+                                                    wire:click="setMessageToResend({{ $message->id }})"
+                                                    title="Click to resend message"
+                                                >
+                                                    Failed
+                                                </flux:badge>
+                                            </flux:modal.trigger>
+                                        @else
+                                            <flux:badge color="gray" size="sm">Pending</flux:badge>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                         {{ $message->created_at->format('M d, Y H:i') }}
                                     </td>
@@ -193,7 +221,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
+                                <td colspan="7" class="px-6 py-12 text-center">
                                     <div class="text-gray-500 dark:text-zinc-400">
                                         <flux:icon.inbox class="mx-auto h-12 w-12 text-gray-400 dark:text-zinc-400" />
                                         <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-zinc-100">No messages</h3>
@@ -520,6 +548,90 @@
         </form>
     </flux:modal>
 
+    <!-- Resend Message Confirmation Modal -->
+    <flux:modal name="resend-message-modal" class="min-w-88">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Resend message?</flux:heading>
+                <flux:text class="mt-2">
+                    You're about to resend this failed message.<br>
+                    This will attempt to send the message again to the same recipient.
+                </flux:text>
+            </div>
+
+            @if($messageToResend)
+                <div class="space-y-4">
+                    <!-- Message Info -->
+                    <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <flux:heading size="md">Message Details</flux:heading>
+                                @if($messageToResend->template)
+                                    <flux:badge color="blue" size="sm">Template</flux:badge>
+                                @else
+                                    <flux:badge color="gray" size="sm">Direct</flux:badge>
+                                @endif
+                            </div>
+                            <div class="text-sm text-gray-600 dark:text-zinc-400 space-y-1">
+                                <div>Recipient: {{ $messageToResend->received_number ?? $messageToResend->group_wa_id ?? 'Unknown' }}</div>
+                                @if($messageToResend->template)
+                                    <div>Template: {{ $messageToResend->template->name }}</div>
+                                @endif
+                                @if($messageToResend->wahaSession)
+                                    <div>Session: {{ $messageToResend->wahaSession->name }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Preview -->
+                    <div class="bg-green-50 dark:bg-green-900/10 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                        <flux:heading size="sm" class="mb-3 text-green-800 dark:text-green-200">Message Preview</flux:heading>
+
+                        <!-- WhatsApp-like message bubble -->
+                        <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 max-w-sm">
+                            <div class="text-sm text-gray-900 dark:text-zinc-100">
+                                @php
+                                    $previewMsg = $messageToResend->message;
+                                    // Replace *text* with <strong>text</strong>
+                                    $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                    // Replace _text_ with <em>text</em>
+                                    $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                @endphp
+                                <div class="whitespace-pre-wrap">{!! $previewMsg !!}</div>
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-zinc-400 mt-2 text-right">
+                                {{ $messageToResend->created_at->format('g:i A') }} ✓✓
+                            </div>
+                        </div>
+
+                        <!-- Additional info -->
+                        <div class="text-xs text-gray-600 dark:text-zinc-400 mt-3 space-y-1">
+                            <div>• Supports formatting: *bold*, _italic_</div>
+                            <div>• Character count: {{ strlen($messageToResend->message) }}</div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Cancel</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    wire:click="resendMessage"
+                    variant="primary"
+                    class="cursor-pointer"
+                    wire:loading.attr="disabled"
+                >
+                    <span wire:loading.remove>Resend Message</span>
+                    <span wire:loading>Please wait...</span>
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
+
     <!-- Preview Message Modal -->
     <flux:modal name="preview-message" class="min-w-96">
         <div class="space-y-6">
@@ -558,7 +670,7 @@
                         <flux:heading size="sm" class="mb-3 text-green-800 dark:text-green-200">Message Preview</flux:heading>
 
                         <!-- WhatsApp-like message bubble -->
-                        <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 max-w-sm ml-auto">
+                        <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 max-w-sm">
                             <div class="text-sm text-gray-900 dark:text-zinc-100">
                                 @php
                                     $previewMsg = $messageToPreview->message;

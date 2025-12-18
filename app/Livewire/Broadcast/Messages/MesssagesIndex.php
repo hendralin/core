@@ -59,6 +59,7 @@ class MesssagesIndex extends Component
 
     // Modal properties
     public $messageToPreview;
+    public $messageToResend;
 
     // Data properties
     public $templates = [];
@@ -517,12 +518,12 @@ class MesssagesIndex extends Component
             $sendResults = [];
 
             foreach ($recipients as $recipient) {
+                // Determine the correct chat ID for WAHA API (needed for both success and error handling)
+                $chatId = isset($recipient['group_wa_id']) ? $recipient['group_wa_id'] : $recipient['wa_id'];
+
                 try {
                     // Build custom message content for this recipient
                     $recipientMessageContent = $this->buildMessageContentForRecipient($recipient);
-
-                    // Determine the correct chat ID for WAHA API
-                    $chatId = isset($recipient['group_wa_id']) ? $recipient['group_wa_id'] : $recipient['wa_id'];
 
                     // Send message via WAHA API first
                     $sendResult = $wahaService->sendText(
@@ -539,6 +540,7 @@ class MesssagesIndex extends Component
                         'group_wa_id' => $recipient['group_wa_id'] ?? null,
                         'received_number' => $recipient['number'] ?? null,
                         'message' => $recipientMessageContent,
+                        'status' => 'sent',
                         'created_by' => Auth::id(),
                     ]);
 
@@ -575,8 +577,24 @@ class MesssagesIndex extends Component
                     ]);
 
                 } catch (\Exception $e) {
+                    // Build custom message content for this recipient (for failed record)
+                    $recipientMessageContent = $this->buildMessageContentForRecipient($recipient);
+
+                    // Create message record with failed status
+                    $message = Message::create([
+                        'waha_session_id' => $this->messageSession,
+                        'template_id' => $this->messageType === 'template' ? $this->selectedTemplate : null,
+                        'wa_id' => $recipient['wa_id'] ?? null,
+                        'group_wa_id' => $recipient['group_wa_id'] ?? null,
+                        'received_number' => $recipient['number'] ?? null,
+                        'message' => $recipientMessageContent,
+                        'status' => 'failed',
+                        'created_by' => Auth::id(),
+                    ]);
+
                     // Log activity for failed message sending
                     activity()
+                        ->performedOn($message)
                         ->causedBy(Auth::user())
                         ->withProperties([
                             'attributes' => [
@@ -596,10 +614,12 @@ class MesssagesIndex extends Component
                         'recipient' => $chatId,
                         'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
                         'success' => false,
+                        'message_id' => $message->id,
                         'error' => $e->getMessage(),
                     ];
 
                     Log::error('Failed to send message via WAHA', [
+                        'message_id' => $message->id,
                         'recipient' => $chatId,
                         'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
                         'error' => $e->getMessage(),
@@ -666,7 +686,7 @@ class MesssagesIndex extends Component
                 foreach ($this->templateParams['header'] as $param => $value) {
                     $header = str_replace("{{" . $param . "}}", $value, $header);
                 }
-                $content .= $header . "\n\n";
+                $content .= '*' . $header . "*\n\n";
             }
 
             // Add body
@@ -844,6 +864,115 @@ class MesssagesIndex extends Component
     public function setMessageToPreview($id)
     {
         $this->messageToPreview = Message::with(['template', 'wahaSession', 'createdBy', 'contact', 'group'])->find($id);
+    }
+
+    public function setMessageToResend($id)
+    {
+        $this->messageToResend = Message::with(['template', 'wahaSession', 'createdBy', 'contact', 'group'])->find($id);
+    }
+
+    public function resendMessage()
+    {
+        if (!$this->messageToResend) {
+            session()->flash('error', 'Message not found.');
+            return;
+        }
+
+        $message = $this->messageToResend;
+
+        // Check if message has failed status
+        if ($message->status !== 'failed') {
+            session()->flash('error', 'Only failed messages can be resent.');
+            $this->messageToResend = null;
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Get the WAHA session
+            $sessionRecord = $message->wahaSession;
+            if (!$sessionRecord) {
+                throw new \Exception('Session not found for this message.');
+            }
+
+            $wahaSessionName = $sessionRecord->session_id;
+            if (!$wahaSessionName) {
+                throw new \Exception('Invalid session. Please check session configuration.');
+            }
+
+            // Determine the chat ID
+            $chatId = $message->group_wa_id ?? $message->wa_id;
+            if (!$chatId) {
+                throw new \Exception('Recipient not found for this message.');
+            }
+
+            // Send message via WAHA API
+            $wahaService = new WahaService();
+            $sendResult = $wahaService->sendText(
+                $chatId,
+                $message->message,
+                $wahaSessionName
+            );
+
+            // Update message status to sent
+            $message->update(['status' => 'sent']);
+
+            // Log activity for successful resend
+            activity()
+                ->performedOn($message)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'recipient' => $chatId,
+                        'recipient_type' => $message->group_wa_id ? 'group' : 'contact',
+                        'message_type' => $message->template_id ? 'template' : 'direct',
+                        'session_id' => $message->waha_session_id,
+                        'template_id' => $message->template_id,
+                        'action' => 'resent',
+                    ],
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ])
+                ->log('resent a message');
+
+            Log::info('Message resent successfully via WAHA', [
+                'message_id' => $message->id,
+                'recipient' => $chatId,
+                'waha_result' => $sendResult,
+            ]);
+
+            DB::commit();
+
+            session()->flash('success', 'Message resent successfully!');
+            $this->messageToResend = null;
+            $this->modal('resend-message-modal')->close();
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            // Log activity for failed resend
+            activity()
+                ->performedOn($message)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'recipient' => $chatId ?? 'unknown',
+                        'error' => $e->getMessage(),
+                        'action' => 'resend_failed',
+                    ],
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ])
+                ->log('failed to resend message');
+
+            Log::error('Failed to resend message via WAHA', [
+                'message_id' => $message->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            session()->flash('error', 'Failed to resend message: ' . $e->getMessage());
+        }
     }
 
     public function render()
