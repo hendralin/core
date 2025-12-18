@@ -15,10 +15,10 @@
             </div>
             <div class="space-y-4">
                 <div>
-                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.4.0</flux:heading>
+                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.4.1</flux:heading>
                     <flux:text class="text-gray-700 dark:text-zinc-300 leading-relaxed">
                         Broadcaster is a comprehensive WhatsApp Business messaging platform built with Laravel and powered by WAHA (WhatsApp HTTP API).
-                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting, template management, contacts synchronization, and comprehensive audit trails through an intuitive web interface.
+                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting with async queue processing, template management, contacts synchronization, and comprehensive audit trails through an intuitive web interface.
                     </flux:text>
                 </div>
 
@@ -49,6 +49,12 @@
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
                                 Bulk Messaging with Excel
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Async Queue Processing
                             </li>
                         </ul>
                     </div>
@@ -99,7 +105,7 @@
                 <div class="pt-4 border-t border-blue-200 dark:border-blue-700">
                     <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
                         Built with modern web technologies including Laravel, Livewire, Flux UI, and Tailwind CSS for optimal performance and user experience.
-                        Features advanced broadcast messaging with bulk Excel upload, comprehensive audit trails, template management with real-time preview, and complete contact synchronization system.
+                        Features advanced broadcast messaging with async queue processing, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, and complete contact synchronization system.
                     </flux:text>
                 </div>
             </div>
@@ -248,7 +254,7 @@
                         Advanced message broadcasting system supporting both direct messaging and template-based communications with bulk sending capabilities through Excel uploads. Features comprehensive delivery status tracking (sent, failed, pending) and automatic resend functionality for failed messages with confirmation dialogs.
                     </flux:text>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                         <div class="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
                             <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ $statistics['total_messages'] ?? 0 }}</div>
                             <div class="text-sm text-emerald-700 dark:text-emerald-300">Total Messages</div>
@@ -256,6 +262,10 @@
                         <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                             <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $statistics['messages_today'] ?? 0 }}</div>
                             <div class="text-sm text-blue-700 dark:text-blue-300">Sent Today</div>
+                        </div>
+                        <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $statistics['pending_messages'] ?? 0 }}</div>
+                            <div class="text-sm text-yellow-700 dark:text-yellow-300">Pending</div>
                         </div>
                         <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                             <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $statistics['sent_messages'] ?? 0 }}</div>
@@ -322,6 +332,26 @@
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
                                     Message Audit Trails
+                                </li>
+                            </ul>
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Async Queue Processing
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Auto Retry (3 attempts)
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Rate Limiting (5 msg/sec)
                                 </li>
                             </ul>
                         </div>
@@ -488,6 +518,126 @@
                             </ul>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Queue System Information -->
+        <div class="space-y-6">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                <flux:heading size="lg" class="mb-4 flex items-center gap-2">
+                    <flux:icon name="queue-list" class="h-6 w-6 text-teal-500 dark:text-teal-400" />
+                    Queue System & Async Processing
+                </flux:heading>
+
+                <div class="space-y-4">
+                    <flux:text class="text-gray-700 dark:text-zinc-300">
+                        Advanced asynchronous message processing system using Laravel Queue for efficient bulk messaging with automatic retry mechanism and rate limiting to prevent API overload.
+                    </flux:text>
+
+                    <div class="flex items-center justify-between p-4 rounded-lg border @if($queueInfo['configured'] && $queueInfo['connection'] !== 'sync') bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800 @else bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 @endif">
+                        <div class="flex items-center gap-3">
+                            @if($queueInfo['configured'] && $queueInfo['connection'] !== 'sync')
+                                <div class="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
+                                    <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                            @else
+                                <div class="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                                    <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                </div>
+                            @endif
+                            <div>
+                                <flux:text class="font-medium">Queue Status</flux:text>
+                                <flux:text class="text-sm">{{ $queueInfo['status'] }}</flux:text>
+                            </div>
+                        </div>
+                        @if($queueInfo['configured'] && $queueInfo['connection'] !== 'sync')
+                            <flux:badge color="teal" icon="check-circle">Configured</flux:badge>
+                        @else
+                            <flux:badge color="yellow" icon="exclamation-triangle">Synchronous Mode</flux:badge>
+                        @endif
+                    </div>
+
+                    @if($queueInfo['configured'] && $queueInfo['connection'] !== 'sync')
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div class="text-center p-4 bg-teal-50 dark:bg-teal-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
+                                <div class="text-2xl font-bold text-teal-600 dark:text-teal-400">{{ ucfirst($queueInfo['connection']) }}</div>
+                                <div class="text-sm text-teal-700 dark:text-teal-300">Connection Type</div>
+                            </div>
+                            <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $queueInfo['pending_jobs'] ?? 0 }}</div>
+                                <div class="text-sm text-yellow-700 dark:text-yellow-300">Pending Jobs</div>
+                            </div>
+                            <div class="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $queueInfo['failed_jobs'] ?? 0 }}</div>
+                                <div class="text-sm text-red-700 dark:text-red-300">Failed Jobs</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <flux:text class="font-semibold text-gray-900 dark:text-white">Queue Features</flux:text>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Asynchronous Processing
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Auto Retry (3 attempts)
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Exponential Backoff
+                                    </li>
+                                </ul>
+                                <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Rate Limiting (5 msg/sec)
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Non-blocking Requests
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Status Auto-update
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    @else
+                        <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <flux:text class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Queue Not Configured</flux:text>
+                                    <flux:text class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                                        Queue is set to synchronous mode. For better performance with bulk messaging, configure <code class="px-1 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 rounded">QUEUE_CONNECTION=database</code> in your <code class="px-1 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 rounded">.env</code> file and start a queue worker.
+                                    </flux:text>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

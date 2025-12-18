@@ -37,6 +37,10 @@
 - **Failed Message Resend**: One-click resend functionality for failed messages with confirmation dialogs
 - **Status Badges**: Visual status indicators in message list (Sent/Failed/Pending)
 - **Resend Statistics**: Track resend activities in audit trail
+- **Queue System**: Asynchronous message processing with Laravel Queue for better performance
+- **Auto Retry**: Automatic retry mechanism (3 attempts) for failed messages
+- **Rate Limiting**: Built-in rate limiting to prevent WAHA API overload (5 messages/second)
+- **Non-blocking Requests**: Send hundreds of messages without request timeout
 
 ### Template Management
 - **Message Templates**: Create and manage WhatsApp message templates
@@ -141,8 +145,10 @@ CACHE_DRIVER=redis
 SESSION_DRIVER=redis
 SESSION_LIFETIME=120
 
-# Queue (optional)
+# Queue (required for message broadcasting)
 QUEUE_CONNECTION=database
+# Queue configuration for async message processing
+# Options: database, redis, sqs, sync (sync = synchronous, not recommended for production)
 ```
 
 ### 5. Database Setup
@@ -167,6 +173,17 @@ npm run dev
 ```bash
 php artisan serve
 ```
+
+### 9. Start Queue Worker (Required for Message Broadcasting)
+```bash
+# For development
+php artisan queue:listen --queue=messages
+
+# For production
+php artisan queue:work --queue=messages --tries=3 --timeout=120
+```
+
+**Important**: Queue worker must be running for messages to be sent. Without it, messages will remain in `pending` status.
 
 Visit `http://localhost:8000` in your browser.
 
@@ -281,6 +298,40 @@ Phone Number,Header Var 1,Header Var 2,Body Var 1,Body Var 2
 - **Visual Indicators**: Color-coded status badges in message list
 - **Status Filtering**: Filter messages by delivery status
 - **Real-time Updates**: Status updates automatically when messages are sent
+- **Queue Processing**: Messages are queued with `pending` status and processed asynchronously
+- **Status Flow**: `pending` → `sent` (success) or `failed` (after retries)
+
+#### Queue System & Async Processing
+
+The application uses Laravel Queue for efficient message processing:
+
+- **Asynchronous Processing**: All messages are queued and processed in the background
+- **Non-blocking**: Send hundreds of messages without request timeout
+- **Auto Retry**: Failed messages automatically retry 3 times with exponential backoff (10s, 30s, 60s)
+- **Rate Limiting**: Built-in rate limiting (5 messages/second) to prevent WAHA API overload
+- **Status Updates**: Message status automatically updates from `pending` → `sent`/`failed`
+- **Queue Monitoring**: Monitor queue status and failed jobs via Laravel commands
+
+**Queue Worker Setup:**
+```bash
+# Development
+php artisan queue:listen --queue=messages
+
+# Production
+php artisan queue:work --queue=messages --tries=3 --timeout=120 --sleep=3
+```
+
+**Monitor Queue:**
+```bash
+# Check failed jobs
+php artisan queue:failed
+
+# Retry failed jobs
+php artisan queue:retry all
+
+# Clear failed jobs
+php artisan queue:flush
+```
 
 #### Failed Message Resend
 
@@ -300,11 +351,15 @@ Phone Number,Header Var 1,Header Var 2,Body Var 1,Body Var 2
 #### Best Practices
 
 - **Session Selection**: Choose appropriate WhatsApp sessions for your target audience
-- **Rate Limiting**: Avoid sending too many messages simultaneously to prevent blocking
+- **Queue Worker**: Always ensure queue worker is running before sending messages
+- **Rate Limiting**: System automatically limits to 5 messages/second - adjust if needed
 - **Template Variables**: Use descriptive variable names for clarity
 - **File Formats**: Always use the provided Excel templates for bulk uploads
 - **Phone Number Format**: Include country codes (e.g., 62812... for Indonesia)
 - **Message Preview**: Always preview messages before bulk sending campaigns
+- **Monitor Status**: Check message status regularly - failed messages can be resent
+- **Bulk Sending**: For large campaigns, messages are automatically queued and processed
+- **Typing Indicators**: Automatically disabled for bulk sending to improve performance
 
 ### Template Management
 
@@ -483,6 +538,94 @@ $templates = Template::where('name', 'like', '%welcome%')
     ->get();
 ```
 
+### Queue System & Message Processing
+
+The application uses Laravel Queue for efficient asynchronous message processing:
+
+#### Queue Configuration
+
+**Environment Setup:**
+```env
+QUEUE_CONNECTION=database  # Use database queue driver
+```
+
+**Start Queue Worker:**
+```bash
+# Development
+php artisan queue:listen --queue=messages
+
+# Production (with retry and timeout)
+php artisan queue:work --queue=messages --tries=3 --timeout=120 --sleep=3
+```
+
+#### Message Status Flow
+
+1. **Pending**: Message is queued and waiting to be processed
+2. **Processing**: Job is executing (handled automatically)
+3. **Sent**: Message successfully sent via WAHA API
+4. **Failed**: Message failed after all retry attempts
+
+#### Retry Mechanism
+
+- **Max Attempts**: 3 retries per message
+- **Backoff Strategy**: Exponential backoff (10s, 30s, 60s)
+- **Auto Update**: Status automatically updates after each attempt
+- **Final Status**: After 3 failed attempts, status set to `failed`
+
+#### Rate Limiting
+
+- **Default Rate**: 5 messages per second
+- **Configurable**: Adjust in `WahaService::sendBulkText()`
+- **Per Session**: Rate limiting applied per WAHA session
+- **Automatic**: Rate limiting enforced during queue processing
+
+#### Queue Monitoring
+
+```bash
+# Check queue status
+php artisan queue:work --queue=messages --verbose
+
+# List failed jobs
+php artisan queue:failed
+
+# Retry all failed jobs
+php artisan queue:retry all
+
+# Retry specific job
+php artisan queue:retry {job-id}
+
+# Clear failed jobs
+php artisan queue:flush
+```
+
+#### Production Deployment
+
+For production, use Supervisor to manage queue workers:
+
+**Supervisor Config** (`/etc/supervisor/conf.d/broadcast-queue.conf`):
+```ini
+[program:broadcast-queue]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/broadcast/artisan queue:work --queue=messages --tries=3 --timeout=120 --sleep=3
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=2
+redirect_stderr=true
+stdout_logfile=/var/www/broadcast/storage/logs/queue-worker.log
+stopwaitsecs=3600
+```
+
+**Supervisor Commands:**
+```bash
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start broadcast-queue:*
+sudo supervisorctl status broadcast-queue:*
+```
+
 ### API Health Check
 
 The application automatically monitors WAHA connectivity:
@@ -577,6 +720,9 @@ The application provides RESTful APIs for:
 - **Error Logging**: Comprehensive error tracking and reporting
 - **Performance Monitoring**: Built-in Laravel Telescope support
 - **Health Checks**: Automated WAHA connectivity monitoring
+- **Queue Monitoring**: Track queue status, failed jobs, and processing statistics
+- **Message Status Tracking**: Real-time status updates (pending, sent, failed)
+- **Retry Logging**: Detailed logs for message retry attempts and failures
 
 ## 🧪 Testing
 
@@ -609,9 +755,37 @@ npm run test:e2e
    php artisan view:cache
    ```
 
-3. **Queue Worker** (if using queues):
+3. **Queue Worker** (required for message broadcasting):
    ```bash
-   php artisan queue:work
+   # Start queue worker for message processing
+   php artisan queue:work --queue=messages --tries=3 --timeout=120
+   
+   # Or use supervisor for production (recommended)
+   # See supervisor configuration below
+   ```
+
+4. **Supervisor Configuration** (Production - Recommended):
+   Create `/etc/supervisor/conf.d/broadcast-queue.conf`:
+   ```ini
+   [program:broadcast-queue]
+   process_name=%(program_name)s_%(process_num)02d
+   command=php /path/to/broadcast/artisan queue:work --queue=messages --tries=3 --timeout=120 --sleep=3
+   autostart=true
+   autorestart=true
+   stopasgroup=true
+   killasgroup=true
+   user=www-data
+   numprocs=2
+   redirect_stderr=true
+   stdout_logfile=/path/to/broadcast/storage/logs/queue-worker.log
+   stopwaitsecs=3600
+   ```
+   
+   Then run:
+   ```bash
+   sudo supervisorctl reread
+   sudo supervisorctl update
+   sudo supervisorctl start broadcast-queue:*
    ```
 
 4. **Web Server Configuration**: Configure Apache/Nginx for Laravel
@@ -728,9 +902,12 @@ GET /health
 
 ### Rate Limiting
 
-- WAHA API has built-in rate limiting to prevent WhatsApp blocking
-- Application includes additional safeguards for bulk messaging
-- Recommended: Max 50 messages per minute per session
+- **WAHA API**: Built-in rate limiting to prevent WhatsApp blocking
+- **Application Level**: Additional rate limiting (default: 5 messages/second)
+- **Configurable**: Adjust rate limit in `WahaService::sendBulkText()` method
+- **Recommended**: Max 5 messages/second per session (300 messages/minute)
+- **Bulk Sending**: Rate limiting automatically applied for bulk campaigns
+- **Queue Processing**: Rate limiting enforced during async queue processing
 
 ## 🤝 Contributing
 
@@ -748,6 +925,16 @@ GET /health
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.4.1 🚀
+- **Queue System Implementation**: Asynchronous message processing with Laravel Queue
+- **Auto Retry Mechanism**: Automatic retry (3 attempts) with exponential backoff for failed messages
+- **Rate Limiting**: Built-in rate limiting (5 messages/second) to prevent WAHA API overload
+- **Non-blocking Requests**: Send hundreds of messages without request timeout
+- **Optimized Performance**: Reduced typing indicator delay and improved bulk sending efficiency
+- **Enhanced Status Tracking**: Improved status flow (pending → sent/failed) with automatic updates
+- **Queue Monitoring**: Commands and tools for monitoring queue status and failed jobs
+- **Production Ready**: Supervisor configuration and production deployment guidelines
 
 ### Version 1.4.0 🎯
 - **Message Broadcasting System**: Complete WhatsApp message broadcasting platform
@@ -803,13 +990,50 @@ GET /health
 - Modern Flux UI interface
 - Real-time health monitoring
 
+## 🐛 Troubleshooting
+
+### Message Status Issues
+
+**Messages stuck in `pending` status:**
+- Ensure queue worker is running: `php artisan queue:work --queue=messages`
+- Check queue connection in `.env`: `QUEUE_CONNECTION=database`
+- Verify database connection is working
+- Check logs: `storage/logs/laravel.log`
+
+**Messages immediately `failed`:**
+- Verify WAHA API connection and credentials
+- Check session ID is valid and active
+- Review error logs for detailed failure reasons
+- Ensure WAHA server is accessible
+
+**Queue not processing:**
+- Restart queue worker
+- Check for failed jobs: `php artisan queue:failed`
+- Retry failed jobs: `php artisan queue:retry all`
+- Verify database connection
+
+### Performance Issues
+
+**Slow message sending:**
+- Check rate limiting settings (default: 5 messages/second)
+- Monitor queue worker performance
+- Consider increasing queue worker processes
+- Check WAHA API response times
+
+**High memory usage:**
+- Reduce queue worker processes
+- Increase PHP memory limit
+- Monitor queue batch sizes
+
 ## 🐛 Support
 
 If you encounter any issues:
 
 1. Check the [Issues](https://github.com/your-username/broadcast/issues) page
-2. Create a new issue with detailed information
-3. Contact the development team
+2. Review troubleshooting section above
+3. Check queue status and logs
+4. Create a new issue with detailed information
+5. Contact the development team
 
 ## 📄 License
 

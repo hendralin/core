@@ -127,26 +127,30 @@ class WahaService
      * @param string $chatId WhatsApp chat ID (e.g., "6281234567890@s.whatsapp.net")
      * @param string $text Message text
      * @param string|null $session WAHA session name (optional, defaults to config)
+     * @param bool $useTypingIndicator Whether to use typing indicator (default: true)
+     * @param float $typingDelay Delay in seconds for typing indicator (default: 0.5)
      * @return array Response from WAHA API
      * @throws \Exception
      */
-    public function sendText(string $chatId, string $text, ?string $session = null): array
+    public function sendText(string $chatId, string $text, ?string $session = null, bool $useTypingIndicator = true, float $typingDelay = 0.5): array
     {
         $sessionName = $session ?? $this->session;
 
         try {
-            // Start typing indicator before sending message
-            $this->startTyping($chatId, $sessionName);
-
-            // Small delay to show typing indicator (adjust as needed)
-            sleep(1);
+            // Start typing indicator before sending message (optional, can be disabled for bulk)
+            if ($useTypingIndicator) {
+                $this->startTyping($chatId, $sessionName);
+                // Reduced delay for better performance (0.5s instead of 1s)
+                usleep((int)($typingDelay * 1000000));
+            }
 
             // Send the actual message
             $response = Http::withHeaders([
                 'accept' => 'application/json',
                 'X-Api-Key' => $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->post($this->baseUrl . '/api/sendText', [
+            ])->timeout(30) // Add timeout to prevent hanging
+            ->post($this->baseUrl . '/api/sendText', [
                 'chatId' => $chatId,
                 'reply_to' => null,
                 'text' => $text,
@@ -157,12 +161,14 @@ class WahaService
 
             if ($response->successful()) {
                 // Stop typing indicator after successful send
-                $this->stopTyping($chatId, $sessionName);
+                if ($useTypingIndicator) {
+                    $this->stopTyping($chatId, $sessionName);
+                }
 
                 Log::info('WAHA sendText success', [
                     'session' => $sessionName,
                     'chatId' => $chatId,
-                    'text' => $text,
+                    'text' => substr($text, 0, 100) . '...', // Log only first 100 chars
                     'response' => $response->json(),
                 ]);
 
@@ -170,13 +176,15 @@ class WahaService
             }
 
             // Stop typing indicator even on failure
-            $this->stopTyping($chatId, $sessionName);
+            if ($useTypingIndicator) {
+                $this->stopTyping($chatId, $sessionName);
+            }
 
             // Log error response
             Log::error('WAHA sendText failed', [
                 'session' => $sessionName,
                 'chatId' => $chatId,
-                'text' => $text,
+                'text' => substr($text, 0, 100) . '...',
                 'status' => $response->status(),
                 'response' => $response->body(),
             ]);
@@ -185,12 +193,14 @@ class WahaService
 
         } catch (\Exception $e) {
             // Stop typing indicator on any exception
-            $this->stopTyping($chatId, $sessionName);
+            if ($useTypingIndicator) {
+                $this->stopTyping($chatId, $sessionName);
+            }
 
             Log::error('WAHA sendText exception', [
                 'session' => $sessionName,
                 'chatId' => $chatId,
-                'text' => $text,
+                'text' => substr($text, 0, 100) . '...',
                 'error' => $e->getMessage(),
             ]);
 
@@ -199,23 +209,40 @@ class WahaService
     }
 
     /**
-     * Send text message to multiple recipients
+     * Send text message to multiple recipients with rate limiting
      *
      * @param array $recipients Array of ['chatId' => string, 'text' => string]
      * @param string|null $session Custom session (optional)
+     * @param int $rateLimitPerSecond Maximum messages per second (default: 5)
+     * @param bool $useTypingIndicator Whether to use typing indicator (default: false for bulk)
      * @return array Array of results for each recipient
      */
-    public function sendBulkText(array $recipients, ?string $session = null): array
+    public function sendBulkText(array $recipients, ?string $session = null, int $rateLimitPerSecond = 5, bool $useTypingIndicator = false): array
     {
         $results = [];
+        $startTime = microtime(true);
+        $messageCount = 0;
+        $delayBetweenMessages = 1.0 / $rateLimitPerSecond; // Calculate delay to maintain rate limit
 
         foreach ($recipients as $recipient) {
             try {
-                // sendText already includes typing indicators
+                // Rate limiting: ensure we don't exceed messages per second
+                $currentTime = microtime(true);
+                $elapsed = $currentTime - $startTime;
+                $expectedTime = $messageCount * $delayBetweenMessages;
+
+                if ($elapsed < $expectedTime) {
+                    $sleepTime = $expectedTime - $elapsed;
+                    usleep((int)($sleepTime * 1000000));
+                }
+
+                // sendText with typing indicator disabled for bulk sending
                 $result = $this->sendText(
                     $recipient['chatId'],
                     $recipient['text'],
-                    $session
+                    $session,
+                    $useTypingIndicator,
+                    0.3 // Reduced delay for bulk
                 );
 
                 $results[] = [
@@ -224,12 +251,15 @@ class WahaService
                     'result' => $result,
                 ];
 
+                $messageCount++;
+
             } catch (\Exception $e) {
                 $results[] = [
                     'chatId' => $recipient['chatId'],
                     'success' => false,
                     'error' => $e->getMessage(),
                 ];
+                $messageCount++; // Count failed messages too for rate limiting
             }
         }
 

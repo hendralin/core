@@ -10,14 +10,15 @@ use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
-#[Title('About The Broadcaster System v1.4.0')]
+#[Title('About The Broadcaster System v1.4.1')]
 class AboutIndex extends Component
 {
     public function render()
     {
         $systemInfo = [
-            'version' => '1.4.0',
+            'version' => '1.4.1',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
@@ -35,6 +36,9 @@ class AboutIndex extends Component
                 'message_audit_trails' => true,
                 'message_status_tracking' => true,
                 'resend_functionality' => true,
+                'queue_system' => true,
+                'auto_retry' => true,
+                'rate_limiting' => true,
             ],
         ];
 
@@ -44,7 +48,10 @@ class AboutIndex extends Component
         // Get system statistics
         $statistics = $this->getSystemStatistics();
 
-        return view('livewire.about.about-index', compact('systemInfo', 'wahaInfo', 'statistics'));
+        // Get queue information
+        $queueInfo = $this->getQueueInfo();
+
+        return view('livewire.about.about-index', compact('systemInfo', 'wahaInfo', 'statistics', 'queueInfo'));
     }
 
     private function getWahaInfo()
@@ -118,5 +125,45 @@ class AboutIndex extends Component
             'failed_messages' => Message::where('status', 'failed')->count(),
             'pending_messages' => Message::where('status', 'pending')->orWhereNull('status')->count(),
         ];
+    }
+
+    private function getQueueInfo()
+    {
+        $queueInfo = [
+            'connection' => config('queue.default'),
+            'configured' => true,
+            'pending_jobs' => 0,
+            'failed_jobs' => 0,
+            'status' => 'Unknown',
+        ];
+
+        try {
+            // Check if queue connection is configured
+            if ($queueInfo['connection'] === 'sync') {
+                $queueInfo['status'] = 'Synchronous (Not Recommended)';
+                $queueInfo['configured'] = false;
+            } else {
+                $queueInfo['status'] = 'Configured';
+
+                // Try to get pending jobs count from database
+                if ($queueInfo['connection'] === 'database') {
+                    try {
+                        $queueInfo['pending_jobs'] = DB::table('jobs')
+                            ->where('queue', 'messages')
+                            ->count();
+
+                        $queueInfo['failed_jobs'] = DB::table('failed_jobs')->count();
+                    } catch (\Exception $e) {
+                        // Table might not exist or connection issue
+                        Log::warning('Could not get queue statistics: ' . $e->getMessage());
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to get queue info: ' . $e->getMessage());
+            $queueInfo['status'] = 'Error';
+        }
+
+        return $queueInfo;
     }
 }

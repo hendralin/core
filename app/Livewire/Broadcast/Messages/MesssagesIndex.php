@@ -8,6 +8,7 @@ use App\Models\Message;
 use App\Models\Session;
 use Livewire\Component;
 use App\Models\Template;
+use App\Jobs\SendMessageJob;
 use Livewire\WithPagination;
 use App\Services\WahaService;
 use Livewire\WithFileUploads;
@@ -16,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Spatie\Activitylog\Models\Activity;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -514,122 +514,52 @@ class MesssagesIndex extends Component
                 throw new \Exception('Invalid session selected. Please select a valid WAHA session.');
             }
 
-            $wahaService = new WahaService();
-            $sendResults = [];
+            $queuedMessages = [];
+            $totalRecipients = count($recipients);
 
+            // Create message records with 'pending' status and dispatch jobs
             foreach ($recipients as $recipient) {
-                // Determine the correct chat ID for WAHA API (needed for both success and error handling)
+                // Determine the correct chat ID for WAHA API
                 $chatId = isset($recipient['group_wa_id']) ? $recipient['group_wa_id'] : $recipient['wa_id'];
 
-                try {
-                    // Build custom message content for this recipient
-                    $recipientMessageContent = $this->buildMessageContentForRecipient($recipient);
+                // Build custom message content for this recipient
+                $recipientMessageContent = $this->buildMessageContentForRecipient($recipient);
 
-                    // Send message via WAHA API first
-                    $sendResult = $wahaService->sendText(
-                        $chatId,
-                        $recipientMessageContent,
-                        $wahaSessionName // Pass the correct WAHA session name
-                    );
+                // Create message record with 'pending' status
+                $message = Message::create([
+                    'waha_session_id' => $this->messageSession,
+                    'template_id' => $this->messageType === 'template' ? $this->selectedTemplate : null,
+                    'wa_id' => $recipient['wa_id'] ?? null,
+                    'group_wa_id' => $recipient['group_wa_id'] ?? null,
+                    'received_number' => $recipient['number'] ?? null,
+                    'message' => $recipientMessageContent,
+                    'status' => 'pending', // Set as pending, will be updated by job
+                    'created_by' => Auth::id(),
+                ]);
 
-                    // Create message record only if WAHA send was successful
-                    $message = Message::create([
-                        'waha_session_id' => $this->messageSession,
-                        'template_id' => $this->messageType === 'template' ? $this->selectedTemplate : null,
-                        'wa_id' => $recipient['wa_id'] ?? null,
-                        'group_wa_id' => $recipient['group_wa_id'] ?? null,
-                        'received_number' => $recipient['number'] ?? null,
-                        'message' => $recipientMessageContent,
-                        'status' => 'sent',
-                        'created_by' => Auth::id(),
-                    ]);
+                // Dispatch job to send message asynchronously
+                SendMessageJob::dispatch($message->id, $chatId, $wahaSessionName)
+                    ->onQueue('messages'); // Use dedicated queue for messages
 
-                    // Log activity for successful message sending
-                    activity()
-                        ->performedOn($message)
-                        ->causedBy(Auth::user())
-                        ->withProperties([
-                            'attributes' => [
-                                'recipient' => $chatId,
-                                'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
-                                'message_type' => $this->messageType,
-                                'session_id' => $this->messageSession,
-                                'template_id' => $this->selectedTemplate,
-                            ],
-                            'ip' => request()->ip(),
-                            'user_agent' => request()->userAgent(),
-                        ])
-                        ->log('sent a message');
+                $queuedMessages[] = $message->id;
 
-                    $sendResults[] = [
-                        'recipient' => $chatId,
-                        'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
-                        'success' => true,
-                        'message_id' => $message->id,
-                        'waha_result' => $sendResult,
-                    ];
-
-                    Log::info('Message sent successfully via WAHA', [
-                        'message_id' => $message->id,
-                        'recipient' => $chatId,
-                        'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
-                        'waha_result' => $sendResult,
-                    ]);
-
-                } catch (\Exception $e) {
-                    // Build custom message content for this recipient (for failed record)
-                    $recipientMessageContent = $this->buildMessageContentForRecipient($recipient);
-
-                    // Create message record with failed status
-                    $message = Message::create([
-                        'waha_session_id' => $this->messageSession,
-                        'template_id' => $this->messageType === 'template' ? $this->selectedTemplate : null,
-                        'wa_id' => $recipient['wa_id'] ?? null,
-                        'group_wa_id' => $recipient['group_wa_id'] ?? null,
-                        'received_number' => $recipient['number'] ?? null,
-                        'message' => $recipientMessageContent,
-                        'status' => 'failed',
-                        'created_by' => Auth::id(),
-                    ]);
-
-                    // Log activity for failed message sending
-                    activity()
-                        ->performedOn($message)
-                        ->causedBy(Auth::user())
-                        ->withProperties([
-                            'attributes' => [
-                                'recipient' => $chatId,
-                                'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
-                                'message_type' => $this->messageType,
-                                'session_id' => $this->messageSession,
-                                'error' => $e->getMessage(),
-                            ],
-                            'ip' => request()->ip(),
-                            'user_agent' => request()->userAgent(),
-                        ])
-                        ->log('failed to send message');
-
-                    // Log the error but continue with other recipients if bulk
-                    $sendResults[] = [
-                        'recipient' => $chatId,
-                        'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
-                        'success' => false,
-                        'message_id' => $message->id,
-                        'error' => $e->getMessage(),
-                    ];
-
-                    Log::error('Failed to send message via WAHA', [
-                        'message_id' => $message->id,
-                        'recipient' => $chatId,
-                        'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
-                        'error' => $e->getMessage(),
-                    ]);
-
-                    // For single recipient, re-throw the exception
-                    if (count($recipients) === 1) {
-                        throw $e;
-                    }
-                }
+                // Log activity for queued message
+                activity()
+                    ->performedOn($message)
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'attributes' => [
+                            'recipient' => $chatId,
+                            'recipient_type' => isset($recipient['group_wa_id']) ? 'group' : 'contact',
+                            'message_type' => $this->messageType,
+                            'session_id' => $this->messageSession,
+                            'template_id' => $this->selectedTemplate,
+                            'status' => 'pending',
+                        ],
+                        'ip' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                    ])
+                    ->log('queued a message for sending');
             }
 
             // Update template usage count if using template
@@ -643,25 +573,25 @@ class MesssagesIndex extends Component
 
             DB::commit();
 
-            // Calculate success/failure stats
-            $totalSent = count($sendResults);
-            $successful = count(array_filter($sendResults, fn($r) => $r['success']));
-            $failed = $totalSent - $successful;
+            Log::info('Messages queued for sending', [
+                'total_messages' => $totalRecipients,
+                'message_ids' => $queuedMessages,
+                'session' => $wahaSessionName,
+            ]);
 
-            if ($failed === 0) {
-                session()->flash('success', "All {$totalSent} message(s) sent successfully!");
-            } elseif ($successful === 0) {
-                session()->flash('error', "Failed to send all {$totalSent} message(s). Check logs for details.");
-            } else {
-                session()->flash('success', "{$successful} of {$totalSent} message(s) sent successfully. {$failed} failed.");
-            }
+            // Inform user that messages are queued
+            session()->flash('success', "{$totalRecipients} message(s) telah diantrikan untuk dikirim. Status akan diperbarui secara otomatis.");
 
             $this->closeSendModal();
             $this->resetForm();
 
         } catch (\Exception $e) {
             DB::rollback();
-            session()->flash('error', 'Failed to send message: ' . $e->getMessage());
+            Log::error('Failed to queue messages', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            session()->flash('error', 'Gagal mengantrikan pesan: ' . $e->getMessage());
         }
     }
 
@@ -907,18 +837,14 @@ class MesssagesIndex extends Component
                 throw new \Exception('Recipient not found for this message.');
             }
 
-            // Send message via WAHA API
-            $wahaService = new WahaService();
-            $sendResult = $wahaService->sendText(
-                $chatId,
-                $message->message,
-                $wahaSessionName
-            );
+            // Update message status to pending before queuing
+            $message->update(['status' => 'pending']);
 
-            // Update message status to sent
-            $message->update(['status' => 'sent']);
+            // Dispatch job to resend message asynchronously
+            SendMessageJob::dispatch($message->id, $chatId, $wahaSessionName)
+                ->onQueue('messages');
 
-            // Log activity for successful resend
+            // Log activity for queued resend
             activity()
                 ->performedOn($message)
                 ->causedBy(Auth::user())
@@ -930,21 +856,21 @@ class MesssagesIndex extends Component
                         'session_id' => $message->waha_session_id,
                         'template_id' => $message->template_id,
                         'action' => 'resent',
+                        'status' => 'pending',
                     ],
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ])
-                ->log('resent a message');
+                ->log('queued message for resending');
 
-            Log::info('Message resent successfully via WAHA', [
+            Log::info('Message queued for resending', [
                 'message_id' => $message->id,
                 'recipient' => $chatId,
-                'waha_result' => $sendResult,
             ]);
 
             DB::commit();
 
-            session()->flash('success', 'Message resent successfully!');
+            session()->flash('success', 'Pesan telah diantrikan untuk dikirim ulang. Status akan diperbarui secara otomatis.');
             $this->messageToResend = null;
             $this->modal('resend-message-modal')->close();
 
