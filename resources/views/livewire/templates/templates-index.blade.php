@@ -245,7 +245,7 @@
             @if($templateToPreview)
                 <div class="space-y-4">
                     <!-- Template Info -->
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4">
                         <div class="flex items-center justify-between mb-2">
                             <flux:heading size="md">{{ $templateToPreview->name }}</flux:heading>
                             @if ($templateToPreview->is_active)

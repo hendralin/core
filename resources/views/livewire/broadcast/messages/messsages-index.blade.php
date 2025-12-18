@@ -130,7 +130,20 @@
                                         {{ $messages->firstItem() + $index }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900 dark:text-zinc-100" title="{{ $message->message }}">{{ Str::limit($message->message, 100) }}</div>
+                                        @php
+                                            $msg = Str::limit($message->message, 100);
+
+                                            // Replace *text* with <strong>text</strong>
+                                            $msg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $msg);
+
+                                            // Replace _text_ with <em>text</em>
+                                            $msg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $msg);
+                                        @endphp
+                                        <flux:modal.trigger name="preview-message">
+                                            <div class="text-sm max-w-xs truncate md:max-w-none md:whitespace-normal text-gray-900 dark:text-zinc-100 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" wire:click="setMessageToPreview({{ $message->id }})" title="Click to preview message">
+                                                {!! $msg !!}
+                                            </div>
+                                        </flux:modal.trigger>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                         @if($message->received_number)
@@ -138,7 +151,18 @@
                                                 <div class="font-semibold text-gray-900 dark:text-zinc-100">{{ $message->contact->name ?? $message->contact->push_name }}</div>
                                             @endif
                                             <div>{{ $message->received_number }}</div>
-                                            <div class="text-xs">Contact</div>
+                                            <div class="text-xs">
+                                                @php
+                                                    $numberRaw = $message->received_number;
+                                                    // Check pattern: if ends with @c.us, it is a "Contact", otherwise "Number"
+                                                    if (is_string($numberRaw) && preg_match('/^\d+@c\.us$/', $numberRaw)) {
+                                                        $recipientTypeLabel = "Contact";
+                                                    } else {
+                                                        $recipientTypeLabel = "Number";
+                                                    }
+                                                @endphp
+                                                {{ $recipientTypeLabel }}
+                                            </div>
                                         @elseif($message->group_wa_id)
                                             @if($message->group && $message->group->name)
                                                 <div class="font-semibold text-gray-900 dark:text-zinc-100">{{ $message->group->name }}</div>
@@ -236,8 +260,12 @@
                 @if($messageType === 'direct' && $recipientType !== 'recipients')
                     <div>
                         <flux:label for="directMessage">Message Content <span class="text-red-500">*</span></flux:label>
-                        <flux:textarea wire:model="directMessage" rows="4" class="mt-1" placeholder="Type your message here..."></flux:textarea>
+                        <flux:textarea wire:model.live="directMessage" rows="4" class="mt-1" placeholder="Type your message here (max 1024 characters)" maxlength="1024"></flux:textarea>
                         @error('directMessage') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <div class="mt-2 text-xs text-gray-600 dark:text-zinc-400 space-y-1">
+                            <div>• Supports formatting: *bold*, _italic_</div>
+                            <div>• Character count: {{ strlen($directMessage ?? '') }}</div>
+                        </div>
                     </div>
                 @endif
 
@@ -323,11 +351,24 @@
                 <flux:fieldset>
                     <flux:legend class="text-sm">Recipient Type <span class="text-red-500">*</span></flux:legend>
                 <flux:radio.group wire:model.live="recipientType">
+                    <flux:radio value="number" label="Send to Number" description="Send message to WhatsApp number" checked />
                     <flux:radio value="contact" label="Send to Contact" description="Send message to individual phone number" checked />
                     <flux:radio value="group" label="Send to Group(s)" description="Send message to WhatsApp groups" />
                     <flux:radio value="recipients" label="Send to Recipient(s)" description="Send message to recipients list" />
                 </flux:radio.group>
                 </flux:fieldset>
+
+                <!-- Number Selection -->
+                @if($recipientType === 'number')
+                    <div>
+                        <flux:label for="contactNumber">Enter Number <span class="text-red-500">*</span></flux:label>
+                        <flux:input wire:model="contactNumber" class="mt-1" placeholder="Enter WhatsApp number" />
+                        @error('contactNumber') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <div class="mt-2 text-xs text-gray-600 dark:text-zinc-400 space-y-1">
+                            <div>• Format: 6281234567890 (without '+' prefix)</div>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Contact Selection -->
                 @if($recipientType === 'contact')
@@ -477,6 +518,78 @@
                 @endif
             </div>
         </form>
+    </flux:modal>
+
+    <!-- Preview Message Modal -->
+    <flux:modal name="preview-message" class="min-w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Message Preview</flux:heading>
+                <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">How the message appears</flux:text>
+            </div>
+
+            @if($messageToPreview)
+                <div class="space-y-4">
+                    <!-- Message Info -->
+                    <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <flux:heading size="md">Message Details</flux:heading>
+                                @if($messageToPreview->template)
+                                    <flux:badge color="blue" size="sm">Template</flux:badge>
+                                @else
+                                    <flux:badge color="gray" size="sm">Direct</flux:badge>
+                                @endif
+                            </div>
+                            <div class="text-sm text-gray-600 dark:text-zinc-400 space-y-1">
+                                <div>Sent: {{ $messageToPreview->created_at->format('M d, Y H:i') }}</div>
+                                @if($messageToPreview->template)
+                                    <div>Template: {{ $messageToPreview->template->name }}</div>
+                                @endif
+                                @if($messageToPreview->wahaSession)
+                                    <div>Session: {{ $messageToPreview->wahaSession->name }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Preview -->
+                    <div class="bg-green-50 dark:bg-green-900/10 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                        <flux:heading size="sm" class="mb-3 text-green-800 dark:text-green-200">Message Preview</flux:heading>
+
+                        <!-- WhatsApp-like message bubble -->
+                        <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 max-w-sm ml-auto">
+                            <div class="text-sm text-gray-900 dark:text-zinc-100">
+                                @php
+                                    $previewMsg = $messageToPreview->message;
+                                    // Replace *text* with <strong>text</strong>
+                                    $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                    // Replace _text_ with <em>text</em>
+                                    $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                @endphp
+                                <div class="whitespace-pre-wrap">{!! $previewMsg !!}</div>
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-zinc-400 mt-2 text-right">
+                                {{ $messageToPreview->created_at->format('g:i A') }} ✓✓
+                            </div>
+                        </div>
+
+                        <!-- Additional info -->
+                        <div class="text-xs text-gray-600 dark:text-zinc-400 mt-3 space-y-1">
+                            <div>• Supports formatting: *bold*, _italic_</div>
+                            <div>• Character count: {{ strlen($messageToPreview->message) }}</div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Close</flux:button>
+                </flux:modal.close>
+            </div>
+        </div>
     </flux:modal>
 
 </div>

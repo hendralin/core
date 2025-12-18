@@ -37,9 +37,9 @@ class MesssagesIndex extends Component
     public $messageType = 'direct'; // 'direct' or 'template'
     public $selectedTemplate = '';
     public $directMessage = '';
-    public $recipientType = 'contact'; // 'contact' or 'group'
+    public $recipientType = 'number'; // 'number', 'contact', 'group', or 'recipients'
     public $selectedContactId = '';
-    public $contactNumber = ''; // Keep for backward compatibility
+    public $contactNumber = '';
     public $selectedGroups = [];
     public $selectedRecipients = [];
     public $recipientsFile;
@@ -58,6 +58,7 @@ class MesssagesIndex extends Component
     public $perPage = 10;
 
     // Modal properties
+    public $messageToPreview;
 
     // Data properties
     public $templates = [];
@@ -179,21 +180,29 @@ class MesssagesIndex extends Component
 
     public function updatedRecipientType()
     {
-        if ($this->recipientType === 'contact') {
-            // Reset group and recipients selection when switching to contact
+        if ($this->recipientType === 'number') {
+            // Reset contact, group and recipients selection when switching to number
+            $this->selectedContactId = '';
+            $this->selectedGroups = [];
+            $this->selectedRecipients = [];
+            $this->recipientsFile = null;
+            $this->parsedRecipients = [];
+        } elseif ($this->recipientType === 'contact') {
+            // Reset number, group and recipients selection when switching to contact
+            $this->contactNumber = '';
             $this->selectedGroups = [];
             $this->selectedRecipients = [];
             $this->recipientsFile = null;
             $this->parsedRecipients = [];
         } elseif ($this->recipientType === 'group') {
-            // Reset contact and recipients selection when switching to group
+            // Reset number, contact and recipients selection when switching to group
             $this->selectedContactId = '';
             $this->contactNumber = '';
             $this->selectedRecipients = [];
             $this->recipientsFile = null;
             $this->parsedRecipients = [];
         } elseif ($this->recipientType === 'recipients') {
-            // Reset contact and group selection when switching to recipients
+            // Reset number, contact and group selection when switching to recipients
             $this->selectedContactId = '';
             $this->contactNumber = '';
             $this->selectedGroups = [];
@@ -416,12 +425,10 @@ class MesssagesIndex extends Component
         $this->messageType = 'direct';
         $this->selectedTemplate = '';
         $this->directMessage = '';
-        $this->recipientType = 'contact';
+        $this->recipientType = 'number';
         $this->contactNumber = '';
         $this->messageSession = '';
-        $this->selectedTemplate = '';
         $this->selectedContactId = '';
-        $this->contactNumber = '';
         $this->selectedGroups = [];
         $this->selectedRecipients = [];
         $this->recipientsFile = null;
@@ -480,7 +487,9 @@ class MesssagesIndex extends Component
         // Validate session exists and is valid
         $rules['messageSession'] = 'required|exists:waha_sessions,id';
 
-        if ($this->recipientType === 'contact') {
+        if ($this->recipientType === 'number') {
+            $rules['contactNumber'] = 'required|regex:/^(\+?\d{1,3}[-.\s]?)?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/';
+        } elseif ($this->recipientType === 'contact') {
             $rules['selectedContactId'] = 'required|exists:contacts,id';
         } elseif ($this->recipientType === 'group') {
             $rules['selectedGroups'] = 'required|array|min:1|exists:groups,id';
@@ -728,7 +737,18 @@ class MesssagesIndex extends Component
     {
         $recipients = [];
 
-        if ($this->recipientType === 'contact') {
+        if ($this->recipientType === 'number') {
+            if ($this->contactNumber) {
+                // Clean contact number format (remove any non-numeric characters except +)
+                $cleanNumber = preg_replace('/[^\d+]/', '', $this->contactNumber);
+                // Remove leading + if present for WAHA format
+                $cleanNumber = ltrim($cleanNumber, '+');
+                $recipients[] = [
+                    'number' => $this->contactNumber,
+                    'wa_id' => $cleanNumber . '@s.whatsapp.net', // WAHA format
+                ];
+            }
+        } elseif ($this->recipientType === 'contact') {
             if ($this->selectedContactId) {
                 $contact = Contact::find($this->selectedContactId);
                 if ($contact) {
@@ -739,14 +759,6 @@ class MesssagesIndex extends Component
                         'wa_id' => $cleanNumber . '@s.whatsapp.net', // WAHA format
                     ];
                 }
-            } elseif ($this->contactNumber) {
-                // Fallback for backward compatibility
-                // Clean contact number format (remove any non-numeric characters except +)
-                $cleanNumber = preg_replace('/[^\d+]/', '', $this->contactNumber);
-                $recipients[] = [
-                    'number' => $this->contactNumber,
-                    'wa_id' => $cleanNumber . '@s.whatsapp.net', // WAHA format
-                ];
             }
         } elseif ($this->recipientType === 'group') {
             foreach ($this->selectedGroups as $groupId) {
@@ -780,12 +792,15 @@ class MesssagesIndex extends Component
 
     private function buildRecipientInfo()
     {
-        if ($this->recipientType === 'contact') {
+        if ($this->recipientType === 'number') {
+            if ($this->contactNumber) {
+                return "Number: " . $this->contactNumber;
+            }
+            return "Please enter a WhatsApp number";
+        } elseif ($this->recipientType === 'contact') {
             if ($this->selectedContactId) {
                 $contact = Contact::find($this->selectedContactId);
                 return $contact ? "Contact: " . ($contact->name ?: $contact->wa_id) : "Contact not found";
-            } elseif ($this->contactNumber) {
-                return "Contact: " . $this->contactNumber;
             }
             return "Please select a contact";
         } elseif ($this->recipientType === 'group') {
@@ -824,6 +839,11 @@ class MesssagesIndex extends Component
         $this->search = '';
         $this->selectedSession = '';
         $this->resetPage();
+    }
+
+    public function setMessageToPreview($id)
+    {
+        $this->messageToPreview = Message::with(['template', 'wahaSession', 'createdBy', 'contact', 'group'])->find($id);
     }
 
     public function render()
