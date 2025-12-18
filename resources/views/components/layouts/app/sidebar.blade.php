@@ -34,7 +34,7 @@
                     <flux:sidebar.group expandable icon="cog-6-tooth" heading="Setup" class="grid">
                         @if (auth()->user()->can('company.view') ||
                         auth()->user()->can('company.edit'))
-                            <flux:sidebar.item icon="building-office" :href="route('company.show')" :current="request()->routeIs('company.show')" wire:navigate>{{ __('Company') }}</flux:sidebar.item>
+                            <flux:navlist.item icon="building-office" :href="route('company.show')" :current="request()->routeIs('company.show')" wire:navigate>{{ __('Company') }}</flux:navlist.item>
                         @endif
                     </flux:sidebar.group>
                 @endif
@@ -46,14 +46,14 @@
                         auth()->user()->can('user.create') ||
                         auth()->user()->can('user.edit') ||
                         auth()->user()->can('user.delete'))
-                            <flux:sidebar.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>{{ __('Users') }}</flux:sidebar.item>
+                            <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>{{ __('Users') }}</flux:navlist.item>
                         @endif
 
                         @if (auth()->user()->can('role.view') ||
                         auth()->user()->can('role.create') ||
                         auth()->user()->can('role.edit') ||
                         auth()->user()->can('role.delete'))
-                            <flux:sidebar.item icon="link-slash" :href="route('roles.index')" :current="request()->routeIs('roles.*')" wire:navigate>{{ __('Roles') }}</flux:sidebar.item>
+                            <flux:navlist.item icon="link-slash" :href="route('roles.index')" :current="request()->routeIs('roles.*')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
                         @endif
                     </flux:sidebar.group>
                 @endif
@@ -111,10 +111,10 @@
 
                 <flux:sidebar.group expandable icon="wrench-screwdriver" heading="Tool" class="grid">
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
-                        <flux:sidebar.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup and Restore') }}</flux:sidebar.item>
+                        <flux:navlist.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup and Restore') }}</flux:navlist.item>
                     @endif
 
-                    <flux:sidebar.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:sidebar.item>
+                    <flux:navlist.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:navlist.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

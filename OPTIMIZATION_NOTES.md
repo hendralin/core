@@ -47,6 +47,10 @@ Atau untuk development:
 php artisan queue:listen --queue=messages
 ```
 
+```bash
+php artisan queue:work --queue=messages --tries=3 --timeout=120
+```
+
 ### 2. Konfigurasi Queue
 Pastikan `QUEUE_CONNECTION` di `.env` sudah diset:
 ```env
