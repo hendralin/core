@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Activity extends SpatieActivity
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
         'log_name',
         'description',
@@ -19,6 +24,11 @@ class Activity extends SpatieActivity
         'updated_at',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'properties' => 'array',
         'created_at' => 'datetime',
@@ -26,7 +36,7 @@ class Activity extends SpatieActivity
     ];
 
     /**
-     * Get the user that performed this activity
+     * Get the user that performed the activity
      */
     public function getCauser(): BelongsTo
     {
@@ -34,7 +44,7 @@ class Activity extends SpatieActivity
     }
 
     /**
-     * Get activities for a specific user
+     * Get the activities for a specific user
      */
     public function scopeForUser($query, $userId)
     {
@@ -43,7 +53,7 @@ class Activity extends SpatieActivity
     }
 
     /**
-     * Get activities for a specific subject
+     * Get the activities for a specific subject
      */
     public function scopeBySubject($query, $subject)
     {
@@ -52,7 +62,7 @@ class Activity extends SpatieActivity
     }
 
     /**
-     * Get activities by log name
+     * Get the activities by log name
      */
     public function scopeByLogName($query, $logName)
     {
@@ -60,7 +70,7 @@ class Activity extends SpatieActivity
     }
 
     /**
-     * Get recent activities
+     * Get the recent activities
      */
     public function scopeRecent($query, $days = 7)
     {
@@ -68,19 +78,19 @@ class Activity extends SpatieActivity
     }
 
     /**
-     * Get activity description with formatted data
+     * Get the activity description with formatted data
      */
     public function getFormattedDescriptionAttribute(): string
     {
         $description = $this->description;
 
-        // Replace :name placeholder with subject/causer name
+        // Replace the :name placeholder with the subject/causer name
         if (str_contains($description, ':name')) {
             $name = '';
 
-            // Try to get name from subject (the model being acted upon)
+            // Try to get the name from the subject (the model being acted upon)
             if ($this->subject_type === 'App\\Models\\User' && $this->subject_id) {
-                // Use relationship if loaded, otherwise fallback to direct query
+                // Use the relationship if loaded, otherwise fallback to the direct query
                 if ($this->relationLoaded('subject') && $this->subject) {
                     $name = $this->subject->name ?? '';
                 } else {
@@ -89,7 +99,7 @@ class Activity extends SpatieActivity
                 }
             }
 
-            // If no subject name, try causer (the user performing the action)
+            // If no subject name, try the causer (the user performing the action)
             if (empty($name) && $this->causer_type === 'App\\Models\\User' && $this->causer_id) {
                 // Use relationship if loaded, otherwise fallback to direct query
                 if ($this->relationLoaded('causer') && $this->causer) {

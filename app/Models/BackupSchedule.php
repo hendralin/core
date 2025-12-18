@@ -7,6 +7,11 @@ use Carbon\Carbon;
 
 class BackupSchedule extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
         'name',
         'frequency',
@@ -22,6 +27,11 @@ class BackupSchedule extends Model
         'encryption_password'
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'is_active' => 'boolean',
         'time' => 'datetime:H:i',
@@ -34,7 +44,7 @@ class BackupSchedule extends Model
     ];
 
     /**
-     * Calculate next run time based on frequency
+     * Calculate the next run time based on frequency
      */
     public function calculateNextRun(): Carbon
     {
@@ -74,7 +84,7 @@ class BackupSchedule extends Model
     }
 
     /**
-     * Update last run and calculate next run
+     * Update the last run and calculate the next run
      */
     public function markAsRun(): void
     {
@@ -85,7 +95,7 @@ class BackupSchedule extends Model
     }
 
     /**
-     * Check if schedule should run now
+     * Check if the schedule should run now
      */
     public function shouldRunNow(): bool
     {
@@ -101,7 +111,7 @@ class BackupSchedule extends Model
     }
 
     /**
-     * Get frequency options for forms
+     * Get the frequency options for forms
      */
     public static function getFrequencyOptions(): array
     {
@@ -113,7 +123,7 @@ class BackupSchedule extends Model
     }
 
     /**
-     * Get day of week options
+     * Get the day of week options
      */
     public static function getDayOfWeekOptions(): array
     {
@@ -129,7 +139,7 @@ class BackupSchedule extends Model
     }
 
     /**
-     * Get day of month options
+     * Get the day of month options
      */
     public static function getDayOfMonthOptions(): array
     {

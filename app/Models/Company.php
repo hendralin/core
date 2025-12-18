@@ -9,6 +9,12 @@ use Spatie\Activitylog\LogOptions;
 class Company extends Model
 {
     use LogsActivity;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
         'name',
         'address',
@@ -29,6 +35,11 @@ class Company extends Model
         'features_enabled',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'social_media' => 'array',
         'features_enabled' => 'array',
@@ -36,6 +47,9 @@ class Company extends Model
         'license_expires_at' => 'datetime',
     ];
 
+    /**
+     * Get the options for activity logging
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -62,6 +76,9 @@ class Company extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    /**
+     * Get the attributes for activity logging
+     */
     public function getActivitylogAttributes(): array
     {
         return [
