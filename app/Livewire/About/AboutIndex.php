@@ -33,6 +33,8 @@ class AboutIndex extends Component
                 'profile_pictures' => true,
                 'activity_logging' => true,
                 'message_audit_trails' => true,
+                'message_status_tracking' => true,
+                'resend_functionality' => true,
             ],
         ];
 
@@ -112,7 +114,9 @@ class AboutIndex extends Component
             'total_messages' => Message::count(),
             'messages_today' => Message::whereDate('created_at', today())->count(),
             'messages_this_week' => Message::where('created_at', '>=', now()->startOfWeek())->count(),
-            'successful_messages' => Message::whereNotNull('wa_id')->count(),
+            'sent_messages' => Message::where('status', 'sent')->count(),
+            'failed_messages' => Message::where('status', 'failed')->count(),
+            'pending_messages' => Message::where('status', 'pending')->orWhereNull('status')->count(),
         ];
     }
 }
