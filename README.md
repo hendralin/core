@@ -33,6 +33,10 @@
 - **Session-based Filtering**: Send messages using specific WhatsApp sessions
 - **Smart Validation**: Intelligent form validation with contextual error messages
 - **Success Reporting**: Detailed delivery statistics and failure notifications
+- **Message Status Tracking**: Real-time status tracking (sent, failed, pending) for all messages
+- **Failed Message Resend**: One-click resend functionality for failed messages with confirmation dialogs
+- **Status Badges**: Visual status indicators in message list (Sent/Failed/Pending)
+- **Resend Statistics**: Track resend activities in audit trail
 
 ### Template Management
 - **Message Templates**: Create and manage WhatsApp message templates
@@ -270,6 +274,21 @@ Phone Number,Header Var 1,Header Var 2,Body Var 1,Body Var 2
 6281234567890,John Doe,ABC Corp,Laptop,$999
 6289876543210,Jane Smith,XYZ Ltd,Phone,$599
 ```
+
+#### Message Status Tracking
+
+- **Status Monitoring**: All messages are tracked with status (sent, failed, pending)
+- **Visual Indicators**: Color-coded status badges in message list
+- **Status Filtering**: Filter messages by delivery status
+- **Real-time Updates**: Status updates automatically when messages are sent
+
+#### Failed Message Resend
+
+- **One-Click Resend**: Easily resend failed messages with a single click
+- **Confirmation Dialog**: Safety confirmation before resending messages
+- **Message Preview**: Preview message content before resending
+- **Status Updates**: Automatic status update to 'sent' after successful resend
+- **Activity Logging**: All resend activities are logged in audit trail
 
 #### WAHA API Monitoring
 
@@ -746,6 +765,11 @@ GET /health
 - **Contact Dropdown Selection**: Session-filtered contact selection with names
 - **Group Broadcasting**: Send messages to WhatsApp groups with session filtering
 - **Message History**: Complete logging and tracking of all broadcast activities
+- **Message Status Tracking**: Real-time status tracking (sent, failed, pending) for all messages
+- **Failed Message Resend**: One-click resend functionality for failed messages with confirmation dialogs
+- **Status Badges**: Visual status indicators in message list with color-coded badges
+- **Resend Statistics**: Track resend activities in audit trail with detailed activity logs
+- **Enhanced Audit Trail**: Improved audit trail with status information and resend activity tracking
 
 ### Version 1.3.0
 - **Groups Management System**: Complete group and community synchronization from WhatsApp
