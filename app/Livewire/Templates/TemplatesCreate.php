@@ -5,13 +5,24 @@ namespace App\Livewire\Templates;
 use App\Models\Session;
 use Livewire\Component;
 use App\Models\Template;
+use App\Traits\HasWahaConfig;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 
 #[Title('Create Template')]
 class TemplatesCreate extends Component
 {
+    use HasWahaConfig;
+
     public $waha_session_id, $name, $header, $body, $is_active = true;
+
+    public function mount()
+    {
+        if (!$this->isWahaConfigured()) {
+            session()->flash('error', 'WAHA belum dikonfigurasi. Silakan konfigurasi WAHA terlebih dahulu.');
+            return $this->redirect(route('templates.index'), true);
+        }
+    }
 
     public function submit()
     {

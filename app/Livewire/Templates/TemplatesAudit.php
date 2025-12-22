@@ -6,6 +6,7 @@ use App\Models\Session;
 use Livewire\Component;
 use App\Models\Activity;
 use App\Models\Template;
+use App\Traits\HasWahaConfig;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Livewire\WithoutUrlPagination;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 #[Title('Template Audit Trail')]
 class TemplatesAudit extends Component
 {
-    use WithPagination, WithoutUrlPagination;
+    use WithPagination, WithoutUrlPagination, HasWahaConfig;
 
     public $search = '';
     public $perPage = 10;
@@ -25,6 +26,11 @@ class TemplatesAudit extends Component
 
     public function mount()
     {
+        if (!$this->isWahaConfigured()) {
+            session()->flash('error', 'WAHA belum dikonfigurasi. Silakan konfigurasi WAHA terlebih dahulu.');
+            return $this->redirect(route('templates.index'), true);
+        }
+
         // Only show templates and sessions created by current user
         $this->templates = Template::where('created_by', Auth::id())->get();
         $this->sessions = Session::where('created_by', Auth::id())->get();

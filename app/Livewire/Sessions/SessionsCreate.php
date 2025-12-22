@@ -3,8 +3,8 @@
 namespace App\Livewire\Sessions;
 
 use App\Models\Session;
-use App\Traits\HasWahaConfig;
 use Livewire\Component;
+use App\Traits\HasWahaConfig;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -30,6 +30,14 @@ class SessionsCreate extends Component
     protected $messages = [
         'session_id.regex' => 'Session ID can only contain alphanumeric characters, hyphens, and underscores (a-z, A-Z, 0-9, -, _)',
     ];
+
+    public function mount()
+    {
+        if (!$this->isWahaConfigured()) {
+            session()->flash('error', 'WAHA belum dikonfigurasi. Silakan konfigurasi WAHA terlebih dahulu.');
+            return $this->redirect(route('sessions.index'), true);
+        }
+    }
 
     public function updatedName()
     {
@@ -73,7 +81,7 @@ class SessionsCreate extends Component
             try {
                 $apiUrl = $this->getWahaApiUrl();
                 $apiKey = $this->getWahaApiKey();
-                
+
                 if (!$apiUrl || !$apiKey) {
                     throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
                 }

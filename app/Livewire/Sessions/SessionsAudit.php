@@ -26,6 +26,11 @@ class SessionsAudit extends Component
 
     public function mount()
     {
+        if (!$this->isWahaConfigured()) {
+            session()->flash('error', 'WAHA belum dikonfigurasi. Silakan konfigurasi WAHA terlebih dahulu.');
+            return $this->redirect(route('sessions.index'), true);
+        }
+
         $this->authorize('session.view');
         $this->sessions = Session::where('created_by', Auth::id())->get();
     }

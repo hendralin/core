@@ -3,8 +3,8 @@
 namespace App\Livewire\Sessions;
 
 use App\Models\Session;
-use App\Traits\HasWahaConfig;
 use Livewire\Component;
+use App\Traits\HasWahaConfig;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +24,11 @@ class SessionsShow extends Component
 
     public function mount(Session $session)
     {
+        if (!$this->isWahaConfigured()) {
+            session()->flash('error', 'WAHA belum dikonfigurasi. Silakan konfigurasi WAHA terlebih dahulu.');
+            return $this->redirect(route('sessions.index'), true);
+        }
+
         $this->authorize('session.view');
 
         // Check if session belongs to current user

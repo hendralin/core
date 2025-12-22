@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use App\Traits\HasWahaConfig;
 
 #[Title('Templates')]
 class TemplatesIndex extends Component
 {
-    use WithPagination, WithoutUrlPagination;
+    use WithPagination, WithoutUrlPagination, HasWahaConfig;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -153,6 +154,14 @@ class TemplatesIndex extends Component
 
     public function render()
     {
+        if (!$this->isWahaConfigured()) {
+            return view('livewire.templates.templates-index', [
+                'templates' => collect(),
+                'wahaConfigured' => false,
+                'sessions' => $this->sessions,
+            ]);
+        }
+
         $templates = Template::with(['createdBy', 'updatedBy', 'wahaSession'])
             ->where('created_by', Auth::id()) // Only show templates created by current user
             ->when($this->search, function ($q) {
@@ -167,6 +176,10 @@ class TemplatesIndex extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
-        return view('livewire.templates.templates-index', compact('templates'));
+        return view('livewire.templates.templates-index', [
+            'templates' => $templates,
+            'wahaConfigured' => true,
+            'sessions' => $this->sessions,
+        ]);
     }
 }

@@ -73,7 +73,7 @@
                             <div>
                                 <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Configuration Required</h4>
                                 <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                                    You must configure WAHA_API_URL and WAHA_API_KEY in your environment variables before you can manage WhatsApp sessions.
+                                    WAHA_API_URL and WAHA_API_KEY are not configured. Please configure them first before managing WhatsApp sessions.
                                     <a href="{{ route('waha.index') }}" class="font-medium underline underline-offset-2 hover:text-yellow-800 dark:hover:text-yellow-100">Configure WAHA</a>
                                 </p>
                             </div>
