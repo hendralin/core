@@ -3,6 +3,7 @@
 namespace App\Livewire\Sessions;
 
 use App\Models\Session;
+use App\Traits\HasWahaConfig;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Request;
 #[Title('Sessions')]
 class SessionsIndex extends Component
 {
-    use WithPagination, WithoutUrlPagination;
+    use WithPagination, WithoutUrlPagination, HasWahaConfig;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -100,10 +101,17 @@ class SessionsIndex extends Component
             if ($session) {
                 // First, delete from WAHA API
                 try {
+                    $apiUrl = $this->getWahaApiUrl();
+                    $apiKey = $this->getWahaApiKey();
+                    
+                    if (!$apiUrl || !$apiKey) {
+                        throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+                    }
+
                     $apiResponse = Http::withHeaders([
                         'accept' => '*/*',
-                        'X-Api-Key' => env('WAHA_API_KEY'),
-                    ])->delete(env('WAHA_API_URL') . "/api/sessions/{$session->session_id}");
+                        'X-Api-Key' => $apiKey,
+                    ])->delete($apiUrl . "/api/sessions/{$session->session_id}");
 
                     if (!$apiResponse->successful()) {
                         Log::error('Failed to delete session from WAHA API: ' . $apiResponse->body());
@@ -172,7 +180,7 @@ class SessionsIndex extends Component
     public function render()
     {
         // Check if WAHA is configured
-        if (!env('WAHA_API_URL') || !env('WAHA_API_KEY')) {
+        if (!$this->isWahaConfigured()) {
             return view('livewire.sessions.sessions-index', [
                 'sessions' => collect(),
                 'wahaConfigured' => false
@@ -183,13 +191,15 @@ class SessionsIndex extends Component
 
         try {
             // Cache sessions data for 5 minutes to reduce API calls
-            $cacheKey = 'waha_sessions_data';
-            $apiSessions = Cache::remember($cacheKey, now()->addMinutes(5), function () {
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+            $cacheKey = 'waha_sessions_data_' . Auth::id();
+            $apiSessions = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($apiUrl, $apiKey) {
                 try {
                     $response = Http::withHeaders([
                         'accept' => 'application/json',
-                        'X-Api-Key' => env('WAHA_API_KEY'),
-                    ])->get(env('WAHA_API_URL') . "/api/sessions?all=true");
+                        'X-Api-Key' => $apiKey,
+                    ])->get($apiUrl . "/api/sessions?all=true");
 
                     if ($response->successful()) {
                         return $response->json();
@@ -222,8 +232,8 @@ class SessionsIndex extends Component
 
                                     $profileResponse = Http::withHeaders([
                                         'accept' => '*/*',
-                                        'X-Api-Key' => env('WAHA_API_KEY'),
-                                    ])->get(env('WAHA_API_URL') . "/api/contacts/profile-picture?contactId={$contactId}&refresh=false&session={$sessionName}");
+                                        'X-Api-Key' => $this->getWahaApiKey(),
+                                    ])->get($this->getWahaApiUrl() . "/api/contacts/profile-picture?contactId={$contactId}&refresh=false&session={$sessionName}");
 
                                     if ($profileResponse->successful()) {
                                         // API returns JSON with profilePictureURL field

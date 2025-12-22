@@ -70,7 +70,7 @@
             </div>
 
             <!-- Actions Bar -->
-            @if (env('WAHA_API_URL') && env('WAHA_API_KEY'))
+            @if ($this->wahaConfigured)
             <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
                 <div class="flex flex-wrap gap-2 justify-end">
                     <div class="flex flex-wrap gap-2">

@@ -3,6 +3,7 @@
 namespace App\Livewire\Sessions;
 
 use App\Models\Session;
+use App\Traits\HasWahaConfig;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Request;
 #[Title('Create Session')]
 class SessionsCreate extends Component
 {
+    use HasWahaConfig;
     public $name;
     public $session_id;
     public $is_active = true;
@@ -69,11 +71,18 @@ class SessionsCreate extends Component
 
             // Call WAHA API to create session
             try {
+                $apiUrl = $this->getWahaApiUrl();
+                $apiKey = $this->getWahaApiKey();
+                
+                if (!$apiUrl || !$apiKey) {
+                    throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+                }
+
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
-                    'X-Api-Key' => env('WAHA_API_KEY'),
+                    'X-Api-Key' => $apiKey,
                     'Content-Type' => 'application/json',
-                ])->post(env('WAHA_API_URL') . '/api/sessions', [
+                ])->post($apiUrl . '/api/sessions', [
                     'name' => $validatedData['session_id'],
                     'config' => [
                         'metadata' => (object)[],

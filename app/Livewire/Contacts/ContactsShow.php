@@ -3,6 +3,7 @@
 namespace App\Livewire\Contacts;
 
 use App\Models\Contact;
+use App\Traits\HasWahaConfig;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Http;
 #[Title('Show Contact')]
 class ContactsShow extends Component
 {
+    use HasWahaConfig;
     public Contact $contact;
     public $profilePictureUrl;
     public $showProfileModal = false;
@@ -38,10 +40,18 @@ class ContactsShow extends Component
 
         // If not in database, fetch from WAHA API
         try {
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+            
+            if (!$apiUrl || !$apiKey) {
+                $this->profilePictureUrl = null;
+                return;
+            }
+
             $response = Http::withHeaders([
                 'accept' => '*/*',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->get(env('WAHA_API_URL') . '/api/contacts/profile-picture', [
+                'X-Api-Key' => $apiKey,
+            ])->get($apiUrl . '/api/contacts/profile-picture', [
                 'contactId' => $this->contact->wa_id,
                 'refresh' => 'false',
                 'session' => $this->contact->wahaSession?->session_id

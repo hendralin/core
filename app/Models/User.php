@@ -245,4 +245,12 @@ class User extends Authenticatable implements MustVerifyEmail
         $company = Company::first();
         return $company ? $company->logo : null;
     }
+
+    /**
+     * Get the config for the user.
+     */
+    public function config()
+    {
+        return $this->hasOne(Config::class);
+    }
 }

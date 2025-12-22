@@ -4,6 +4,7 @@ namespace App\Livewire\Groups;
 
 use App\Models\Group;
 use App\Models\Contact;
+use App\Traits\HasWahaConfig;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Http;
 #[Title('Show Group')]
 class GroupsShow extends Component
 {
+    use HasWahaConfig;
     public Group $group;
     public $groupPictureUrl;
     public $participantPictures = [];
@@ -53,10 +55,18 @@ class GroupsShow extends Component
 
         // If not in database, try to fetch from WAHA API (if available)
         try {
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+            
+            if (!$apiUrl || !$apiKey) {
+                $this->groupPictureUrl = null;
+                return;
+            }
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->get(env('WAHA_API_URL') . '/api/' . $this->group->wahaSession?->session_id . '/groups/' . $this->group->group_wa_id . '/picture', [
+                'X-Api-Key' => $apiKey,
+            ])->get($apiUrl . '/api/' . $this->group->wahaSession?->session_id . '/groups/' . $this->group->group_wa_id . '/picture', [
                 'refresh' => 'false'
             ]);
 
@@ -90,10 +100,18 @@ class GroupsShow extends Component
         }
 
         try {
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+            
+            if (!$apiUrl || !$apiKey) {
+                $this->participantPictures[$participantId] = null;
+                return;
+            }
+
             $response = Http::withHeaders([
                 'accept' => '*/*',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->get(env('WAHA_API_URL') . '/api/contacts/profile-picture', [
+                'X-Api-Key' => $apiKey,
+            ])->get($apiUrl . '/api/contacts/profile-picture', [
                 'contactId' => $participantId,
                 'refresh' => 'false',
                 'session' => $this->group->wahaSession?->session_id

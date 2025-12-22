@@ -4,6 +4,7 @@ namespace App\Livewire\Contacts;
 
 use App\Models\Contact;
 use App\Models\Session;
+use App\Traits\HasWahaConfig;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Request;
 #[Title('Contacts')]
 class ContactsIndex extends Component
 {
-    use WithPagination, WithoutUrlPagination;
+    use WithPagination, WithoutUrlPagination, HasWahaConfig;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -97,10 +98,17 @@ class ContactsIndex extends Component
             }
 
             // Call WAHA API to get contacts
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+            
+            if (!$apiUrl || !$apiKey) {
+                throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+            }
+
             $response = Http::withHeaders([
                 'accept' => '*/*',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->get(env('WAHA_API_URL') . '/api/contacts/all', [
+                'X-Api-Key' => $apiKey,
+            ])->get($apiUrl . '/api/contacts/all', [
                 'session' => $session->session_id, // Use session_id field from database
             ]);
 
@@ -165,6 +173,11 @@ class ContactsIndex extends Component
         // Reset selected session and close modal regardless of success/failure
         $this->selectedSessionId = null;
         $this->modal('sync-contacts-modal')->close();
+    }
+
+    public function getWahaConfiguredProperty()
+    {
+        return $this->isWahaConfigured();
     }
 
     public function render()

@@ -6,16 +6,19 @@ use App\Models\Contact;
 use App\Models\Group;
 use App\Models\Template;
 use App\Models\Message;
+use App\Traits\HasWahaConfig;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('About The Broadcaster System v1.5.0')]
 class AboutIndex extends Component
 {
+    use HasWahaConfig;
     public function render()
     {
         $systemInfo = [
@@ -71,8 +74,9 @@ class AboutIndex extends Component
         ];
 
         try {
-            $apiUrl = env('WAHA_API_URL');
-            $apiKey = env('WAHA_API_KEY');
+            $config = \App\Models\Config::where('user_id', Auth::id())->first();
+            $apiUrl = $config?->api_url;
+            $apiKey = $config?->api_key;
 
             if ($apiUrl && $apiKey) {
                 $wahaInfo['configured'] = true;

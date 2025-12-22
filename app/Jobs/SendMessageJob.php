@@ -60,7 +60,9 @@ class SendMessageJob implements ShouldQueue
             // Update status to processing (optional, if you want to track this)
             // $message->update(['status' => 'processing']);
 
-            $wahaService = new WahaService();
+            // Get user_id from message's created_by relationship
+            $userId = $message->createdBy->id ?? null;
+            $wahaService = new WahaService($userId);
 
             // Check if message is image, file, or custom type
             $messageData = json_decode($message->message, true);

@@ -2,21 +2,38 @@
 
 namespace App\Services;
 
+use App\Models\Config;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WahaService
 {
-    protected string $baseUrl;
-    protected string $apiKey;
+    protected ?string $baseUrl = null;
+    protected ?string $apiKey = null;
     protected string $session;
     public bool $isConnected = false;
+    protected ?int $userId = null;
 
-    public function __construct()
+    public function __construct(?int $userId = null)
     {
-        $this->baseUrl = env('WAHA_API_URL');
-        $this->apiKey = env('WAHA_API_KEY');
+        $this->userId = $userId ?? Auth::id();
+        $this->loadConfig();
         $this->session = env('WAHA_SESSION_ID', 'The_Broadcaster');
+    }
+
+    /**
+     * Load configuration from database for the user
+     */
+    protected function loadConfig(): void
+    {
+        if ($this->userId) {
+            $config = Config::where('user_id', $this->userId)->first();
+            if ($config) {
+                $this->baseUrl = $config->api_url;
+                $this->apiKey = $config->api_key;
+            }
+        }
     }
 
     /**
@@ -529,11 +546,11 @@ class WahaService
     public function checkConnection()
     {
         try {
-            if (env('WAHA_API_URL') && env('WAHA_API_KEY')) {
+            if ($this->baseUrl && $this->apiKey) {
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
-                    'X-Api-Key' => env('WAHA_API_KEY'),
-                ])->get(env('WAHA_API_URL') . '/health');
+                    'X-Api-Key' => $this->apiKey,
+                ])->get($this->baseUrl . '/health');
 
                 $this->isConnected = $response->successful() && $response->status() === 200;
             } else {

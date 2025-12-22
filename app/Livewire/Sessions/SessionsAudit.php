@@ -6,6 +6,7 @@ use App\Models\Session;
 use Livewire\Component;
 use App\Models\Activity;
 use Livewire\WithPagination;
+use App\Traits\HasWahaConfig;
 use Livewire\Attributes\Title;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Cache;
 #[Title('Session Audit Trail')]
 class SessionsAudit extends Component
 {
-    use WithPagination, WithoutUrlPagination;
+    use WithPagination, WithoutUrlPagination, HasWahaConfig;
 
     public $search = '';
     public $perPage = 10;
@@ -50,13 +51,19 @@ class SessionsAudit extends Component
     public function render()
     {
         // Get sessions data from WAHA API with caching
-        $cacheKey = 'waha_sessions_data';
-        $apiSessions = Cache::remember($cacheKey, now()->addMinutes(5), function () {
+        $apiUrl = $this->getWahaApiUrl();
+        $apiKey = $this->getWahaApiKey();
+        $cacheKey = 'waha_sessions_data_' . Auth::id();
+        $apiSessions = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($apiUrl, $apiKey) {
             try {
+                if (!$apiUrl || !$apiKey) {
+                    return null;
+                }
+
                 $response = Http::withHeaders([
                     'accept' => 'application/json',
-                    'X-Api-Key' => env('WAHA_API_KEY'),
-                ])->get(env('WAHA_API_URL') . "/api/sessions?all=true");
+                    'X-Api-Key' => $apiKey,
+                ])->get($apiUrl . "/api/sessions?all=true");
 
                 if ($response->successful()) {
                     return $response->json();

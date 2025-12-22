@@ -3,6 +3,7 @@
 namespace App\Livewire\Sessions;
 
 use App\Models\Session;
+use App\Traits\HasWahaConfig;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Request;
 #[Title('Session Details')]
 class SessionsShow extends Component
 {
+    use HasWahaConfig;
     public Session $session;
     public $sessionData = null;
     public $qrCodeImage = null;
@@ -36,10 +38,18 @@ class SessionsShow extends Component
     public function fetchSessionData()
     {
         try {
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+
+            if (!$apiUrl || !$apiKey) {
+                Log::warning('WAHA configuration not found for user', ['user_id' => Auth::id()]);
+                return;
+            }
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->get(env('WAHA_API_URL') . "/api/sessions/{$this->session->session_id}");
+                'X-Api-Key' => $apiKey,
+            ])->get($apiUrl . "/api/sessions/{$this->session->session_id}");
 
             if ($response->successful()) {
                 $this->sessionData = $response->json();
@@ -71,10 +81,17 @@ class SessionsShow extends Component
                     $contactId = urlencode($this->sessionData['me']['id']);
                     $sessionName = $this->session->session_id;
 
+                    $apiUrl = $this->getWahaApiUrl();
+                    $apiKey = $this->getWahaApiKey();
+
+                    if (!$apiUrl || !$apiKey) {
+                        return null;
+                    }
+
                     $profileResponse = Http::withHeaders([
                         'accept' => '*/*',
-                        'X-Api-Key' => env('WAHA_API_KEY'),
-                    ])->get(env('WAHA_API_URL') . "/api/contacts/profile-picture?contactId={$contactId}&refresh=false&session={$sessionName}");
+                        'X-Api-Key' => $apiKey,
+                    ])->get($apiUrl . "/api/contacts/profile-picture?contactId={$contactId}&refresh=false&session={$sessionName}");
 
                     if ($profileResponse->successful()) {
                         // API returns JSON with profilePictureURL field
@@ -103,10 +120,17 @@ class SessionsShow extends Component
 
         try {
             // Hit WAHA API to start session
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+
+            if (!$apiUrl || !$apiKey) {
+                throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+            }
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->post(env('WAHA_API_URL') . "/api/sessions/{$this->session->session_id}/start");
+                'X-Api-Key' => $apiKey,
+            ])->post($apiUrl . "/api/sessions/{$this->session->session_id}/start");
 
             if ($response->successful()) {
                 // Log activity
@@ -144,10 +168,17 @@ class SessionsShow extends Component
 
         try {
             // Hit WAHA API to restart session
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+
+            if (!$apiUrl || !$apiKey) {
+                throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+            }
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->post(env('WAHA_API_URL') . "/api/sessions/{$this->session->session_id}/restart");
+                'X-Api-Key' => $apiKey,
+            ])->post($apiUrl . "/api/sessions/{$this->session->session_id}/restart");
 
             if ($response->successful()) {
                 // Log activity
@@ -185,10 +216,17 @@ class SessionsShow extends Component
 
         try {
             // Hit WAHA API to stop session
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+
+            if (!$apiUrl || !$apiKey) {
+                throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+            }
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->post(env('WAHA_API_URL') . "/api/sessions/{$this->session->session_id}/stop");
+                'X-Api-Key' => $apiKey,
+            ])->post($apiUrl . "/api/sessions/{$this->session->session_id}/stop");
 
             if ($response->successful()) {
                 // Log activity
@@ -226,10 +264,17 @@ class SessionsShow extends Component
 
         try {
             // Hit WAHA API to logout session
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+
+            if (!$apiUrl || !$apiKey) {
+                throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+            }
+
             $response = Http::withHeaders([
                 'accept' => 'application/json',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->post(env('WAHA_API_URL') . "/api/sessions/{$this->session->session_id}/logout");
+                'X-Api-Key' => $apiKey,
+            ])->post($apiUrl . "/api/sessions/{$this->session->session_id}/logout");
 
             if ($response->successful()) {
                 // Log activity
@@ -267,10 +312,17 @@ class SessionsShow extends Component
 
         try {
             // Hit WAHA API to get QR code screenshot
+            $apiUrl = $this->getWahaApiUrl();
+            $apiKey = $this->getWahaApiKey();
+
+            if (!$apiUrl || !$apiKey) {
+                throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+            }
+
             $response = Http::withHeaders([
                 'accept' => 'image/jpeg',
-                'X-Api-Key' => env('WAHA_API_KEY'),
-            ])->get(env('WAHA_API_URL') . "/api/screenshot?session={$this->session->session_id}");
+                'X-Api-Key' => $apiKey,
+            ])->get($apiUrl . "/api/screenshot?session={$this->session->session_id}");
 
             if ($response->successful()) {
                 // Convert response to base64 for display
@@ -319,10 +371,17 @@ class SessionsShow extends Component
 
             // First, delete from WAHA API
             try {
+                $apiUrl = $this->getWahaApiUrl();
+                $apiKey = $this->getWahaApiKey();
+
+                if (!$apiUrl || !$apiKey) {
+                    throw new \Exception('WAHA configuration not found. Please configure your WAHA settings first.');
+                }
+
                 $apiResponse = Http::withHeaders([
                     'accept' => '*/*',
-                    'X-Api-Key' => env('WAHA_API_KEY'),
-                ])->delete(env('WAHA_API_URL') . "/api/sessions/{$this->session->session_id}");
+                    'X-Api-Key' => $apiKey,
+                ])->delete($apiUrl . "/api/sessions/{$this->session->session_id}");
 
                 if (!$apiResponse->successful()) {
                     Log::error('Failed to delete session from WAHA API: ' . $apiResponse->body());

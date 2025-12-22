@@ -31,7 +31,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        @if(env('WAHA_API_URL') && env('WAHA_API_KEY'))
+                        @if($wahaApiUrl && $wahaApiKey)
                             <flux:badge color="green" icon="check" size="sm">Configured</flux:badge>
                             @if($isConnected)
                                 <flux:badge color="blue" icon="wifi" size="sm">Connected</flux:badge>
@@ -55,12 +55,12 @@
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">Base URL</p>
-                                <p class="text-sm text-gray-600 dark:text-zinc-400">WAHA_API_URL environment variable</p>
+                                <p class="text-sm text-gray-600 dark:text-zinc-400">WAHA API Base URL</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            @if(env('WAHA_API_URL'))
-                                <p class="font-mono text-sm text-gray-900 dark:text-white">{{ env('WAHA_API_URL') }}</p>
+                            @if($wahaApiUrl)
+                                <p class="font-mono text-sm text-gray-900 dark:text-white">{{ $wahaApiUrl }}</p>
                                 <p class="text-xs text-green-600 dark:text-green-400">✓ Configured</p>
                             @else
                                 <p class="text-sm text-gray-500 dark:text-zinc-400">Not set</p>
@@ -79,12 +79,12 @@
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">API Key</p>
-                                <p class="text-sm text-gray-600 dark:text-zinc-400">WAHA_API_KEY environment variable</p>
+                                <p class="text-sm text-gray-600 dark:text-zinc-400">WAHA API Key</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            @if(env('WAHA_API_KEY'))
-                                <p class="font-mono text-sm text-gray-900 dark:text-white">{{ Str::mask(env('WAHA_API_KEY'), '*', 8) }}</p>
+                            @if($wahaApiKey)
+                                <p class="font-mono text-sm text-gray-900 dark:text-white">{{ Str::mask($wahaApiKey, '*', 8) }}</p>
                                 <p class="text-xs text-green-600 dark:text-green-400">✓ Configured</p>
                             @else
                                 <p class="text-sm text-gray-500 dark:text-zinc-400">Not set</p>
@@ -94,7 +94,7 @@
                     </div>
                 </div>
 
-                @if(!env('WAHA_API_URL') || !env('WAHA_API_KEY'))
+                @if(!$wahaApiUrl || !$wahaApiKey)
                     <div class="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                         <div class="flex items-start gap-3">
                             <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -103,7 +103,7 @@
                             <div>
                                 <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Configuration Required</h4>
                                 <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                                    You must configure WAHA_API_URL and WAHA_API_KEY in your environment variables before you can create and manage WhatsApp sessions.
+                                    You must configure WAHA API URL and API Key before you can create and manage WhatsApp sessions.
                                 </p>
                             </div>
                         </div>
