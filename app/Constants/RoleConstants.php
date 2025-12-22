@@ -7,17 +7,20 @@ class RoleConstants
     // System role names
     const SUPERADMIN = 'superadmin';
     const ADMIN = 'admin';
+    const USER = 'user';
 
     // All system roles that cannot be deleted
     const PROTECTED_ROLES = [
         self::SUPERADMIN,
         self::ADMIN,
+        self::USER,
     ];
 
     // Role display names
     const ROLE_DISPLAY_NAMES = [
         self::SUPERADMIN => 'Super Admin',
         self::ADMIN => 'Admin',
+        self::USER => 'User',
     ];
 
     /**
@@ -44,6 +47,7 @@ class RoleConstants
         return [
             self::SUPERADMIN,
             self::ADMIN,
+            self::USER,
         ];
     }
 }

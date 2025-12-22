@@ -9,6 +9,7 @@ use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 
@@ -25,7 +26,7 @@ class SessionsAudit extends Component
     public function mount()
     {
         $this->authorize('session.view');
-        $this->sessions = Session::all();
+        $this->sessions = Session::where('created_by', Auth::id())->get();
     }
 
     public function updating($field)
@@ -67,8 +68,8 @@ class SessionsAudit extends Component
             }
         });
 
-        // Get database sessions and merge with API data for filter dropdown
-        $dbSessions = Session::all()->keyBy('session_id');
+        // Get database sessions and merge with API data for filter dropdown - only sessions created by current user
+        $dbSessions = Session::where('created_by', Auth::id())->get()->keyBy('session_id');
         $sessions = collect();
 
         if ($apiSessions) {
@@ -110,6 +111,9 @@ class SessionsAudit extends Component
         $activities = Activity::query()
             ->with(['causer', 'subject'])
             ->where('subject_type', Session::class)
+            ->whereHas('subject', function ($query) {
+                $query->where('created_by', Auth::id());
+            })
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('description', 'like', '%' . $this->search . '%')

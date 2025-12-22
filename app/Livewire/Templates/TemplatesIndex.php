@@ -2,15 +2,15 @@
 
 namespace App\Livewire\Templates;
 
-use App\Models\Template;
 use App\Models\Session;
 use Livewire\Component;
+use App\Models\Template;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
+use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
-use Livewire\WithoutUrlPagination;
 
 #[Title('Templates')]
 class TemplatesIndex extends Component
@@ -38,7 +38,8 @@ class TemplatesIndex extends Component
 
     public function mount()
     {
-        $this->sessions = Session::all();
+        // Only show sessions created by current user
+        $this->sessions = Session::where('created_by', Auth::id())->get();
     }
 
     public function updatedStatusFilter()
@@ -100,7 +101,9 @@ class TemplatesIndex extends Component
 
     public function setTemplateToPreview($id)
     {
-        $this->templateToPreview = Template::with(['createdBy', 'updatedBy'])->find($id);
+        $this->templateToPreview = Template::where('created_by', Auth::id())
+            ->with(['createdBy', 'updatedBy'])
+            ->find($id);
     }
 
     public function delete()
@@ -108,10 +111,10 @@ class TemplatesIndex extends Component
         $this->authorize('template.delete');
 
         try {
-            $template = Template::find($this->templateToDelete);
+            $template = Template::where('created_by', Auth::id())->find($this->templateToDelete);
 
             if (!$template) {
-                session()->flash('error', 'Template not found or already deleted.');
+                session()->flash('error', 'Template not found, already deleted, or you do not have permission to delete this template.');
                 $this->templateToDelete = null;
                 return;
             }
@@ -151,6 +154,7 @@ class TemplatesIndex extends Component
     public function render()
     {
         $templates = Template::with(['createdBy', 'updatedBy', 'wahaSession'])
+            ->where('created_by', Auth::id()) // Only show templates created by current user
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')

@@ -18,7 +18,12 @@ class TemplatesCreate extends Component
         $this->authorize('template.create');
 
         $this->validate([
-            'waha_session_id' => 'required|exists:waha_sessions,id',
+            'waha_session_id' => ['required', 'exists:waha_sessions,id', function ($attribute, $value, $fail) {
+                $session = Session::where('created_by', Auth::id())->find($value);
+                if (!$session) {
+                    $fail('Selected session does not exist or you do not have permission to use this session.');
+                }
+            }],
             'name' => 'required|string|max:255|unique:templates,name|regex:/^[a-z_]+$/',
             'header' => 'nullable|string|max:60',
             'body' => 'required|string|max:1024',
@@ -77,7 +82,8 @@ class TemplatesCreate extends Component
     public function render()
     {
         return view('livewire.templates.templates-create', [
-            'sessions' => Session::all(),
+            // Only show sessions created by current user
+            'sessions' => Session::where('created_by', Auth::id())->get(),
         ]);
     }
 }

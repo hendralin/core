@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Templates;
 
+use App\Models\Session;
 use Livewire\Component;
 use App\Models\Activity;
 use App\Models\Template;
-use App\Models\Session;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Livewire\WithoutUrlPagination;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Template Audit Trail')]
 class TemplatesAudit extends Component
@@ -24,8 +25,9 @@ class TemplatesAudit extends Component
 
     public function mount()
     {
-        $this->templates = Template::all();
-        $this->sessions = Session::all();
+        // Only show templates and sessions created by current user
+        $this->templates = Template::where('created_by', Auth::id())->get();
+        $this->sessions = Session::where('created_by', Auth::id())->get();
     }
 
     public function updating($field)
@@ -56,6 +58,9 @@ class TemplatesAudit extends Component
         $activities = Activity::query()
             ->with(['causer', 'subject.wahaSession'])
             ->where('subject_type', Template::class)
+            ->whereHas('subject', function ($query) {
+                $query->where('created_by', Auth::id());
+            })
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('description', 'like', '%' . $this->search . '%')
@@ -81,16 +86,31 @@ class TemplatesAudit extends Component
             ->orderBy('created_at', 'desc')
             ->paginate($this->perPage);
 
-        // Get statistics
+        // Get statistics - only for templates created by current user
         $stats = [
-            'total_activities' => Activity::where('subject_type', Template::class)->count(),
+            'total_activities' => Activity::where('subject_type', Template::class)
+                ->whereHas('subject', function ($query) {
+                    $query->where('created_by', Auth::id());
+                })->count(),
             'today_activities' => Activity::where('subject_type', Template::class)
+                ->whereHas('subject', function ($query) {
+                    $query->where('created_by', Auth::id());
+                })
                 ->whereDate('created_at', today())->count(),
             'created_count' => Activity::where('subject_type', Template::class)
+                ->whereHas('subject', function ($query) {
+                    $query->where('created_by', Auth::id());
+                })
                 ->where('description', 'created a new template')->count(),
             'updated_count' => Activity::where('subject_type', Template::class)
+                ->whereHas('subject', function ($query) {
+                    $query->where('created_by', Auth::id());
+                })
                 ->where('description', 'updated template information')->count(),
             'deleted_count' => Activity::where('subject_type', Template::class)
+                ->whereHas('subject', function ($query) {
+                    $query->where('created_by', Auth::id());
+                })
                 ->where('description', 'deleted template')->count(),
         ];
 

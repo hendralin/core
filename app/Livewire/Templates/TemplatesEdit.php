@@ -19,6 +19,11 @@ class TemplatesEdit extends Component
     {
         $this->authorize('template.edit');
 
+        // Check if template belongs to current user
+        if ($template->created_by !== Auth::id()) {
+            abort(403, 'You do not have permission to edit this template.');
+        }
+
         $this->template = $template;
         $this->waha_session_id = $template->waha_session_id;
         $this->name = $template->name;
@@ -30,7 +35,12 @@ class TemplatesEdit extends Component
     public function submit()
     {
         $this->validate([
-            'waha_session_id' => 'required|exists:waha_sessions,id',
+            'waha_session_id' => ['required', 'exists:waha_sessions,id', function ($attribute, $value, $fail) {
+                $session = Session::where('created_by', Auth::id())->find($value);
+                if (!$session) {
+                    $fail('Selected session does not exist or you do not have permission to use this session.');
+                }
+            }],
             'name' => 'required|string|max:255|unique:templates,name,' . $this->template->id . '|regex:/^[a-z_]+$/',
             'header' => 'nullable|string|max:60',
             'body' => 'required|string|max:1024',
@@ -99,7 +109,8 @@ class TemplatesEdit extends Component
     public function render()
     {
         return view('livewire.templates.templates-edit', [
-            'sessions' => Session::all(),
+            // Only show sessions created by current user
+            'sessions' => Session::where('created_by', Auth::id())->get(),
         ]);
     }
 }

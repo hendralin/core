@@ -23,6 +23,12 @@ class SessionsShow extends Component
     public function mount(Session $session)
     {
         $this->authorize('session.view');
+
+        // Check if session belongs to current user
+        if ($session->created_by !== Auth::id()) {
+            abort(403, 'You do not have permission to view this session.');
+        }
+
         $this->session = $session;
         $this->fetchSessionData();
     }
@@ -305,6 +311,11 @@ class SessionsShow extends Component
     public function delete()
     {
         $this->authorize('session.delete');
+
+        // Check if session belongs to current user
+        if ($this->session->created_by !== Auth::id()) {
+            abort(403, 'You do not have permission to delete this session.');
+        }
 
             // First, delete from WAHA API
             try {

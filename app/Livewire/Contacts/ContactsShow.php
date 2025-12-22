@@ -5,6 +5,7 @@ namespace App\Livewire\Contacts;
 use App\Models\Contact;
 use Livewire\Component;
 use Livewire\Attributes\Title;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 #[Title('Show Contact')]
@@ -17,6 +18,11 @@ class ContactsShow extends Component
     public function mount(Contact $contact): void
     {
         $this->contact = $contact->load(['wahaSession']); // Eager load relationships
+
+        // Check if contact belongs to a session created by current user
+        if (!$this->contact->wahaSession || $this->contact->wahaSession->created_by !== Auth::id()) {
+            abort(403, 'You do not have permission to view this contact.');
+        }
 
         // Check if profile picture already exists in database, otherwise fetch from API
         $this->loadOrFetchProfilePicture();

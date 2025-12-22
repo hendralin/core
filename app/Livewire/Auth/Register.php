@@ -3,12 +3,13 @@
 namespace App\Livewire\Auth;
 
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
+use Livewire\Component;
+use Livewire\Attributes\Layout;
+use App\Constants\RoleConstants;
+use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
-use Livewire\Attributes\Layout;
-use Livewire\Component;
+use Illuminate\Auth\Events\Registered;
 
 #[Layout('components.layouts.auth')]
 class Register extends Component
@@ -34,7 +35,12 @@ class Register extends Component
 
         $validated['password'] = Hash::make($validated['password']);
 
-        event(new Registered(($user = User::create($validated))));
+        $user = User::create($validated);
+
+        // Assign role 'user' to newly registered user
+        $user->assignRole(RoleConstants::USER);
+
+        event(new Registered($user));
 
         Auth::login($user);
 

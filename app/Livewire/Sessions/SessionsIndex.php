@@ -95,7 +95,7 @@ class SessionsIndex extends Component
                 return;
             }
             // Session exists in database
-            $session = Session::find($sessionId);
+            $session = Session::where('created_by', Auth::id())->find($sessionId);
 
             if ($session) {
                 // First, delete from WAHA API
@@ -203,8 +203,8 @@ class SessionsIndex extends Component
 
             if ($apiSessions) {
 
-                // Get all database sessions for filtering (by session_id)
-                $dbSessions = Session::all()->keyBy('session_id');
+                // Get all database sessions for filtering (by session_id) - only sessions created by current user
+                $dbSessions = Session::where('created_by', Auth::id())->get()->keyBy('session_id');
 
                 foreach ($apiSessions as $apiSession) {
                     // Filter: only show sessions that exist in database (by session_id)
@@ -258,8 +258,8 @@ class SessionsIndex extends Component
                 }
             } else {
                 Log::error('Failed to fetch sessions from WAHA API (cached or fresh)');
-                // Fallback: show all database sessions with unknown status
-                $dbSessions = Session::all();
+                // Fallback: show all database sessions with unknown status - only sessions created by current user
+                $dbSessions = Session::where('created_by', Auth::id())->get();
                 foreach ($dbSessions as $dbSession) {
                     $sessionData = [
                         'id' => $dbSession->id,
@@ -279,8 +279,8 @@ class SessionsIndex extends Component
             }
         } catch (\Exception $e) {
             Log::error('Exception while fetching sessions: ' . $e->getMessage());
-            // Fallback: show all database sessions with error status
-            $dbSessions = Session::all();
+            // Fallback: show all database sessions with error status - only sessions created by current user
+            $dbSessions = Session::where('created_by', Auth::id())->get();
             foreach ($dbSessions as $dbSession) {
                 $sessionData = [
                     'id' => $dbSession->id,

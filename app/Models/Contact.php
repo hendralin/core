@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,5 +51,15 @@ class Contact extends Model
     public function wahaSession(): BelongsTo
     {
         return $this->belongsTo(Session::class, 'waha_session_id');
+    }
+
+    /*
+    * Scope to filter contacts by user who created the session
+    */
+    public function scopeForUser($query, $userId): Builder
+    {
+        return $query->whereHas('wahaSession', function ($q) use ($userId) {
+            $q->where('created_by', $userId);
+        });
     }
 }

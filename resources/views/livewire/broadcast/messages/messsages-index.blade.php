@@ -893,15 +893,15 @@
                                         $isScheduledPast = $now->gt($scheduledTime);
                                     @endphp
                                     @if($isScheduledPast)
-                                        {{ $scheduledTime->format('g:i A') }} ✓✓
+                                        {{ $scheduledTime->format('H:i') }} ✓✓
                                     @else
                                         <div class="flex items-center justify-end gap-1">
                                             <flux:icon.clock class="h-3 w-3 text-orange-600 dark:text-orange-400" />
-                                            <span>{{ $scheduledTime->format('g:i A') }}</span>
+                                            <span>{{ $scheduledTime->format('H:i') }}</span>
                                         </div>
                                     @endif
                                 @else
-                                    {{ $messageToResend->created_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('g:i A') }} ✓✓
+                                    {{ $messageToResend->created_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('H:i') }} ✓✓
                                 @endif
                             </div>
                         </div>
@@ -1104,15 +1104,15 @@
                                         $isScheduledPast = $now->gt($scheduledTime);
                                     @endphp
                                     @if($isScheduledPast)
-                                        {{ $scheduledTime->format('g:i A') }} ✓✓
+                                        {{ $scheduledTime->format('H:i') }} ✓✓
                                     @else
                                         <div class="flex items-center justify-end gap-1">
                                             <flux:icon.clock class="h-3 w-3 text-orange-600 dark:text-orange-400" />
-                                            <span>{{ $scheduledTime->format('g:i A') }}</span>
+                                            <span>{{ $scheduledTime->format('H:i') }}</span>
                                         </div>
                                     @endif
                                 @else
-                                    {{ $messageToPreview->created_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('g:i A') }} ✓✓
+                                    {{ $messageToPreview->created_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('H:i') }} ✓✓
                                 @endif
                             </div>
                         </div>

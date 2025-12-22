@@ -89,11 +89,11 @@ class ContactsIndex extends Component
         ]);
 
         try {
-            // Get the selected session
-            $session = Session::find($this->selectedSessionId);
+            // Get the selected session - only sessions created by current user
+            $session = Session::where('created_by', Auth::id())->find($this->selectedSessionId);
 
             if (!$session) {
-                throw new \Exception('Selected session no longer exists. Please refresh the page and try again.');
+                throw new \Exception('Selected session does not exist or you do not have permission to sync contacts from this session.');
             }
 
             // Call WAHA API to get contacts
@@ -110,32 +110,32 @@ class ContactsIndex extends Component
 
             $contactsData = $response->json();
             $syncedCount = 0;
+            $deletedCount = 0;
 
-            DB::transaction(function () use ($contactsData, $session, &$syncedCount) {
+            DB::transaction(function () use ($contactsData, $session, &$syncedCount, &$deletedCount) {
+                // Delete all existing contacts for this session first
+                $deletedCount = Contact::where('waha_session_id', $session->id)->delete();
+
+                // Create new contacts from API data
                 foreach ($contactsData as $contactData) {
                     // Skip group chats (IDs ending with @g.us) and LID contacts (IDs ending with @lid)
                     if (str_ends_with($contactData['id'], '@g.us') || str_ends_with($contactData['id'], '@lid')) {
                         continue;
                     }
 
-                    // Prepare contact data for upsert
+                    // Prepare contact data for creation
                     $contactAttributes = [
                         'waha_session_id' => $session->id,
                         'wa_id' => $contactData['id'],
                         'name' => $contactData['name'] ?? null,
                         'verified_name' => $contactData['verifiedName'] ?? null,
                         'push_name' => $contactData['pushname'] ?? null,
+                        'created_at' => now(),
                         'updated_at' => now(),
                     ];
 
-                    // Upsert contact (insert if not exists, update if exists)
-                    Contact::updateOrCreate(
-                        [
-                            'waha_session_id' => $session->id,
-                            'wa_id' => $contactData['id'],
-                        ],
-                        $contactAttributes
-                    );
+                    // Create new contact
+                    Contact::create($contactAttributes);
 
                     $syncedCount++;
                 }
@@ -151,12 +151,13 @@ class ContactsIndex extends Component
                     'waha_session_id' => $this->selectedSessionId,
                     'session_name' => $session->name,
                     'sync_type' => 'contacts_sync',
+                    'contacts_deleted' => $deletedCount,
                     'contacts_synced' => $syncedCount,
                     'api_response_status' => $response->status(),
                 ])
                 ->log('synchronized contacts from session');
 
-            session()->flash('success', "Successfully synchronized {$syncedCount} contacts from {$session->name}.");
+            session()->flash('success', "Successfully synchronized {$syncedCount} contacts from {$session->name}. {$deletedCount} old contacts were removed.");
         } catch (\Throwable $e) {
             session()->flash('error', 'Failed to synchronize contacts: ' . $e->getMessage());
         }
@@ -169,6 +170,7 @@ class ContactsIndex extends Component
     public function render()
     {
         $contacts = Contact::with(['wahaSession'])
+            ->forUser(Auth::id()) // Only show contacts from sessions created by current user
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')
@@ -183,9 +185,9 @@ class ContactsIndex extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
-        // Get active sessions for filtering and syncing
-        $syncableSessions = Session::active()->orderBy('name')->get();
-        $availableSessions = Session::orderBy('name')->get();
+        // Get active sessions for filtering and syncing - only sessions created by current user
+        $syncableSessions = Session::where('created_by', Auth::id())->active()->orderBy('name')->get();
+        $availableSessions = Session::where('created_by', Auth::id())->orderBy('name')->get();
 
         return view('livewire.contacts.contacts-index', compact('contacts', 'syncableSessions', 'availableSessions'));
     }

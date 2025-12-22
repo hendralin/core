@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\Contact;
 use Livewire\Component;
 use Livewire\Attributes\Title;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 #[Title('Show Group')]
@@ -21,6 +22,11 @@ class GroupsShow extends Component
     public function mount(Group $group): void
     {
         $this->group = $group->load(['wahaSession']); // Eager load relationships
+
+        // Check if group belongs to a session created by current user
+        if (!$this->group->wahaSession || $this->group->wahaSession->created_by !== Auth::id()) {
+            abort(403, 'You do not have permission to view this group.');
+        }
 
         // Check if group picture already exists in database, otherwise fetch from API
         $this->loadOrFetchGroupPicture();
@@ -131,7 +137,9 @@ class GroupsShow extends Component
         }
 
         // Query contacts table for names - try both exact matches and pattern matches
+        // Only show contacts from sessions created by current user
         $contacts = Contact::where('waha_session_id', $this->group->waha_session_id)
+            ->forUser(Auth::id())
             ->where(function ($query) use ($searchIds) {
                 foreach ($searchIds as $id) {
                     // Try exact match first

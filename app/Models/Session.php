@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Session extends Model
@@ -24,6 +25,7 @@ class Session extends Model
         'name',
         'session_id',
         'is_active',
+        'created_by',
     ];
 
     /**
@@ -54,6 +56,7 @@ class Session extends Model
                 'name',
                 'session_id',
                 'is_active',
+                'created_by',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
@@ -73,5 +76,13 @@ class Session extends Model
     public function scopeActive($query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    /*
+    * Get the user that created the session
+    */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Broadcast\Messages;
 
+use Carbon\Carbon;
 use App\Models\Group;
 use App\Models\Contact;
 use App\Models\Message;
@@ -17,11 +18,9 @@ use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Carbon\Carbon;
 
 #[Title('Broadcast Messages')]
 class MesssagesIndex extends Component
@@ -125,11 +124,12 @@ class MesssagesIndex extends Component
     public function loadData()
     {
         $this->templates = Template::where('is_active', true)
+            ->where('created_by', Auth::id()) // Only show templates created by current user
             ->with('wahaSession')
             ->orderBy('name')
             ->get();
 
-        $this->sessions = Session::all();
+        $this->sessions = Session::where('created_by', Auth::id())->orderBy('name')->get();
 
         // Check WAHA connection status
         $this->checkWahaStatus();
@@ -138,15 +138,18 @@ class MesssagesIndex extends Component
         // This allows filtering based on the session selected in the send message modal
         if ($this->messageSession) {
             $this->groups = Group::where('waha_session_id', $this->messageSession)
+                ->forUser(Auth::id())
                 ->with('wahaSession')
                 ->get();
             $this->contacts = Contact::where('waha_session_id', $this->messageSession)
+                ->forUser(Auth::id())
                 ->with('wahaSession')
                 ->orderBy('name')
                 ->get();
         } else {
-            $this->groups = Group::with('wahaSession')->get();
-            $this->contacts = Contact::with('wahaSession')
+            $this->groups = Group::forUser(Auth::id())->with('wahaSession')->get();
+            $this->contacts = Contact::forUser(Auth::id())
+                ->with('wahaSession')
                 ->orderBy('name')
                 ->get();
         }
@@ -305,10 +308,15 @@ class MesssagesIndex extends Component
         }
     }
 
+    public function updatedStatusFilter()
+    {
+        $this->resetPage();
+    }
+
     public function loadTemplateParams()
     {
         if ($this->selectedTemplate && $this->messageType === 'template') {
-            $template = Template::find($this->selectedTemplate);
+            $template = Template::where('created_by', Auth::id())->find($this->selectedTemplate);
             if ($template) {
                 // Reset template params
                 $this->templateParams = [
@@ -366,7 +374,7 @@ class MesssagesIndex extends Component
             $filename = 'direct_message_template.xlsx';
         } else {
             // Template message
-            $template = Template::find($this->selectedTemplate);
+            $template = Template::where('created_by', Auth::id())->find($this->selectedTemplate);
             $col = 'A';
             $headers = ['Phone Number'];
 
@@ -449,7 +457,7 @@ class MesssagesIndex extends Component
                     }
                 } elseif ($this->messageType === 'template') {
                     // Template message format: Phone Number | Header Var 1 | Header Var 2 | Body Var 1 | Body Var 2 | ...
-                    $template = Template::find($this->selectedTemplate);
+                    $template = Template::where('created_by', Auth::id())->find($this->selectedTemplate);
                     if (!$template) {
                         $this->addError('recipientsFile', 'Template not found. Please select a valid template first.');
                         return;
@@ -566,7 +574,7 @@ class MesssagesIndex extends Component
 
             // Validate template parameters (only when not using bulk recipients)
             if ($this->recipientType !== 'recipients' && $this->selectedTemplate) {
-                $template = Template::find($this->selectedTemplate);
+                $template = Template::where('created_by', Auth::id())->find($this->selectedTemplate);
                 if ($template) {
                     // Validate header parameters
                     if (!empty($this->templateParams['header'])) {
@@ -697,7 +705,7 @@ class MesssagesIndex extends Component
             $recipients = $this->buildRecipients();
 
             // Get the WAHA session name from database
-            $sessionRecord = Session::find($this->messageSession);
+            $sessionRecord = Session::where('created_by', Auth::id())->find($this->messageSession);
             $wahaSessionName = $sessionRecord ? $sessionRecord->session_id : null;
 
             if (!$wahaSessionName) {
@@ -802,7 +810,7 @@ class MesssagesIndex extends Component
 
             // Update template usage count if using template
             if ($this->messageType === 'template' && $this->selectedTemplate) {
-                $template = Template::find($this->selectedTemplate);
+                $template = Template::where('created_by', Auth::id())->find($this->selectedTemplate);
                 if ($template) {
                     $template->incrementUsageCount();
                     $template->update(['last_used_at' => now()]);
@@ -840,7 +848,7 @@ class MesssagesIndex extends Component
                 return 'Please select a template first';
             }
 
-            $template = Template::find($this->selectedTemplate);
+            $template = Template::where('created_by', Auth::id())->find($this->selectedTemplate);
             if (!$template) {
                 return 'Template not found';
             }
@@ -883,7 +891,7 @@ class MesssagesIndex extends Component
                     return $params['direct_message'] ?? $this->buildMessageContent();
                 } elseif ($this->messageType === 'template') {
                     // Use template with custom parameters from file
-                    $template = Template::find($this->selectedTemplate);
+                    $template = Template::where('created_by', Auth::id())->find($this->selectedTemplate);
                     if (!$template) {
                         return $this->buildMessageContent();
                     }
@@ -938,7 +946,7 @@ class MesssagesIndex extends Component
             }
         } elseif ($this->recipientType === 'contact') {
             if ($this->selectedContactId) {
-                $contact = Contact::find($this->selectedContactId);
+                $contact = Contact::forUser(Auth::id())->find($this->selectedContactId);
                 if ($contact) {
                     // Clean wa_id format for WAHA (remove any existing suffix and add proper one)
                     $cleanNumber = preg_replace('/@.+$/', '', $contact->wa_id);
@@ -950,7 +958,7 @@ class MesssagesIndex extends Component
             }
         } elseif ($this->recipientType === 'group') {
             foreach ($this->selectedGroups as $groupId) {
-                $group = Group::find($groupId);
+                $group = Group::forUser(Auth::id())->find($groupId);
                 if ($group) {
                     $recipients[] = [
                         'group_wa_id' => $group->group_wa_id,
@@ -987,7 +995,7 @@ class MesssagesIndex extends Component
             return "Please enter a WhatsApp number";
         } elseif ($this->recipientType === 'contact') {
             if ($this->selectedContactId) {
-                $contact = Contact::find($this->selectedContactId);
+                $contact = Contact::forUser(Auth::id())->find($this->selectedContactId);
                 return $contact ? "Contact: " . ($contact->name ?: $contact->wa_id) : "Contact not found";
             }
             return "Please select a contact";
@@ -998,7 +1006,7 @@ class MesssagesIndex extends Component
 
             $groupNames = [];
             foreach ($this->selectedGroups as $groupId) {
-                $group = Group::find($groupId);
+                $group = Group::forUser(Auth::id())->find($groupId);
                 if ($group) {
                     $groupNames[] = $group->name;
                 }
@@ -1035,12 +1043,16 @@ class MesssagesIndex extends Component
 
     public function setMessageToPreview($id)
     {
-        $this->messageToPreview = Message::with(['template', 'wahaSession', 'createdBy', 'contact', 'group'])->find($id);
+        $this->messageToPreview = Message::where('created_by', Auth::id())
+            ->with(['template', 'wahaSession', 'createdBy', 'contact', 'group'])
+            ->find($id);
     }
 
     public function setMessageToResend($id)
     {
-        $this->messageToResend = Message::with(['template', 'wahaSession', 'createdBy', 'contact', 'group'])->find($id);
+        $this->messageToResend = Message::where('created_by', Auth::id())
+            ->with(['template', 'wahaSession', 'createdBy', 'contact', 'group'])
+            ->find($id);
     }
 
     public function resendMessage()
@@ -1156,6 +1168,7 @@ class MesssagesIndex extends Component
     public function render()
     {
         $messages = Message::with(['template', 'wahaSession', 'createdBy', 'contact'])
+            ->where('created_by', Auth::id()) // Only show messages created by current user
             ->when($this->search, function ($query) {
                 $query->where('message', 'like', '%' . $this->search . '%')
                       ->orWhere('received_number', 'like', '%' . $this->search . '%');

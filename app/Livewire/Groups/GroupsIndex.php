@@ -89,11 +89,11 @@ class GroupsIndex extends Component
         ]);
 
         try {
-            // Get the selected session
-            $session = Session::find($this->selectedSessionId);
+            // Get the selected session - only sessions created by current user
+            $session = Session::where('created_by', Auth::id())->find($this->selectedSessionId);
 
             if (!$session) {
-                throw new \Exception('Selected session no longer exists. Please refresh the page and try again.');
+                throw new \Exception('Selected session does not exist or you do not have permission to sync groups from this session.');
             }
 
             // Call WAHA API to get groups
@@ -108,26 +108,26 @@ class GroupsIndex extends Component
 
             $groupsData = $response->json();
             $syncedCount = 0;
+            $deletedCount = 0;
 
-            DB::transaction(function () use ($groupsData, $session, &$syncedCount) {
+            DB::transaction(function () use ($groupsData, $session, &$syncedCount, &$deletedCount) {
+                // Delete all existing groups for this session first
+                $deletedCount = Group::where('waha_session_id', $session->id)->delete();
+
+                // Create new groups from API data
                 foreach ($groupsData as $groupId => $groupData) {
-                    // Prepare group data for upsert
+                    // Prepare group data for creation
                     $groupAttributes = [
                         'waha_session_id' => $session->id,
                         'group_wa_id' => $groupId,
                         'name' => $groupData['subject'] ?? null,
                         'detail' => $groupData,
+                        'created_at' => now(),
                         'updated_at' => now(),
                     ];
 
-                    // Upsert group (insert if not exists, update if exists)
-                    Group::updateOrCreate(
-                        [
-                            'waha_session_id' => $session->id,
-                            'group_wa_id' => $groupId,
-                        ],
-                        $groupAttributes
-                    );
+                    // Create new group
+                    Group::create($groupAttributes);
 
                     $syncedCount++;
                 }
@@ -143,12 +143,13 @@ class GroupsIndex extends Component
                     'waha_session_id' => $this->selectedSessionId,
                     'session_name' => $session->name,
                     'sync_type' => 'groups_sync',
+                    'groups_deleted' => $deletedCount,
                     'groups_synced' => $syncedCount,
                     'api_response_status' => $response->status(),
                 ])
                 ->log('synchronized groups from session');
 
-            session()->flash('success', "Successfully synchronized {$syncedCount} groups from {$session->name}.");
+            session()->flash('success', "Successfully synchronized {$syncedCount} groups from {$session->name}. {$deletedCount} old groups were removed.");
         } catch (\Throwable $e) {
             session()->flash('error', 'Failed to synchronize groups: ' . $e->getMessage());
         }
@@ -161,6 +162,7 @@ class GroupsIndex extends Component
     public function render()
     {
         $groups = Group::with(['wahaSession'])
+            ->forUser(Auth::id()) // Only show groups from sessions created by current user
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')
@@ -174,9 +176,9 @@ class GroupsIndex extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
-        // Get active sessions for filtering and syncing
-        $syncableSessions = Session::active()->orderBy('name')->get();
-        $availableSessions = Session::orderBy('name')->get();
+        // Get active sessions for filtering and syncing - only sessions created by current user
+        $syncableSessions = Session::where('created_by', Auth::id())->active()->orderBy('name')->get();
+        $availableSessions = Session::where('created_by', Auth::id())->orderBy('name')->get();
 
         return view('livewire.groups.groups-index', compact('groups', 'syncableSessions', 'availableSessions'));
     }

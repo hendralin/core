@@ -47,7 +47,10 @@ class SessionsCreate extends Component
 
         try {
             DB::transaction(function () use ($validatedData) {
-                $session = Session::create($validatedData);
+                $session = Session::create([
+                    ...$validatedData,
+                    'created_by' => Auth::id(),
+                ]);
 
                 // Log activity
                 activity()
