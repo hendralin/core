@@ -9,16 +9,17 @@ use App\Models\Message;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
-#[Title('About The Broadcaster System v1.4.1')]
+#[Title('About The Broadcaster System v1.5.0')]
 class AboutIndex extends Component
 {
     public function render()
     {
         $systemInfo = [
-            'version' => '1.4.1',
+            'version' => '1.5.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
@@ -30,6 +31,11 @@ class AboutIndex extends Component
                 'templates_system' => true,
                 'broadcast_messaging' => true,
                 'bulk_messaging' => true,
+                'scheduled_messaging' => true,
+                'multiple_message_types' => true,
+                'timezone_aware_display' => true,
+                'advanced_filtering' => true,
+                'real_time_validation' => true,
                 'waha_integration' => true,
                 'profile_pictures' => true,
                 'activity_logging' => true,
@@ -89,7 +95,7 @@ class AboutIndex extends Component
                             'X-Api-Key' => $apiKey,
                         ])->get($apiUrl . '/api/version');
 
-                        if ($versionResponse->successful()) {
+                        if ($versionResponse && $versionResponse->successful()) {
                             $versionData = $versionResponse->json();
                             $wahaInfo['version'] = $versionData['version'] ?? 'Unknown';
                         }

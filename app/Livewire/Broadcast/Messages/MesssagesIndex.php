@@ -17,9 +17,11 @@ use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Carbon\Carbon;
 
 #[Title('Broadcast Messages')]
 class MesssagesIndex extends Component
@@ -35,8 +37,18 @@ class MesssagesIndex extends Component
 
     // Form properties
     public $messageType = 'direct'; // 'direct' or 'template'
+    public $chattingMethods = 'text'; // 'text', 'image', 'file', or 'custom'
     public $selectedTemplate = '';
     public $directMessage = '';
+    public $image;
+    public $imageCaption = '';
+    public $file;
+    public $fileCaption = '';
+    public $custom = '';
+    public $customPreviewUrl = '';
+    public $customPreviewTitle = '';
+    public $customPreviewDescription = '';
+    public $customPreviewImage;
     public $recipientType = 'number'; // 'number', 'contact', 'group', or 'recipients'
     public $selectedContactId = '';
     public $contactNumber = '';
@@ -46,6 +58,8 @@ class MesssagesIndex extends Component
     public $parsedRecipients = [];
     public $selectedSession = ''; // For filtering messages list
     public $messageSession = ''; // For sending messages in modal
+    public $whenToSend = 'now'; // 'now' or 'later'
+    public $sendAt; // datetime for scheduled sending
     public $templateParams = [
         'header' => [],
         'body' => []
@@ -56,6 +70,9 @@ class MesssagesIndex extends Component
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
     public $perPage = 10;
+    public $startDate = '';
+    public $endDate = '';
+    public $statusFilter = '';
 
     // Modal properties
     public $messageToPreview;
@@ -99,6 +116,9 @@ class MesssagesIndex extends Component
 
     public function mount()
     {
+        // Set default date range to current month
+        $this->startDate = now()->startOfMonth()->format('Y-m-d');
+        $this->endDate = now()->endOfMonth()->format('Y-m-d');
         $this->loadData();
     }
 
@@ -166,7 +186,20 @@ class MesssagesIndex extends Component
             'body' => []
         ];
 
+        // If messageType is 'template', reset chattingMethods to 'text' and disable other options
+        if ($this->messageType === 'template') {
+            $this->chattingMethods = 'text';
+        }
+
         $this->resetValidation();
+    }
+
+    public function updatedChattingMethods()
+    {
+        // If messageType is 'template' or recipientType is 'recipients', only allow 'text' option
+        if (($this->messageType === 'template' || $this->recipientType === 'recipients') && $this->chattingMethods !== 'text') {
+            $this->chattingMethods = 'text';
+        }
     }
 
     public function updatedSelectedTemplate()
@@ -207,6 +240,8 @@ class MesssagesIndex extends Component
             $this->selectedContactId = '';
             $this->contactNumber = '';
             $this->selectedGroups = [];
+            // Reset chattingMethods to 'text' when using recipients (bulk upload)
+            $this->chattingMethods = 'text';
         }
 
         $this->resetValidation();
@@ -220,6 +255,54 @@ class MesssagesIndex extends Component
     public function updatedMessageSession()
     {
         $this->loadData(); // Reload groups when message session changes
+    }
+
+    public function updatedWhenToSend()
+    {
+        if ($this->whenToSend === 'now') {
+            $this->sendAt = null;
+        }
+        $this->resetValidation('sendAt');
+    }
+
+    public function updatedSendAt()
+    {
+        // Real-time validation for sendAt field
+        if ($this->whenToSend === 'later' && $this->sendAt) {
+            // Reset validation for sendAt field
+            $this->resetValidation('sendAt');
+
+            try {
+                // Get user's timezone, fallback to app timezone
+                $userTimezone = Auth::user()->timezone ?? config('app.timezone', 'UTC');
+
+                // Parse selected time in user's timezone
+                $selectedTime = Carbon::parse($this->sendAt, $userTimezone);
+
+                // Get current time in user's timezone and add 5 minutes
+                $minTime = now($userTimezone)->addMinutes(5);
+
+                Log::info('Schedule validation', [
+                    'sendAt_raw' => $this->sendAt,
+                    'user_timezone' => $userTimezone,
+                    'selectedTime' => $selectedTime->toDateTimeString(),
+                    'minTime' => $minTime->toDateTimeString(),
+                    'is_valid' => $selectedTime->gt($minTime)
+                ]);
+
+                if ($selectedTime->lte($minTime)) {
+                    $this->addError('sendAt', 'Schedule time must be at least 5 minutes in the future.');
+                } else {
+                    $this->resetValidation('sendAt');
+                }
+            } catch (\Exception $e) {
+                $this->addError('sendAt', 'Invalid date/time format. Please select a valid time.');
+                Log::error('Schedule validation error', [
+                    'sendAt' => $this->sendAt,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
     }
 
     public function loadTemplateParams()
@@ -424,8 +507,18 @@ class MesssagesIndex extends Component
     public function resetForm()
     {
         $this->messageType = 'direct';
+        $this->chattingMethods = 'text';
         $this->selectedTemplate = '';
         $this->directMessage = '';
+        $this->image = null;
+        $this->imageCaption = '';
+        $this->file = null;
+        $this->fileCaption = '';
+        $this->custom = '';
+        $this->customPreviewUrl = '';
+        $this->customPreviewTitle = '';
+        $this->customPreviewDescription = '';
+        $this->customPreviewImage = null;
         $this->recipientType = 'number';
         $this->contactNumber = '';
         $this->messageSession = '';
@@ -438,6 +531,8 @@ class MesssagesIndex extends Component
             'header' => [],
             'body' => []
         ];
+        $this->whenToSend = 'now';
+        $this->sendAt = null;
         $this->resetValidation();
     }
 
@@ -451,7 +546,20 @@ class MesssagesIndex extends Component
         if ($this->messageType === 'direct') {
             // Only require directMessage if not using bulk recipients (recipients get messages from file)
             if ($this->recipientType !== 'recipients') {
-                $rules['directMessage'] = 'required';
+                // Validate based on chatting methods
+                if ($this->chattingMethods === 'text') {
+                    $rules['directMessage'] = 'required';
+                } elseif ($this->chattingMethods === 'image') {
+                    $rules['image'] = 'required|image|mimes:jpeg,jpg,png,gif,webp|max:10240'; // 10MB max
+                } elseif ($this->chattingMethods === 'file') {
+                    $rules['file'] = 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,7z,tar,gz,bz2,xz,wim,iso,mp4,mov,avi,mkv,webm,ogg,mp3,wav|max:10240'; // 10MB max
+                } elseif ($this->chattingMethods === 'custom') {
+                    $rules['custom'] = 'required|string|max:1024';
+                    $rules['customPreviewUrl'] = 'required|url|max:2048';
+                    $rules['customPreviewTitle'] = 'required|string|max:255';
+                    $rules['customPreviewDescription'] = 'required|string|max:500';
+                    $rules['customPreviewImage'] = 'required|image|mimes:jpeg,jpg,png,gif,webp|max:10240'; // 10MB max
+                }
             }
         } elseif ($this->messageType === 'template') {
             $rules['selectedTemplate'] = 'required|exists:templates,id';
@@ -498,10 +606,92 @@ class MesssagesIndex extends Component
             $rules['recipientsFile'] = 'required|file|mimes:xlsx,xls,csv|max:10240';
         }
 
+        // Schedule validation - basic rules only, detailed validation handled above
+        if ($this->whenToSend === 'later') {
+            $rules['sendAt'] = 'required|date';
+            // Add custom validation message
+            $messages['sendAt.required'] = 'Schedule time is required.';
+            $messages['sendAt.date'] = 'Schedule time must be a valid date and time.';
+        }
+
+        // Validate schedule time before other validations
+        if ($this->whenToSend === 'later' && $this->sendAt) {
+            try {
+                // Get user's timezone, fallback to app timezone
+                $userTimezone = Auth::user()->timezone ?? config('app.timezone', 'UTC');
+
+                // Parse selected time in user's timezone
+                $selectedTime = Carbon::parse($this->sendAt, $userTimezone);
+
+                // Get current time in user's timezone and add 5 minutes
+                $minTime = now($userTimezone)->addMinutes(5);
+
+                if ($selectedTime->lte($minTime)) {
+                    $this->addError('sendAt', 'Schedule time must be at least 5 minutes in the future.');
+                    return; // Stop further validation
+                }
+            } catch (\Exception $e) {
+                $this->addError('sendAt', 'Invalid date/time format. Please select a valid time.');
+                return;
+            }
+        }
+
         $this->validate($rules, $messages ?? []);
+
+        // Custom validation: URL in Message Text must be identical to Preview URL
+        if ($this->chattingMethods === 'custom' && $this->custom && $this->customPreviewUrl) {
+            // Extract URL from message text (simple pattern - stops at whitespace)
+            preg_match('/https?:\/\/[^\s]+/i', $this->custom, $matches);
+
+            if (empty($matches) || empty($matches[0])) {
+                $this->addError('custom', 'Message Text must contain a URL that is identical to the Preview URL.');
+                return;
+            }
+
+            $extractedUrl = trim($matches[0]);
+            $previewUrl = trim($this->customPreviewUrl);
+
+            // Compare URLs directly - must be exactly the same
+            if ($extractedUrl !== $previewUrl) {
+                $this->addError('custom', 'The URL in Message Text must be identical to the Preview URL.');
+                $this->addError('customPreviewUrl', 'The Preview URL must match the URL in Message Text exactly.');
+                // Stop execution if validation fails
+                return;
+            }
+        }
 
         try {
             DB::beginTransaction();
+
+            // Handle file upload if chatting method is image, file, or custom
+            $fileUrl = null;
+            $fileMimetype = null;
+            $fileFilename = null;
+            $customPreviewImageUrl = null;
+
+            if ($this->chattingMethods === 'image' && $this->image) {
+                // Store image to public storage
+                $imagePath = $this->image->store('images', 'uploads');
+                // Get full URL for the image
+                $fileUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
+                // $fileUrl = asset('uploads/' . $imagePath);
+                $fileMimetype = $this->image->getMimeType();
+                $fileFilename = $this->image->getClientOriginalName();
+            } elseif ($this->chattingMethods === 'file' && $this->file) {
+                // Store file to public storage
+                $filePath = $this->file->store('files', 'uploads');
+                // Get full URL for the file
+                $fileUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
+                // $fileUrl = asset('uploads/' . $filePath);
+                $fileMimetype = $this->file->getMimeType();
+                $fileFilename = $this->file->getClientOriginalName();
+            } elseif ($this->chattingMethods === 'custom' && $this->customPreviewImage) {
+                // Store custom preview image to public storage
+                $previewImagePath = $this->customPreviewImage->store('images', 'uploads');
+                // Get full URL for the preview image
+                $customPreviewImageUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
+                // $customPreviewImageUrl = asset('uploads/' . $previewImagePath);
+            }
 
             $messageContent = $this->buildMessageContent();
             $recipients = $this->buildRecipients();
@@ -525,21 +715,69 @@ class MesssagesIndex extends Component
                 // Build custom message content for this recipient
                 $recipientMessageContent = $this->buildMessageContentForRecipient($recipient);
 
+                // Prepare message data - for image/file/custom, store as JSON with metadata
+                $messageData = $recipientMessageContent;
+                if ($this->chattingMethods === 'image' && $fileUrl) {
+                    $messageData = json_encode([
+                        'type' => 'image',
+                        'url' => $fileUrl,
+                        'mimetype' => $fileMimetype,
+                        'filename' => $fileFilename,
+                        'caption' => $this->imageCaption ?? '',
+                    ]);
+                } elseif ($this->chattingMethods === 'file' && $fileUrl) {
+                    $messageData = json_encode([
+                        'type' => 'file',
+                        'url' => $fileUrl,
+                        'mimetype' => $fileMimetype,
+                        'filename' => $fileFilename,
+                        'caption' => $this->fileCaption ?? '',
+                    ]);
+                } elseif ($this->chattingMethods === 'custom') {
+                    $messageData = json_encode([
+                        'type' => 'custom',
+                        'text' => $this->custom,
+                        'previewUrl' => $this->customPreviewUrl,
+                        'previewTitle' => $this->customPreviewTitle ?? '',
+                        'previewDescription' => $this->customPreviewDescription ?? '',
+                        'previewImageUrl' => $customPreviewImageUrl ?? '',
+                    ]);
+                }
+
                 // Create message record with 'pending' status
+                $scheduledAt = null;
+                if ($this->whenToSend === 'later' && $this->sendAt) {
+                    $userTimezone = Auth::user()->timezone ?? config('app.timezone', 'UTC');
+                    $scheduledAt = Carbon::parse($this->sendAt, $userTimezone)->utc();
+                }
+
                 $message = Message::create([
                     'waha_session_id' => $this->messageSession,
                     'template_id' => $this->messageType === 'template' ? $this->selectedTemplate : null,
                     'wa_id' => $recipient['wa_id'] ?? null,
                     'group_wa_id' => $recipient['group_wa_id'] ?? null,
                     'received_number' => $recipient['number'] ?? null,
-                    'message' => $recipientMessageContent,
+                    'message' => $messageData,
                     'status' => 'pending', // Set as pending, will be updated by job
+                    'scheduled_at' => $scheduledAt,
                     'created_by' => Auth::id(),
                 ]);
 
                 // Dispatch job to send message asynchronously
-                SendMessageJob::dispatch($message->id, $chatId, $wahaSessionName)
+                // Pass chatting method to job
+                $job = SendMessageJob::dispatch($message->id, $chatId, $wahaSessionName, $this->chattingMethods)
                     ->onQueue('messages'); // Use dedicated queue for messages
+
+                // Schedule for later if selected
+                if ($this->whenToSend === 'later' && $this->sendAt) {
+                    // Get user's timezone, fallback to app timezone
+                    $userTimezone = Auth::user()->timezone ?? config('app.timezone', 'UTC');
+
+                    // Parse the scheduled time in user's timezone, then convert to UTC for queue
+                    $scheduledTime = Carbon::parse($this->sendAt, $userTimezone)->utc();
+
+                    $job->delay($scheduledTime);
+                }
 
                 $queuedMessages[] = $message->id;
 
@@ -788,6 +1026,10 @@ class MesssagesIndex extends Component
     {
         $this->search = '';
         $this->selectedSession = '';
+        $this->statusFilter = '';
+        // Reset date range to current month
+        $this->startDate = now()->startOfMonth()->format('Y-m-d');
+        $this->endDate = now()->endOfMonth()->format('Y-m-d');
         $this->resetPage();
     }
 
@@ -837,11 +1079,19 @@ class MesssagesIndex extends Component
                 throw new \Exception('Recipient not found for this message.');
             }
 
+            // Detect message type (image, file, custom, or text)
+            $messageData = json_decode($message->message, true);
+            $chattingMethods = 'text'; // default
+
+            if (is_array($messageData) && isset($messageData['type'])) {
+                $chattingMethods = $messageData['type']; // 'image', 'file', 'custom', etc.
+            }
+
             // Update message status to pending before queuing
             $message->update(['status' => 'pending']);
 
             // Dispatch job to resend message asynchronously
-            SendMessageJob::dispatch($message->id, $chatId, $wahaSessionName)
+            SendMessageJob::dispatch($message->id, $chatId, $wahaSessionName, $chattingMethods)
                 ->onQueue('messages');
 
             // Log activity for queued resend
@@ -853,6 +1103,7 @@ class MesssagesIndex extends Component
                         'recipient' => $chatId,
                         'recipient_type' => $message->group_wa_id ? 'group' : 'contact',
                         'message_type' => $message->template_id ? 'template' : 'direct',
+                        'chatting_method' => $chattingMethods,
                         'session_id' => $message->waha_session_id,
                         'template_id' => $message->template_id,
                         'action' => 'resent',
@@ -866,6 +1117,7 @@ class MesssagesIndex extends Component
             Log::info('Message queued for resending', [
                 'message_id' => $message->id,
                 'recipient' => $chatId,
+                'chatting_method' => $chattingMethods,
             ]);
 
             DB::commit();
@@ -910,6 +1162,15 @@ class MesssagesIndex extends Component
             })
             ->when($this->selectedSession, function ($query) {
                 $query->where('waha_session_id', $this->selectedSession);
+            })
+            ->when($this->statusFilter, function ($query) {
+                $query->where('status', $this->statusFilter);
+            })
+            ->when($this->startDate, function ($query) {
+                $query->whereDate('created_at', '>=', $this->startDate);
+            })
+            ->when($this->endDate, function ($query) {
+                $query->whereDate('created_at', '<=', $this->endDate);
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);

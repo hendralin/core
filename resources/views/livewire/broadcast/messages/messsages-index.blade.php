@@ -25,6 +25,38 @@
             </flux:callout>
         @endif
 
+        <!-- Advance Filters Card -->
+        <div class="dark:bg-zinc-800 bg-blue-50 rounded-lg border border-gray-200 dark:border-zinc-700 mb-6">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <flux:heading size="xl">Filter</flux:heading>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Session !-->
+                    <flux:select label="Session" wire:model.live="selectedSession" class="min-w-32">
+                        <flux:select.option value="">All Sessions</flux:select.option>
+                        @foreach($sessions as $session)
+                            <flux:select.option value="{{ $session->id }}">{{ $session->name }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+
+                    <!-- Start Date -->
+                    <flux:input label="Periode Awal" type="date" wire:model.live="startDate" />
+
+                    <!-- End Date -->
+                    <flux:input label="Periode Akhir" type="date" wire:model.live="endDate" />
+
+                    <!-- Status -->
+                    <flux:select label="Status" wire:model.live="statusFilter">
+                        <flux:select.option value="">All Status</flux:select.option>
+                        <flux:select.option value="pending">Pending</flux:select.option>
+                        <flux:select.option value="sent">Sent</flux:select.option>
+                        <flux:select.option value="failed">Failed</flux:select.option>
+                    </flux:select>
+                </div>
+            </div>
+        </div>
+
         <!-- Search & Filters -->
         <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 mb-6">
             <div class="p-4 border-b border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50">
@@ -38,17 +70,6 @@
 
                     <!-- Filters -->
                     <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
-                        <!-- Session Filter -->
-                        <div class="flex items-center">
-                            <label for="session-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2 min-w-fit">Session:</label>
-                            <flux:select wire:model.live="selectedSession" class="min-w-32">
-                                <flux:select.option value="">All Sessions</flux:select.option>
-                                @foreach($sessions as $session)
-                                    <flux:select.option value="{{ $session->id }}">{{ $session->name }}</flux:select.option>
-                                @endforeach
-                            </flux:select>
-                        </div>
-
                         <!-- Per Page Filter -->
                         <div class="flex items-center">
                             <label for="per-page" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2 min-w-fit">Show:</label>
@@ -61,7 +82,12 @@
                         </div>
 
                         <!-- Clear Filters -->
-                        @if($search || $selectedSession)
+                        @php
+                            $currentMonthStart = now()->startOfMonth()->format('Y-m-d');
+                            $currentMonthEnd = now()->endOfMonth()->format('Y-m-d');
+                            $hasDateFilter = $startDate !== $currentMonthStart || $endDate !== $currentMonthEnd;
+                        @endphp
+                        @if($search || $selectedSession || $statusFilter || $hasDateFilter)
                             <div class="flex justify-start sm:justify-end">
                                 <flux:button wire:click="clearFilters" variant="ghost" class="cursor-pointer" tooltip="Clear Filters">
                                     Clear Filters
@@ -74,7 +100,7 @@
 
             <!-- Actions Bar -->
             <div class="p-4 border-b border-gray-200 dark:border-zinc-700">
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 items-center">
                     @if($wahaStatus['connected'])
                         @can('message.create')
                             <flux:button wire:click="openSendModal" variant="primary" size="sm" icon="paper-airplane" tooltip="Send Message" class="cursor-pointer">Send Message</flux:button>
@@ -87,6 +113,13 @@
 
                     <div wire:loading>
                         <flux:icon.loading class="text-red-600" />
+                    </div>
+
+                    <div class="ml-auto">
+                        <flux:button wire:click="$refresh" variant="ghost" size="sm" icon="arrow-path" tooltip="Refresh" class="cursor-pointer" wire:loading.attr="disabled">
+                            <span wire:loading.remove>Refresh</span>
+                            <span wire:loading>Please wait...</span>
+                        </flux:button>
                     </div>
                 </div>
             </div>
@@ -140,17 +173,57 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         @php
-                                            $msg = Str::limit($message->message, 100);
+                                            // Check if message is JSON (image, file, custom, etc.)
+                                            $messageData = json_decode($message->message, true);
+                                            $isImage = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'image';
+                                            $isFile = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'file';
+                                            $isCustom = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'custom';
 
-                                            // Replace *text* with <strong>text</strong>
-                                            $msg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $msg);
+                                            if ($isImage || $isFile) {
+                                                // For image/file messages, show caption or filename
+                                                $displayText = !empty($messageData['caption'])
+                                                    ? $messageData['caption']
+                                                    : ($messageData['filename'] ?? ($isImage ? 'Image' : 'File'));
+                                                $msg = Str::limit($displayText, 100);
 
-                                            // Replace _text_ with <em>text</em>
-                                            $msg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $msg);
+                                                // Apply formatting for caption (only if caption exists, not for filename)
+                                                if (!empty($messageData['caption'])) {
+                                                    // Replace *text* with <strong>text</strong>
+                                                    $msg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $msg);
+                                                    // Replace _text_ with <em>text</em>
+                                                    $msg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $msg);
+                                                }
+                                            } elseif ($isCustom) {
+                                                // For custom messages, show text with preview URL
+                                                $displayText = $messageData['text'] ?? 'Custom Link Preview';
+                                                $msg = Str::limit($displayText, 100);
+                                                // Apply formatting
+                                                $msg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $msg);
+                                                $msg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $msg);
+                                            } else {
+                                                // For text messages, apply formatting
+                                                $msg = Str::limit($message->message, 100);
+                                                // Replace *text* with <strong>text</strong>
+                                                $msg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $msg);
+                                                // Replace _text_ with <em>text</em>
+                                                $msg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $msg);
+                                            }
                                         @endphp
                                         <flux:modal.trigger name="preview-message">
                                             <div class="text-sm max-w-xs truncate md:max-w-none md:whitespace-normal text-gray-900 dark:text-zinc-100 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" wire:click="setMessageToPreview({{ $message->id }})" title="Click to preview message">
-                                                {!! $msg !!}
+                                                <div class="flex items-center gap-2">
+                                                    @if($message->scheduled_at)
+                                                        <flux:icon.clock class="h-4 w-4 text-orange-600 dark:text-orange-400 shrink-0" title="Scheduled message" />
+                                                    @endif
+                                                    @if($isImage)
+                                                        <flux:icon.photo class="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                                                    @elseif($isFile)
+                                                        <flux:icon.paper-clip class="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
+                                                    @elseif($isCustom)
+                                                        <flux:icon.link class="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                                                    @endif
+                                                    <span>{!! $msg !!}</span>
+                                                </div>
                                             </div>
                                         </flux:modal.trigger>
                                     </td>
@@ -199,23 +272,29 @@
                                         @if($message->status === 'sent')
                                             <flux:badge color="green" size="sm">Sent</flux:badge>
                                         @elseif($message->status === 'failed')
+                                            @php
+                                                $errorTooltip = $message->error_message
+                                                    ? 'Error: ' . Str::limit($message->error_message, 100) . ' (Click to see details and resend)'
+                                                    : 'Click to resend message';
+                                            @endphp
                                             <flux:modal.trigger name="resend-message-modal">
+                                                <flux:tooltip content="{{ $errorTooltip }}">
                                                 <flux:badge
                                                     color="red"
                                                     size="sm"
                                                     class="cursor-pointer hover:opacity-80 transition-opacity"
                                                     wire:click="setMessageToResend({{ $message->id }})"
-                                                    title="Click to resend message"
                                                 >
                                                     Failed
                                                 </flux:badge>
+                                                </flux:tooltip>
                                             </flux:modal.trigger>
                                         @else
                                             <flux:badge color="gray" size="sm">Pending</flux:badge>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
-                                        {{ $message->created_at->format('M d, Y H:i') }}
+                                        {{ $message->created_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('M d, Y H:i') }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -275,6 +354,20 @@
             </div>
 
             @if($messageSession)
+                <!-- Chatting Methods -->
+                <flux:radio.group wire:model.live="chattingMethods" label="Chatting Methods" variant="segmented" size="sm">
+                    <flux:radio value="text" label="Text" icon="pencil-square" />
+                    @if($messageType === 'template' || $recipientType === 'recipients')
+                        <flux:radio value="image" label="Image" icon="photo" disabled />
+                        <flux:radio value="file" label="File" icon="paper-clip" disabled />
+                        <flux:radio value="custom" label="Custom" icon="identification" disabled />
+                    @else
+                        <flux:radio value="image" label="Image" icon="photo" />
+                        <flux:radio value="file" label="File" icon="paper-clip" />
+                        <flux:radio value="custom" label="Custom" icon="identification" />
+                    @endif
+                </flux:radio.group>
+
                 <!-- Message Type -->
                 <flux:fieldset>
                     <flux:legend class="text-sm">Message Type <span class="text-red-500">*</span></flux:legendc>
@@ -285,7 +378,7 @@
                 </flux:fieldset>
 
                 <!-- Direct Message -->
-                @if($messageType === 'direct' && $recipientType !== 'recipients')
+                @if($messageType === 'direct' && $recipientType !== 'recipients' && $chattingMethods === 'text')
                     <div>
                         <flux:label for="directMessage">Message Content <span class="text-red-500">*</span></flux:label>
                         <flux:textarea wire:model.live="directMessage" rows="4" class="mt-1" placeholder="Type your message here (max 1024 characters)" maxlength="1024"></flux:textarea>
@@ -293,6 +386,74 @@
                         <div class="mt-2 text-xs text-gray-600 dark:text-zinc-400 space-y-1">
                             <div>• Supports formatting: *bold*, _italic_</div>
                             <div>• Character count: {{ strlen($directMessage ?? '') }}</div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Image Selection -->
+                @if($chattingMethods === 'image')
+                    <div>
+                        <flux:label for="image">Upload Image <span class="text-red-500">*</span></flux:label>
+                        <flux:input type="file" wire:model="image" class="mt-1" accept="image/*" />
+                        @error('image') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <div class="mt-1 text-xs text-gray-600 dark:text-zinc-400">Upload image to send (max 10MB, formats: JPEG, PNG, GIF, WebP)</div>
+                    </div>
+                    <div class="mt-4">
+                        <flux:label for="imageCaption">Image Caption (Optional)</flux:label>
+                        <flux:textarea wire:model="imageCaption" rows="3" class="mt-1" placeholder="Enter caption for the image (optional)" maxlength="1024"></flux:textarea>
+                        @error('imageCaption') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+                @endif
+
+                <!-- File Selection -->
+                @if($chattingMethods === 'file')
+                    <div>
+                        <flux:label for="file">Upload File <span class="text-red-500">*</span></flux:label>
+                        <flux:input type="file" wire:model="file" class="mt-1" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+                        @error('file') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <div class="mt-1 text-xs text-gray-600 dark:text-zinc-400">Upload file to send (max 10MB)</div>
+                    </div>
+                    <div class="mt-4">
+                        <flux:label for="fileCaption">File Caption (Optional)</flux:label>
+                        <flux:textarea wire:model="fileCaption" rows="3" class="mt-1" placeholder="Enter caption for the file (optional)" maxlength="1024"></flux:textarea>
+                        @error('fileCaption') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+                @endif
+
+                <!-- Custom Selection -->
+                @if($chattingMethods === 'custom')
+                    <div class="space-y-4">
+                        <div>
+                            <flux:label for="custom">Message Text <span class="text-red-500">*</span></flux:label>
+                            <flux:textarea wire:model="custom" rows="4" class="mt-1" placeholder="Type your message text here (max 1024 characters). Must include a URL identical to Preview URL." maxlength="1024"></flux:textarea>
+                            @error('custom') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            <div class="mt-1 text-xs text-gray-600 dark:text-zinc-400">The URL in this text must be identical to the Preview URL below</div>
+                        </div>
+
+                        <div>
+                            <flux:label for="customPreviewUrl">Preview URL <span class="text-red-500">*</span></flux:label>
+                            <flux:input wire:model="customPreviewUrl" class="mt-1" placeholder="https://example.com" />
+                            @error('customPreviewUrl') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            <div class="mt-1 text-xs text-gray-600 dark:text-zinc-400">This URL must match exactly with the URL in Message Text above</div>
+                        </div>
+
+                        <div>
+                            <flux:label for="customPreviewTitle">Preview Title <span class="text-red-500">*</span></flux:label>
+                            <flux:input wire:model="customPreviewTitle" class="mt-1" placeholder="Enter preview title" maxlength="255" />
+                            @error('customPreviewTitle') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <flux:label for="customPreviewDescription">Preview Description <span class="text-red-500">*</span></flux:label>
+                            <flux:textarea wire:model="customPreviewDescription" rows="3" class="mt-1" placeholder="Enter preview description" maxlength="500"></flux:textarea>
+                            @error('customPreviewDescription') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <flux:label for="customPreviewImage">Preview Image <span class="text-red-500">*</span></flux:label>
+                            <flux:input type="file" wire:model="customPreviewImage" class="mt-1" accept="image/*" />
+                            @error('customPreviewImage') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            <div class="mt-1 text-xs text-gray-600 dark:text-zinc-400">Upload image to display in the preview (max 10MB, formats: JPEG, PNG, GIF, WebP)</div>
                         </div>
                     </div>
                 @endif
@@ -534,6 +695,24 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- When to send -->
+                <flux:fieldset>
+                    <flux:legend class="text-sm">When to send</flux:legend>
+                    <flux:radio.group wire:model.live="whenToSend">
+                        <flux:radio value="now" label="Send immediately" />
+                        <flux:radio value="later" label="Schedule for later" />
+                    </flux:radio.group>
+                </flux:fieldset>
+                @if($whenToSend === 'later')
+                    <div>
+                    <flux:input type="datetime-local" wire:model.live="sendAt" />
+                    @error('sendAt') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    <div class="mt-2 text-xs text-gray-600 dark:text-zinc-400 space-y-1">
+                        <div>The message will be sent at the scheduled time. Schedule at least 5 minutes in the future.</div>
+                    </div>
+                    </div>
+                @endif
             @endif
 
             <!-- Actions -->
@@ -580,6 +759,12 @@
                                 @if($messageToResend->wahaSession)
                                     <div>Session: {{ $messageToResend->wahaSession->name }}</div>
                                 @endif
+                                @if($messageToResend->error_message)
+                                    <div class="mt-2 pt-2 border-t border-red-200 dark:border-red-800">
+                                        <div class="font-semibold text-red-600 dark:text-red-400">Error:</div>
+                                        <div class="text-red-700 dark:text-red-300 wrap-break-word">{{ $messageToResend->error_message }}</div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -589,26 +774,153 @@
                         <flux:heading size="sm" class="mb-3 text-green-800 dark:text-green-200">Message Preview</flux:heading>
 
                         <!-- WhatsApp-like message bubble -->
-                        <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 max-w-sm">
-                            <div class="text-sm text-gray-900 dark:text-zinc-100">
-                                @php
-                                    $previewMsg = $messageToResend->message;
-                                    // Replace *text* with <strong>text</strong>
-                                    $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
-                                    // Replace _text_ with <em>text</em>
-                                    $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
-                                @endphp
-                                <div class="whitespace-pre-wrap">{!! $previewMsg !!}</div>
-                            </div>
+                        <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3">
+                            @php
+                                $messageData = json_decode($messageToResend->message, true);
+                                $isImage = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'image';
+                                $isFile = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'file';
+                                $isCustom = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'custom';
+                            @endphp
+
+                            @if($isImage)
+                                <!-- Image Message Preview -->
+                                <div class="space-y-2">
+                                    <div class="relative rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                        <img src="{{ $messageData['url'] }}" alt="{{ $messageData['filename'] ?? 'Image' }}" class="w-full h-auto max-h-64 object-contain" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23ddd\' width=\'400\' height=\'300\'/%3E%3Ctext fill=\'%23999\' font-family=\'sans-serif\' font-size=\'20\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'%3EImage not available%3C/text%3E%3C/svg%3E';" />
+                                    </div>
+                                    @if(!empty($messageData['caption']))
+                                        <div class="text-sm text-gray-900 dark:text-zinc-100 text-left">
+                                            @php
+                                                $previewMsg = trim($messageData['caption']);
+                                                // Replace *text* with <strong>text</strong>
+                                                $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                                // Replace _text_ with <em>text</em>
+                                                $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                            @endphp
+                                            <div class="whitespace-pre-line text-left wrap-break-word">{!! $previewMsg !!}</div>
+                                        </div>
+                                    @endif
+                                    <div class="text-xs text-gray-500 dark:text-zinc-400">
+                                        <div>File: {{ $messageData['filename'] ?? 'N/A' }}</div>
+                                        <div>Type: {{ $messageData['mimetype'] ?? 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            @elseif($isFile)
+                                <!-- File Message Preview -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-3 p-3 bg-gray-200 dark:bg-gray-700 rounded-lg">
+                                        <flux:icon.paper-clip class="h-8 w-8 text-green-600 dark:text-green-400 shrink-0" />
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">
+                                                {{ $messageData['filename'] ?? 'File' }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-zinc-400">
+                                                {{ $messageData['mimetype'] ?? 'N/A' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if(!empty($messageData['caption']))
+                                        <div class="text-sm text-gray-900 dark:text-zinc-100 text-left">
+                                            @php
+                                                $previewMsg = trim($messageData['caption']);
+                                                // Replace *text* with <strong>text</strong>
+                                                $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                                // Replace _text_ with <em>text</em>
+                                                $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                            @endphp
+                                            <div class="whitespace-pre-line text-left wrap-break-word">{!! $previewMsg !!}</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @elseif($isCustom)
+                                <!-- Custom Link Preview Message -->
+                                <div class="space-y-2">
+                                    @if(!empty($messageData['previewUrl']))
+                                        <div class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
+                                            @if(!empty($messageData['previewImageUrl']))
+                                                <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                                    <img src="{{ $messageData['previewImageUrl'] }}" alt="Preview" class="w-full h-full object-cover" onerror="this.style.display='none';" />
+                                                </div>
+                                            @endif
+                                            <div class="p-3">
+                                                @if(!empty($messageData['previewTitle']))
+                                                    <div class="font-semibold text-sm text-gray-900 dark:text-zinc-100 mb-1">
+                                                        {{ $messageData['previewTitle'] }}
+                                                    </div>
+                                                @endif
+                                                @if(!empty($messageData['previewDescription']))
+                                                    <div class="text-xs text-gray-600 dark:text-zinc-400 mb-2 line-clamp-2">
+                                                        {{ $messageData['previewDescription'] }}
+                                                    </div>
+                                                @endif
+                                                <div class="text-xs text-blue-600 dark:text-blue-400 truncate">
+                                                    {{ $messageData['previewUrl'] }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="text-sm text-gray-900 dark:text-zinc-100">
+                                        @php
+                                            $previewMsg = $messageData['text'] ?? '';
+                                            // Replace *text* with <strong>text</strong>
+                                            $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                            // Replace _text_ with <em>text</em>
+                                            $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                        @endphp
+                                        <div class="whitespace-pre-wrap">{!! $previewMsg !!}</div>
+                                    </div>
+                                </div>
+                            @else
+                                <!-- Text Message Preview -->
+                                <div class="text-sm text-gray-900 dark:text-zinc-100">
+                                    @php
+                                        $previewMsg = $messageToResend->message;
+                                        // Replace *text* with <strong>text</strong>
+                                        $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                        // Replace _text_ with <em>text</em>
+                                        $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                    @endphp
+                                    <div class="whitespace-pre-wrap">{!! $previewMsg !!}</div>
+                                </div>
+                            @endif
+
                             <div class="text-xs text-gray-500 dark:text-zinc-400 mt-2 text-right">
-                                {{ $messageToResend->created_at->format('g:i A') }} ✓✓
+                                @if($messageToResend->scheduled_at)
+                                    @php
+                                        $userTimezone = Auth::user()->timezone ?? config('app.timezone', 'UTC');
+                                        $scheduledTime = $messageToResend->scheduled_at->setTimezone($userTimezone);
+                                        $now = now($userTimezone);
+                                        $isScheduledPast = $now->gt($scheduledTime);
+                                    @endphp
+                                    @if($isScheduledPast)
+                                        {{ $scheduledTime->format('g:i A') }} ✓✓
+                                    @else
+                                        <div class="flex items-center justify-end gap-1">
+                                            <flux:icon.clock class="h-3 w-3 text-orange-600 dark:text-orange-400" />
+                                            <span>{{ $scheduledTime->format('g:i A') }}</span>
+                                        </div>
+                                    @endif
+                                @else
+                                    {{ $messageToResend->created_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('g:i A') }} ✓✓
+                                @endif
                             </div>
                         </div>
 
                         <!-- Additional info -->
                         <div class="text-xs text-gray-600 dark:text-zinc-400 mt-3 space-y-1">
-                            <div>• Supports formatting: *bold*, _italic_</div>
-                            <div>• Character count: {{ strlen($messageToResend->message) }}</div>
+                            @if($isImage)
+                                <div>• Message type: Image</div>
+                                <div>• Image URL: <a href="{{ $messageData['url'] }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">{{ Str::limit($messageData['url'], 50) }}</a></div>
+                            @elseif($isFile)
+                                <div>• Message type: File</div>
+                                <div>• File URL: <a href="{{ $messageData['url'] }}" target="_blank" class="text-green-600 dark:text-green-400 hover:underline">{{ Str::limit($messageData['url'], 50) }}</a></div>
+                            @elseif($isCustom)
+                                <div>• Message type: Custom Link Preview</div>
+                                <div>• Preview URL: <a href="{{ $messageData['previewUrl'] ?? 'N/A' }}" target="_blank" class="text-purple-600 dark:text-purple-400 hover:underline">{{ Str::limit($messageData['previewUrl'] ?? 'N/A', 50) }}</a></div>
+                            @else
+                                <div>• Supports formatting: *bold*, _italic_</div>
+                                <div>• Character count: {{ strlen($messageToResend->message) }}</div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -633,7 +945,7 @@
     </flux:modal>
 
     <!-- Preview Message Modal -->
-    <flux:modal name="preview-message" class="min-w-96">
+    <flux:modal name="preview-message" class="min-w-md">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">Message Preview</flux:heading>
@@ -654,12 +966,15 @@
                                 @endif
                             </div>
                             <div class="text-sm text-gray-600 dark:text-zinc-400 space-y-1">
-                                <div>Sent: {{ $messageToPreview->created_at->format('M d, Y H:i') }}</div>
+                                <div>Sent: {{ $messageToPreview->created_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('M d, Y H:i') }}</div>
                                 @if($messageToPreview->template)
                                     <div>Template: {{ $messageToPreview->template->name }}</div>
                                 @endif
                                 @if($messageToPreview->wahaSession)
                                     <div>Session: {{ $messageToPreview->wahaSession->name }}</div>
+                                @endif
+                                @if($messageToPreview->scheduled_at)
+                                    <div>Scheduled: {{ $messageToPreview->scheduled_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('M d, Y H:i') }}</div>
                                 @endif
                             </div>
                         </div>
@@ -671,25 +986,152 @@
 
                         <!-- WhatsApp-like message bubble -->
                         <div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 max-w-sm">
-                            <div class="text-sm text-gray-900 dark:text-zinc-100">
-                                @php
-                                    $previewMsg = $messageToPreview->message;
-                                    // Replace *text* with <strong>text</strong>
-                                    $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
-                                    // Replace _text_ with <em>text</em>
-                                    $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
-                                @endphp
-                                <div class="whitespace-pre-wrap">{!! $previewMsg !!}</div>
-                            </div>
+                            @php
+                                $messageData = json_decode($messageToPreview->message, true);
+                                $isImage = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'image';
+                                $isFile = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'file';
+                                $isCustom = is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'custom';
+                            @endphp
+
+                            @if($isImage)
+                                <!-- Image Message Preview -->
+                                <div class="space-y-2">
+                                    <div class="relative rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                        <img src="{{ $messageData['url'] }}" alt="{{ $messageData['filename'] ?? 'Image' }}" class="w-full h-auto max-h-64 object-contain" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23ddd\' width=\'400\' height=\'300\'/%3E%3Ctext fill=\'%23999\' font-family=\'sans-serif\' font-size=\'20\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'%3EImage not available%3C/text%3E%3C/svg%3E';" />
+                                    </div>
+                                    @if(!empty($messageData['caption']))
+                                        <div class="text-sm text-gray-900 dark:text-zinc-100 text-left">
+                                            @php
+                                                $previewMsg = trim($messageData['caption']);
+                                                // Replace *text* with <strong>text</strong>
+                                                $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                                // Replace _text_ with <em>text</em>
+                                                $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                            @endphp
+                                            <div class="whitespace-pre-line text-left wrap-break-word">{!! $previewMsg !!}</div>
+                                        </div>
+                                    @endif
+                                    <div class="text-xs text-gray-500 dark:text-zinc-400">
+                                        <div>File: {{ $messageData['filename'] ?? 'N/A' }}</div>
+                                        <div>Type: {{ $messageData['mimetype'] ?? 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            @elseif($isFile)
+                                <!-- File Message Preview -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-3 p-3 bg-gray-200 dark:bg-gray-700 rounded-lg">
+                                        <flux:icon.paper-clip class="h-8 w-8 text-green-600 dark:text-green-400 shrink-0" />
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">
+                                                {{ $messageData['filename'] ?? 'File' }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-zinc-400">
+                                                {{ $messageData['mimetype'] ?? 'N/A' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if(!empty($messageData['caption']))
+                                        <div class="text-sm text-gray-900 dark:text-zinc-100 text-left">
+                                            @php
+                                                $previewMsg = trim($messageData['caption']);
+                                                // Replace *text* with <strong>text</strong>
+                                                $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                                // Replace _text_ with <em>text</em>
+                                                $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                            @endphp
+                                            <div class="whitespace-pre-line text-left wrap-break-word">{!! $previewMsg !!}</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @elseif($isCustom)
+                                <!-- Custom Link Preview Message -->
+                                <div class="space-y-2">
+                                    @if(!empty($messageData['previewUrl']))
+                                        <div class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
+                                            @if(!empty($messageData['previewImageUrl']))
+                                                <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                                    <img src="{{ $messageData['previewImageUrl'] }}" alt="Preview" class="w-full h-full object-cover" onerror="this.style.display='none';" />
+                                                </div>
+                                            @endif
+                                            <div class="p-3">
+                                                @if(!empty($messageData['previewTitle']))
+                                                    <div class="font-semibold text-sm text-gray-900 dark:text-zinc-100 mb-1">
+                                                        {{ $messageData['previewTitle'] }}
+                                                    </div>
+                                                @endif
+                                                @if(!empty($messageData['previewDescription']))
+                                                    <div class="text-xs text-gray-600 dark:text-zinc-400 mb-2 line-clamp-2">
+                                                        {{ $messageData['previewDescription'] }}
+                                                    </div>
+                                                @endif
+                                                <div class="text-xs text-blue-600 dark:text-blue-400 truncate">
+                                                    {{ $messageData['previewUrl'] }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="text-sm text-gray-900 dark:text-zinc-100">
+                                        @php
+                                            $previewMsg = $messageData['text'] ?? '';
+                                            // Replace *text* with <strong>text</strong>
+                                            $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                            // Replace _text_ with <em>text</em>
+                                            $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                        @endphp
+                                        <div class="whitespace-pre-wrap">{!! $previewMsg !!}</div>
+                                    </div>
+                                </div>
+                            @else
+                                <!-- Text Message Preview -->
+                                <div class="text-sm text-gray-900 dark:text-zinc-100">
+                                    @php
+                                        $previewMsg = $messageToPreview->message;
+                                        // Replace *text* with <strong>text</strong>
+                                        $previewMsg = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMsg);
+                                        // Replace _text_ with <em>text</em>
+                                        $previewMsg = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMsg);
+                                    @endphp
+                                    <div class="whitespace-pre-wrap">{!! $previewMsg !!}</div>
+                                </div>
+                            @endif
+
                             <div class="text-xs text-gray-500 dark:text-zinc-400 mt-2 text-right">
-                                {{ $messageToPreview->created_at->format('g:i A') }} ✓✓
+                                @if($messageToPreview->scheduled_at)
+                                    @php
+                                        $userTimezone = Auth::user()->timezone ?? config('app.timezone', 'UTC');
+                                        $scheduledTime = $messageToPreview->scheduled_at->setTimezone($userTimezone);
+                                        $now = now($userTimezone);
+                                        $isScheduledPast = $now->gt($scheduledTime);
+                                    @endphp
+                                    @if($isScheduledPast)
+                                        {{ $scheduledTime->format('g:i A') }} ✓✓
+                                    @else
+                                        <div class="flex items-center justify-end gap-1">
+                                            <flux:icon.clock class="h-3 w-3 text-orange-600 dark:text-orange-400" />
+                                            <span>{{ $scheduledTime->format('g:i A') }}</span>
+                                        </div>
+                                    @endif
+                                @else
+                                    {{ $messageToPreview->created_at->setTimezone(Auth::user()->timezone ?? config('app.timezone', 'UTC'))->format('g:i A') }} ✓✓
+                                @endif
                             </div>
                         </div>
 
                         <!-- Additional info -->
                         <div class="text-xs text-gray-600 dark:text-zinc-400 mt-3 space-y-1">
-                            <div>• Supports formatting: *bold*, _italic_</div>
-                            <div>• Character count: {{ strlen($messageToPreview->message) }}</div>
+                            @if($isImage)
+                                <div>• Message type: Image</div>
+                                <div>• Image URL: <a href="{{ $messageData['url'] }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">{{ Str::limit($messageData['url'], 50) }}</a></div>
+                            @elseif($isFile)
+                                <div>• Message type: File</div>
+                                <div>• File URL: <a href="{{ $messageData['url'] }}" target="_blank" class="text-green-600 dark:text-green-400 hover:underline">{{ Str::limit($messageData['url'], 50) }}</a></div>
+                            @elseif($isCustom)
+                                <div>• Message type: Custom Link Preview</div>
+                                <div>• Preview URL: <a href="{{ $messageData['previewUrl'] ?? 'N/A' }}" target="_blank" class="text-purple-600 dark:text-purple-400 hover:underline">{{ Str::limit($messageData['previewUrl'] ?? 'N/A', 50) }}</a></div>
+                            @else
+                                <div>• Supports formatting: *bold*, _italic_</div>
+                                <div>• Character count: {{ strlen($messageToPreview->message) }}</div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -698,7 +1140,10 @@
             <div class="flex gap-2">
                 <flux:spacer />
                 <flux:modal.close>
-                    <flux:button variant="ghost" class="cursor-pointer">Close</flux:button>
+                    <flux:button variant="ghost" class="cursor-pointer" wire:loading.attr="disabled">
+                        <span wire:loading.remove>Close</span>
+                        <span wire:loading>Please wait...</span>
+                    </flux:button>
                 </flux:modal.close>
             </div>
         </div>

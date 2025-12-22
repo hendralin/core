@@ -26,7 +26,18 @@ class Message extends Model
         'received_number',
         'message',
         'status',
+        'error_message',
+        'scheduled_at',
         'created_by',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'scheduled_at' => 'datetime',
     ];
 
     /**
@@ -43,6 +54,8 @@ class Message extends Model
                 'received_number',
                 'message',
                 'status',
+                'error_message',
+                'scheduled_at',
                 'created_by',
             ])
             ->logOnlyDirty()

@@ -15,10 +15,10 @@
             </div>
             <div class="space-y-4">
                 <div>
-                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.4.1</flux:heading>
+                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.5.0</flux:heading>
                     <flux:text class="text-gray-700 dark:text-zinc-300 leading-relaxed">
                         Broadcaster is a comprehensive WhatsApp Business messaging platform built with Laravel and powered by WAHA (WhatsApp HTTP API).
-                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting with async queue processing, template management, contacts synchronization, and comprehensive audit trails through an intuitive web interface.
+                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting with async queue processing, scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), template management, contacts synchronization, and comprehensive audit trails through an intuitive web interface.
                     </flux:text>
                 </div>
 
@@ -36,7 +36,19 @@
                                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
+                                Scheduled Message Broadcasting
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
                                 Advanced Message Broadcasting
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Scheduled Messaging
                             </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -105,7 +117,7 @@
                 <div class="pt-4 border-t border-blue-200 dark:border-blue-700">
                     <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
                         Built with modern web technologies including Laravel, Livewire, Flux UI, and Tailwind CSS for optimal performance and user experience.
-                        Features advanced broadcast messaging with async queue processing, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, and complete contact synchronization system.
+                        Features advanced broadcast messaging with async queue processing, scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), advanced filtering and validation, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, and complete contact synchronization system.
                     </flux:text>
                 </div>
             </div>
@@ -251,7 +263,7 @@
 
                 <div class="space-y-4">
                     <flux:text class="text-gray-700 dark:text-zinc-300">
-                        Advanced message broadcasting system supporting both direct messaging and template-based communications with bulk sending capabilities through Excel uploads. Features comprehensive delivery status tracking (sent, failed, pending) and automatic resend functionality for failed messages with confirmation dialogs.
+                        Advanced message broadcasting system supporting direct messaging, template-based communications, scheduled messaging with timezone support, and multiple message types (text, image, file, custom link preview) with bulk sending capabilities through Excel uploads. Features comprehensive delivery status tracking (sent, failed, pending), scheduled message indicators, advanced filtering, and automatic resend functionality for failed messages with confirmation dialogs.
                     </flux:text>
 
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -286,6 +298,12 @@
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
                                     Direct Message Broadcasting
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Scheduled Message Broadcasting
                                 </li>
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -299,28 +317,18 @@
                                     </svg>
                                     Bulk Excel Upload
                                 </li>
-                            </ul>
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    Individual & Group Targeting
+                                    Advanced Filtering & Search
                                 </li>
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    Real-time Delivery Status
+                                    Multiple Message Types
                                 </li>
-                                <li class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    Message Status Tracking
-                                </li>
-                            </ul>
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -335,6 +343,36 @@
                                 </li>
                             </ul>
                             <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Individual & Group Targeting
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Real-time Delivery Status
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Message Type Icons
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Timezone-aware Timestamps
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Message Status Tracking
+                                </li>
                                 <li class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -619,6 +657,12 @@
                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                         </svg>
                                         Status Auto-update
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Timezone-aware Scheduling
                                     </li>
                                 </ul>
                             </div>

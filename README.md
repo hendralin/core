@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
   </p>
 
-  <h3>A modern Laravel-based WhatsApp session management system powered by WAHA (WhatsApp HTTP API)</h3>
+  <h3>A modern Laravel-based WhatsApp session management system with advanced scheduling and timezone support powered by WAHA (WhatsApp HTTP API)</h3>
 
 </div>
 
@@ -23,19 +23,23 @@
 
 ### Message Broadcasting 🎯
 - **WhatsApp Broadcasting**: Send messages to contacts, groups, or bulk recipients
-- **Multiple Message Types**: Direct messages or template-based messages with parameters
+- **Multiple Message Types**: Direct messages, images, files, or custom link previews
+- **Scheduled Messaging**: Send messages immediately or schedule for later with timezone support
 - **Bulk Message Upload**: Excel/CSV upload for mass messaging campaigns
 - **Template Parameters**: Support for header and body variables (@{{name}}, @{{price}}, etc.)
 - **Recipient Management**: Individual contacts, groups, or custom recipient lists
+- **Advanced Filtering**: Filter messages by date range, status, session, and search
 - **Typing Indicators**: Professional typing indicators before message delivery
 - **WAHA API Status**: Real-time connection monitoring with user alerts
 - **Message History**: Complete logging and tracking of all sent messages
 - **Session-based Filtering**: Send messages using specific WhatsApp sessions
 - **Smart Validation**: Intelligent form validation with contextual error messages
+- **Timezone-aware Display**: All timestamps displayed in user's timezone
 - **Success Reporting**: Detailed delivery statistics and failure notifications
 - **Message Status Tracking**: Real-time status tracking (sent, failed, pending) for all messages
 - **Failed Message Resend**: One-click resend functionality for failed messages with confirmation dialogs
 - **Status Badges**: Visual status indicators in message list (Sent/Failed/Pending)
+- **Scheduled Message Indicators**: Clock icons for scheduled vs immediate messages
 - **Resend Statistics**: Track resend activities in audit trail
 - **Queue System**: Asynchronous message processing with Laravel Queue for better performance
 - **Auto Retry**: Automatic retry mechanism (3 attempts) for failed messages
@@ -83,6 +87,9 @@
 - **Template Variables**: Advanced parameter substitution (header & body variables)
 - **Session Management**: Multi-session WhatsApp broadcasting capabilities
 - **Real-time Validation**: Smart form validation with contextual feedback
+- **Timezone Support**: Full timezone-aware messaging and display
+- **Scheduled Messaging**: Advanced scheduling with timezone conversion
+- **Message Type Icons**: Visual indicators for text, image, file, and custom messages
 - **Caching System**: Optimized performance with intelligent caching
 - **Background Jobs**: Asynchronous processing for better UX
 - **Audit Trails**: Complete activity logging and message delivery tracking
@@ -249,17 +256,19 @@ The application includes the following permission groups:
 
 The Message Broadcasting feature allows you to send WhatsApp messages to individual contacts, groups, or bulk recipients through your configured WAHA sessions.
 
-#### Sending Direct Messages
+#### Sending Messages with Advanced Features
 
 1. **Navigate to Messages**: Click on the "Messages" section in your dashboard
 2. **Check WAHA Status**: Ensure the WAHA API connection shows "Connected" (green status)
 3. **Select Session**: Choose the WhatsApp session to use for broadcasting
-4. **Choose Recipient Type**:
+4. **Choose Message Type**: Select from Text, Image, File, or Custom Link Preview
+5. **Choose Recipient Type**:
    - **Contact**: Select from dropdown or enter phone number manually
    - **Group**: Choose from filtered list of groups for selected session
    - **Recipients**: Upload Excel/CSV file for bulk messaging campaigns
-5. **Compose Message**: Write your message in the text area
-6. **Send**: Click "Send Message" - typing indicators will appear automatically
+6. **Compose Message**: Write your message, upload files, or configure link preview
+7. **Schedule Options**: Choose "Send immediately" or "Schedule for later" with date/time picker
+8. **Send**: Click "Send Message" - messages are queued and processed asynchronously
 
 #### Using Message Templates
 
@@ -275,6 +284,31 @@ The Message Broadcasting feature allows you to send WhatsApp messages to individ
 3. **Upload File**: Import your recipient list through the bulk upload interface
 4. **Review Recipients**: Preview all recipients and their messages before sending
 5. **Send Campaign**: Broadcast to all recipients with professional typing indicators
+
+#### Message Types Support
+
+**Text Messages:**
+- Plain text with formatting support (*bold*, _italic_)
+- Direct sending or scheduled delivery
+- Template variable substitution (@{{1}}, @{{2}}, etc.)
+
+**Image Messages:**
+- JPEG, PNG, GIF support with automatic optimization
+- Caption support with formatting (*bold*, _italic_)
+- Automatic image upload and secure URL generation
+- File size and type validation
+
+**File Messages:**
+- Comprehensive file support: PDF, DOC, XLS, archives, video, audio
+- Automatic filename and MIME type detection
+- Caption support with rich text formatting
+- Secure file upload with storage optimization
+
+**Custom Link Preview:**
+- Text messages with embedded URLs and rich preview
+- Customizable title, description, and preview image
+- URL validation and exact matching requirements
+- Professional link preview card generation
 
 #### Excel Template Formats
 
@@ -296,10 +330,12 @@ Phone Number,Header Var 1,Header Var 2,Body Var 1,Body Var 2
 
 - **Status Monitoring**: All messages are tracked with status (sent, failed, pending)
 - **Visual Indicators**: Color-coded status badges in message list
-- **Status Filtering**: Filter messages by delivery status
+- **Scheduled Indicators**: Clock icons distinguish immediate vs scheduled messages
+- **Status Filtering**: Filter messages by delivery status, date range, and session
 - **Real-time Updates**: Status updates automatically when messages are sent
 - **Queue Processing**: Messages are queued with `pending` status and processed asynchronously
 - **Status Flow**: `pending` → `sent` (success) or `failed` (after retries)
+- **Timezone Display**: All timestamps shown in user's timezone
 
 #### Queue System & Async Processing
 
@@ -925,6 +961,28 @@ GET /health
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.5.0 🕐
+- **Scheduled Messaging**: Send messages immediately or schedule for future delivery with timezone support
+- **Multiple Message Types**: Support for text, image, file, and custom link preview messages
+- **Advanced Filtering**: Filter messages by date range, status, session, and search terms
+- **Timezone-aware Display**: All timestamps displayed in user's configured timezone
+- **Message Type Icons**: Visual indicators for different message types (text, image, file, custom)
+- **Scheduled Message Indicators**: Clock icons to distinguish immediate vs scheduled messages
+- **Enhanced Validation**: Real-time validation for scheduling with timezone awareness
+- **Error Message Display**: Detailed error messages for failed message delivery
+- **Improved UI**: Better visual feedback and status indicators throughout the application
+
+### Version 1.5.0 🕐
+- **Scheduled Messaging**: Send messages immediately or schedule for future delivery with timezone support
+- **Multiple Message Types**: Support for text, image, file, and custom link preview messages
+- **Advanced Filtering**: Filter messages by date range, status, session, and search terms
+- **Timezone-aware Display**: All timestamps displayed in user's timezone
+- **Message Type Icons**: Visual indicators for different message types (text, image, file, custom)
+- **Scheduled Message Indicators**: Clock icons to distinguish immediate vs scheduled messages
+- **Enhanced Validation**: Real-time validation for scheduling with timezone awareness
+- **Error Message Display**: Detailed error messages for failed message delivery
+- **Improved UI**: Better visual feedback and status indicators throughout the application
 
 ### Version 1.4.1 🚀
 - **Queue System Implementation**: Asynchronous message processing with Laravel Queue

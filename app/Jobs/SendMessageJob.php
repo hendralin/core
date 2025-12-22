@@ -27,7 +27,8 @@ class SendMessageJob implements ShouldQueue
     public function __construct(
         public int $messageId,
         public string $chatId,
-        public string $wahaSessionName
+        public string $wahaSessionName,
+        public string $chattingMethods = 'text'
     ) {
         // Set queue name based on session to avoid conflicts
         $this->onQueue('messages');
@@ -60,14 +61,58 @@ class SendMessageJob implements ShouldQueue
             // $message->update(['status' => 'processing']);
 
             $wahaService = new WahaService();
-            $sendResult = $wahaService->sendText(
-                $this->chatId,
-                $message->message,
-                $this->wahaSessionName
-            );
 
-            // Update message status to sent
-            $message->update(['status' => 'sent']);
+            // Check if message is image, file, or custom type
+            $messageData = json_decode($message->message, true);
+            $isImage = ($this->chattingMethods === 'image' || (is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'image'));
+            $isFile = ($this->chattingMethods === 'file' || (is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'file'));
+            $isCustom = ($this->chattingMethods === 'custom' || (is_array($messageData) && isset($messageData['type']) && $messageData['type'] === 'custom'));
+
+            if ($isImage && is_array($messageData)) {
+                // Send image message
+                $sendResult = $wahaService->sendImage(
+                    $this->chatId,
+                    $messageData['url'],
+                    $messageData['caption'] ?? '',
+                    $this->wahaSessionName,
+                    $messageData['mimetype'] ?? null,
+                    $messageData['filename'] ?? null
+                );
+            } elseif ($isFile && is_array($messageData)) {
+                // Send file message
+                $sendResult = $wahaService->sendFile(
+                    $this->chatId,
+                    $messageData['url'],
+                    $messageData['caption'] ?? '',
+                    $this->wahaSessionName,
+                    $messageData['mimetype'] ?? null,
+                    $messageData['filename'] ?? null
+                );
+            } elseif ($isCustom && is_array($messageData)) {
+                // Send custom link preview message
+                $sendResult = $wahaService->sendCustomLinkPreview(
+                    $this->chatId,
+                    $messageData['text'],
+                    $messageData['previewUrl'],
+                    $messageData['previewTitle'] ?? null,
+                    $messageData['previewDescription'] ?? null,
+                    $messageData['previewImageUrl'] ?? null,
+                    $this->wahaSessionName
+                );
+            } else {
+                // Send text message
+                $sendResult = $wahaService->sendText(
+                    $this->chatId,
+                    $message->message,
+                    $this->wahaSessionName
+                );
+            }
+
+            // Update message status to sent and clear error message
+            $message->update([
+                'status' => 'sent',
+                'error_message' => null,
+            ]);
 
             // Log activity for successful message sending
             activity()
@@ -107,7 +152,15 @@ class SendMessageJob implements ShouldQueue
             if ($this->attempts() >= $this->tries) {
                 $message = Message::find($this->messageId);
                 if ($message) {
-                    $message->update(['status' => 'failed']);
+                    $errorMessage = $e->getMessage();
+                    // Truncate error message if too long (max 500 chars)
+                    if (strlen($errorMessage) > 500) {
+                        $errorMessage = substr($errorMessage, 0, 497) . '...';
+                    }
+                    $message->update([
+                        'status' => 'failed',
+                        'error_message' => $errorMessage,
+                    ]);
 
                     // Log activity for failed message sending
                     activity()
@@ -141,7 +194,15 @@ class SendMessageJob implements ShouldQueue
     {
         $message = Message::find($this->messageId);
         if ($message && $message->status !== 'sent') {
-            $message->update(['status' => 'failed']);
+            $errorMessage = $exception->getMessage();
+            // Truncate error message if too long (max 500 chars)
+            if (strlen($errorMessage) > 500) {
+                $errorMessage = substr($errorMessage, 0, 497) . '...';
+            }
+            $message->update([
+                'status' => 'failed',
+                'error_message' => $errorMessage,
+            ]);
 
             Log::error('SendMessageJob: Job failed permanently', [
                 'message_id' => $this->messageId,
