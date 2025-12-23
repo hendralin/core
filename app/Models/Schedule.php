@@ -7,6 +7,7 @@ use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Schedule extends Model
@@ -191,5 +192,13 @@ class Schedule extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /*
+    * Get all recipients for this schedule
+    */
+    public function recipients(): HasMany
+    {
+        return $this->hasMany(ScheduleRecipient::class);
     }
 }

@@ -34,41 +34,108 @@
                             </div>
 
                             <!-- Recipient Type -->
-                            <flux:radio.group wire:model.live="recipientType" label="Recipient Type" description="Select where the message will be sent">
+                            <flux:radio.group wire:model.live="recipientType" label="Recipient Type" description="Select where the message will be sent (you can select multiple recipients)">
                                 <flux:radio
                                     value="contact"
                                     label="Contact"
-                                    description="Send message to a specific contact from your contact list"
+                                    description="Send message to one or more contacts from your contact list"
                                 />
                                 <flux:radio
                                     value="group"
                                     label="Group"
-                                    description="Send message to a WhatsApp group"
+                                    description="Send message to one or more WhatsApp groups"
                                 />
                                 <flux:radio
                                     value="number"
                                     label="Phone Number"
-                                    description="Send message directly to a phone number"
+                                    description="Send message directly to one or more phone numbers"
                                 />
                             </flux:radio.group>
 
                             <!-- Recipient Selection -->
                             @if($recipientType === 'contact')
-                                <flux:select wire:model="contact_id" label="Contact" description="Select a contact">
-                                    <flux:select.option value="" label="Select Contact" />
-                                    @foreach($contacts as $contact)
-                                        <flux:select.option value="{{ $contact->id }}">{{ $contact->name ?? $contact->wa_id }}</flux:select.option>
-                                    @endforeach
-                                </flux:select>
+                                <div>
+                                    <flux:label>Select Contacts <span class="text-red-500">*</span></flux:label>
+                                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mb-2">Select one or more contacts to receive the message</flux:text>
+                                    @if(count($contacts) > 0)
+                                        <div class="mt-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-zinc-700 rounded-lg p-3">
+                                            <flux:checkbox.group wire:model="contact_ids">
+                                                <flux:checkbox.all label="Select all contacts" />
+                                                @foreach($contacts as $contact)
+                                                    <flux:checkbox
+                                                        value="{{ $contact->id }}"
+                                                        label="{{ $contact->name ?? $contact->wa_id }}"
+                                                    />
+                                                @endforeach
+                                            </flux:checkbox.group>
+                                        </div>
+                                    @else
+                                        <div class="mt-2 p-3 border border-gray-200 dark:border-zinc-700 rounded-lg bg-gray-50 dark:bg-zinc-800/50">
+                                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">No contacts available. Please select a session first.</flux:text>
+                                        </div>
+                                    @endif
+                                    @error('contact_ids') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                                </div>
                             @elseif($recipientType === 'group')
-                                <flux:select wire:model="group_id" label="Group" description="Select a group">
-                                    <flux:select.option value="" label="Select Group" />
-                                    @foreach($groups as $group)
-                                        <flux:select.option value="{{ $group->id }}">{{ $group->name }}</flux:select.option>
-                                    @endforeach
-                                </flux:select>
+                                <div>
+                                    <flux:label>Select Groups <span class="text-red-500">*</span></flux:label>
+                                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mb-2">Select one or more groups to receive the message</flux:text>
+                                    @if(count($groups) > 0)
+                                        <div class="mt-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-zinc-700 rounded-lg p-3">
+                                            <flux:checkbox.group wire:model="group_ids">
+                                                <flux:checkbox.all label="Select all groups" />
+                                                @foreach($groups as $group)
+                                                    <flux:checkbox
+                                                        value="{{ $group->id }}"
+                                                        label="{{ $group->name }}"
+                                                    />
+                                                @endforeach
+                                            </flux:checkbox.group>
+                                        </div>
+                                    @else
+                                        <div class="mt-2 p-3 border border-gray-200 dark:border-zinc-700 rounded-lg bg-gray-50 dark:bg-zinc-800/50">
+                                            <flux:text class="text-sm text-gray-600 dark:text-zinc-400">No groups available. Please select a session first.</flux:text>
+                                        </div>
+                                    @endif
+                                    @error('group_ids') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                                </div>
                             @elseif($recipientType === 'number')
-                                <flux:input wire:model="wa_id" label="WhatsApp Number" placeholder="e.g., 6281234567890" description="Enter phone number with country code" />
+                                <div>
+                                    <flux:label>WhatsApp Numbers <span class="text-red-500">*</span></flux:label>
+                                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mb-2">Enter one or more phone numbers with country code</flux:text>
+                                    <div class="space-y-2">
+                                        @foreach($wa_ids as $index => $waId)
+                                            <div class="flex gap-2">
+                                                <flux:input
+                                                    wire:model="wa_ids.{{ $index }}"
+                                                    placeholder="e.g., 6281234567890"
+                                                    class="flex-1"
+                                                />
+                                                @if(count($wa_ids) > 1)
+                                                    <flux:button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        wire:click="removeWaId({{ $index }})"
+                                                        icon="x-mark"
+                                                        tooltip="Remove this number"
+                                                    />
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                        <flux:button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            wire:click="addWaId"
+                                            icon="plus"
+                                        >
+                                            Add Another Number
+                                        </flux:button>
+                                    </div>
+                                    @error('wa_ids') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                                    @error('wa_ids.*') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                                </div>
                             @endif
 
                             <!-- Frequency -->

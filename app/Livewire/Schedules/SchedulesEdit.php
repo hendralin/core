@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\Contact;
 use Livewire\Component;
 use App\Models\Schedule;
+use App\Models\ScheduleRecipient;
 use App\Traits\HasWahaConfig;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,9 @@ class SchedulesEdit extends Component
 
     public $waha_session_id, $name, $description, $message;
     public $recipientType = 'contact';
-    public $contact_id, $group_id, $wa_id;
+    public $contact_ids = [];
+    public $group_ids = [];
+    public $wa_ids = [];
     public $frequency = 'daily';
     public $time;
     public $day_of_week, $day_of_month;
@@ -57,27 +60,53 @@ class SchedulesEdit extends Component
         $this->day_of_month = $schedule->day_of_month;
         $this->is_active = $schedule->is_active;
 
-        // Determine recipient type - prioritize group_wa_id and received_number
-        if ($schedule->group_wa_id) {
-            $this->recipientType = 'group';
-            // Try to find group by group_wa_id
-            $group = Group::where('group_wa_id', $schedule->group_wa_id)->first();
-            $this->group_id = $group ? $group->id : null;
-        } elseif ($schedule->received_number) {
-            // Check if received_number matches a contact
-            $contact = Contact::where('wa_id', $schedule->received_number)->first();
-            if ($contact) {
-                $this->recipientType = 'contact';
-                $this->contact_id = $contact->id;
-            } else {
-                $this->recipientType = 'number';
-                // Extract original number from received_number (remove @s.whatsapp.net if exists)
-                $this->wa_id = preg_replace('/@.+$/', '', $schedule->received_number);
+        // Load recipients from pivot table (new way) or legacy fields (backward compatibility)
+        $recipients = $schedule->recipients;
+
+        if ($recipients->isNotEmpty()) {
+            // New way: load from pivot table
+            $firstRecipient = $recipients->first();
+            $this->recipientType = $firstRecipient->recipient_type;
+
+            if ($firstRecipient->recipient_type === 'contact') {
+                $this->contact_ids = $recipients->where('recipient_type', 'contact')->pluck('contact_id')->filter()->toArray();
+            } elseif ($firstRecipient->recipient_type === 'group') {
+                $groupIds = $recipients->where('recipient_type', 'group')->pluck('group_id')->filter();
+                $this->group_ids = $groupIds->toArray();
+            } elseif ($firstRecipient->recipient_type === 'number') {
+                $this->wa_ids = $recipients->where('recipient_type', 'number')
+                    ->pluck('received_number')
+                    ->filter()
+                    ->map(function($num) {
+                        return preg_replace('/@.+$/', '', $num);
+                    })
+                    ->toArray();
             }
-        } elseif ($schedule->wa_id) {
-            $this->recipientType = 'number';
-            // Extract original number from wa_id (remove @s.whatsapp.net if exists)
-            $this->wa_id = preg_replace('/@.+$/', '', $schedule->wa_id);
+        } else {
+            // Legacy support: determine recipient type from old fields
+            if ($schedule->group_wa_id) {
+                $this->recipientType = 'group';
+                $group = Group::where('group_wa_id', $schedule->group_wa_id)->first();
+                if ($group) {
+                    $this->group_ids = [$group->id];
+                }
+            } elseif ($schedule->received_number) {
+                $contact = Contact::where('wa_id', $schedule->received_number)->first();
+                if ($contact) {
+                    $this->recipientType = 'contact';
+                    $this->contact_ids = [$contact->id];
+                } else {
+                    $this->recipientType = 'number';
+                    $this->wa_ids = [preg_replace('/@.+$/', '', $schedule->received_number)];
+                }
+            } elseif ($schedule->wa_id) {
+                $this->recipientType = 'number';
+                $this->wa_ids = [preg_replace('/@.+$/', '', $schedule->wa_id)];
+            }
+        }
+
+        if (empty($this->wa_ids)) {
+            $this->wa_ids = [''];
         }
 
         $this->sessions = Session::where('created_by', Auth::id())->get();
@@ -90,15 +119,26 @@ class SchedulesEdit extends Component
     public function updatedWahaSessionId()
     {
         $this->loadRecipients();
-        $this->contact_id = null;
-        $this->group_id = null;
+        $this->contact_ids = [];
+        $this->group_ids = [];
     }
 
     public function updatedRecipientType()
     {
-        $this->contact_id = null;
-        $this->group_id = null;
-        $this->wa_id = null;
+        $this->contact_ids = [];
+        $this->group_ids = [];
+        $this->wa_ids = [''];
+    }
+
+    public function addWaId()
+    {
+        $this->wa_ids[] = '';
+    }
+
+    public function removeWaId($index)
+    {
+        unset($this->wa_ids[$index]);
+        $this->wa_ids = array_values($this->wa_ids);
     }
 
     public function updatedFrequency()
@@ -149,9 +189,10 @@ class SchedulesEdit extends Component
             'is_active' => 'boolean',
         ];
 
-        // Recipient validation
+        // Recipient validation - now supports multiple recipients
         if ($this->recipientType === 'contact') {
-            $rules['contact_id'] = ['required', 'exists:contacts,id', function ($attribute, $value, $fail) {
+            $rules['contact_ids'] = ['required', 'array', 'min:1'];
+            $rules['contact_ids.*'] = ['required', 'exists:contacts,id', function ($attribute, $value, $fail) {
                 $contact = Contact::where('waha_session_id', $this->waha_session_id)
                     ->forUser(Auth::id())
                     ->find($value);
@@ -160,7 +201,8 @@ class SchedulesEdit extends Component
                 }
             }];
         } elseif ($this->recipientType === 'group') {
-            $rules['group_id'] = ['required', 'exists:groups,id', function ($attribute, $value, $fail) {
+            $rules['group_ids'] = ['required', 'array', 'min:1'];
+            $rules['group_ids.*'] = ['required', 'exists:groups,id', function ($attribute, $value, $fail) {
                 $group = Group::where('waha_session_id', $this->waha_session_id)
                     ->forUser(Auth::id())
                     ->find($value);
@@ -169,7 +211,8 @@ class SchedulesEdit extends Component
                 }
             }];
         } elseif ($this->recipientType === 'number') {
-            $rules['wa_id'] = 'required|string|max:255|regex:/^(\+?\d{1,3}[-.\s]?)?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/';
+            $rules['wa_ids'] = ['required', 'array', 'min:1'];
+            $rules['wa_ids.*'] = 'required|string|max:255|regex:/^(\+?\d{1,3}[-.\s]?)?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/';
         }
 
         // Frequency-specific validation
@@ -192,12 +235,21 @@ class SchedulesEdit extends Component
             'message.string' => 'Message must be text.',
             'message.max' => 'Message cannot exceed 4096 characters.',
             'recipientType.required' => 'Please select a recipient type.',
-            'contact_id.required' => 'Please select a contact.',
-            'contact_id.exists' => 'Selected contact does not exist.',
-            'group_id.required' => 'Please select a group.',
-            'group_id.exists' => 'Selected group does not exist.',
-            'wa_id.required' => 'Please enter a WhatsApp number.',
-            'wa_id.regex' => 'Please enter a valid phone number.',
+            'contact_ids.required' => 'Please select at least one contact.',
+            'contact_ids.array' => 'Contacts must be an array.',
+            'contact_ids.min' => 'Please select at least one contact.',
+            'contact_ids.*.required' => 'Please select a valid contact.',
+            'contact_ids.*.exists' => 'Selected contact does not exist.',
+            'group_ids.required' => 'Please select at least one group.',
+            'group_ids.array' => 'Groups must be an array.',
+            'group_ids.min' => 'Please select at least one group.',
+            'group_ids.*.required' => 'Please select a valid group.',
+            'group_ids.*.exists' => 'Selected group does not exist.',
+            'wa_ids.required' => 'Please enter at least one WhatsApp number.',
+            'wa_ids.array' => 'Phone numbers must be an array.',
+            'wa_ids.min' => 'Please enter at least one WhatsApp number.',
+            'wa_ids.*.required' => 'Please enter a WhatsApp number.',
+            'wa_ids.*.regex' => 'Please enter a valid phone number.',
             'frequency.required' => 'Please select a frequency.',
             'time.required' => 'Please select a time.',
             'time.date_format' => 'Please enter a valid time format (HH:mm).',
@@ -222,40 +274,14 @@ class SchedulesEdit extends Component
             'is_active' => $this->schedule->is_active,
         ];
 
-        // Determine recipient values - only store wa_id, group_wa_id, and received_number
-        $waId = null;
-        $groupWaId = null;
-        $receivedNumber = null;
-
-        if ($this->recipientType === 'contact' && $this->contact_id) {
-            $contact = Contact::find($this->contact_id);
-            if ($contact) {
-                // Clean wa_id format for WAHA (remove any existing suffix and add proper one)
-                $cleanNumber = preg_replace('/@.+$/', '', $contact->wa_id);
-                $waId = $cleanNumber . '@s.whatsapp.net';
-                $receivedNumber = $contact->wa_id;
-            }
-        } elseif ($this->recipientType === 'group' && $this->group_id) {
-            $group = Group::find($this->group_id);
-            if ($group) {
-                $groupWaId = $group->group_wa_id;
-            }
-        } elseif ($this->recipientType === 'number' && $this->wa_id) {
-            // Clean contact number format (remove any non-numeric characters except +)
-            $cleanNumber = preg_replace('/[^\d+]/', '', $this->wa_id);
-            // Remove leading + if present for WAHA format
-            $cleanNumber = ltrim($cleanNumber, '+');
-            $waId = $cleanNumber . '@s.whatsapp.net';
-            $receivedNumber = $this->wa_id;
-        }
-
+        // Update schedule (legacy fields kept for backward compatibility, but recipients stored in pivot table)
         $this->schedule->waha_session_id = $this->waha_session_id;
         $this->schedule->name = $this->name;
         $this->schedule->description = $this->description;
         $this->schedule->message = $this->message;
-        $this->schedule->wa_id = $waId;
-        $this->schedule->group_wa_id = $groupWaId;
-        $this->schedule->received_number = $receivedNumber;
+        $this->schedule->wa_id = null; // Legacy field
+        $this->schedule->group_wa_id = null; // Legacy field
+        $this->schedule->received_number = null; // Legacy field
         $this->schedule->frequency = $this->frequency;
         $this->schedule->time = $this->time;
         $this->schedule->day_of_week = $this->frequency === 'weekly' ? $this->day_of_week : null;
@@ -271,6 +297,55 @@ class SchedulesEdit extends Component
         }
 
         $this->schedule->save();
+
+        // Delete existing recipients and create new ones
+        $this->schedule->recipients()->delete();
+
+        // Create recipients in pivot table
+        if ($this->recipientType === 'contact' && !empty($this->contact_ids)) {
+            foreach ($this->contact_ids as $contactId) {
+                $contact = Contact::find($contactId);
+                if ($contact) {
+                    $cleanNumber = preg_replace('/@.+$/', '', $contact->wa_id);
+                    $waId = $cleanNumber . '@s.whatsapp.net';
+
+                    ScheduleRecipient::create([
+                        'schedule_id' => $this->schedule->id,
+                        'recipient_type' => 'contact',
+                        'contact_id' => $contact->id,
+                        'wa_id' => $waId,
+                        'received_number' => $contact->wa_id,
+                    ]);
+                }
+            }
+        } elseif ($this->recipientType === 'group' && !empty($this->group_ids)) {
+            foreach ($this->group_ids as $groupId) {
+                $group = Group::find($groupId);
+                if ($group) {
+                    ScheduleRecipient::create([
+                        'schedule_id' => $this->schedule->id,
+                        'recipient_type' => 'group',
+                        'group_id' => $group->id,
+                        'group_wa_id' => $group->group_wa_id,
+                    ]);
+                }
+            }
+        } elseif ($this->recipientType === 'number' && !empty($this->wa_ids)) {
+            foreach ($this->wa_ids as $waIdInput) {
+                if (empty(trim($waIdInput))) continue;
+
+                $cleanNumber = preg_replace('/[^\d+]/', '', $waIdInput);
+                $cleanNumber = ltrim($cleanNumber, '+');
+                $waId = $cleanNumber . '@s.whatsapp.net';
+
+                ScheduleRecipient::create([
+                    'schedule_id' => $this->schedule->id,
+                    'recipient_type' => 'number',
+                    'wa_id' => $waId,
+                    'received_number' => $waIdInput,
+                ]);
+            }
+        }
 
         // Log activity
         activity()

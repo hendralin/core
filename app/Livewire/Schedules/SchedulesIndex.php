@@ -143,6 +143,7 @@ class SchedulesIndex extends Component
 
             session()->flash('success', 'Schedule deleted.');
             $this->scheduleToDelete = null;
+            $this->modal('delete-schedule')->close();
         } catch (\Throwable $e) {
             if ($e instanceof \PDOException && isset($e->errorInfo[0]) && $e->errorInfo[0] == 23000) {
                 session()->flash('error', "The {$schedule->name} cannot be deleted because it is already in use.");
@@ -195,7 +196,7 @@ class SchedulesIndex extends Component
             ]);
         }
 
-        $schedules = Schedule::with(['createdBy', 'wahaSession', 'group', 'contact'])
+        $schedules = Schedule::with(['createdBy', 'wahaSession', 'group', 'contact', 'recipients.contact', 'recipients.group'])
             ->where('created_by', Auth::id()) // Only show schedules created by current user
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {

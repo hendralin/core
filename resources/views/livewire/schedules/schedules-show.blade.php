@@ -87,30 +87,123 @@
                         </div>
                     </div>
 
-                    <flux:heading size="lg" class="mt-6">Recipient</flux:heading>
+                    <flux:heading size="lg" class="mt-6">Recipients</flux:heading>
                     <div class="mt-3 p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border">
-                        @if($schedule->group_wa_id)
-                            @if($schedule->group)
-                                <flux:text><strong>Group:</strong> {{ $schedule->group->name }}</flux:text>
-                                <div class="mt-2"><flux:text class="text-xs text-gray-500"><strong>Group WA ID:</strong> {{ $schedule->group_wa_id }}</flux:text></div>
-                            @else
-                                <flux:text><strong>Group WA ID:</strong> {{ $schedule->group_wa_id }}</flux:text>
+                        @php
+                            $recipients = $schedule->recipients;
+                        @endphp
+
+                        @if($recipients->isNotEmpty())
+                            {{-- New way: Display from pivot table --}}
+                            @php
+                                $contacts = $recipients->where('recipient_type', 'contact');
+                                $groups = $recipients->where('recipient_type', 'group');
+                                $numbers = $recipients->where('recipient_type', 'number');
+                            @endphp
+
+                            @if($contacts->isNotEmpty())
+                                <div class="mb-4">
+                                    <flux:heading size="sm" class="mb-2">Contacts ({{ $contacts->count() }})</flux:heading>
+                                    <div class="space-y-2">
+                                        @foreach($contacts as $recipient)
+                                            <div class="p-2 bg-white dark:bg-zinc-700 rounded border border-gray-200 dark:border-zinc-600">
+                                                @if($recipient->contact)
+                                                    <flux:text><strong>{{ $recipient->contact->name ?? 'Unknown' }}</strong></flux:text>
+                                                    <div class="mt-1"><flux:text class="text-xs text-gray-500">{{ $recipient->contact->wa_id }}</flux:text></div>
+                                                @else
+                                                    <flux:text><strong>Contact ID:</strong> {{ $recipient->contact_id }}</flux:text>
+                                                    @if($recipient->received_number)
+                                                        <div class="mt-1"><flux:text class="text-xs text-gray-500">{{ $recipient->received_number }}</flux:text></div>
+                                                    @endif
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endif
-                        @elseif($schedule->received_number)
-                            @if($schedule->contact)
-                                <flux:text><strong>Contact:</strong> {{ $schedule->contact->name ?? $schedule->contact->wa_id }}</flux:text>
-                                <div class="mt-2"><flux:text class="text-xs text-gray-500"><strong>Received Number:</strong> {{ $schedule->received_number }}</flux:text></div>
-                            @else
-                                <flux:text><strong>Phone Number:</strong> {{ $schedule->received_number }}</flux:text>
+
+                            @if($groups->isNotEmpty())
+                                <div class="mb-4">
+                                    <flux:heading size="sm" class="mb-2">Groups ({{ $groups->count() }})</flux:heading>
+                                    <div class="space-y-2">
+                                        @foreach($groups as $recipient)
+                                            <div class="p-2 bg-white dark:bg-zinc-700 rounded border border-gray-200 dark:border-zinc-600">
+                                                @if($recipient->group)
+                                                    <flux:text><strong>{{ $recipient->group->name }}</strong></flux:text>
+                                                    <div class="mt-1"><flux:text class="text-xs text-gray-500">Group WA ID: {{ $recipient->group_wa_id }}</flux:text></div>
+                                                @else
+                                                    <flux:text><strong>Group ID:</strong> {{ $recipient->group_id }}</flux:text>
+                                                    @if($recipient->group_wa_id)
+                                                        <div class="mt-1"><flux:text class="text-xs text-gray-500">Group WA ID: {{ $recipient->group_wa_id }}</flux:text></div>
+                                                    @endif
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endif
-                        @elseif($schedule->wa_id)
-                            <flux:text><strong>Phone Number:</strong> {{ $schedule->wa_id }}</flux:text>
-                        @elseif($schedule->group)
-                            <flux:text><strong>Group:</strong> {{ $schedule->group->name }}</flux:text>
-                        @elseif($schedule->contact)
-                            <flux:text><strong>Contact:</strong> {{ $schedule->contact->name ?? $schedule->contact->wa_id }}</flux:text>
+
+                            @if($numbers->isNotEmpty())
+                                <div class="mb-4">
+                                    <flux:heading size="sm" class="mb-2">Phone Numbers ({{ $numbers->count() }})</flux:heading>
+                                    <div class="space-y-2">
+                                        @foreach($numbers as $recipient)
+                                            <div class="p-2 bg-white dark:bg-zinc-700 rounded border border-gray-200 dark:border-zinc-600">
+                                                <flux:text><strong>{{ $recipient->received_number ?? preg_replace('/@.+$/', '', $recipient->wa_id) }}</strong></flux:text>
+                                                @if($recipient->wa_id)
+                                                    <div class="mt-1"><flux:text class="text-xs text-gray-500">WA ID: {{ $recipient->wa_id }}</flux:text></div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="mt-3 pt-3 border-t border-gray-300 dark:border-zinc-600">
+                                <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
+                                    <strong>Total Recipients:</strong> {{ $recipients->count() }}
+                                </flux:text>
+                            </div>
                         @else
-                            <flux:text class="text-gray-400">No recipient set</flux:text>
+                            {{-- Legacy support: Display from old fields --}}
+                            @if($schedule->group_wa_id)
+                                <div class="mb-3">
+                                    <flux:badge color="yellow" class="mb-2">Legacy Format</flux:badge>
+                                    @if($schedule->group)
+                                        <flux:text><strong>Group:</strong> {{ $schedule->group->name }}</flux:text>
+                                        <div class="mt-2"><flux:text class="text-xs text-gray-500"><strong>Group WA ID:</strong> {{ $schedule->group_wa_id }}</flux:text></div>
+                                    @else
+                                        <flux:text><strong>Group WA ID:</strong> {{ $schedule->group_wa_id }}</flux:text>
+                                    @endif
+                                </div>
+                            @elseif($schedule->received_number)
+                                <div class="mb-3">
+                                    <flux:badge color="yellow" class="mb-2">Legacy Format</flux:badge>
+                                    @if($schedule->contact)
+                                        <flux:text><strong>Contact:</strong> {{ $schedule->contact->name ?? $schedule->contact->wa_id }}</flux:text>
+                                        <div class="mt-2"><flux:text class="text-xs text-gray-500"><strong>Received Number:</strong> {{ $schedule->received_number }}</flux:text></div>
+                                    @else
+                                        <flux:text><strong>Phone Number:</strong> {{ $schedule->received_number }}</flux:text>
+                                    @endif
+                                </div>
+                            @elseif($schedule->wa_id)
+                                <div class="mb-3">
+                                    <flux:badge color="yellow" class="mb-2">Legacy Format</flux:badge>
+                                    <flux:text><strong>Phone Number:</strong> {{ $schedule->wa_id }}</flux:text>
+                                </div>
+                            @elseif($schedule->group)
+                                <div class="mb-3">
+                                    <flux:badge color="yellow" class="mb-2">Legacy Format</flux:badge>
+                                    <flux:text><strong>Group:</strong> {{ $schedule->group->name }}</flux:text>
+                                </div>
+                            @elseif($schedule->contact)
+                                <div class="mb-3">
+                                    <flux:badge color="yellow" class="mb-2">Legacy Format</flux:badge>
+                                    <flux:text><strong>Contact:</strong> {{ $schedule->contact->name ?? $schedule->contact->wa_id }}</flux:text>
+                                </div>
+                            @else
+                                <flux:text class="text-gray-400">No recipient set</flux:text>
+                            @endif
                         @endif
                     </div>
 

@@ -217,27 +217,112 @@
                                         <div class="text-sm font-medium text-gray-900 dark:text-zinc-100">{{ $schedule->name }}</div>
                                         <div class="text-sm text-gray-500 dark:text-zinc-400">{{ Str::limit($schedule->description, 50) }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
-                                        @if($schedule->group_wa_id)
-                                            @if($schedule->group)
-                                                <span class="font-medium">Group:</span> {{ $schedule->group->name }}
-                                            @else
-                                                <span class="font-medium">Group:</span> {{ Str::limit($schedule->group_wa_id, 30) }}
-                                            @endif
-                                        @elseif($schedule->received_number)
-                                            @if($schedule->contact)
-                                                <span class="font-medium">Contact:</span> {{ $schedule->contact->name ?? $schedule->contact->wa_id }}
-                                            @else
-                                                <span class="font-medium">Number:</span> {{ $schedule->received_number }}
-                                            @endif
-                                        @elseif($schedule->wa_id)
-                                            <span class="font-medium">Number:</span> {{ $schedule->wa_id }}
-                                        @elseif($schedule->group)
-                                            <span class="font-medium">Group:</span> {{ $schedule->group->name }}
-                                        @elseif($schedule->contact)
-                                            <span class="font-medium">Contact:</span> {{ $schedule->contact->name ?? $schedule->contact->wa_id }}
+                                    <td class="px-6 py-4 text-sm text-gray-500 dark:text-zinc-400">
+                                        @php
+                                            $recipients = $schedule->recipients;
+                                        @endphp
+
+                                        @if($recipients->isNotEmpty())
+                                            {{-- New way: Display from pivot table --}}
+                                            @php
+                                                $contacts = $recipients->where('recipient_type', 'contact');
+                                                $groups = $recipients->where('recipient_type', 'group');
+                                                $numbers = $recipients->where('recipient_type', 'number');
+                                                $totalCount = $recipients->count();
+                                            @endphp
+
+                                            <div class="space-y-1">
+                                                @if($contacts->isNotEmpty())
+                                                    <div>
+                                                        <span class="font-medium text-xs text-gray-400">Contacts:</span>
+                                                        <div class="flex flex-wrap gap-1 mt-0.5">
+                                                            @foreach($contacts->take(3) as $recipient)
+                                                                <flux:badge color="blue" size="xs">
+                                                                    {{ $recipient->contact ? ($recipient->contact->name ?? Str::limit($recipient->contact->wa_id, 15)) : 'Contact #' . $recipient->contact_id }}
+                                                                </flux:badge>
+                                                            @endforeach
+                                                            @if($contacts->count() > 3)
+                                                                <flux:badge color="gray" size="xs">+{{ $contacts->count() - 3 }} more</flux:badge>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                @if($groups->isNotEmpty())
+                                                    <div>
+                                                        <span class="font-medium text-xs text-gray-400">Groups:</span>
+                                                        <div class="flex flex-wrap gap-1 mt-0.5">
+                                                            @foreach($groups->take(3) as $recipient)
+                                                                <flux:badge color="purple" size="xs">
+                                                                    {{ $recipient->group ? Str::limit($recipient->group->name, 15) : 'Group #' . $recipient->group_id }}
+                                                                </flux:badge>
+                                                            @endforeach
+                                                            @if($groups->count() > 3)
+                                                                <flux:badge color="gray" size="xs">+{{ $groups->count() - 3 }} more</flux:badge>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                @if($numbers->isNotEmpty())
+                                                    <div>
+                                                        <span class="font-medium text-xs text-gray-400">Numbers:</span>
+                                                        <div class="flex flex-wrap gap-1 mt-0.5">
+                                                            @foreach($numbers->take(3) as $recipient)
+                                                                <flux:badge color="green" size="xs">
+                                                                    {{ Str::limit($recipient->received_number ?? preg_replace('/@.+$/', '', $recipient->wa_id), 15) }}
+                                                                </flux:badge>
+                                                            @endforeach
+                                                            @if($numbers->count() > 3)
+                                                                <flux:badge color="gray" size="xs">+{{ $numbers->count() - 3 }} more</flux:badge>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                @if($totalCount > 6)
+                                                    <div class="text-xs text-gray-400 mt-1">
+                                                        <strong>Total:</strong> {{ $totalCount }} recipients
+                                                    </div>
+                                                @endif
+                                            </div>
                                         @else
-                                            <span class="text-gray-400">No recipient</span>
+                                            {{-- Legacy support: Display from old fields --}}
+                                            @if($schedule->group_wa_id)
+                                                @if($schedule->group)
+                                                    <div>
+                                                        <span class="font-medium">Group:</span> {{ Str::limit($schedule->group->name, 30) }}
+                                                    </div>
+                                                @else
+                                                    <div>
+                                                        <span class="font-medium">Group:</span> {{ Str::limit($schedule->group_wa_id, 30) }}
+                                                    </div>
+                                                @endif
+                                            @elseif($schedule->received_number)
+                                                @if($schedule->contact)
+                                                    <div>
+                                                        <span class="font-medium">Contact:</span> {{ Str::limit($schedule->contact->name ?? $schedule->contact->wa_id, 30) }}
+                                                    </div>
+                                                @else
+                                                    <div>
+                                                        <span class="font-medium">Number:</span> {{ Str::limit($schedule->received_number, 30) }}
+                                                    </div>
+                                                @endif
+                                            @elseif($schedule->wa_id)
+                                                <div>
+                                                    <span class="font-medium">Number:</span> {{ Str::limit($schedule->wa_id, 30) }}
+                                                </div>
+                                            @elseif($schedule->group)
+                                                <div>
+                                                    <span class="font-medium">Group:</span> {{ Str::limit($schedule->group->name, 30) }}
+                                                </div>
+                                            @elseif($schedule->contact)
+                                                <div>
+                                                    <span class="font-medium">Contact:</span> {{ Str::limit($schedule->contact->name ?? $schedule->contact->wa_id, 30) }}
+                                                </div>
+                                            @else
+                                                <span class="text-gray-400">No recipient</span>
+                                            @endif
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">

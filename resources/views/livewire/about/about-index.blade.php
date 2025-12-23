@@ -15,10 +15,10 @@
             </div>
             <div class="space-y-4">
                 <div>
-                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.6.0</flux:heading>
+                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.6.1</flux:heading>
                     <flux:text class="text-gray-700 dark:text-zinc-300 leading-relaxed">
                         Broadcaster is a comprehensive WhatsApp Business messaging platform built with Laravel and powered by WAHA (WhatsApp HTTP API).
-                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly), scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), template management, contacts synchronization, and comprehensive audit trails through an intuitive web interface.
+                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly) supporting multiple recipients (contacts, groups, phone numbers), scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), template management, contacts synchronization, and comprehensive audit trails through an intuitive web interface.
                     </flux:text>
                 </div>
 
@@ -123,7 +123,7 @@
                 <div class="pt-4 border-t border-blue-200 dark:border-blue-700">
                     <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
                         Built with modern web technologies including Laravel, Livewire, Flux UI, and Tailwind CSS for optimal performance and user experience.
-                        Features advanced broadcast messaging with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly), scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), advanced filtering and validation, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, Laravel Scheduler integration, and complete contact synchronization system.
+                        Features advanced broadcast messaging with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly) supporting multiple recipients simultaneously, scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), advanced filtering and validation, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, Laravel Scheduler integration, and complete contact synchronization system.
                     </flux:text>
                 </div>
             </div>
@@ -783,7 +783,7 @@
 
                 <div class="space-y-4">
                     <flux:text class="text-gray-700 dark:text-zinc-300">
-                        Automated message scheduling system with recurring delivery options (Daily, Weekly, Monthly), timezone support, and Laravel Scheduler integration for reliable message delivery at specified times.
+                        Automated message scheduling system with recurring delivery options (Daily, Weekly, Monthly), timezone support, multiple recipients support (contacts, groups, phone numbers), and Laravel Scheduler integration for reliable message delivery at specified times.
                     </flux:text>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -857,7 +857,13 @@
                                     <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    Contact, Group & Number Support
+                                    Multiple Recipients Support
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Bulk Recipient Selection
                                 </li>
                             </ul>
                         </div>

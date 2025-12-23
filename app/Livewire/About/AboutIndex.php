@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-#[Title('About The Broadcaster System v1.6.0')]
+#[Title('About The Broadcaster System v1.6.1')]
 class AboutIndex extends Component
 {
     use HasWahaConfig;
     public function render()
     {
         $systemInfo = [
-            'version' => '1.6.0',
+            'version' => '1.6.1',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
@@ -36,6 +36,7 @@ class AboutIndex extends Component
                 'bulk_messaging' => true,
                 'scheduled_messaging' => true,
                 'schedules_management' => true,
+                'multiple_recipients_schedules' => true,
                 'multiple_message_types' => true,
                 'timezone_aware_display' => true,
                 'advanced_filtering' => true,

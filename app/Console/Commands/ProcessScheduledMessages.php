@@ -104,67 +104,89 @@ class ProcessScheduledMessages extends Command
                 return Command::FAILURE;
             }
 
-            // Determine recipient - use group_wa_id, received_number, or wa_id
-            $chatId = null;
-            $waId = null;
-            $groupWaId = null;
-            $receivedNumber = null;
-
-            if ($schedule->group_wa_id) {
-                $chatId = $schedule->group_wa_id;
-                $groupWaId = $schedule->group_wa_id;
-            } elseif ($schedule->wa_id) {
-                // wa_id is already in WAHA format (with @s.whatsapp.net)
-                $chatId = $schedule->wa_id;
-                $waId = $schedule->wa_id;
-                $receivedNumber = $schedule->received_number ?? preg_replace('/@.+$/', '', $schedule->wa_id);
-            } elseif ($schedule->received_number) {
-                // received_number is the original number, need to format for WAHA
-                $cleanNumber = preg_replace('/@.+$/', '', $schedule->received_number);
-                $cleanNumber = preg_replace('/[^\d+]/', '', $cleanNumber);
-                $cleanNumber = ltrim($cleanNumber, '+');
-                $chatId = $cleanNumber . '@s.whatsapp.net';
-                $waId = $chatId;
-                $receivedNumber = $schedule->received_number;
-            }
-
-            if (!$chatId) {
-                $this->error("No valid recipient found for schedule '{$schedule->name}'.");
-                return Command::FAILURE;
-            }
-
-            // Create message record
             DB::beginTransaction();
 
-            $message = Message::create([
-                'waha_session_id' => $schedule->waha_session_id,
-                'template_id' => null,
-                'wa_id' => $waId,
-                'group_wa_id' => $groupWaId,
-                'received_number' => $receivedNumber,
-                'message' => $schedule->message,
-                'status' => 'pending',
-                'scheduled_at' => $schedule->next_run,
-                'created_by' => $schedule->created_by,
-            ]);
+            // Get recipients from pivot table (new way) or legacy fields (backward compatibility)
+            $recipients = $schedule->recipients;
 
-            // Dispatch job to send message
-            SendMessageJob::dispatch($message->id, $chatId, $wahaSessionName, 'text')
-                ->onQueue('messages');
+            // If no recipients in pivot table, check legacy fields for backward compatibility
+            if ($recipients->isEmpty()) {
+                // Legacy support: create recipient data from old fields
+                $legacyRecipients = [];
+
+                if ($schedule->group_wa_id) {
+                    $legacyRecipients[] = [
+                        'recipient_type' => 'group',
+                        'group_wa_id' => $schedule->group_wa_id,
+                        'chat_id' => $schedule->group_wa_id,
+                    ];
+                } elseif ($schedule->wa_id) {
+                    $legacyRecipients[] = [
+                        'recipient_type' => $schedule->received_number ? 'contact' : 'number',
+                        'wa_id' => $schedule->wa_id,
+                        'received_number' => $schedule->received_number ?? preg_replace('/@.+$/', '', $schedule->wa_id),
+                        'chat_id' => $schedule->wa_id,
+                    ];
+                } elseif ($schedule->received_number) {
+                    $cleanNumber = preg_replace('/@.+$/', '', $schedule->received_number);
+                    $cleanNumber = preg_replace('/[^\d+]/', '', $cleanNumber);
+                    $cleanNumber = ltrim($cleanNumber, '+');
+                    $chatId = $cleanNumber . '@s.whatsapp.net';
+                    $legacyRecipients[] = [
+                        'recipient_type' => 'number',
+                        'wa_id' => $chatId,
+                        'received_number' => $schedule->received_number,
+                        'chat_id' => $chatId,
+                    ];
+                }
+
+                if (empty($legacyRecipients)) {
+                    DB::rollBack();
+                    $this->error("No valid recipient found for schedule '{$schedule->name}'.");
+                    return Command::FAILURE;
+                }
+
+                // Process legacy recipients
+                foreach ($legacyRecipients as $recipientData) {
+                    $this->sendToRecipient($schedule, $wahaSessionName, $recipientData);
+                }
+            } else {
+                // Process recipients from pivot table
+                foreach ($recipients as $recipient) {
+                    $chatId = null;
+                    $waId = null;
+                    $groupWaId = null;
+                    $receivedNumber = null;
+
+                    if ($recipient->recipient_type === 'group' && $recipient->group_wa_id) {
+                        $chatId = $recipient->group_wa_id;
+                        $groupWaId = $recipient->group_wa_id;
+                    } elseif ($recipient->wa_id) {
+                        $chatId = $recipient->wa_id;
+                        $waId = $recipient->wa_id;
+                        $receivedNumber = $recipient->received_number ?? preg_replace('/@.+$/', '', $recipient->wa_id);
+                    }
+
+                    if ($chatId) {
+                        $recipientData = [
+                            'recipient_type' => $recipient->recipient_type,
+                            'wa_id' => $waId,
+                            'group_wa_id' => $groupWaId,
+                            'received_number' => $receivedNumber,
+                            'chat_id' => $chatId,
+                        ];
+
+                        $this->sendToRecipient($schedule, $wahaSessionName, $recipientData);
+                    }
+                }
+            }
 
             // Mark schedule as run and calculate next run
             $schedule->markAsRun();
 
             DB::commit();
 
-            $this->info("✓ Message queued for schedule '{$schedule->name}' (Message ID: {$message->id})");
-
-            Log::info('Scheduled message processed', [
-                'schedule_id' => $schedule->id,
-                'schedule_name' => $schedule->name,
-                'message_id' => $message->id,
-                'recipient' => $chatId,
-            ]);
+            $this->info("✓ Messages queued for schedule '{$schedule->name}'");
 
             return Command::SUCCESS;
 
@@ -182,6 +204,39 @@ class ProcessScheduledMessages extends Command
 
             return Command::FAILURE;
         }
+    }
+
+    /**
+     * Send message to a single recipient
+     */
+    private function sendToRecipient(Schedule $schedule, string $wahaSessionName, array $recipientData): void
+    {
+        // Create message record
+        $message = Message::create([
+            'waha_session_id' => $schedule->waha_session_id,
+            'template_id' => null,
+            'wa_id' => $recipientData['wa_id'] ?? null,
+            'group_wa_id' => $recipientData['group_wa_id'] ?? null,
+            'received_number' => $recipientData['received_number'] ?? null,
+            'message' => $schedule->message,
+            'status' => 'pending',
+            'scheduled_at' => $schedule->next_run,
+            'created_by' => $schedule->created_by,
+        ]);
+
+        // Dispatch job to send message
+        SendMessageJob::dispatch($message->id, $recipientData['chat_id'], $wahaSessionName, 'text')
+            ->onQueue('messages');
+
+        $this->info("  → Message queued for {$recipientData['recipient_type']} (Message ID: {$message->id})");
+
+        Log::info('Scheduled message recipient processed', [
+            'schedule_id' => $schedule->id,
+            'schedule_name' => $schedule->name,
+            'message_id' => $message->id,
+            'recipient_type' => $recipientData['recipient_type'],
+            'recipient' => $recipientData['chat_id'],
+        ]);
     }
 }
 

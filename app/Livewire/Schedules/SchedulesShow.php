@@ -27,7 +27,7 @@ class SchedulesShow extends Component
             abort(403, 'You do not have permission to view this schedule.');
         }
 
-        $this->schedule = $schedule->load(['createdBy', 'wahaSession', 'group', 'contact']);
+        $this->schedule = $schedule->load(['createdBy', 'wahaSession', 'group', 'contact', 'recipients.contact', 'recipients.group']);
     }
 
     public function render()

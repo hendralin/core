@@ -72,7 +72,9 @@
 ### Schedules Management 📅
 - **Automated Scheduling**: Schedule message delivery at specific times (Daily, Weekly, Monthly)
 - **Timezone Support**: User-specific timezone handling for accurate delivery times
-- **Multiple Recipients**: Send scheduled messages to contacts, groups, or phone numbers
+- **Multiple Recipients**: Send scheduled messages to multiple contacts, groups, or phone numbers simultaneously
+- **Bulk Recipient Selection**: Select multiple contacts or groups at once with checkbox groups
+- **Flexible Recipient Types**: Mix and match contacts, groups, and phone numbers in a single schedule
 - **Message Formatting**: Support for WhatsApp formatting (*bold*, _italic_) in scheduled messages
 - **Schedule Management**: Create, edit, activate/deactivate schedules with intuitive UI
 - **Usage Tracking**: Monitor schedule execution count and last/next run times
@@ -529,12 +531,42 @@ The Schedules feature allows you to automate message delivery at specific times 
    - **Name & Description**: Give your schedule a descriptive name
    - **Message Content**: Enter the message with formatting support (*bold*, _italic_)
    - **Recipient Type**: Choose Contact, Group, or Phone Number
+   - **Multiple Recipients**: 
+     - **Contacts**: Select one or more contacts using checkbox group (with "Select all" option)
+     - **Groups**: Select one or more groups using checkbox group (with "Select all" option)
+     - **Phone Numbers**: Add multiple phone numbers with "Add Another Number" button
    - **Frequency**: Select Daily, Weekly, or Monthly
    - **Time**: Set the delivery time (uses your timezone)
    - **Day Selection**: For weekly/monthly, select specific day
    - **Active Status**: Enable/disable the schedule
 4. **Preview**: Review message preview with formatting
 5. **Save**: Create the schedule
+
+#### Multiple Recipients Support
+
+The schedule system now supports sending messages to multiple recipients simultaneously:
+
+**Multiple Contacts:**
+- Select multiple contacts from your contact list using checkbox group
+- Use "Select all contacts" to quickly select all available contacts
+- Each contact receives the same scheduled message
+
+**Multiple Groups:**
+- Select multiple WhatsApp groups using checkbox group
+- Use "Select all groups" to quickly select all available groups
+- Each group receives the same scheduled message
+
+**Multiple Phone Numbers:**
+- Add multiple phone numbers manually
+- Click "Add Another Number" to add additional recipients
+- Remove individual numbers with the remove button
+- Each number receives the same scheduled message
+
+**Recipient Display:**
+- Schedule list shows all recipients grouped by type (Contacts, Groups, Numbers)
+- Schedule details page displays all recipients with full information
+- Visual badges distinguish between recipient types
+- Total recipient count displayed for easy reference
 
 #### Schedule Types
 
@@ -587,6 +619,7 @@ php artisan schedule:process --schedule=1
 
 #### Schedule Features
 
+- **Multiple Recipients**: Send to multiple contacts, groups, or phone numbers in one schedule
 - **Message Formatting**: Support for `*bold*` and `_italic_` formatting
 - **Character Count**: Real-time character count in message editor
 - **Usage Tracking**: Monitor how many times schedule has executed
@@ -594,6 +627,8 @@ php artisan schedule:process --schedule=1
 - **Status Indicators**: Visual badges for active/inactive schedules
 - **Message Preview**: WhatsApp-like preview with formatting
 - **Audit Logging**: Complete activity trail for all schedule operations
+- **Recipient Management**: Easy selection and management of multiple recipients
+- **Backward Compatibility**: Legacy schedules with single recipients still supported
 
 For detailed setup and troubleshooting, see [Schedule Usage Documentation](docs/SCHEDULE_USAGE.md).
 
@@ -1077,6 +1112,15 @@ GET /health
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.6.1 📅
+- **Multiple Recipients Support**: Send scheduled messages to multiple contacts, groups, or phone numbers simultaneously
+- **Bulk Recipient Selection**: Checkbox groups for easy selection of multiple contacts and groups
+- **Dynamic Phone Number Input**: Add/remove multiple phone numbers with intuitive UI
+- **Recipient Display**: Enhanced schedule list and details pages showing all recipients with visual badges
+- **Database Schema**: New `schedule_recipients` pivot table for flexible recipient management
+- **Backward Compatibility**: Legacy schedules with single recipients continue to work seamlessly
+- **Improved UI**: Better recipient visualization in schedule index and show pages
 
 ### Version 1.6.0 📅
 - **Schedules Module**: Complete automated message scheduling system
