@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-#[Title('About The Broadcaster System v1.5.0')]
+#[Title('About The Broadcaster System v1.6.0')]
 class AboutIndex extends Component
 {
     use HasWahaConfig;
     public function render()
     {
         $systemInfo = [
-            'version' => '1.5.0',
+            'version' => '1.6.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
@@ -35,6 +35,7 @@ class AboutIndex extends Component
                 'broadcast_messaging' => true,
                 'bulk_messaging' => true,
                 'scheduled_messaging' => true,
+                'schedules_management' => true,
                 'multiple_message_types' => true,
                 'timezone_aware_display' => true,
                 'advanced_filtering' => true,
@@ -48,6 +49,7 @@ class AboutIndex extends Component
                 'queue_system' => true,
                 'auto_retry' => true,
                 'rate_limiting' => true,
+                'laravel_scheduler' => true,
             ],
         ];
 
@@ -134,6 +136,9 @@ class AboutIndex extends Component
             'sent_messages' => Message::where('status', 'sent')->count(),
             'failed_messages' => Message::where('status', 'failed')->count(),
             'pending_messages' => Message::where('status', 'pending')->orWhereNull('status')->count(),
+            'schedules' => \App\Models\Schedule::count(),
+            'active_schedules' => \App\Models\Schedule::where('is_active', true)->count(),
+            'total_schedule_runs' => \App\Models\Schedule::sum('usage_count'),
         ];
     }
 

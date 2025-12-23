@@ -26,11 +26,16 @@ use App\Livewire\Sessions\SessionsShow;
 use App\Livewire\Contacts\ContactsIndex;
 use App\Livewire\Sessions\SessionsAudit;
 use App\Livewire\Sessions\SessionsIndex;
+use App\Livewire\Schedules\SchedulesEdit;
+use App\Livewire\Schedules\SchedulesShow;
 use App\Livewire\Sessions\SessionsCreate;
 use App\Livewire\Templates\TemplatesEdit;
 use App\Livewire\Templates\TemplatesShow;
+use App\Livewire\Schedules\SchedulesAudit;
+use App\Livewire\Schedules\SchedulesIndex;
 use App\Livewire\Templates\TemplatesAudit;
 use App\Livewire\Templates\TemplatesIndex;
+use App\Livewire\Schedules\SchedulesCreate;
 use App\Livewire\Templates\TemplatesCreate;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
 use App\Livewire\Broadcast\Messages\MesssagesAudit;
@@ -104,6 +109,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('messages', MesssagesIndex::class)->name('messages.index')->middleware(['permission:message.view|message.send|message.audit']);
     Route::get('messages/audit', MesssagesAudit::class)->name('messages.audit')->middleware(['permission:message.audit']);
+
+    Route::get('schedules', SchedulesIndex::class)->name('schedules.index')->middleware(['permission:schedule.view|schedule.create|schedule.edit|schedule.delete']);
+    Route::get('schedules/audit', SchedulesAudit::class)->name('schedules.audit')->middleware(['permission:schedule.audit']);
+    Route::get('schedules/create', SchedulesCreate::class)->name('schedules.create')->middleware(['permission:schedule.create']);
+    Route::get('schedules/{schedule}/edit', SchedulesEdit::class)->name('schedules.edit')->middleware(['permission:schedule.edit']);
+    Route::get('schedules/{schedule}', SchedulesShow::class)->name('schedules.show')->middleware(['permission:schedule.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);

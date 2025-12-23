@@ -69,6 +69,19 @@
 - **Group Filtering**: Filter groups by session, type (Community/Group), and search
 - **Visual Preview**: Clickable profile pictures for enlarged viewing with contextual information
 
+### Schedules Management 📅
+- **Automated Scheduling**: Schedule message delivery at specific times (Daily, Weekly, Monthly)
+- **Timezone Support**: User-specific timezone handling for accurate delivery times
+- **Multiple Recipients**: Send scheduled messages to contacts, groups, or phone numbers
+- **Message Formatting**: Support for WhatsApp formatting (*bold*, _italic_) in scheduled messages
+- **Schedule Management**: Create, edit, activate/deactivate schedules with intuitive UI
+- **Usage Tracking**: Monitor schedule execution count and last/next run times
+- **Real-time Preview**: Preview scheduled messages with formatting before activation
+- **Audit Trail**: Complete activity logging for all schedule operations
+- **Laravel Scheduler Integration**: Automatic processing via Laravel task scheduler
+- **Status Monitoring**: Track active/inactive schedules with visual indicators
+- **Advanced Filtering**: Filter schedules by status, frequency, session, and search terms
+
 ### User Management
 - **Role-Based Access Control**: Comprehensive permission system
 - **User Authentication**: Secure login and session management
@@ -89,6 +102,7 @@
 - **Real-time Validation**: Smart form validation with contextual feedback
 - **Timezone Support**: Full timezone-aware messaging and display
 - **Scheduled Messaging**: Advanced scheduling with timezone conversion
+- **Automated Schedules**: Recurring message delivery with Laravel Scheduler integration
 - **Message Type Icons**: Visual indicators for text, image, file, and custom messages
 - **Caching System**: Optimized performance with intelligent caching
 - **Background Jobs**: Asynchronous processing for better UX
@@ -191,6 +205,16 @@ php artisan queue:work --queue=messages --tries=3 --timeout=120
 ```
 
 **Important**: Queue worker must be running for messages to be sent. Without it, messages will remain in `pending` status.
+
+### 10. Setup Laravel Scheduler (Required for Scheduled Messages)
+```bash
+# Add to crontab (Linux/Unix/macOS)
+* * * * * cd /path/to/your/project && php artisan schedule:run >> /dev/null 2>&1
+
+# Or use Windows Task Scheduler for Windows
+```
+
+**Important**: Laravel Scheduler must be running for scheduled messages to be processed. See [Schedule Usage Documentation](docs/SCHEDULE_USAGE.md) for detailed setup instructions.
 
 Visit `http://localhost:8000` in your browser.
 
@@ -492,6 +516,87 @@ if ($response->successful()) {
 4. **Participant Information**: View group participants with contact names and admin roles
 5. **Profile Pictures**: Click to preview enlarged group and participant profile pictures
 
+### Schedules Management 📅
+
+The Schedules feature allows you to automate message delivery at specific times with full timezone support.
+
+#### Creating Schedules
+
+1. **Navigate to Schedules**: Click on the "Schedules" section in your dashboard
+2. **Create New Schedule**: Click "Create Schedule" button
+3. **Configure Schedule**:
+   - **Session**: Select the WhatsApp session to use
+   - **Name & Description**: Give your schedule a descriptive name
+   - **Message Content**: Enter the message with formatting support (*bold*, _italic_)
+   - **Recipient Type**: Choose Contact, Group, or Phone Number
+   - **Frequency**: Select Daily, Weekly, or Monthly
+   - **Time**: Set the delivery time (uses your timezone)
+   - **Day Selection**: For weekly/monthly, select specific day
+   - **Active Status**: Enable/disable the schedule
+4. **Preview**: Review message preview with formatting
+5. **Save**: Create the schedule
+
+#### Schedule Types
+
+**Daily Schedules:**
+- Send message every day at specified time
+- Example: Daily morning reminder at 09:00
+
+**Weekly Schedules:**
+- Send message once per week on selected day
+- Requires day of week selection (Sunday-Saturday)
+- Example: Weekly report every Monday at 10:00
+
+**Monthly Schedules:**
+- Send message once per month on selected date
+- Requires day of month selection (1-28)
+- Example: Monthly newsletter on 1st at 08:00
+
+#### Managing Schedules
+
+1. **View All Schedules**: Browse all schedules with filtering options
+2. **Filter Schedules**: Filter by status (Active/Inactive), frequency, session, or search
+3. **Edit Schedule**: Modify schedule details, message, or timing
+4. **Activate/Deactivate**: Toggle schedule status without deleting
+5. **View Details**: See schedule information, last run, next run, and usage count
+6. **Audit Trail**: Track all schedule changes and activities
+
+#### Timezone Handling
+
+- **User Timezone**: Each user can set their timezone in profile settings
+- **Automatic Conversion**: Schedule times are calculated in user's timezone
+- **UTC Storage**: Times stored in UTC for consistency
+- **Display**: All times displayed in user's timezone in the UI
+
+#### Schedule Processing
+
+Schedules are processed automatically by Laravel Scheduler:
+
+```bash
+# Process all ready schedules
+php artisan schedule:process
+
+# Process specific schedule
+php artisan schedule:process --schedule=1
+```
+
+**Setup Requirements:**
+- Laravel Scheduler must be configured in crontab (see [Schedule Usage Documentation](docs/SCHEDULE_USAGE.md))
+- Queue worker must be running for message delivery
+- Schedules run every minute to check for ready messages
+
+#### Schedule Features
+
+- **Message Formatting**: Support for `*bold*` and `_italic_` formatting
+- **Character Count**: Real-time character count in message editor
+- **Usage Tracking**: Monitor how many times schedule has executed
+- **Last/Next Run**: Track execution history and upcoming runs
+- **Status Indicators**: Visual badges for active/inactive schedules
+- **Message Preview**: WhatsApp-like preview with formatting
+- **Audit Logging**: Complete activity trail for all schedule operations
+
+For detailed setup and troubleshooting, see [Schedule Usage Documentation](docs/SCHEDULE_USAGE.md).
+
 #### Group Synchronization
 
 ```php
@@ -742,6 +847,17 @@ The application provides RESTful APIs for:
 - `POST /groups/sync` - Sync groups from WAHA API
 - `GET /groups/audit` - Groups audit trail
 
+#### Schedules API Endpoints
+
+- `GET /schedules` - List all schedules with filtering and pagination
+- `POST /schedules` - Create new schedule
+- `GET /schedules/{id}` - Get schedule details
+- `PUT /schedules/{id}` - Update schedule
+- `DELETE /schedules/{id}` - Delete schedule
+- `GET /schedules/{id}/toggle-active` - Toggle schedule active status
+- `GET /schedules/audit` - Schedules audit trail
+- `POST /schedules/{id}/process` - Manually process specific schedule
+
 ## 🔐 Security
 
 - **Authentication**: Laravel Sanctum for API authentication
@@ -962,6 +1078,20 @@ GET /health
 
 ## 📝 Changelog
 
+### Version 1.6.0 📅
+- **Schedules Module**: Complete automated message scheduling system
+- **Recurring Schedules**: Daily, Weekly, and Monthly message delivery
+- **Timezone Support**: User-specific timezone handling for accurate delivery times
+- **Schedule Management**: Full CRUD operations for schedules with intuitive UI
+- **Laravel Scheduler Integration**: Automatic processing via `schedule:process` command
+- **Message Formatting**: Support for WhatsApp formatting (*bold*, _italic_) in schedules
+- **Usage Tracking**: Monitor schedule execution count and run history
+- **Audit Trail**: Complete activity logging for schedule operations
+- **Schedule Preview**: Real-time message preview with formatting
+- **Status Management**: Activate/deactivate schedules without deletion
+- **Advanced Filtering**: Filter schedules by status, frequency, session, and search
+- **Documentation**: Comprehensive schedule usage documentation
+
 ### Version 1.5.0 🕐
 - **Scheduled Messaging**: Send messages immediately or schedule for future delivery with timezone support
 - **Multiple Message Types**: Support for text, image, file, and custom link preview messages
@@ -1049,6 +1179,23 @@ GET /health
 - Real-time health monitoring
 
 ## 🐛 Troubleshooting
+
+### Schedule Issues
+
+**Schedules not running:**
+- Verify Laravel Scheduler is configured: Check crontab entry `* * * * * php artisan schedule:run`
+- Check schedule status: Ensure schedule is `is_active = true` in database
+- Verify `next_run` time: Check if `next_run <= now()` in UTC
+- Test manually: Run `php artisan schedule:process --schedule=1` for specific schedule
+- Check logs: Review `storage/logs/laravel.log` for schedule processing errors
+- Ensure queue worker is running: Messages need queue worker to be sent
+
+**Timezone issues:**
+- Verify user timezone: Check `users.timezone` column in database
+- Recalculate next_run: Update schedule's `next_run` after timezone change
+- Check timezone conversion: Ensure times are correctly converted to UTC
+
+For detailed troubleshooting, see [Schedule Usage Documentation](docs/SCHEDULE_USAGE.md).
 
 ### Message Status Issues
 

@@ -26,3 +26,9 @@ Schedule::command('license:check-expiration')
 //     ->weeklyOn(1, '09:00') // Every Monday at 9 AM
 //     ->withoutOverlapping()
 //     ->runInBackground();
+
+// Process scheduled messages every minute
+Schedule::command('schedule:process')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->runInBackground();

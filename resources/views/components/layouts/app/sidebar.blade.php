@@ -96,8 +96,8 @@
                         auth()->user()->can('template.delete'))
                             <flux:navlist.item icon="document-text" :href="route('templates.index')" :current="request()->routeIs('templates.*')" wire:navigate>{{ __('Templates') }}</flux:navlist.item>
                         @endif
-                    @endif
-                </flux:sidebar.group>
+                    </flux:sidebar.group>
+                @endif
 
                 @if (auth()->user()->can('message.view'))
                     <flux:sidebar.group expandable icon="megaphone" heading="Broadcast" class="grid">
@@ -105,6 +105,13 @@
                         auth()->user()->can('message.send') ||
                         auth()->user()->can('message.audit'))
                             <flux:navlist.item icon="chat-bubble-left-ellipsis" :href="route('messages.index')" :current="request()->routeIs('messages.*')" wire:navigate>{{ __('Messages') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('schedule.view') ||
+                        auth()->user()->can('schedule.create') ||
+                        auth()->user()->can('schedule.edit') ||
+                        auth()->user()->can('schedule.delete'))
+                            <flux:navlist.item icon="clock" :href="route('schedules.index')" :current="request()->routeIs('schedules.*')" wire:navigate>{{ __('Schedules') }}</flux:navlist.item>
                         @endif
                     </flux:sidebar.group>
                 @endif
@@ -257,12 +264,20 @@
                     </flux:navlist.group>
                 @endif
 
-                @if (auth()->user()->can('message.view'))
+                @if (auth()->user()->can('message.view') ||
+                auth()->user()->can('schedule.view'))
                     <flux:navlist.group :heading="__('Broadcast')" class="grid">
                         @if (auth()->user()->can('message.view') ||
                         auth()->user()->can('message.send') ||
                         auth()->user()->can('message.audit'))
                             <flux:navlist.item icon="chat-bubble-left-ellipsis" :href="route('messages.index')" :current="request()->routeIs('messages.*')" wire:navigate>{{ __('Messages') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('schedule.view') ||
+                        auth()->user()->can('schedule.create') ||
+                        auth()->user()->can('schedule.edit') ||
+                        auth()->user()->can('schedule.delete'))
+                            <flux:navlist.item icon="clock" :href="route('schedules.index')" :current="request()->routeIs('schedules.*')" wire:navigate>{{ __('Schedules') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

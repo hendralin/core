@@ -15,10 +15,10 @@
             </div>
             <div class="space-y-4">
                 <div>
-                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.5.0</flux:heading>
+                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.6.0</flux:heading>
                     <flux:text class="text-gray-700 dark:text-zinc-300 leading-relaxed">
                         Broadcaster is a comprehensive WhatsApp Business messaging platform built with Laravel and powered by WAHA (WhatsApp HTTP API).
-                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting with async queue processing, scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), template management, contacts synchronization, and comprehensive audit trails through an intuitive web interface.
+                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly), scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), template management, contacts synchronization, and comprehensive audit trails through an intuitive web interface.
                     </flux:text>
                 </div>
 
@@ -43,6 +43,12 @@
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
                                 Advanced Message Broadcasting
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Automated Schedule Management
                             </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -117,7 +123,7 @@
                 <div class="pt-4 border-t border-blue-200 dark:border-blue-700">
                     <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
                         Built with modern web technologies including Laravel, Livewire, Flux UI, and Tailwind CSS for optimal performance and user experience.
-                        Features advanced broadcast messaging with async queue processing, scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), advanced filtering and validation, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, and complete contact synchronization system.
+                        Features advanced broadcast messaging with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly), scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), advanced filtering and validation, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, Laravel Scheduler integration, and complete contact synchronization system.
                     </flux:text>
                 </div>
             </div>
@@ -759,6 +765,99 @@
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                     </svg>
                                     Contact Name Resolution
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedules Management Information -->
+        <div class="space-y-6">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                <flux:heading size="lg" class="mb-4 flex items-center gap-2">
+                    <flux:icon name="clock" class="h-6 w-6 text-amber-500 dark:text-amber-400" />
+                    Schedules Management System
+                </flux:heading>
+
+                <div class="space-y-4">
+                    <flux:text class="text-gray-700 dark:text-zinc-300">
+                        Automated message scheduling system with recurring delivery options (Daily, Weekly, Monthly), timezone support, and Laravel Scheduler integration for reliable message delivery at specified times.
+                    </flux:text>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                            <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ $statistics['schedules'] ?? 0 }}</div>
+                            <div class="text-sm text-amber-700 dark:text-amber-300">Total Schedules</div>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                            <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $statistics['active_schedules'] ?? 0 }}</div>
+                            <div class="text-sm text-green-700 dark:text-green-300">Active Schedules</div>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $statistics['total_schedule_runs'] ?? 0 }}</div>
+                            <div class="text-sm text-blue-700 dark:text-blue-300">Total Executions</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ \App\Models\Schedule::where('frequency', 'daily')->count() }}</div>
+                            <div class="text-sm text-purple-700 dark:text-purple-300">Daily Schedules</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <flux:text class="font-semibold text-gray-900 dark:text-white">Schedule Features</flux:text>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Recurring Schedules (Daily, Weekly, Monthly)
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    User Timezone Support
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Laravel Scheduler Integration
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Message Formatting Support
+                                </li>
+                            </ul>
+                            <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Usage Count Tracking
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Last/Next Run Tracking
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Complete Audit Trail
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Contact, Group & Number Support
                                 </li>
                             </ul>
                         </div>

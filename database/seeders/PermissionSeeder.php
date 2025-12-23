@@ -53,6 +53,11 @@ class PermissionSeeder extends Seeder
             'message.view',
             'message.create',
             'message.audit',
+            'schedule.view',
+            'schedule.create',
+            'schedule.edit',
+            'schedule.delete',
+            'schedule.audit',
         ];
 
         foreach ($permissions as $key => $value) {

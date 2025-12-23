@@ -97,7 +97,14 @@
                                         @if($template->header)
                                             <div class="font-semibold mb-2">{{ $template->header }}</div>
                                         @endif
-                                        <div class="whitespace-pre-wrap">{{ $template->body }}</div>
+                                        @php
+                                            $previewMessage = $template->body ?? '';
+                                            // Replace *text* with <strong>text</strong>
+                                            $previewMessage = preg_replace('/\*(.+?)\*/s', '<strong>$1</strong>', $previewMessage);
+                                            // Replace _text_ with <em>text</em>
+                                            $previewMessage = preg_replace('/\_(.+?)\_/s', '<em>$1</em>', $previewMessage);
+                                        @endphp
+                                        <div class="whitespace-pre-wrap">{!! $previewMessage !!}</div>
                                     </div>
                                     <div class="text-xs text-gray-500 dark:text-zinc-400 mt-2 text-right">
                                         12:34 PM ✓✓
