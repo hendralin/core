@@ -11,10 +11,18 @@ class VehicleFileTitle extends Model
 {
     use LogsActivity;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'title',
     ];
 
+    /**
+     * Get the options for activity logging
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -23,6 +31,11 @@ class VehicleFileTitle extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    /**
+     * Get the vehicle files for the vehicle file title
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function vehicleFiles(): HasMany
     {
         return $this->hasMany(VehicleFile::class);

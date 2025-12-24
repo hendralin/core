@@ -2,13 +2,19 @@
 
 namespace App\Models;
 
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
 
 class Company extends Model
 {
     use LogsActivity;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'address',
@@ -29,6 +35,11 @@ class Company extends Model
         'features_enabled',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'social_media' => 'array',
         'features_enabled' => 'array',
@@ -36,6 +47,9 @@ class Company extends Model
         'license_expires_at' => 'datetime',
     ];
 
+    /**
+     * Get the options for activity logging
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -62,6 +76,11 @@ class Company extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    /**
+     * Get the attributes for activity logging
+     *
+     * @return array<string, string>
+     */
     public function getActivitylogAttributes(): array
     {
         return [
@@ -87,6 +106,8 @@ class Company extends Model
 
     /**
      * Check if the license is active
+     *
+     * @return bool
      */
     public function isLicenseActive(): bool
     {
@@ -96,6 +117,8 @@ class Company extends Model
 
     /**
      * Check if the license is expired
+     *
+     * @return bool
      */
     public function isLicenseExpired(): bool
     {
@@ -105,6 +128,8 @@ class Company extends Model
 
     /**
      * Check if the license is in trial period
+     *
+     * @return bool
      */
     public function isTrialLicense(): bool
     {
@@ -113,6 +138,8 @@ class Company extends Model
 
     /**
      * Get days until license expires
+     *
+     * @return int|null
      */
     public function getDaysUntilExpiration(): ?int
     {
@@ -125,6 +152,9 @@ class Company extends Model
 
     /**
      * Check if license is expiring soon (within 30 days)
+     *
+     * @param int $days
+     * @return bool
      */
     public function isLicenseExpiringSoon(int $days = 30): bool
     {
@@ -134,6 +164,8 @@ class Company extends Model
 
     /**
      * Get license status badge color
+     *
+     * @return string
      */
     public function getLicenseStatusColor(): string
     {
@@ -148,6 +180,8 @@ class Company extends Model
 
     /**
      * Get license type display name
+     *
+     * @return string
      */
     public function getLicenseTypeDisplay(): string
     {

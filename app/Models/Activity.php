@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
-use Spatie\Activitylog\Models\Activity as SpatieActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\Models\Activity as SpatieActivity;
 
 class Activity extends SpatieActivity
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'log_name',
         'description',
@@ -19,6 +24,11 @@ class Activity extends SpatieActivity
         'updated_at',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'properties' => 'array',
         'created_at' => 'datetime',

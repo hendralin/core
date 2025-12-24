@@ -149,6 +149,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the description for the activity log
+     *
+     * @param string $eventName
+     * @return string
      */
     public function getDescriptionForEvent(string $eventName): string
     {
@@ -172,6 +175,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user is active
+     *
+     * @return bool
      */
     public function isActive(): bool
     {
@@ -180,6 +185,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user is inactive
+     *
+     * @return bool
      */
     public function isInactive(): bool
     {
@@ -188,6 +195,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user is pending
+     *
+     * @return bool
      */
     public function isPending(): bool
     {
@@ -196,6 +205,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get status label
+     *
+     * @return string
      */
     public function getStatusLabel(): string
     {
@@ -209,6 +220,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get status color for UI
+     *
+     * @return string
      */
     public function getStatusColor(): string
     {
@@ -222,6 +235,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Activate the user
+     *
+     * @return void
      */
     public function activate(): void
     {
@@ -230,6 +245,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Deactivate the user
+     *
+     * @return void
      */
     public function deactivate(): void
     {
@@ -238,6 +255,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the company logo URL directly
+     *
+     * @return string|null
      */
     public function getCompanyLogoUrlAttribute(): ?string
     {
@@ -250,6 +269,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the company logo path directly
+     *
+     * @return string|null
      */
     public function getCompanyLogoAttribute(): ?string
     {

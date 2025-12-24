@@ -11,6 +11,11 @@ class VehicleFile extends Model
 {
     use LogsActivity;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'vehicle_id',
         'vehicle_file_title_id',
@@ -18,6 +23,9 @@ class VehicleFile extends Model
         'created_by',
     ];
 
+    /**
+     * Get the options for activity logging
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -33,6 +41,8 @@ class VehicleFile extends Model
 
     /**
      * Get the vehicle that owns the file
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function vehicle(): BelongsTo
     {
@@ -41,6 +51,8 @@ class VehicleFile extends Model
 
     /**
      * Get the vehicle file title that owns the file
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function vehicleFileTitle(): BelongsTo
     {
@@ -49,6 +61,8 @@ class VehicleFile extends Model
 
     /**
      * Get the user that created the file
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function createdBy(): BelongsTo
     {

@@ -227,10 +227,14 @@
             <flux:navlist variant="outline" class="in-data-flux-sidebar-collapsed-desktop:hidden">
                 <flux:navlist.group :heading="__('Theming')" class="grid" @keydown.window="if ($event.shiftKey && ($event.key === 'd' || $event.key === 'D')) $flux.dark = !$flux.dark">
                     <flux:navlist.item x-show="$flux.dark" icon="moon" x-data>
-                        <flux:switch x-model="$flux.dark" label="Dark" class="cursor-pointer" />
+                        <flux:tooltip content="Switch to light mode" position="right">
+                            <flux:switch x-model="$flux.dark" label="Dark" class="cursor-pointer" />
+                        </flux:tooltip>
                     </flux:navlist.item>
                     <flux:navlist.item x-show="!$flux.dark" icon="sun" x-data>
-                        <flux:switch x-model="$flux.dark" label="Light" class="cursor-pointer" />
+                        <flux:tooltip content="Switch to dark mode" position="right">
+                            <flux:switch x-model="$flux.dark" label="Light" class="cursor-pointer" />
+                        </flux:tooltip>
                     </flux:navlist.item>
                 </flux:navlist.group>
 

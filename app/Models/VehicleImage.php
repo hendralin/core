@@ -11,6 +11,11 @@ class VehicleImage extends Model
 {
     use LogsActivity;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'vehicle_id',
         'image',
@@ -32,6 +37,8 @@ class VehicleImage extends Model
 
     /**
      * Get the vehicle that owns the image
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function vehicle(): BelongsTo
     {

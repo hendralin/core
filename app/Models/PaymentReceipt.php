@@ -11,6 +11,11 @@ class PaymentReceipt extends Model
 {
     use LogsActivity;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'vehicle_id',
         'payment_number',
@@ -26,10 +31,27 @@ class PaymentReceipt extends Model
         'printed_at',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $dates = [
         'payment_date',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'vehicle_id' => 'integer',
+    ];
+
+    /**
+     * Get the options for activity logging
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -51,6 +73,11 @@ class PaymentReceipt extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    /**
+     * Get the vehicle that owns the payment receipt
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);

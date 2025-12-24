@@ -13,6 +13,11 @@ class Vehicle extends Model
 {
     use LogsActivity;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'police_number',
         'brand_id',
@@ -49,6 +54,11 @@ class Vehicle extends Model
         'description',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $dates = [
         'vehicle_registration_date',
         'vehicle_registration_expiry_date',
@@ -103,6 +113,8 @@ class Vehicle extends Model
 
     /**
      * Get the brand that owns the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function brand(): BelongsTo
     {
@@ -111,6 +123,8 @@ class Vehicle extends Model
 
     /**
      * Get the type that owns the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function type(): BelongsTo
     {
@@ -119,6 +133,8 @@ class Vehicle extends Model
 
     /**
      * Get the category that owns the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function category(): BelongsTo
     {
@@ -127,6 +143,8 @@ class Vehicle extends Model
 
     /**
      * Get the model that owns the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function vehicle_model(): BelongsTo
     {
@@ -135,6 +153,8 @@ class Vehicle extends Model
 
     /**
      * Get the warehouse that owns the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function warehouse(): BelongsTo
     {
@@ -143,6 +163,8 @@ class Vehicle extends Model
 
     /**
      * Get the salesman that owns the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function salesman(): BelongsTo
     {
@@ -151,6 +173,8 @@ class Vehicle extends Model
 
     /**
      * Get the leasing that owns the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function leasing(): BelongsTo
     {
@@ -159,6 +183,8 @@ class Vehicle extends Model
 
     /**
      * Get the images for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function images(): HasMany
     {
@@ -167,6 +193,8 @@ class Vehicle extends Model
 
     /**
      * Get the costs for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function costs(): HasMany
     {
@@ -175,6 +203,8 @@ class Vehicle extends Model
 
     /**
      * Get the commissions for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function commissions(): HasMany
     {
@@ -183,6 +213,8 @@ class Vehicle extends Model
 
     /**
      * Get the equipment for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function equipment(): HasMany
     {
@@ -191,6 +223,8 @@ class Vehicle extends Model
 
     /**
      * Get the loan calculations for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function loanCalculations(): HasMany
     {
@@ -199,6 +233,8 @@ class Vehicle extends Model
 
     /**
      * Get the purchase payments for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function purchasePayments(): HasMany
     {
@@ -207,6 +243,8 @@ class Vehicle extends Model
 
     /**
      * Get the payment receipts for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function paymentReceipts(): HasMany
     {
@@ -215,6 +253,8 @@ class Vehicle extends Model
 
     /**
      * Get the certificate receipts for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function vehicleCertificateReceipts(): HasMany
     {
@@ -223,6 +263,8 @@ class Vehicle extends Model
 
     /**
      * Get the handovers for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function vehicleHandovers(): HasMany
     {
@@ -231,6 +273,8 @@ class Vehicle extends Model
 
     /**
      * Get the equipment for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function vehicleEquipment(): HasOne
     {
@@ -239,6 +283,8 @@ class Vehicle extends Model
 
     /**
      * Get the files for the vehicle
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function vehicleFiles(): HasMany
     {

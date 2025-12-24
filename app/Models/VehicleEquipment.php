@@ -11,6 +11,11 @@ class VehicleEquipment extends Model
 {
     use LogsActivity;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'type',
         'vehicle_id',
@@ -42,6 +47,8 @@ class VehicleEquipment extends Model
 
     /**
      * Get the vehicle that owns the vehicle equipment
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function vehicle(): BelongsTo
     {

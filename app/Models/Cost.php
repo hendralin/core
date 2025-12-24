@@ -11,6 +11,11 @@ class Cost extends Model
 {
     use LogsActivity;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'cost_type',
         'vehicle_id',
@@ -23,10 +28,18 @@ class Cost extends Model
         'status',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $dates = [
         'cost_date',
     ];
 
+    /**
+     * Get the options for activity logging
+     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -44,16 +57,31 @@ class Cost extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    /**
+     * Get the vehicle that owns the cost
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
     }
 
+    /**
+     * Get the vendor that owns the cost
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
     }
 
+    /**
+     * Get the user that created the cost
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
