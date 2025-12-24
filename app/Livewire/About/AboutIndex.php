@@ -126,22 +126,26 @@ class AboutIndex extends Component
 
     private function getSystemStatistics()
     {
+        $userId = Auth::id();
+
         return [
-            'contacts' => Contact::count(),
-            'groups' => Group::count(),
-            'templates' => Template::count(),
-            'active_templates' => Template::where('is_active', true)->count(),
-            'communities' => Group::where('detail->isCommunity', true)->count(),
-            'regular_groups' => Group::where('detail->isCommunity', false)->count(),
-            'total_messages' => Message::count(),
-            'messages_today' => Message::whereDate('created_at', today())->count(),
-            'messages_this_week' => Message::where('created_at', '>=', now()->startOfWeek())->count(),
-            'sent_messages' => Message::where('status', 'sent')->count(),
-            'failed_messages' => Message::where('status', 'failed')->count(),
-            'pending_messages' => Message::where('status', 'pending')->orWhereNull('status')->count(),
-            'schedules' => \App\Models\Schedule::count(),
-            'active_schedules' => \App\Models\Schedule::where('is_active', true)->count(),
-            'total_schedule_runs' => \App\Models\Schedule::sum('usage_count'),
+            'contacts' => Contact::forUser($userId)->count(),
+            'groups' => Group::forUser($userId)->count(),
+            'templates' => Template::where('created_by', $userId)->count(),
+            'active_templates' => Template::where('created_by', $userId)->where('is_active', true)->count(),
+            'communities' => Group::forUser($userId)->where('detail->isCommunity', true)->count(),
+            'regular_groups' => Group::forUser($userId)->where('detail->isCommunity', false)->count(),
+            'total_messages' => Message::where('created_by', $userId)->count(),
+            'messages_today' => Message::where('created_by', $userId)->whereDate('created_at', today())->count(),
+            'messages_this_week' => Message::where('created_by', $userId)->where('created_at', '>=', now()->startOfWeek())->count(),
+            'sent_messages' => Message::where('created_by', $userId)->where('status', 'sent')->count(),
+            'failed_messages' => Message::where('created_by', $userId)->where('status', 'failed')->count(),
+            'pending_messages' => Message::where('created_by', $userId)->where(function($q) {
+                $q->where('status', 'pending')->orWhereNull('status');
+            })->count(),
+            'schedules' => \App\Models\Schedule::where('created_by', $userId)->count(),
+            'active_schedules' => \App\Models\Schedule::where('created_by', $userId)->where('is_active', true)->count(),
+            'total_schedule_runs' => \App\Models\Schedule::where('created_by', $userId)->sum('usage_count'),
         ];
     }
 
