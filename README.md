@@ -90,7 +90,15 @@
 - **Activity Logging**: Track all user actions and system events
 
 ### System Features
-- **Dashboard**: Overview of system status and WhatsApp connections
+- **Dashboard**: Comprehensive overview with real-time statistics, message trends, recent messages, active sessions, and upcoming schedules
+  - **Statistics Cards**: Total messages, sent/pending/failed counts, contacts, groups, active sessions, and schedules
+  - **Message Trends Chart**: Visual representation of message activity with date range filtering
+  - **Recent Messages**: Latest message activity with status indicators and JSON message support (images, files, custom links)
+  - **Active Sessions**: Live session status with profile pictures, WhatsApp account names, and message counts
+  - **Upcoming Schedules**: Next scheduled message deliveries with frequency and timing information
+  - **WAHA & Queue Status**: Real-time server connectivity and queue monitoring per user
+  - **Date Range Filtering**: Filter dashboard data by custom date ranges (defaults to current month)
+  - **Timezone-aware Display**: All timestamps displayed in user's configured timezone
 - **Configuration Management**: Easy setup of WAHA API credentials
 - **Responsive Design**: Modern UI built with Flux UI components
 - **Dark Mode Support**: Full dark/light theme support
@@ -272,11 +280,78 @@ The application includes the following permission groups:
 ### Basic Usage
 
 1. **Login**: Access the application with your credentials
-2. **Configure WAHA**: Set up your WhatsApp API integration
-3. **Create Sessions**: Add and manage WhatsApp sessions
-4. **Sync Contacts**: Synchronize contacts from WhatsApp
-5. **Sync Groups**: Synchronize groups and communities
-6. **Monitor Status**: Check connection health and session status
+2. **View Dashboard**: Get an overview of your system activity, statistics, and recent messages
+3. **Configure WAHA**: Set up your WhatsApp API integration
+4. **Create Sessions**: Add and manage WhatsApp sessions
+5. **Sync Contacts**: Synchronize contacts from WhatsApp
+6. **Sync Groups**: Synchronize groups and communities
+7. **Monitor Status**: Check connection health and session status
+
+### Dashboard Overview 📊
+
+The Dashboard provides a comprehensive overview of your WhatsApp broadcasting system with real-time statistics and activity monitoring.
+
+#### Dashboard Features
+
+1. **Statistics Overview**:
+   - **Total Messages**: Complete message count with today's activity
+   - **Sent Messages**: Successfully delivered messages with success percentage
+   - **Pending Messages**: Messages waiting in queue for processing
+   - **Failed Messages**: Messages that failed after retry attempts
+   - **Contacts & Groups**: Total synchronized contacts and groups
+   - **Active Sessions**: Number of active WhatsApp sessions
+   - **Active Schedules**: Number of active scheduled message deliveries
+
+2. **Message Trends Chart**:
+   - Visual bar chart showing message activity over time
+   - Date range filtering (defaults to current month)
+   - Displays only days with actual message data
+   - Hover tooltips showing exact message counts
+   - Responsive design for different screen sizes
+
+3. **Recent Messages**:
+   - Latest message activity with full details
+   - Support for all message types (text, image, file, custom link preview)
+   - Status badges (Sent/Failed/Pending) with color coding
+   - Message formatting display (*bold*, _italic_)
+   - JSON message parsing for media and custom messages
+   - Timezone-aware timestamps
+
+4. **Active Sessions**:
+   - Live session cards with profile pictures
+   - WhatsApp account information (name and WA ID)
+   - Message count per session
+   - Status indicators (green dot for active)
+   - Cached data for optimal performance
+
+5. **Upcoming Schedules**:
+   - Next scheduled message deliveries
+   - Frequency information (Daily/Weekly/Monthly)
+   - Next run time in user's timezone
+   - Quick access to schedule management
+
+6. **WAHA & Queue Status**:
+   - Real-time WAHA server connectivity status
+   - API URL and version information
+   - Queue connection status
+   - Pending and failed jobs count (per user)
+   - Configuration status indicators
+
+#### Date Range Filtering
+
+- **Default Period**: Current month (start to end of month)
+- **Custom Range**: Select any date range for statistics and charts
+- **Timezone Support**: All dates respect user's timezone settings
+- **Dynamic Updates**: Statistics and charts update automatically when date range changes
+- **Validation**: Automatic validation to ensure logical date selections
+
+#### Dashboard Data
+
+All dashboard data is filtered by:
+- **User-specific**: Only shows data created by the logged-in user
+- **Date Range**: Respects selected date range filter
+- **Timezone-aware**: All timestamps displayed in user's timezone
+- **Cached**: Session and profile data cached for optimal performance
 
 ### Message Broadcasting 🎯
 
@@ -1189,6 +1264,20 @@ GET /health
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.8.0 📊
+- **Dashboard Module**: Comprehensive dashboard with real-time statistics and activity monitoring
+- **Statistics Cards**: Total messages, sent/pending/failed counts, contacts, groups, sessions, and schedules
+- **Message Trends Chart**: Visual bar chart with date range filtering and dynamic data display
+- **Recent Messages**: Latest message activity with JSON message support (images, files, custom links)
+- **Active Sessions**: Live session cards with profile pictures, WhatsApp account info, and message counts
+- **Upcoming Schedules**: Next scheduled deliveries with frequency and timing information
+- **Date Range Filtering**: Custom date range filter for dashboard data (defaults to current month)
+- **User-specific Data**: All dashboard statistics filtered by logged-in user
+- **Queue Status Monitoring**: Per-user pending and failed jobs tracking
+- **Timezone-aware Display**: All timestamps displayed in user's configured timezone
+- **Caching System**: Optimized performance with intelligent caching for sessions and profile pictures
+- **Responsive Design**: Fully responsive dashboard layout for all screen sizes
 
 ### Version 1.7.0 🚀
 - **RESTful API**: Complete RESTful API for sending WhatsApp messages programmatically

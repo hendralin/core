@@ -15,20 +15,21 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-#[Title('About The Broadcaster System v1.7.0')]
+#[Title('About The Broadcaster System v1.8.0')]
 class AboutIndex extends Component
 {
     use HasWahaConfig;
     public function render()
     {
         $systemInfo = [
-            'version' => '1.7.0',
+            'version' => '1.8.0',
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
             'timezone' => config('app.timezone'),
             'environment' => config('app.env'),
             'features' => [
+                'dashboard_module' => true,
                 'contacts_management' => true,
                 'groups_management' => true,
                 'templates_system' => true,

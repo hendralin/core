@@ -15,10 +15,10 @@
             </div>
             <div class="space-y-4">
                 <div>
-                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.7.0</flux:heading>
+                    <flux:heading size="lg" class="mb-2 text-gray-900 dark:text-white">About Broadcaster v1.8.0</flux:heading>
                     <flux:text class="text-gray-700 dark:text-zinc-300 leading-relaxed">
                         Broadcaster is a comprehensive WhatsApp Business messaging platform built with Laravel and powered by WAHA (WhatsApp HTTP API).
-                        It provides a complete solution for managing multiple WhatsApp Business sessions, advanced message broadcasting with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly) supporting multiple recipients (contacts, groups, phone numbers), scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), template management, contacts synchronization, comprehensive audit trails through an intuitive web interface, and RESTful API for programmatic message sending with secure token-based authentication.
+                        It provides a complete solution for managing multiple WhatsApp Business sessions, comprehensive dashboard with real-time statistics and activity monitoring, advanced message broadcasting with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly) supporting multiple recipients (contacts, groups, phone numbers), scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), template management, contacts synchronization, comprehensive audit trails through an intuitive web interface, and RESTful API for programmatic message sending with secure token-based authentication.
                     </flux:text>
                 </div>
 
@@ -26,6 +26,12 @@
                     <div class="space-y-3">
                         <flux:text class="font-semibold text-gray-900 dark:text-white">Core Features</flux:text>
                         <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Comprehensive Dashboard
+                            </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -135,7 +141,7 @@
                 <div class="pt-4 border-t border-blue-200 dark:border-blue-700">
                     <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
                         Built with modern web technologies including Laravel, Livewire, Flux UI, and Tailwind CSS for optimal performance and user experience.
-                        Features advanced broadcast messaging with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly) supporting multiple recipients simultaneously, scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), advanced filtering and validation, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, Laravel Scheduler integration, complete contact synchronization system, and RESTful API with secure token-based authentication for programmatic message sending.
+                        Features comprehensive dashboard with real-time statistics, message trends chart, recent messages, active sessions, and upcoming schedules, advanced broadcast messaging with async queue processing, automated schedule management with recurring message delivery (Daily, Weekly, Monthly) supporting multiple recipients simultaneously, scheduled messaging with timezone support, multiple message types (text, image, file, custom link preview), advanced filtering and validation, bulk Excel upload, comprehensive audit trails, template management with real-time preview, auto retry mechanism, rate limiting, Laravel Scheduler integration, complete contact synchronization system, and RESTful API with secure token-based authentication for programmatic message sending.
                     </flux:text>
                 </div>
             </div>
@@ -799,6 +805,97 @@
                         </div>
                     </div>
                 @endif
+            </div>
+        </div>
+
+        <!-- Dashboard Module Information -->
+        <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+            <flux:heading size="lg" class="mb-4 flex items-center gap-2">
+                <flux:icon name="chart-bar" class="h-6 w-6 text-rose-500 dark:text-rose-400" />
+                Dashboard Module
+            </flux:heading>
+
+            <div class="space-y-4">
+                <flux:text class="text-gray-700 dark:text-zinc-300">
+                    Comprehensive dashboard with real-time statistics, message trends visualization, recent messages, active sessions monitoring, and upcoming schedules overview. Features date range filtering, timezone-aware display, and user-specific data filtering for personalized insights.
+                </flux:text>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
+                        <div class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ $statistics['total_messages'] ?? 0 }}</div>
+                        <div class="text-sm text-rose-700 dark:text-rose-300">Total Messages</div>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $statistics['sent_messages'] ?? 0 }}</div>
+                        <div class="text-sm text-green-700 dark:text-green-300">Sent Messages</div>
+                    </div>
+                    <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ \App\Models\Session::where('created_by', auth()->id())->active()->count() }}</div>
+                        <div class="text-sm text-blue-700 dark:text-blue-300">Active Sessions</div>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $statistics['active_schedules'] ?? 0 }}</div>
+                        <div class="text-sm text-purple-700 dark:text-purple-300">Active Schedules</div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <flux:text class="font-semibold text-gray-900 dark:text-white">Dashboard Features</flux:text>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Real-time Statistics Cards
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Message Trends Chart
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Recent Messages Display
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Active Sessions Overview
+                            </li>
+                        </ul>
+                        <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Upcoming Schedules Preview
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Date Range Filtering
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                User-specific Data Filtering
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Timezone-aware Display
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
