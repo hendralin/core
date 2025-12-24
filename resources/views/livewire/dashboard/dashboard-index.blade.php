@@ -75,6 +75,88 @@
         </div>
     </div>
 
+    <!-- API Token Notification (shown once after registration) -->
+    @if(session('api_token'))
+        <div class="mb-8" x-data="{ show: true, copied: false }" x-show="show" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-4">
+            <div class="relative overflow-hidden rounded-2xl bg-linear-to-br from-emerald-500 via-teal-500 to-cyan-600 shadow-xl">
+                <!-- Background Pattern -->
+                <div class="absolute inset-0 opacity-10">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
+                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
+                </div>
+
+                <div class="relative p-6">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start gap-4">
+                            <div class="shrink-0 p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                </svg>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-lg font-bold text-white">🎉 Welcome! Your API Token</h3>
+                                    <span class="px-2 py-0.5 text-xs font-semibold bg-white/20 text-white rounded-full">One-time display</span>
+                                </div>
+                                <p class="text-sm text-white/80">
+                                    This is your personal API token for accessing the broadcast API. <strong class="text-white">Copy and save it now</strong> — it won't be shown again for security reasons.
+                                </p>
+                                <div class="flex items-center gap-3 mt-3">
+                                    <div class="flex-1 relative">
+                                        <input
+                                            type="text"
+                                            id="api-token-input"
+                                            value="{{ session('api_token') }}"
+                                            readonly
+                                            class="w-full px-4 py-3 pr-12 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-white/50 selection:bg-white/30"
+                                        >
+                                        <button
+                                            @click="navigator.clipboard.writeText('{{ session('api_token') }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white/20 rounded-lg transition-colors"
+                                            :title="copied ? 'Copied!' : 'Copy to clipboard'"
+                                        >
+                                            <svg x-show="!copied" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <svg x-show="copied" x-cloak class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <button
+                                        @click="navigator.clipboard.writeText('{{ session('api_token') }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                        class="shrink-0 px-5 py-3 bg-white text-teal-600 font-semibold rounded-xl hover:bg-white/90 transition-colors flex items-center gap-2 shadow-lg"
+                                    >
+                                        <span x-show="!copied">Copy Token</span>
+                                        <span x-show="copied" x-cloak>Copied!</span>
+                                        <svg x-show="copied" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-white/60 mt-2">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    You can regenerate a new token anytime from your profile settings.
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            @click="show = false"
+                            class="shrink-0 p-2 hover:bg-white/20 rounded-lg transition-colors"
+                            title="Dismiss"
+                        >
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Date Range Filter -->
     <div class="mb-8">
         <div class="bg-white/80 dark:bg-zinc-800/80 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-zinc-700/50 p-6 shadow-lg shadow-gray-200/20 dark:shadow-none">

@@ -171,28 +171,46 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <flux:heading>PHP Version</flux:heading>
-                        <flux:text class="text-sm">{{ $systemInfo['php_version'] }}</flux:text>
+                        <img src="https://img.shields.io/badge/php-{{ $systemInfo['php_version'] }}-purple.svg" alt="PHP Version">
                     </div>
                     <div>
                         <flux:heading>Laravel Version</flux:heading>
-                        <flux:text class="text-sm">{{ $systemInfo['laravel_version'] }}</flux:text>
+                        <img src="https://img.shields.io/badge/stable-{{ explode(' ', $systemInfo['laravel_version'])[1] }}-red.svg" alt="Laravel Version">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <flux:heading>Database</flux:heading>
-                        <flux:text class="text-sm">{{ ucfirst($systemInfo['database']) }}</flux:text>
+                        <img src="https://img.shields.io/badge/db-{{ ucfirst($systemInfo['database']) }}-brown.svg" alt="Database">
                     </div>
                     <div>
-                        <flux:heading>Environment</flux:heading>
-                        <flux:text class="text-sm">{{ ucfirst($systemInfo['environment']) }}</flux:text>
+                        <flux:heading>Livewire Version</flux:heading>
+                        {{-- <img src="https://poser.pugx.org/livewire/livewire/v/stable.svg" alt="Livewire Version"> --}}
+                        <img src="https://img.shields.io/badge/stable-3.7.3-pink.svg" alt="Livewire Version">
                     </div>
                 </div>
 
-                <div>
-                    <flux:heading>Timezone</flux:heading>
-                    <flux:text class="text-sm">{{ $systemInfo['timezone'] }}</flux:text>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <flux:heading>Tailwind Version</flux:heading>
+                        <img src="https://img.shields.io/badge/stable-4.1.18-blue.svg" alt="Tailwind Version">
+                    </div>
+                    <div>
+                        <flux:heading>Flux Version</flux:heading>
+                        <img src="https://img.shields.io/badge/stable-2.10.2-white.svg" alt="Flux Version">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <flux:heading>Environment</flux:heading>
+                        <img src="https://img.shields.io/badge/env-{{ ucfirst($systemInfo['environment']) }}-green.svg" alt="Environment">
+                    </div>
+                    <div>
+                        <flux:heading>Timezone</flux:heading>
+                        <flux:text class="text-sm">{{ $systemInfo['timezone'] }}</flux:text>
+                    </div>
                 </div>
             </div>
         </div>
@@ -730,11 +748,11 @@
                             <div class="text-sm text-teal-700 dark:text-teal-300">Connection Type</div>
                         </div>
                         <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                            <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $queueInfo['pending_jobs'] ?? 0 }}</div>
+                            <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $statistics['pending_messages'] ?? 0 }}</div>
                             <div class="text-sm text-yellow-700 dark:text-yellow-300">Pending Jobs</div>
                         </div>
                         <div class="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                            <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $queueInfo['failed_jobs'] ?? 0 }}</div>
+                            <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $statistics['failed_messages'] ?? 0 }}</div>
                             <div class="text-sm text-red-700 dark:text-red-300">Failed Jobs</div>
                         </div>
                     </div>

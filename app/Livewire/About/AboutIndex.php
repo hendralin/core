@@ -26,7 +26,7 @@ class AboutIndex extends Component
             'php_version' => PHP_VERSION,
             'laravel_version' => 'Laravel ' . app()->version(),
             'database' => config('database.default'),
-            'timezone' => config('app.timezone'),
+            'timezone' => Auth::user()->timezone,
             'environment' => config('app.env'),
             'features' => [
                 'dashboard_module' => true,
@@ -156,7 +156,6 @@ class AboutIndex extends Component
             'connection' => config('queue.default'),
             'configured' => true,
             'pending_jobs' => 0,
-            'failed_jobs' => 0,
             'status' => 'Unknown',
         ];
 
@@ -174,8 +173,6 @@ class AboutIndex extends Component
                         $queueInfo['pending_jobs'] = DB::table('jobs')
                             ->where('queue', 'messages')
                             ->count();
-
-                        $queueInfo['failed_jobs'] = DB::table('failed_jobs')->count();
                     } catch (\Exception $e) {
                         // Table might not exist or connection issue
                         Log::warning('Could not get queue statistics: ' . $e->getMessage());
