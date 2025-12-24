@@ -45,7 +45,19 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'api_token',
     ];
+
+    /**
+     * Generate and store a new API token for the user.
+     */
+    public function regenerateApiToken(): string
+    {
+        $token = Str::random(60);
+        $this->forceFill(['api_token' => $token])->save();
+
+        return $token;
+    }
 
     /**
      * Get the attributes that should be cast.

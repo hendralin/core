@@ -71,4 +71,16 @@ class Profile extends Component
 
         Session::flash('status', 'verification-link-sent');
     }
+
+    /**
+     * Regenerate API token for the current user.
+     */
+    public function regenerateApiToken(): void
+    {
+        $user = Auth::user();
+        $user->regenerateApiToken();
+
+        Session::flash('api-token-regenerated', true);
+        Session::flash('new-api-token', $user->api_token);
+    }
 }

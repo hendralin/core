@@ -893,13 +893,90 @@ The application provides RESTful APIs for:
 - `GET /schedules/audit` - Schedules audit trail
 - `POST /schedules/{id}/process` - Manually process specific schedule
 
+#### Messages API Endpoints (RESTful API)
+
+The application provides RESTful APIs for sending WhatsApp messages programmatically. All endpoints require API token authentication.
+
+**Authentication:**
+- Each user automatically receives an `api_token` upon registration or creation
+- Include header: `Authorization: Bearer {api_token}`
+- Token is displayed once after creation - save it securely
+- View and regenerate API token in Settings > Profile
+
+**Base URL:** `http://your-domain.com/api/messages`
+
+**Available Endpoints:**
+
+1. **Send Text Message** - `POST /api/messages/sendText`
+   - Send plain text messages to contacts or groups
+   - Supports scheduled delivery with timezone handling
+   - Parameters: `session_id`, `phone_number` or `group_wa_id`, `message`, `scheduled_at` (optional)
+
+2. **Send Image Message** - `POST /api/messages/sendImage`
+   - Send image messages with optional caption
+   - Parameters: `session_id`, `phone_number` or `group_wa_id`, `image_url`, `caption` (optional), `mimetype` (optional), `filename` (optional), `scheduled_at` (optional)
+
+3. **Send File Message** - `POST /api/messages/sendFile`
+   - Send file messages (PDF, DOC, etc.) with optional caption
+   - Parameters: `session_id`, `phone_number` or `group_wa_id`, `file_url`, `caption` (optional), `mimetype` (optional), `filename` (optional), `scheduled_at` (optional)
+
+4. **Send Custom Link Preview** - `POST /api/messages/link-custom-preview`
+   - Send text messages with custom link preview
+   - Parameters: `session_id`, `phone_number` or `group_wa_id`, `text`, `preview_url`, `preview_title` (optional), `preview_description` (optional), `preview_image_url` (optional), `scheduled_at` (optional)
+
+5. **Send Template Message** - `POST /api/messages/sendTemplate`
+   - Send messages using predefined templates with variable substitution
+   - Parameters: `session_id`, `template_name`, `phone_number` or `group_wa_id`, `placeholder_headers` (array, optional), `placeholders` (array, optional), `scheduled_at` (optional)
+
+**Example Request:**
+```bash
+curl -X POST http://your-domain.com/api/messages/sendText \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -d '{
+    "session_id": "your_waha_session_id",
+    "phone_number": "6281234567890",
+    "message": "Hello, this is a test message"
+  }'
+```
+
+**Response Format:**
+```json
+{
+    "success": true,
+    "message": "Message has been queued for sending.",
+    "data": {
+        "id": 123,
+        "status": "pending",
+        "scheduled_at": null,
+        "created_at": "2024-01-15T10:30:00+00:00"
+    }
+}
+```
+
+**Features:**
+- **Asynchronous Processing**: All messages are queued and processed via Laravel Queue
+- **Timezone Support**: Scheduled messages respect user's timezone settings
+- **Template Variables**: Support for ordered placeholder arrays (`placeholder_headers` and `placeholders`)
+- **Validation**: Comprehensive validation matching web interface rules
+- **Error Handling**: Detailed error messages for validation failures
+- **Status Tracking**: Messages return with `pending` status, updated automatically after processing
+
+For complete API documentation, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+
 ## 🔐 Security
 
-- **Authentication**: Laravel Sanctum for API authentication
+- **Authentication**: API Token-based authentication for RESTful APIs
+  - Each user receives a unique `api_token` upon registration
+  - Tokens can be viewed and regenerated in Settings > Profile
+  - Include `Authorization: Bearer {api_token}` header in API requests
+- **Web Authentication**: Session-based authentication for web interface
 - **Authorization**: Spatie Laravel Permission for role-based access
-- **CSRF Protection**: Built-in Laravel CSRF protection
-- **Input Validation**: Comprehensive server-side validation
+- **CSRF Protection**: Built-in Laravel CSRF protection for web routes
+- **Input Validation**: Comprehensive server-side validation with timezone-aware scheduling
 - **SQL Injection Prevention**: Eloquent ORM with prepared statements
+- **API Token Security**: Tokens are hashed in database, displayed only once after creation
 
 ## 📊 Monitoring & Logging
 
@@ -1112,6 +1189,17 @@ GET /health
 - Ensure all tests pass before submitting PR
 
 ## 📝 Changelog
+
+### Version 1.7.0 🚀
+- **RESTful API**: Complete RESTful API for sending WhatsApp messages programmatically
+- **API Token Authentication**: Secure token-based authentication for API access
+- **Multiple Message Types**: API support for text, image, file, custom link preview, and template messages
+- **Template API**: Send template messages via API with ordered placeholder arrays
+- **Timezone-aware Validation**: API validation matches web interface with timezone support
+- **Comprehensive Validation**: All API endpoints include validation matching web interface rules
+- **API Token Management**: View and regenerate API tokens in Settings > Profile
+- **Asynchronous Processing**: All API messages processed via Laravel Queue
+- **Complete Documentation**: Full API documentation in API_DOCUMENTATION.md
 
 ### Version 1.6.1 📅
 - **Multiple Recipients Support**: Send scheduled messages to multiple contacts, groups, or phone numbers simultaneously

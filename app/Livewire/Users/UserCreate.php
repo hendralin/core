@@ -74,6 +74,7 @@ class UserCreate extends Component
             'email_verified_at' => now(), // Auto-verify for admin-created users
             'is_email_verified' => true,
         ]);
+        $apiToken = $user->regenerateApiToken();
 
         $user->syncRoles($this->roles);
 
@@ -98,6 +99,7 @@ class UserCreate extends Component
             ->log('created a new user account');
 
         session()->flash('success', 'User created.');
+        session()->flash('api_token', $apiToken);
 
         return $this->redirect('/users', true);
     }

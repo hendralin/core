@@ -681,24 +681,33 @@ class MesssagesIndex extends Component
                 // Store image to public storage
                 $imagePath = $this->image->store('images', 'uploads');
                 // Get full URL for the image
-                $fileUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
-                // $fileUrl = asset('uploads/' . $imagePath);
+                if (config('app.env') === 'local') {
+                    $fileUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
+                } else {
+                    $fileUrl = asset('uploads/' . $imagePath);
+                }
                 $fileMimetype = $this->image->getMimeType();
                 $fileFilename = $this->image->getClientOriginalName();
             } elseif ($this->chattingMethods === 'file' && $this->file) {
                 // Store file to public storage
                 $filePath = $this->file->store('files', 'uploads');
                 // Get full URL for the file
-                $fileUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
-                // $fileUrl = asset('uploads/' . $filePath);
+                if (config('app.env') === 'local') {
+                    $fileUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
+                } else {
+                    $fileUrl = asset('uploads/' . $filePath);
+                }
                 $fileMimetype = $this->file->getMimeType();
                 $fileFilename = $this->file->getClientOriginalName();
             } elseif ($this->chattingMethods === 'custom' && $this->customPreviewImage) {
                 // Store custom preview image to public storage
                 $previewImagePath = $this->customPreviewImage->store('images', 'uploads');
                 // Get full URL for the preview image
-                $customPreviewImageUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
-                // $customPreviewImageUrl = asset('uploads/' . $previewImagePath);
+                if (config('app.env') === 'local') {
+                    $customPreviewImageUrl = 'https://github.com/devlikeapro/waha/raw/core/examples/waha.jpg';
+                } else {
+                    $customPreviewImageUrl = asset('uploads/' . $previewImagePath);
+                }
             }
 
             $messageContent = $this->buildMessageContent();
