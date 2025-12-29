@@ -33,10 +33,12 @@ class CompanyLicenseSeeder extends Seeder
                 'max_users' => 5, // Trial limit
                 'max_storage_gb' => 1, // Trial storage limit
                 'features_enabled' => [
-                    'Basic Inventory Management',
-                    'Sales Tracking',
-                    'Basic Reports',
-                    'User Management'
+                    'Company Information',
+                    'Role Management',
+                    'User Management',
+                    'Backup & Restore',
+                    'Audit Trail',
+                    'Activity Log',
                 ],
             ]);
 

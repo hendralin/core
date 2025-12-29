@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Roles;
 
+use App\Models\Role;
 use Livewire\Component;
 use App\Models\Activity;
-use App\Models\Role;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Livewire\WithoutUrlPagination;

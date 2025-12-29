@@ -102,7 +102,7 @@ class RoleService
             ->with('permissions')
             ->withCount('users')
             ->when(auth()->check() && !auth()->user()->hasRole(RoleConstants::SUPERADMIN), function ($q) {
-                $q->whereNotIn('name', [RoleConstants::SALESMAN, RoleConstants::CUSTOMER, RoleConstants::SUPPLIER]);
+                $q->whereNotIn('name', [RoleConstants::USER]);
             })
             ->when($search, fn($q) => $q->where('name', 'like', '%' . $search . '%'))
             ->orderBy($sortField, $sortDirection)

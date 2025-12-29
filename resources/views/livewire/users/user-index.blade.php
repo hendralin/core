@@ -14,7 +14,6 @@
             <x-alert type="error" class="mb-4">{{ $value }}</x-alert>
         @endsession
 
-
         <x-data-table :data="$users" :roles="$roles" :showAdvancedFilters="$showAdvancedFilters" searchable filterable selectable title="Users" placeholder="Search users...">
             <x-slot name="actions">
                 <div class="flex flex-wrap gap-2">
