@@ -14,6 +14,7 @@ class RoleService
     private const PERMISSION_GROUPS = [
         'System' => ['company', 'backup-restore'],
         'Users & Roles' => ['user', 'role'],
+        'Trading Summary' => ['stock-summary'],
     ];
     /**
      * Check if a role can be deleted

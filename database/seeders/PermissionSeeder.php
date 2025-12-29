@@ -32,6 +32,9 @@ class PermissionSeeder extends Seeder
             'backup-restore.download',
             'backup-restore.restore',
             'backup-restore.delete',
+
+            // Trading Summary
+            'stock-summary.view',
         ];
 
         foreach ($permissions as $key => $value) {

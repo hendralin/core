@@ -58,6 +58,14 @@
                     </flux:sidebar.group>
                 @endif
 
+                @if (auth()->user()->can('stock-summary.view'))
+                    <flux:sidebar.group expandable icon="chart-bar" heading="Trading Summary" class="grid">
+                        @if (auth()->user()->can('stock-summary.view'))
+                            <flux:sidebar.item icon="chart-bar" :href="route('stock-summary.index')" :current="request()->routeIs('stock-summary.index')" wire:navigate>{{ __('Stock Summary') }}</flux:sidebar.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endif
+
                 <flux:sidebar.group expandable icon="wrench-screwdriver" heading="Tool" class="grid">
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
                         <flux:sidebar.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup and Restore') }}</flux:sidebar.item>
@@ -161,6 +169,14 @@
                         auth()->user()->can('role.edit') ||
                         auth()->user()->can('role.delete'))
                             <flux:navlist.item icon="link-slash" :href="route('roles.index')" :current="request()->routeIs('roles.*')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
+
+                @if (auth()->user()->can('stock-summary.view'))
+                    <flux:navlist.group :heading="__('Trading Summary')" class="grid">
+                        @if (auth()->user()->can('stock-summary.view'))
+                            <flux:navlist.item icon="chart-bar" :href="route('stock-summary.index')" :current="request()->routeIs('stock-summary.index')" wire:navigate>{{ __('Stock Summary') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

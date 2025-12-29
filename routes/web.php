@@ -18,6 +18,7 @@ use App\Livewire\Company\CompanyShow;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
+use App\Livewire\TradingSummary\StockSummaryIndex;
 
 // License expired page (accessible even when license is expired)
 Route::get('/license-expired', function () {
@@ -64,6 +65,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('roles/create', RoleCreate::class)->name('roles.create')->middleware(['permission:role.create']);
     Route::get('roles/{role}/edit', RoleEdit::class)->name('roles.edit')->middleware(['permission:role.edit']);
     Route::get('roles/{role}', RoleShow::class)->name('roles.show')->middleware(['permission:role.view']);
+
+    Route::get('stock-summary', StockSummaryIndex::class)->name('stock-summary.index')->middleware(['permission:stock-summary.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
