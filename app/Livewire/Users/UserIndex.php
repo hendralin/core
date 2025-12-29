@@ -6,12 +6,13 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
+use App\Constants\RoleConstants;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Log;
 use Livewire\WithoutUrlPagination;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 
 #[Title('Users')]
 class UserIndex extends Component
@@ -64,7 +65,7 @@ class UserIndex extends Component
             ->with('roles')
             ->orderBy($this->sortField, $this->sortDirection)
             ->whereDoesntHave('roles', function ($q) {
-                $q->whereIn('name', ['salesman', 'customer', 'supplier', 'cashier']);
+                $q->whereIn('name', [RoleConstants::USER]);
             })
             ->pluck('id')
             ->toArray();
@@ -89,7 +90,7 @@ class UserIndex extends Component
                 ->with('roles')
                 ->orderBy($this->sortField, $this->sortDirection)
                 ->whereDoesntHave('roles', function ($q) {
-                    $q->whereIn('name', ['salesman', 'customer', 'supplier', 'cashier']);
+                    $q->whereIn('name', [RoleConstants::USER]);
                 })
                 ->pluck('id')
                 ->toArray();
@@ -108,7 +109,7 @@ class UserIndex extends Component
                 ->with('roles')
                 ->orderBy($this->sortField, $this->sortDirection)
                 ->whereDoesntHave('roles', function ($q) {
-                    $q->whereIn('name', ['salesman', 'customer', 'supplier', 'cashier']);
+                    $q->whereIn('name', [RoleConstants::USER]);
                 })
                 ->pluck('id')
                 ->toArray();
@@ -199,7 +200,7 @@ class UserIndex extends Component
 
     public function mount()
     {
-        $this->roles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
+        $this->roles = Role::orderBy('name')->get();
     }
 
     public function delete($id)
@@ -443,7 +444,7 @@ class UserIndex extends Component
             ->when($this->loginDateFrom, fn($q) => $q->whereDate('last_login_at', '>=', $this->loginDateFrom))
             ->when($this->loginDateTo, fn($q) => $q->whereDate('last_login_at', '<=', $this->loginDateTo))
             ->whereDoesntHave('roles', function ($q) {
-                $q->whereIn('name', ['salesman', 'customer', 'supplier', 'cashier']);
+                $q->whereIn('name', [RoleConstants::USER]);
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);

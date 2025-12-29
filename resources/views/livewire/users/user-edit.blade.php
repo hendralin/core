@@ -49,15 +49,16 @@
                 <flux:input wire:model="birth_date" label="Birth Date" type="date" />
                 <flux:textarea wire:model="address" label="Address" placeholder="Address..." />
                 <flux:select wire:model="timezone" label="Timezone">
-                    <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
-                    <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
-                    <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
-                    <option value="UTC">UTC</option>
+                    <flux:select.option value="">Select Timezone</flux:select.option>
+                    <flux:select.option value="Asia/Jakarta">Asia/Jakarta (WIB)</flux:select.option>
+                    <flux:select.option value="Asia/Makassar">Asia/Makassar (WITA)</flux:select.option>
+                    <flux:select.option value="Asia/Jayapura">Asia/Jayapura (WIT)</flux:select.option>
+                    <flux:select.option value="UTC">UTC</flux:select.option>
                 </flux:select>
                 <flux:select wire:model="status" label="Status">
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
-                    <option value="2">Pending</option>
+                    <flux:select.option value="1">Active</flux:select.option>
+                    <flux:select.option value="0">Inactive</flux:select.option>
+                    <flux:select.option value="2">Pending</flux:select.option>
                 </flux:select>
                 <div class="space-y-4">
                     <flux:heading size="sm">Change Password (leave blank to keep current)</flux:heading>

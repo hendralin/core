@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Roles;
 
-use App\Services\RoleService;
-use Livewire\Component;
-use Livewire\Attributes\Title;
 use App\Models\Role;
-use Spatie\Permission\Models\Permission;
+use Livewire\Component;
+use App\Services\RoleService;
+use Livewire\Attributes\Title;
+use App\Constants\RoleConstants;
 use Illuminate\Support\Facades\Auth;
 
 #[Title('Edit Role')]
@@ -68,12 +68,12 @@ class RoleEdit extends Component
                 'unique:roles,name,' . $this->role->id,
                 function ($attribute, $value, $fail) {
                     // Allow editing protected roles but prevent changing their names to other protected names
-                    if (\App\Constants\RoleConstants::isProtected($this->role->name) &&
-                        !\App\Constants\RoleConstants::isProtected($value)) {
+                    if (RoleConstants::isProtected($this->role->name) &&
+                        !RoleConstants::isProtected($value)) {
                         $fail('Cannot change protected system role name.');
                     }
-                    if (!\App\Constants\RoleConstants::isProtected($this->role->name) &&
-                        \App\Constants\RoleConstants::isProtected($value)) {
+                    if (!RoleConstants::isProtected($this->role->name) &&
+                        RoleConstants::isProtected($value)) {
                         $fail('Cannot change to protected system role name.');
                     }
                 }

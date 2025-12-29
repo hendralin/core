@@ -2,15 +2,14 @@
 
 namespace App\Livewire\Roles;
 
-use App\Services\RoleService;
-use App\Constants\RoleConstants;
+use App\Models\Role;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Services\RoleService;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Livewire\WithoutUrlPagination;
-use App\Models\Role;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Roles')]
 class RoleIndex extends Component
