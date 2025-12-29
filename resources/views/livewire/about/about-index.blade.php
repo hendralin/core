@@ -1,6 +1,6 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('About Boilerplate') }}</flux:heading>
+        <flux:heading size="xl" level="1">{{ __('About Bandar Saham') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Informasi sistem dan aplikasi') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
@@ -11,14 +11,14 @@
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                 <flux:heading size="lg" class="mb-4 flex items-center gap-2">
                     <flux:icon.information-circle class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    Boilerplate Information
+                    Bandar Saham Information
                 </flux:heading>
 
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <flux:heading size="sm" level="3">Application Name</flux:heading>
-                            <flux:text class="text-lg font-semibold">Boilerplate</flux:text>
+                            <flux:text class="text-lg font-semibold">Bandar Saham</flux:text>
                         </div>
                         <div>
                             <flux:heading size="sm" level="3">Version</flux:heading>

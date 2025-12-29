@@ -5,7 +5,7 @@ namespace App\Livewire\About;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 
-#[Title('About Boilerplate v1.0.0')]
+#[Title('About Bandar Saham v1.0.0')]
 class AboutIndex extends Component
 {
     public function render()
