@@ -6,87 +6,87 @@
     </div>
 
     <!-- Filters Section -->
-    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 mb-6">
-        <div class="p-4 border-b border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/80">
-            <div class="flex flex-col lg:flex-row lg:items-end gap-4">
-                <!-- Per Page Selector -->
-                <flux:select wire:model.live="perPage" label="Per Page">
-                    @foreach ($this->perPageOptions as $option)
-                    <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
-                    @endforeach
-                </flux:select>
+    <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6 mt-6 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+            <!-- Per Page Selector -->
+            <flux:select wire:model.live="perPage" label="Per Page">
+                @foreach ($this->perPageOptions as $option)
+                <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
+                @endforeach
+            </flux:select>
 
-                <!-- Search Input -->
-                <div class="flex-1 min-w-0">
-                    <flux:input
-                        wire:model.live.debounce.300ms="search"
-                        label="{{ __('Search') }}"
-                        placeholder="{{ __('Stock code or company name...') }}"
-                        icon="magnifying-glass"
-                        clearable />
-                </div>
+            <!-- Search Input -->
+            <div class="flex-1 min-w-0">
+                <flux:input
+                    wire:model.live.debounce.300ms="search"
+                    label="{{ __('Search') }}"
+                    placeholder="{{ __('Stock code or company name...') }}"
+                    icon="magnifying-glass"
+                    clearable />
+            </div>
 
-                <!-- Trading Date -->
-                <div class="w-full lg:w-48">
-                    <flux:input
-                        type="date"
-                        wire:model.live="date"
-                        label="{{ __('Trading Date') }}" />
-                </div>
+            <!-- Trading Date -->
+            <div class="w-full lg:w-48">
+                <flux:input
+                    type="date"
+                    wire:model.live="date"
+                    label="{{ __('Trading Date') }}" />
+            </div>
 
-                <!-- Column Visibility -->
-                <div class="shrink-0">
-                    <flux:dropdown>
-                        <flux:button icon="view-columns">
-                            {{ __('Columns') }}
-                            <flux:badge size="sm" color="blue" class="ml-1">{{ $this->visibleColumnCount }}</flux:badge>
-                        </flux:button>
+            <!-- Column Visibility -->
+            <div class="shrink-0">
+                <flux:dropdown>
+                    <flux:button icon="view-columns">
+                        {{ __('Columns') }}
+                        <flux:badge size="sm" color="blue" class="ml-1">{{ $this->visibleColumnCount }}</flux:badge>
+                    </flux:button>
 
-                        <flux:menu class="w-64 max-h-80 overflow-y-auto">
-                            <flux:menu.heading>{{ __('Toggle Columns') }}</flux:menu.heading>
+                    <flux:menu class="w-64 max-h-80 overflow-y-auto">
+                        <flux:menu.heading>{{ __('Toggle Columns') }}</flux:menu.heading>
 
-                            <!-- Select All / Deselect All -->
-                            @if($this->isAllColumnsSelected)
-                                <flux:menu.item wire:click="deselectAllColumns">
-                                    <div class="flex items-center justify-between w-full font-medium">
-                                        <span>{{ __('Deselect All') }}</span>
-                                        <flux:icon.x-mark class="size-4 text-red-500" />
-                                    </div>
-                                </flux:menu.item>
-                            @else
-                                <flux:menu.item wire:click="selectAllColumns">
-                                    <div class="flex items-center justify-between w-full font-medium">
-                                        <span>{{ __('Select All') }}</span>
-                                        <flux:icon.check-circle class="size-4 text-green-500" />
-                                    </div>
-                                </flux:menu.item>
-                            @endif
-
-                            <flux:menu.separator />
-
-                            @foreach($availableColumns as $column => $config)
-                                <flux:menu.item wire:click="toggleColumn('{{ $column }}')">
-                                    <div class="flex items-center justify-between w-full">
-                                        <span>{{ __($config['label']) }}</span>
-                                        @if(in_array($column, $visibleColumns))
-                                            <flux:icon.check class="size-4 text-green-500" />
-                                        @endif
-                                    </div>
-                                </flux:menu.item>
-                            @endforeach
-
-                            <flux:menu.separator />
-
-                            <flux:menu.item wire:click="resetColumns">
-                                <div class="flex items-center text-blue-600 dark:text-blue-400">
-                                    <flux:icon.arrow-path class="size-4 mr-2" />
-                                    {{ __('Reset to Default') }}
+                        <!-- Select All / Deselect All -->
+                        @if($this->isAllColumnsSelected)
+                            <flux:menu.item wire:click="deselectAllColumns">
+                                <div class="flex items-center justify-between w-full font-medium">
+                                    <span>{{ __('Deselect All') }}</span>
+                                    <flux:icon.x-mark class="size-4 text-red-500" />
                                 </div>
                             </flux:menu.item>
-                        </flux:menu>
-                    </flux:dropdown>
-                </div>
+                        @else
+                            <flux:menu.item wire:click="selectAllColumns">
+                                <div class="flex items-center justify-between w-full font-medium">
+                                    <span>{{ __('Select All') }}</span>
+                                    <flux:icon.check-circle class="size-4 text-green-500" />
+                                </div>
+                            </flux:menu.item>
+                        @endif
 
+                        <flux:menu.separator />
+
+                        @foreach($availableColumns as $column => $config)
+                            <flux:menu.item wire:click="toggleColumn('{{ $column }}')">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>{{ __($config['label']) }}</span>
+                                    @if(in_array($column, $visibleColumns))
+                                        <flux:icon.check class="size-4 text-green-500" />
+                                    @endif
+                                </div>
+                            </flux:menu.item>
+                        @endforeach
+
+                        <flux:menu.separator />
+
+                        <flux:menu.item wire:click="resetColumns">
+                            <div class="flex items-center text-blue-600 dark:text-blue-400">
+                                <flux:icon.arrow-path class="size-4 mr-2" />
+                                {{ __('Reset to Default') }}
+                            </div>
+                        </flux:menu.item>
+                    </flux:menu>
+                </flux:dropdown>
+            </div>
+
+            <div class="flex items-center gap-2">
                 <!-- Clear Filters Button -->
                 <div class="shrink-0">
                     <flux:button variant="ghost" wire:click="clearFilters" icon="x-mark">
@@ -95,15 +95,17 @@
                 </div>
 
                 <!-- Loading Indicator -->
-                <div wire:loading class="shrink-0">
-                    <flux:icon.loading class="text-blue-600 size-6" />
+                <div class="hidden md:block">
+                    <div wire:loading class="shrink-0">
+                        <flux:icon.loading class="text-blue-600 size-4 mt-2" />
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Data Table -->
-    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 overflow-hidden mb-6">
+    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden mb-6">
         <!-- Table -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -144,8 +146,12 @@
                             </td>
 
                             @if(in_array('kode_emiten', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-zinc-100">
-                                    {{ $stock->kode_emiten }}
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-semibold">
+                                    <a href="{{ route('stock-summary.detail', $stock->kode_emiten) }}"
+                                       class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors"
+                                       wire:navigate>
+                                        {{ $stock->kode_emiten }}
+                                    </a>
                                 </td>
                             @endif
 
