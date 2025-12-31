@@ -4,6 +4,8 @@ namespace App\Livewire\TradingSummary;
 
 use App\Models\TradingInfo;
 use App\Models\StockCompany;
+use App\Models\News;
+use App\Models\LqCompany;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Collection;
@@ -15,6 +17,30 @@ class StockSummaryDetail extends Component
     public ?StockCompany $company = null;
     public ?TradingInfo $latestTrading = null;
     public Collection $tradingHistory;
+    public Collection $news;
+    public bool $showNewsModal = false;
+    public ?News $selectedNews = null;
+
+    public function openNewsModal(string $itemId): void
+    {
+        $this->selectedNews = $this->news->firstWhere('item_id', $itemId);
+        $this->showNewsModal = true;
+    }
+
+    public function closeNewsModal(): void
+    {
+        $this->showNewsModal = false;
+        $this->selectedNews = null;
+    }
+
+    public function getIsLq45Property(): bool
+    {
+        if (!$this->company) {
+            return false;
+        }
+
+        return LqCompany::where('kode_emiten', $this->company->kode_emiten)->exists();
+    }
     public string $period = '30'; // Days
     public bool $isCustomRange = false; // True when chart has been panned
 
@@ -48,6 +74,7 @@ class StockSummaryDetail extends Component
             ->first();
 
         $this->loadTradingHistory();
+        $this->loadNews();
     }
 
     private function loadTradingHistory(): void
@@ -65,6 +92,108 @@ class StockSummaryDetail extends Component
         }
 
         $this->tradingHistory = $query->get();
+    }
+
+    private function loadNews(): void
+    {
+        $query = News::query();
+
+        // Build comprehensive search conditions
+        $query->where(function ($q) {
+            // Primary search: stock code
+            $q->where('tags', 'like', '%' . $this->stockCode . '%')
+              ->orWhere('summary', 'like', '%' . $this->stockCode . '%')
+              ->orWhere('contents', 'like', '%' . $this->stockCode . '%');
+
+            // Enhanced company-based keyword search
+            if ($this->company && $this->company->nama_emiten) {
+                // Search by full company name
+                $q->orWhere('title', 'like', '%' . $this->company->nama_emiten . '%')
+                  ->orWhere('summary', 'like', '%' . $this->company->nama_emiten . '%')
+                  ->orWhere('contents', 'like', '%' . $this->company->nama_emiten . '%');
+
+                // Split company name by words, exclude common corporate terms
+                $companyKeywords = $this->getCompanyNameKeywords($this->company->nama_emiten);
+
+                foreach ($companyKeywords as $keyword) {
+                    if (strlen($keyword) >= 3) { // Minimum 3 characters for meaningful search
+                        $q->orWhere('title', 'like', '%' . $keyword . '%')
+                          ->orWhere('summary', 'like', '%' . $keyword . '%')
+                          ->orWhere('contents', 'like', '%' . $keyword . '%')
+                          ->orWhere('tags', 'like', '%' . $keyword . '%');
+                    }
+                }
+
+                // Search by sector if available
+                if ($this->company->sektor) {
+                    $q->orWhere('title', 'like', '%' . $this->company->sektor . '%')
+                      ->orWhere('summary', 'like', '%' . $this->company->sektor . '%')
+                      ->orWhere('contents', 'like', '%' . $this->company->sektor . '%');
+                }
+
+                // Search by industry if available
+                if ($this->company->industri) {
+                    $q->orWhere('title', 'like', '%' . $this->company->industri . '%')
+                      ->orWhere('summary', 'like', '%' . $this->company->industri . '%')
+                      ->orWhere('contents', 'like', '%' . $this->company->industri . '%');
+                }
+            }
+        });
+
+        $this->news = $query->orderBy('published_date', 'desc')
+                           ->limit(10)
+                           ->get();
+    }
+
+    /**
+     * Extract meaningful keywords from company name for broader search
+     */
+    private function extractKeywordsFromCompanyName(string $companyName): array
+    {
+        // Remove common words and extract meaningful parts
+        $cleanName = preg_replace('/\b(PT|Persero|Tbk|Tbk\.|Tbk|PT\.|Ltd|Co|Corp|Inc|Plc|BV|GmbH|SA|NV|Sdn|Bhd|Pte|Ltd)\b/i', '', $companyName);
+
+        // Split by spaces, dots, commas, and other separators
+        $parts = preg_split('/[\s\.,\-\(\)]+/', $cleanName);
+
+        // Filter out empty strings and very short words
+        $keywords = array_filter($parts, function($part) {
+            return !empty(trim($part)) && strlen(trim($part)) > 2;
+        });
+
+        return array_unique($keywords);
+    }
+
+    /**
+     * Extract keywords from company name specifically for news search (split per word, exclude PT/Tbk)
+     */
+    private function getCompanyNameKeywords(string $companyName): array
+    {
+        // Define common corporate terms to exclude
+        $excludeTerms = [
+            'PT', 'Tbk', 'Persero', 'Ltd', 'Co', 'Corp', 'Inc', 'Plc', 'BV', 'GmbH',
+            'SA', 'NV', 'Sdn', 'Bhd', 'Pte', 'Ltd', 'Corporation', 'Company', 'Limited',
+            'Incorporated', 'Berhad', 'Sendirian', 'Maju', 'Utama', 'Indonesia', 'Indo',
+            'Asia', 'Pacific', 'International', 'Global', 'Holding', 'Group', 'Jaya',
+            'Makmur', 'Prima', 'Sakti', 'Abadi', 'Sejahtera', 'Sentosa', 'Sukses'
+        ];
+
+        // Clean the company name by removing common corporate prefixes/suffixes
+        $cleanName = preg_replace('/\b(' . implode('|', $excludeTerms) . ')\b/i', '', $companyName);
+
+        // Split by spaces, dots, commas, hyphens, and parentheses
+        $words = preg_split('/[\s\.,\-\(\)\&]+/', $cleanName);
+
+        // Filter out empty strings, very short words, and excluded terms
+        $keywords = array_filter($words, function($word) use ($excludeTerms) {
+            $word = trim($word);
+            return !empty($word) &&
+                   strlen($word) >= 3 && // Minimum 3 characters
+                   !in_array(strtolower($word), array_map('strtolower', $excludeTerms));
+        });
+
+        // Remove duplicates and return
+        return array_unique(array_values($keywords));
     }
 
     /**

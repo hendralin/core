@@ -226,6 +226,82 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- News -->
+                <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                        <span class="text-gray-900 dark:text-white font-medium text-sm">Latest News</span>
+                    </div>
+                    @if($news->isNotEmpty())
+                        <div class="divide-y divide-gray-100 dark:divide-zinc-800 max-h-96 overflow-y-auto">
+                            @foreach($news as $newsItem)
+                                <div wire:click="openNewsModal('{{ $newsItem->item_id }}')" class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer">
+                                    <div class="flex gap-3">
+                                        @if($newsItem->image_url)
+                                            <div class="shrink-0">
+                                                <img
+                                                    src="//idx.co.id{{ $newsItem->image_url }}"
+                                                    alt="{{ $newsItem->title }}"
+                                                    class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-zinc-700"
+                                                    onerror="this.style.display='none'"
+                                                />
+                                            </div>
+                                        @endif
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
+                                                    {{ $newsItem->title }}
+                                                </h4>
+                                                @if($newsItem->is_headline)
+                                                    <span class="shrink-0 px-2 py-0.5 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium rounded">
+                                                        Headline
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            @if($newsItem->summary)
+                                                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                                                    {{ $newsItem->summary }}
+                                                </p>
+                                            @endif
+                                            <div class="flex items-center gap-2 mt-2">
+                                                <span class="text-xs text-gray-400 dark:text-zinc-500">
+                                                    {{ $newsItem->published_date->format('d M Y, H:i') }}
+                                                </span>
+                                                @if($newsItem->tags)
+                                                    <div class="flex flex-wrap gap-1">
+                                                        @php
+                                                            $tags = explode(',', $newsItem->tags);
+                                                        @endphp
+                                                        @foreach($tags as $tag)
+                                                            @if(trim($tag) === $stockCode)
+                                                                <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-xs font-medium rounded">
+                                                                    {{ trim($tag) }}
+                                                                </span>
+                                                            @else
+                                                                <span class="px-2 py-0.5 bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-zinc-400 text-xs rounded">
+                                                                    {{ trim($tag) }}
+                                                                </span>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="px-4 py-8 text-center">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                                <flux:icon.newspaper class="size-6 text-gray-400 dark:text-zinc-600" />
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-zinc-400">
+                                No news available for {{ $stockCode }}
+                            </p>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <!-- Right Sidebar -->
@@ -359,6 +435,17 @@
                                 <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Industry</div>
                                 <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->industri ?? '-' }}</div>
                             </div>
+                            @if($this->isLq45)
+                                <div class="px-4 py-2">
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Index Membership</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                                            <flux:icon.check-circle class="size-3" />
+                                            LQ45
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="px-4 py-2">
                                 <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Listing Date</div>
                                 <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->tanggal_pencatatan?->format('d M Y') ?? '-' }}</div>
@@ -394,6 +481,93 @@
             </div>
         </div>
     @endif
+
+    <!-- News Detail Modal -->
+    <flux:modal wire:model.self="showNewsModal" class="max-w-4xl max-h-[90vh] overflow-y-auto">
+        @if($selectedNews)
+            <div class="space-y-2">
+                <!-- Header -->
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ $selectedNews->title }}
+                        </h1>
+                        @if($selectedNews->is_headline)
+                            <span class="inline-block mt-2 px-3 py-1 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium rounded-full">
+                                Headline News
+                            </span>
+                        @endif
+                    </div>
+                    @if($selectedNews->image_url)
+                        <div class="shrink-0">
+                            <img
+                                src="https://idx.co.id{{ $selectedNews->image_url }}"
+                                alt="{{ $selectedNews->title }}"
+                                class="w-24 h-24 object-cover rounded-lg border border-gray-200 dark:border-zinc-700"
+                                onerror="this.style.display='none'"
+                            />
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Meta Information -->
+                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
+                    <span class="flex items-center gap-1">
+                        <flux:icon.calendar class="size-4" />
+                        {{ $selectedNews->published_date->format('l, d F Y \a\t H:i') }}
+                    </span>
+                    @if($selectedNews->tags)
+                        <div class="flex flex-wrap gap-1">
+                            <span class="text-gray-400 dark:text-zinc-500">Tags:</span>
+                            @php
+                                $tags = explode(',', $selectedNews->tags);
+                            @endphp
+                            @foreach($tags as $tag)
+                                @if(trim($tag) === $stockCode)
+                                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-xs font-medium rounded">
+                                        {{ trim($tag) }}
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-zinc-400 text-xs rounded">
+                                        {{ trim($tag) }}
+                                    </span>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Full Content -->
+                @if($selectedNews->contents)
+                    <div class="prose prose-sm dark:prose-invert max-w-none">
+                        <div class="text-gray-700 dark:text-zinc-300 leading-relaxed">
+                            {!! $selectedNews->contents !!}
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Footer Actions -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                    <flux:modal.close>
+                        <flux:button variant="ghost">Close</flux:button>
+                    </flux:modal.close>
+                    @if($selectedNews->path_base && $selectedNews->path_file)
+                        <a
+                            href="https://idx.co.id{{ $selectedNews->path_base }}{{ $selectedNews->path_file }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex"
+                        >
+                            <flux:button variant="primary">
+                                <flux:icon.arrow-up-right class="size-4 mr-2" />
+                                View Original
+                            </flux:button>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @endif
+    </flux:modal>
 </div>
 
 @push('scripts')
