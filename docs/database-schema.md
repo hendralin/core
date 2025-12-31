@@ -21,6 +21,10 @@ stock_companies (Master)
     ├── company_bond_details
     ├── financial_ratios
     └── trading_infos
+
+idx_news (News)
+    │
+    └── (Independent table for IDX news data)
 ```
 
 ---
@@ -324,6 +328,37 @@ Data trading harian.
 
 **Indexes:** `kode_emiten`, `date`
 **Unique:** `kode_emiten` + `date`
+
+---
+
+## Tabel: `idx_news`
+
+Data berita dari Bursa Efek Indonesia (IDX).
+
+| Kolom | Tipe | Deskripsi |
+|-------|------|-----------|
+| `id` | bigint | Primary key |
+| `item_id` | varchar(50) | **ID unik berita dari IDX (UNIQUE)** |
+| `published_date` | datetime | Tanggal publikasi berita |
+| `image_url` | varchar(500) | URL gambar berita |
+| `locale` | varchar(10) | Bahasa berita (default: 'en-us') |
+| `title` | varchar(500) | Judul berita |
+| `path_base` | varchar(255) | Path base (nullable) |
+| `path_file` | varchar(255) | Path file (nullable) |
+| `tags` | varchar(255) | Tag berita (comma-separated) |
+| `is_headline` | boolean | Flag berita headline |
+| `summary` | text | Ringkasan berita |
+| `contents` | longtext | Konten lengkap berita (HTML) |
+| `created_at` | timestamp | Waktu dibuat |
+| `updated_at` | timestamp | Waktu diupdate |
+
+**Indexes:** `item_id` (unique), `published_date`, `is_headline`
+**Foreign Keys:** None (independent table)
+
+**Catatan:**
+- Field `contents` menyimpan HTML lengkap dari berita IDX
+- Data berita diimport dari 2 sumber file JSON
+- `item_id` digunakan sebagai unique identifier dari IDX
 
 ---
 

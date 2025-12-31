@@ -50,7 +50,36 @@ php artisan stock:import-trading path/to/data/trading/
 
 # 5. Import data trading harian (JSON semua saham)
 php artisan stock:import-trading-json path/to/data/trading_summary.json
+
+# 6. Import berita IDX (basic + detailed)
+php artisan idx:import-news
+
+# 7. Import detail berita IDX (konten lengkap)
+php artisan idx:import-news-details
 ```
+
+### Import News IDX
+
+```bash
+# Import berita IDX lengkap (menggabungkan basic + detailed)
+php artisan idx:import-news --truncate
+
+# Import berita IDX dengan update data yang sudah ada
+php artisan idx:import-news --update
+
+# Import detail berita IDX saja (untuk update konten)
+php artisan idx:import-news-details --force
+
+# Import dengan file path custom
+php artisan idx:import-news --basic-file=data/news/basic.json --detailed-file=data/news/detailed.json
+```
+
+**Catatan:**
+- Command `idx:import-news` akan menggabungkan data dari kedua file JSON
+- Command `idx:import-news-details` hanya untuk update konten detail berita
+- Gunakan `--truncate` untuk menghapus data lama sebelum import
+- Gunakan `--update` untuk update data yang sudah ada
+- Gunakan `--force` untuk skip konfirmasi
 
 ## Tech Stack
 
@@ -62,13 +91,16 @@ php artisan stock:import-trading-json path/to/data/trading_summary.json
 ## Struktur Folder Data
 
 ```
-storage/app/data/
+data/
+├── news/
+│   ├── idx_news_20250101_to_20251230.json              # Data berita IDX (basic)
+│   └── idx_news_detailed_20250101_to_20251230.json     # Data berita IDX (detailed)
 ├── stock_companies.json      # Data perusahaan tercatat
 ├── company_details.json      # Detail perusahaan (direksi, komisaris, dll)
 ├── financial_ratios.json     # Rasio keuangan
 ├── stock_summary/            # Data trading harian (JSON)
-|   ├── 20251223.json
-|   ├── 20251224.json
+│   ├── 20251223.json
+│   ├── 20251224.json
 └── trading/                  # Data trading harian (CSV per saham)
     ├── AADI.csv
     ├── AALI.csv

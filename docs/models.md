@@ -351,6 +351,83 @@ $bond->formatted_nominal; // "IDR 316.000.000.000"
 
 ---
 
+## News
+
+Model untuk data berita IDX.
+
+**File:** `app/Models/News.php`
+
+### Properties
+
+```php
+protected $table = 'idx_news';
+
+protected $fillable = [
+    'item_id',
+    'published_date',
+    'image_url',
+    'locale',
+    'title',
+    'path_base',
+    'path_file',
+    'tags',
+    'is_headline',
+    'summary',
+    'contents',
+];
+
+protected $casts = [
+    'published_date' => 'datetime',
+    'is_headline' => 'boolean',
+];
+```
+
+### Relasi
+
+```php
+// Belongs To (None - independent table)
+```
+
+### Scopes
+
+```php
+// Filter by headline
+News::headline()->get();
+
+// Filter by date range
+News::whereBetween('published_date', ['2025-01-01', '2025-12-31'])->get();
+
+// Filter by tags
+News::where('tags', 'like', '%SUPA%')->get();
+
+// Filter by locale
+News::where('locale', 'en-us')->get();
+```
+
+### Methods
+
+```php
+// Get plain text content (strip HTML)
+public function getPlainContentAttribute()
+{
+    return strip_tags($this->contents);
+}
+
+// Get tag array
+public function getTagArrayAttribute()
+{
+    return $this->tags ? explode(',', $this->tags) : [];
+}
+
+// Check if news has full content
+public function hasFullContent()
+{
+    return !empty($this->contents);
+}
+```
+
+---
+
 ## Query Contoh
 
 ### Top 10 Saham by Market Cap
@@ -383,6 +460,45 @@ $foreignFlow = TradingInfo::join('stock_companies', 'trading_infos.kode_emiten',
     ->whereDate('date', '>=', now()->subDays(30))
     ->groupBy('stock_companies.sektor')
     ->orderByDesc('net_foreign')
+    ->get();
+```
+
+### Berita IDX Terbaru
+
+```php
+$latestNews = News::orderByDesc('published_date')
+    ->limit(10)
+    ->get();
+```
+
+### Berita Headline
+
+```php
+$headlines = News::headline()
+    ->orderByDesc('published_date')
+    ->limit(5)
+    ->get();
+```
+
+### Berita dengan Konten Lengkap
+
+```php
+$newsWithContent = News::whereNotNull('contents')
+    ->where('contents', '!=', '')
+    ->count();
+
+$recentNewsWithContent = News::whereNotNull('contents')
+    ->where('published_date', '>=', now()->subDays(7))
+    ->orderByDesc('published_date')
+    ->get();
+```
+
+### Statistik Berita per Bulan
+
+```php
+$newsStats = News::selectRaw('YEAR(published_date) as year, MONTH(published_date) as month, COUNT(*) as total')
+    ->groupByRaw('YEAR(published_date), MONTH(published_date)')
+    ->orderByRaw('YEAR(published_date) DESC, MONTH(published_date) DESC')
     ->get();
 ```
 

@@ -310,6 +310,112 @@ php artisan stock:import-trading-json path/to/data/trading_2025-05-09.json --upd
 
 ---
 
+## 6. Import IDX News
+
+Mengimport berita dari Bursa Efek Indonesia (IDX).
+
+### Import News Lengkap
+
+```bash
+php artisan idx:import-news [options]
+```
+
+#### Options
+
+| Option | Deskripsi |
+|--------|-----------|
+| `--basic-file=<file>` | Path ke file JSON berita basic |
+| `--detailed-file=<file>` | Path ke file JSON berita detailed |
+| `--truncate` | Hapus semua data sebelum import |
+| `--update` | Update record yang sudah ada |
+
+#### Format JSON Basic
+
+File: `idx_news_20250101_to_20251230.json`
+
+```json
+{
+  "total": 263,
+  "data": [
+    {
+      "Id": 11536,
+      "ItemId": "02a8db5b-abdc-f011-b13a-0050569d3b40",
+      "PublishedDate": "2025-12-19T14:21:09",
+      "ImageUrl": "/media/1557/logo-bursa-efek-indonesia-final.jpg",
+      "Locale": "en-us",
+      "Title": "Listing of Obligasi Berkelanjutan IV Bumi Serpong Damai...",
+      "PathBase": null,
+      "PathFile": null,
+      "Tags": "Obligasi,BSDE",
+      "IsHeadline": false,
+      "Summary": "Listing of Obligasi Berkelanjutan IV Bumi Serpong Damai..."
+    }
+  ]
+}
+```
+
+#### Format JSON Detailed
+
+File: `idx_news_detailed_20250101_to_20251230.json`
+
+```json
+{
+  "total": 263,
+  "data": [
+    {
+      "Id": 11536,
+      "ItemId": "02a8db5b-abdc-f011-b13a-0050569d3b40",
+      "PublishedDate": "2025-12-19T14:21:09",
+      "ImageUrl": "/media/1557/logo-bursa-efek-indonesia-final.jpg",
+      "Locale": "en-us",
+      "Title": "Listing of Obligasi Berkelanjutan IV Bumi Serpong Damai...",
+      "Contents": "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n<p>On 18 December 2025...</p>\n</body>\n</html>"
+    }
+  ]
+}
+```
+
+### Import News Details
+
+```bash
+php artisan idx:import-news-details [file] [options]
+```
+
+#### Arguments
+
+| Argument | Deskripsi |
+|----------|-----------|
+| `file` | Path ke file JSON berita detailed (opsional) |
+
+#### Options
+
+| Option | Deskripsi |
+|--------|-----------|
+| `--create-missing` | Buat record baru jika ItemId tidak ditemukan |
+| `--force` | Skip konfirmasi prompt |
+
+### Contoh Penggunaan
+
+```bash
+# Import berita lengkap (basic + detailed)
+php artisan idx:import-news
+
+# Import fresh (hapus semua data lama)
+php artisan idx:import-news --truncate
+
+# Import dengan update existing records
+php artisan idx:import-news --update
+
+# Import dengan file path custom
+php artisan idx:import-news --basic-file=data/news/basic.json --detailed-file=data/news/detailed.json
+
+# Import detail berita saja (update konten)
+php artisan idx:import-news-details
+php artisan idx:import-news-details data/news/detailed.json --force
+```
+
+---
+
 ## Ringkasan Commands
 
 | Command | Format | Input | Deskripsi |
@@ -319,6 +425,8 @@ php artisan stock:import-trading-json path/to/data/trading_2025-05-09.json --upd
 | `stock:import-ratios` | JSON | 1 file | Rasio keuangan |
 | `stock:import-trading` | CSV | Folder (1 file/saham) | Data trading harian |
 | `stock:import-trading-json` | JSON | 1 file | Data trading harian |
+| `idx:import-news` | JSON | 2 files | Berita IDX (basic + detailed) |
+| `idx:import-news-details` | JSON | 1 file | Detail berita IDX (konten lengkap) |
 
 ---
 
@@ -338,6 +446,9 @@ php artisan stock:import-ratios data/financial_ratios.json
 php artisan stock:import-trading-json data/trading_summary.json
 # atau
 php artisan stock:import-trading data/trading/
+
+# 5. Import berita IDX
+php artisan idx:import-news
 ```
 
 ---
@@ -366,5 +477,35 @@ Tambahkan memory limit di php.ini atau gunakan flag:
 
 ```bash
 php -d memory_limit=512M artisan stock:import-trading path/to/data/trading/
+```
+
+### Error: "File not found" pada news import
+
+Pastikan file berada di lokasi yang benar:
+
+```bash
+# File harus ada di:
+data/news/idx_news_20250101_to_20251230.json
+data/news/idx_news_detailed_20250101_to_20251230.json
+
+# Atau gunakan path lengkap:
+php artisan idx:import-news --basic-file=/full/path/to/basic.json --detailed-file=/full/path/to/detailed.json
+```
+
+### Import news details tidak update data
+
+Gunakan option `--force` untuk skip konfirmasi:
+
+```bash
+php artisan idx:import-news-details --force
+```
+
+### Memory limit untuk file berita besar
+
+Berita dengan konten HTML yang besar membutuhkan memory lebih:
+
+```bash
+php -d memory_limit=256M artisan idx:import-news
+php -d memory_limit=256M artisan idx:import-news-details --force
 ```
 
