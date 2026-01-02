@@ -420,6 +420,104 @@
                     </div>
                 </div>
 
+                @if($financialRatio)
+                    <!-- Financial Ratio -->
+                    <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                        <div class="px-4 py-2 border-gray-200 dark:border-zinc-700 flex items-center justify-between">
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Financial Ratio</span>
+                            <div class="flex items-center gap-1">
+                                @if($financialRatio->isSharia())
+                                    <span class="px-1.5 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-[10px] font-medium rounded">Sharia</span>
+                                @endif
+                                <span class="px-1.5 py-0.5 {{ $financialRatio->isAudited() ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' : 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' }} text-[10px] font-medium rounded">
+                                    {{ $financialRatio->audit_label }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                            <!-- Report Date -->
+                            <div class="px-4 py-2 flex items-center justify-between bg-gray-50 dark:bg-zinc-800/50">
+                                <span class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Report Date</span>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ $financialRatio->fs_date?->format('d M Y') ?? '-' }}</span>
+                            </div>
+
+                            <!-- Valuation Metrics -->
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">PBV</span>
+                                <span class="text-xs font-medium {{ $financialRatio->price_bv && $financialRatio->price_bv < 1 ? 'text-green-600 dark:text-green-400' : ($financialRatio->price_bv && $financialRatio->price_bv > 3 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->price_bv ? number_format($financialRatio->price_bv, 2, ',', '.') . 'x' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">PER</span>
+                                <span class="text-xs font-medium {{ $financialRatio->per && $financialRatio->per < 15 ? 'text-green-600 dark:text-green-400' : ($financialRatio->per && $financialRatio->per > 25 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->per ? number_format($financialRatio->per, 2, ',', '.') . 'x' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">EPS</span>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->eps ? number_format($financialRatio->eps, 2, ',', '.') : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">Book Value</span>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->book_value ? number_format($financialRatio->book_value, 2, ',', '.') : '-' }}
+                                </span>
+                            </div>
+
+                            <!-- Profitability Metrics -->
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">ROE</span>
+                                <span class="text-xs font-medium {{ $financialRatio->roe && $financialRatio->roe > 15 ? 'text-green-600 dark:text-green-400' : ($financialRatio->roe && $financialRatio->roe < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->roe ? number_format($financialRatio->roe, 2, ',', '.') . '%' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">ROA</span>
+                                <span class="text-xs font-medium {{ $financialRatio->roa && $financialRatio->roa > 10 ? 'text-green-600 dark:text-green-400' : ($financialRatio->roa && $financialRatio->roa < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->roa ? number_format($financialRatio->roa, 2, ',', '.') . '%' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">NPM</span>
+                                <span class="text-xs font-medium {{ $financialRatio->npm && $financialRatio->npm > 10 ? 'text-green-600 dark:text-green-400' : ($financialRatio->npm && $financialRatio->npm < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->npm ? number_format($financialRatio->npm, 2, ',', '.') . '%' : '-' }}
+                                </span>
+                            </div>
+
+                            <!-- Leverage -->
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">DER</span>
+                                <span class="text-xs font-medium {{ $financialRatio->de_ratio && $financialRatio->de_ratio < 1 ? 'text-green-600 dark:text-green-400' : ($financialRatio->de_ratio && $financialRatio->de_ratio > 2 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->de_ratio ? number_format($financialRatio->de_ratio, 2, ',', '.') . 'x' : '-' }}
+                                </span>
+                            </div>
+
+                            <!-- Financial Position (in Billions) -->
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">Assets</span>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->assets ? number_format($financialRatio->assets, 2, ',', '.') . ' B' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">Equity</span>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->equity ? number_format($financialRatio->equity, 2, ',', '.') . ' B' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-2 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">Sales</span>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->sales ? number_format($financialRatio->sales, 2, ',', '.') . ' B' : '-' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 @if($company)
                     <!-- Company Info -->
                     <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">

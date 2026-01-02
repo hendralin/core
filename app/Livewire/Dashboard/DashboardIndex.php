@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\TradingInfo;
-use App\Models\StockCompany;
 use App\Models\News;
-use App\Models\LqCompany;
 use App\Models\User;
 use Livewire\Component;
+use App\Models\LqCompany;
+use App\Models\TradingInfo;
+use App\Models\StockCompany;
+use App\Models\FinancialRatio;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,7 @@ class DashboardIndex extends Component
     public string $stockCode = '';
     public ?StockCompany $company = null;
     public ?TradingInfo $latestTrading = null;
+    public ?FinancialRatio $financialRatio = null;
     public Collection $tradingHistory;
     public Collection $news;
     public bool $showNewsModal = false;
@@ -187,6 +189,11 @@ class DashboardIndex extends Component
 
         $this->latestTrading = TradingInfo::where('kode_emiten', $this->stockCode)
             ->orderBy('date', 'desc')
+            ->first();
+
+        // Load latest financial ratio data
+        $this->financialRatio = FinancialRatio::where('code', $this->stockCode)
+            ->orderBy('fs_date', 'desc')
             ->first();
 
         $this->loadTradingHistory();
