@@ -7,6 +7,9 @@
 
             <div>
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+            </div>
+
+            <flux:input wire:model="default_kode_emiten" :label="__('Default Kode Emiten')" type="text" placeholder="BBCA" />
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>
@@ -38,6 +41,8 @@
             </div>
         </form>
 
-        <livewire:settings.delete-user-form />
+        @can('user.delete')
+            <livewire:settings.delete-user-form />
+        @endcan
     </x-settings.layout>
 </section>

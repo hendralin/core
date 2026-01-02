@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            @if($user->phone || $user->birth_date || $user->address)
+            @if($user->phone || $user->birth_date || $user->address || $user->default_kode_emiten)
             <flux:heading size="lg" class="mt-6">Personal Information</flux:heading>
             <div class="mt-3 space-y-3">
                 @if($user->phone)
@@ -76,6 +76,12 @@
                 <div>
                     <flux:heading size="sm">Address</flux:heading>
                     <flux:text class="mt-1">{{ $user->address }}</flux:text>
+                </div>
+                @endif
+                @if($user->default_kode_emiten)
+                <div>
+                    <flux:heading size="sm">Default Kode Emiten</flux:heading>
+                    <flux:text class="mt-1">{{ $user->default_kode_emiten }}</flux:text>
                 </div>
                 @endif
             </div>

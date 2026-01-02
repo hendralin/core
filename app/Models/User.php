@@ -32,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'avatar',
         'status',
+        'default_kode_emiten',
         'last_login_at',
         'timezone',
         'is_email_verified',
@@ -61,6 +62,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_login_at' => 'datetime',
             'is_email_verified' => 'boolean',
             'status' => 'integer',
+            'default_kode_emiten' => 'string',
         ];
     }
 
@@ -139,7 +141,8 @@ class User extends Authenticatable implements MustVerifyEmail
                 'status',
                 'timezone',
                 'avatar',
-                'is_email_verified'
+                'is_email_verified',
+                'default_kode_emiten',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()

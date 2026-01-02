@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
@@ -14,6 +15,8 @@ class Profile extends Component
 
     public string $email = '';
 
+    public string $default_kode_emiten = '';
+
     /**
      * Mount the component.
      */
@@ -21,6 +24,7 @@ class Profile extends Component
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->default_kode_emiten = Auth::user()->default_kode_emiten ?? '';
     }
 
     /**
@@ -41,8 +45,14 @@ class Profile extends Component
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
             ],
+
+            'default_kode_emiten' => ['required', 'string', 'exists:stock_companies,kode_emiten'],
+        ], [
+            'default_kode_emiten.required' => 'Kode emiten wajib diisi.',
+            'default_kode_emiten.exists' => 'Kode emiten tidak valid atau tidak ditemukan dalam daftar perusahaan.',
         ]);
 
+        $validated['default_kode_emiten'] = Str::upper($validated['default_kode_emiten']);
         $user->fill($validated);
 
         if ($user->isDirty('email')) {

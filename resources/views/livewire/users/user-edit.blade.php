@@ -55,6 +55,7 @@
                     <flux:select.option value="Asia/Jayapura">Asia/Jayapura (WIT)</flux:select.option>
                     <flux:select.option value="UTC">UTC</flux:select.option>
                 </flux:select>
+                <flux:input wire:model="default_kode_emiten" label="Default Kode Emiten" placeholder="BBCA..." />
                 <flux:select wire:model="status" label="Status">
                     <flux:select.option value="1">Active</flux:select.option>
                     <flux:select.option value="0">Inactive</flux:select.option>

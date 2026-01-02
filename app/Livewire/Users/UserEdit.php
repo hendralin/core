@@ -4,8 +4,8 @@ namespace App\Livewire\Users;
 
 use App\Models\User;
 use Livewire\Component;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
-use App\Constants\RoleConstants;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +20,7 @@ class UserEdit extends Component
     protected $queryString = [
         'activeTab' => ['except' => 'profile'],
     ];
-    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles, $status;
+    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles, $status, $default_kode_emiten;
 
     public $roles = [];
 
@@ -33,6 +33,7 @@ class UserEdit extends Component
         $this->birth_date = $user->birth_date?->format('Y-m-d');
         $this->address = $user->address;
         $this->timezone = $user->timezone;
+        $this->default_kode_emiten = $user->default_kode_emiten;
         $this->status = $user->status;
 
         $this->allRoles = Role::orderBy('name')->get();
@@ -48,6 +49,7 @@ class UserEdit extends Component
             'birth_date' => 'nullable|date|before:today',
             'address' => 'nullable|string|max:500',
             'timezone' => 'required|string',
+            'default_kode_emiten' => 'required|string|exists:stock_companies,kode_emiten',
             'status' => 'required|integer|in:0,1,2',
             'roles' => 'required|array',
             'password' => 'nullable|string|min:8|same:confirm_password',
@@ -72,6 +74,9 @@ class UserEdit extends Component
 
             'timezone.required' => 'Zona waktu wajib dipilih.',
 
+            'default_kode_emiten.required' => 'Kode emiten wajib diisi.',
+            'default_kode_emiten.exists' => 'Kode emiten tidak valid atau tidak ditemukan dalam daftar perusahaan.',
+
             'status.required' => 'Status pengguna wajib dipilih.',
             'status.integer' => 'Status pengguna harus berupa angka.',
             'status.in' => 'Status pengguna tidak valid.',
@@ -92,6 +97,7 @@ class UserEdit extends Component
             'birth_date' => $this->user->birth_date,
             'address' => $this->user->address,
             'timezone' => $this->user->timezone,
+            'default_kode_emiten' => Str::upper($this->user->default_kode_emiten),
             'status' => $this->user->status,
             'roles' => $this->user->roles()->pluck('name')->toArray(),
         ];
@@ -102,6 +108,7 @@ class UserEdit extends Component
         $this->user->birth_date = $this->birth_date;
         $this->user->address = $this->address;
         $this->user->timezone = $this->timezone;
+        $this->user->default_kode_emiten = Str::upper($this->default_kode_emiten);
         $this->user->status = $this->status;
 
         if ($this->password) {
@@ -125,6 +132,7 @@ class UserEdit extends Component
                     'birth_date' => $this->birth_date,
                     'address' => $this->address,
                     'timezone' => $this->timezone,
+                    'default_kode_emiten' => Str::upper($this->default_kode_emiten),
                     'status' => $this->status,
                     'roles' => $this->roles,
                     'password_changed' => !empty($this->password),

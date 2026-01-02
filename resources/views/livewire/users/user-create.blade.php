@@ -22,6 +22,7 @@
                     <flux:select.option value="Asia/Jayapura">Asia/Jayapura (WIT)</flux:select.option>
                     <flux:select.option value="UTC">UTC</flux:select.option>
                 </flux:select>
+                <flux:input wire:model="default_kode_emiten" label="Default Kode Emiten" placeholder="BBCA..." />
                 <flux:input wire:model="password" label="Password" type="password" viewable placeholder="Password..." />
                 <flux:input wire:model="confirm_password" label="Confirm Password" type="password" viewable placeholder="Confirm Password..." />
                 <div class="grid grid-cols-2 gap-6">

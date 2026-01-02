@@ -4,8 +4,8 @@ namespace App\Livewire\Users;
 
 use App\Models\User;
 use Livewire\Component;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
-use App\Constants\RoleConstants;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 #[Title('Create User')]
 class UserCreate extends Component
 {
-    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles;
+    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles, $default_kode_emiten;
 
     public $roles = [];
 
@@ -31,6 +31,7 @@ class UserCreate extends Component
             'birth_date' => 'nullable|date|before:today',
             'address' => 'nullable|string|max:500',
             'timezone' => 'required|string',
+            'default_kode_emiten' => 'nullable|string|exists:stock_companies,kode_emiten',
             'roles' => 'required|array',
             'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/|same:confirm_password',
         ], [
@@ -54,6 +55,8 @@ class UserCreate extends Component
 
             'timezone.required' => 'Zona waktu wajib dipilih.',
 
+            'default_kode_emiten.exists' => 'Kode emiten tidak valid atau tidak ditemukan dalam daftar perusahaan.',
+
             'roles.required' => 'Setidaknya satu peran harus dipilih.',
             'roles.array' => 'Format peran tidak valid.',
 
@@ -70,6 +73,7 @@ class UserCreate extends Component
             'birth_date' => $this->birth_date,
             'address' => $this->address,
             'timezone' => $this->timezone,
+            'default_kode_emiten' => Str::upper($this->default_kode_emiten),
             'password' => Hash::make($this->password),
             'status' => '1',
             'email_verified_at' => now(), // Auto-verify for admin-created users
@@ -90,6 +94,7 @@ class UserCreate extends Component
                     'birth_date' => $this->birth_date,
                     'address' => $this->address,
                     'timezone' => $this->timezone,
+                    'default_kode_emiten' => Str::upper($this->default_kode_emiten),
                     'status' => '1',
                     'roles' => $this->roles,
                 ],
