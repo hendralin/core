@@ -22,6 +22,14 @@ class StockSummaryDetail extends Component
     public Collection $news;
     public bool $showNewsModal = false;
     public ?News $selectedNews = null;
+    public bool $showCompanyModal = false;
+
+    // Company related data
+    public Collection $directors;
+    public Collection $shareholders;
+    public Collection $subsidiaries;
+    public Collection $dividends;
+    public Collection $bonds;
 
     public function openNewsModal(string $itemId): void
     {
@@ -33,6 +41,16 @@ class StockSummaryDetail extends Component
     {
         $this->showNewsModal = false;
         $this->selectedNews = null;
+    }
+
+    public function openCompanyModal(): void
+    {
+        $this->showCompanyModal = true;
+    }
+
+    public function closeCompanyModal(): void
+    {
+        $this->showCompanyModal = false;
     }
 
     public function getIsLq45Property(): bool
@@ -79,6 +97,21 @@ class StockSummaryDetail extends Component
         $this->financialRatio = FinancialRatio::where('code', $this->stockCode)
             ->orderBy('fs_date', 'desc')
             ->first();
+
+        // Load company related data
+        if ($this->company) {
+            $this->directors = $this->company->directors()->get();
+            $this->shareholders = $this->company->shareholders()->orderBy('persentase', 'desc')->get();
+            $this->subsidiaries = $this->company->subsidiaries()->get();
+            $this->dividends = $this->company->dividends()->orderBy('tanggal_pembayaran', 'desc')->get();
+            $this->bonds = $this->company->bonds()->get();
+        } else {
+            $this->directors = collect();
+            $this->shareholders = collect();
+            $this->subsidiaries = collect();
+            $this->dividends = collect();
+            $this->bonds = collect();
+        }
 
         $this->loadTradingHistory();
         $this->loadNews();

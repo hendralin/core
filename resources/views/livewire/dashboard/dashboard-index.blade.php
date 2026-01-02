@@ -38,6 +38,15 @@
                                 <span class="text-xs px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 font-medium">
                                     {{ $company->papan_pencatatan ?? 'IDX' }}
                                 </span>
+                                <flux:tooltip content="View Details" position="right">
+                                    <flux:button
+                                        wire:click="openCompanyModal"
+                                        variant="ghost"
+                                        icon="eye"
+                                        size="xs"
+                                    >
+                                    </flux:button>
+                                </flux:tooltip>
                                 <flux:tooltip content="Change Stock" position="right">
                                     <flux:button
                                         wire:click="openStockPickerModal"
@@ -533,8 +542,17 @@
                 @if($company)
                     <!-- Company Info -->
                     <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
-                        <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                        <div class="px-4 py-2 border-gray-200 dark:border-zinc-700 flex items-center justify-between">
                             <span class="text-gray-900 dark:text-white font-medium text-sm">Company Info</span>
+                            <flux:tooltip content="View Details" position="right">
+                                <flux:button
+                                    wire:click="openCompanyModal"
+                                    variant="ghost"
+                                    icon="eye"
+                                    size="xs"
+                                >
+                                </flux:button>
+                            </flux:tooltip>
                         </div>
                         <div class="divide-y divide-gray-100 dark:divide-zinc-800">
                             <div class="px-4 py-2">
@@ -674,6 +692,490 @@
                             <flux:button variant="primary">
                                 <flux:icon.arrow-up-right class="size-4 mr-2" />
                                 View Original
+                            </flux:button>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @endif
+    </flux:modal>
+
+    <!-- Company Detail Modal -->
+    <flux:modal wire:model.self="showCompanyModal" class="max-w-4xl max-h-[90vh] overflow-y-auto">
+        @if($company)
+            <div class="space-y-6">
+                <!-- Header -->
+                <div class="flex items-start justify-between gap-4">
+                    <!-- Company Logo -->
+                    <div
+                        class="relative w-16 h-16 shrink-0"
+                        x-data="{ imageLoaded: false, imageError: false }"
+                        x-init="imageLoaded = false; imageError = false"
+                        wire:key="modal-logo-{{ $company->kode_emiten }}"
+                    >
+                        {{-- Fallback initials - always visible until image loads --}}
+                        <div
+                            class="absolute inset-0 rounded-lg bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
+                            x-show="!imageLoaded || imageError"
+                            x-cloak
+                        >
+                            <span class="text-gray-600 dark:text-zinc-400 font-bold text-sm">{{ substr($company->kode_emiten, 0, 2) }}</span>
+                        </div>
+                        {{-- Logo image --}}
+                        @if($company->logo_url)
+                            <img
+                                src="{{ $company->logo_url }}"
+                                alt="{{ $company->kode_emiten }}"
+                                class="absolute inset-0 w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-zinc-700"
+                                x-show="imageLoaded && !imageError"
+                                x-cloak
+                                x-on:load="imageLoaded = true"
+                                x-on:error="imageError = true"
+                            />
+                        @endif
+                    </div>
+                    <div class="flex-1">
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ $company->nama_emiten }}
+                        </h1>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="px-2 py-1 bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-sm font-medium rounded">
+                                {{ $company->kode_emiten }}
+                            </span>
+                            <span class="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-zinc-400">
+                                {{ $company->papan_pencatatan ?? 'IDX' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company Information Tabs -->
+                <div class="w-full" x-data="{ activeTab: 'overview' }">
+                    <!-- Tab Navigation -->
+                    <div class="border-b border-gray-200 dark:border-zinc-700 mb-6">
+                        <nav class="flex space-x-8">
+                            <button
+                                @click="activeTab = 'overview'"
+                                :class="activeTab === 'overview'
+                                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                                class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+                                Overview
+                            </button>
+                            <button
+                                @click="activeTab = 'management'"
+                                :class="activeTab === 'management'
+                                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                                class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+                                Management
+                            </button>
+                            <button
+                                @click="activeTab = 'ownership'"
+                                :class="activeTab === 'ownership'
+                                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                                class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+                                Ownership
+                            </button>
+                            <button
+                                @click="activeTab = 'subsidiaries'"
+                                :class="activeTab === 'subsidiaries'
+                                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                                class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+                                Subsidiaries
+                            </button>
+                            <button
+                                @click="activeTab = 'financial'"
+                                :class="activeTab === 'financial'
+                                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-zinc-400 dark:hover:text-zinc-300'"
+                                class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors">
+                                Financial
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="min-h-[400px]">
+                        <!-- Overview Tab Content -->
+                        <div x-show="activeTab === 'overview'" x-transition class="space-y-6">
+                            <!-- Basic Information -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Company Details</div>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                <span class="text-sm text-gray-500 dark:text-zinc-400">Full Name</span>
+                                                <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->nama_emiten }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                <span class="text-sm text-gray-500 dark:text-zinc-400">Stock Code</span>
+                                                <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->kode_emiten }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                <span class="text-sm text-gray-500 dark:text-zinc-400">Board</span>
+                                                <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->papan_pencatatan ?? 'IDX' }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                <span class="text-sm text-gray-500 dark:text-zinc-400">Sector</span>
+                                                <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->sektor ?? '-' }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                <span class="text-sm text-gray-500 dark:text-zinc-400">Industry</span>
+                                                <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->industri ?? '-' }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                <span class="text-sm text-gray-500 dark:text-zinc-400">Sub Industry</span>
+                                                <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->sub_industri ?? '-' }}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                <span class="text-sm text-gray-500 dark:text-zinc-400">Listing Date</span>
+                                                <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->tanggal_pencatatan?->format('d M Y') ?? '-' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Contact & Website</div>
+                                        <div class="space-y-3">
+                                            @if($company->website_url)
+                                                <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                    <span class="text-sm text-gray-500 dark:text-zinc-400">Website</span>
+                                                    <a href="{{ $company->website_url }}" target="_blank" class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                                        <svg class="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0 9c-1.657 0-3-4.03-3-9s1.343-9 3-9m0 18c1.657 0 3-4.03 3-9s-1.343-9-3-9"></path>
+                                                        </svg>
+                                                        {{ $company->website }}
+                                                    </a>
+                                                </div>
+                                            @endif
+                                            @if($company->email)
+                                                <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                    <span class="text-sm text-gray-500 dark:text-zinc-400">Email</span>
+                                                    <a href="mailto:{{ $company->email }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                                                        {{ $company->email }}
+                                                    </a>
+                                                </div>
+                                            @endif
+                                            @if($company->phone)
+                                                <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                    <span class="text-sm text-gray-500 dark:text-zinc-400">Phone</span>
+                                                    <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->phone }}</span>
+                                                </div>
+                                            @endif
+                                            @if($company->fax)
+                                                <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-800">
+                                                    <span class="text-sm text-gray-500 dark:text-zinc-400">Fax</span>
+                                                    <span class="text-sm text-gray-900 dark:text-white font-medium">{{ $company->fax }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <!-- Index Membership -->
+                                    @if($this->isLq45)
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Index Membership</div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-sm font-medium rounded-full">
+                                                    <svg class="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    LQ45
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            @if($company->alamat || $company->kota || $company->provinsi || $company->kode_pos)
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Address</div>
+                                    <div class="text-sm text-gray-900 dark:text-white">
+                                        @if($company->alamat)
+                                            <p>{{ $company->alamat }}</p>
+                                        @endif
+                                        @if($company->kota || $company->provinsi || $company->kode_pos)
+                                            <p class="mt-1">
+                                                @if($company->kota){{ $company->kota }}@endif
+                                                @if($company->provinsi), {{ $company->provinsi }}@endif
+                                                @if($company->kode_pos) {{ $company->kode_pos }}@endif
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Business Description -->
+                            @if($company->deskripsi)
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Business Description</div>
+                                    <div class="text-sm text-gray-700 dark:text-zinc-300 leading-relaxed">
+                                        {!! $company->deskripsi !!}
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Management Tab Content -->
+                        <div x-show="activeTab === 'management'" x-transition class="space-y-6">
+                            @if($directors->isNotEmpty())
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Board of Directors</div>
+                                    <div class="space-y-2">
+                                        @foreach($directors as $director)
+                                            <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
+                                                <div>
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $director->nama }}</div>
+                                                    <div class="text-xs text-gray-500 dark:text-zinc-400">{{ $director->jabatan }}</div>
+                                                </div>
+                                                @if($director->afiliasi)
+                                                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-medium rounded">
+                                                        Affiliated
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <div class="text-center py-8">
+                                    <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                                        <svg class="size-6 text-gray-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-zinc-400">No director information available</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Ownership Tab Content -->
+                        <div x-show="activeTab === 'ownership'" x-transition class="space-y-6">
+                            @if($shareholders->isNotEmpty())
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Major Shareholders</div>
+                                    <div class="space-y-2">
+                                        @foreach($shareholders as $shareholder)
+                                            <div class="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
+                                                <div class="flex-1">
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $shareholder->nama }}</div>
+                                                    <div class="text-xs text-gray-500 dark:text-zinc-400">{{ $shareholder->kategori }}</div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($shareholder->persentase, 4, ',', '.') }}%</div>
+                                                    <div class="text-xs text-gray-500 dark:text-zinc-400">{{ number_format($shareholder->jumlah, 0, ',', '.') }} shares</div>
+                                                </div>
+                                                @if($shareholder->pengendali)
+                                                    <span class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-xs font-medium rounded">
+                                                        Controller
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <div class="text-center py-8">
+                                    <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                                        <svg class="size-6 text-gray-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-zinc-400">No shareholder information available</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Subsidiaries Tab Content -->
+                        <div x-show="activeTab === 'subsidiaries'" x-transition class="space-y-6">
+                            @if($subsidiaries->isNotEmpty())
+                                <div class="space-y-2">
+                                    @foreach($subsidiaries as $subsidiary)
+                                        <div class="py-2 px-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
+                                            <div class="flex items-start justify-between">
+                                                <div class="flex-1">
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $subsidiary->nama }}</div>
+                                                    <div class="text-xs text-gray-500 dark:text-zinc-400">{{ $subsidiary->bidang_usaha }}</div>
+                                                    <div class="text-xs text-gray-400 dark:text-zinc-500">{{ $subsidiary->lokasi }}</div>
+                                                </div>
+                                                <div class="text-right">
+                                                    @if($subsidiary->persentase)
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($subsidiary->persentase, 2, ',', '.') }}%</div>
+                                                    @endif
+                                                    @if($subsidiary->formatted_aset)
+                                                        <div class="text-xs text-gray-500 dark:text-zinc-400">{{ $subsidiary->formatted_aset }}</div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="mt-2 flex items-center gap-2">
+                                                @if($subsidiary->isActive())
+                                                    <span class="px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-xs font-medium rounded">
+                                                        Active
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-1 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium rounded">
+                                                        {{ $subsidiary->status_operasi ?? 'Inactive' }}
+                                                    </span>
+                                                @endif
+                                                @if($subsidiary->tahun_komersil)
+                                                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-medium rounded">
+                                                        Commercial: {{ $subsidiary->tahun_komersil }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center py-8">
+                                    <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                                        <svg class="size-6 text-gray-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-zinc-400">No subsidiary information available</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Financial Tab Content -->
+                        <div x-show="activeTab === 'financial'" x-transition class="space-y-6">
+                            <!-- Dividends -->
+                            @if($dividends->isNotEmpty())
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Dividend History</div>
+                                    <div class="space-y-2">
+                                        @foreach($dividends as $dividend)
+                                            <div class="py-2 px-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
+                                                <div class="flex items-start justify-between">
+                                                    <div class="flex-1">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $dividend->jenis_label }}</div>
+                                                        <div class="text-xs text-gray-500 dark:text-zinc-400">{{ $dividend->tahun_buku }}</div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        @if($dividend->isCashDividend() && $dividend->formatted_dps)
+                                                            <div class="text-sm font-medium text-green-600 dark:text-green-400">{{ $dividend->formatted_dps }}</div>
+                                                            <div class="text-xs text-gray-500 dark:text-zinc-400">per share</div>
+                                                        @elseif($dividend->isStockDividend() && $dividend->total_saham_bonus)
+                                                            <div class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ number_format($dividend->total_saham_bonus, 0, ',', '.') }}</div>
+                                                            <div class="text-xs text-gray-500 dark:text-zinc-400">bonus shares</div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+                                                    @if($dividend->tanggal_cum)
+                                                        <div>
+                                                            <span class="text-gray-500 dark:text-zinc-400">Cum Date:</span>
+                                                            <span class="text-gray-900 dark:text-white">{{ $dividend->tanggal_cum->format('d M Y') }}</span>
+                                                        </div>
+                                                    @endif
+                                                    @if($dividend->tanggal_pembayaran)
+                                                        <div>
+                                                            <span class="text-gray-500 dark:text-zinc-400">Payment Date:</span>
+                                                            <span class="text-gray-900 dark:text-white">{{ $dividend->tanggal_pembayaran->format('d M Y') }}</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Bonds -->
+                            @if($bonds->isNotEmpty())
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase mb-2">Corporate Bonds</div>
+                                    <div class="space-y-2">
+                                        @foreach($bonds as $bond)
+                                            <div class="py-2 px-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
+                                                <div class="flex items-start justify-between">
+                                                    <div class="flex-1">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $bond->nama_emisi }}</div>
+                                                        <div class="text-xs text-gray-500 dark:text-zinc-400">{{ $bond->isin_code }}</div>
+                                                        @if($bond->rating)
+                                                            <div class="text-xs text-yellow-600 dark:text-yellow-400">{{ $bond->rating }}</div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="text-right">
+                                                        @if($bond->formatted_nominal)
+                                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $bond->formatted_nominal }}</div>
+                                                        @endif
+                                                        <div class="text-xs text-gray-500 dark:text-zinc-400">
+                                                            @if($bond->isActive())
+                                                                <span class="text-green-600 dark:text-green-400">Active</span>
+                                                            @else
+                                                                <span class="text-red-600 dark:text-red-400">Matured</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+                                                    @if($bond->listing_date)
+                                                        <div>
+                                                            <span class="text-gray-500 dark:text-zinc-400">Listing:</span>
+                                                            <span class="text-gray-900 dark:text-white">{{ $bond->listing_date->format('d M Y') }}</span>
+                                                        </div>
+                                                    @endif
+                                                    @if($bond->mature_date)
+                                                        <div>
+                                                            <span class="text-gray-500 dark:text-zinc-400">Maturity:</span>
+                                                            <span class="text-gray-900 dark:text-white">{{ $bond->mature_date->format('d M Y') }}</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                @if($bond->wali_amanat)
+                                                    <div class="mt-2 text-xs">
+                                                        <span class="text-gray-500 dark:text-zinc-400">Trustee:</span>
+                                                        <span class="text-gray-900 dark:text-white">{{ $bond->wali_amanat }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($dividends->isEmpty() && $bonds->isEmpty())
+                                <div class="text-center py-8">
+                                    <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                                        <svg class="size-6 text-gray-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-500 dark:text-zinc-400">No financial information available</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                    <flux:modal.close>
+                        <flux:button variant="ghost">Close</flux:button>
+                    </flux:modal.close>
+                    @if($company->website_url)
+                        <a
+                            href="{{ $company->website_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex"
+                        >
+                            <flux:button variant="primary">
+                                <svg class="size-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                                Visit Website
                             </flux:button>
                         </a>
                     @endif

@@ -24,10 +24,18 @@ class DashboardIndex extends Component
     public Collection $news;
     public bool $showNewsModal = false;
     public ?News $selectedNews = null;
+    public bool $showCompanyModal = false;
     public bool $needsSetup = false;
 
     public string $period = '30'; // Days
     public bool $isCustomRange = false; // True when chart has been panned
+
+    // Company related data
+    public Collection $directors;
+    public Collection $shareholders;
+    public Collection $subsidiaries;
+    public Collection $dividends;
+    public Collection $bonds;
 
     // Stock Picker Modal
     public bool $showStockPickerModal = false;
@@ -47,6 +55,16 @@ class DashboardIndex extends Component
     {
         $this->showNewsModal = false;
         $this->selectedNews = null;
+    }
+
+    public function openCompanyModal(): void
+    {
+        $this->showCompanyModal = true;
+    }
+
+    public function closeCompanyModal(): void
+    {
+        $this->showCompanyModal = false;
     }
 
     public function openStockPickerModal(): void
@@ -152,6 +170,11 @@ class DashboardIndex extends Component
     public function mount(): void
     {
         $this->stockList = collect();
+        $this->directors = collect();
+        $this->shareholders = collect();
+        $this->subsidiaries = collect();
+        $this->dividends = collect();
+        $this->bonds = collect();
 
         /** @var User $user */
         $user = Auth::user();
@@ -198,6 +221,21 @@ class DashboardIndex extends Component
 
         $this->loadTradingHistory();
         $this->loadNews();
+
+        // Load company related data
+        if ($this->company) {
+            $this->directors = $this->company->directors()->get();
+            $this->shareholders = $this->company->shareholders()->orderBy('persentase', 'desc')->get();
+            $this->subsidiaries = $this->company->subsidiaries()->get();
+            $this->dividends = $this->company->dividends()->orderBy('tanggal_pembayaran', 'desc')->get();
+            $this->bonds = $this->company->bonds()->get();
+        } else {
+            $this->directors = collect();
+            $this->shareholders = collect();
+            $this->subsidiaries = collect();
+            $this->dividends = collect();
+            $this->bonds = collect();
+        }
     }
 
     private function loadTradingHistory(): void
