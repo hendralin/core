@@ -5,23 +5,33 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3">
-                        @if($company->logo_url)
-                            <div class="relative w-10 h-10 shrink-0">
-                                <div class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center">
-                                    <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($company->kode_emiten, 0, 2) }}</span>
-                                </div>
+                        <div
+                            class="relative w-10 h-10 shrink-0"
+                            x-data="{ imageLoaded: false, imageError: false }"
+                            x-init="imageLoaded = false; imageError = false"
+                            wire:key="logo-{{ $company->kode_emiten }}"
+                        >
+                            {{-- Fallback initials - always visible until image loads --}}
+                            <div
+                                class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
+                                x-show="!imageLoaded || imageError"
+                                x-cloak
+                            >
+                                <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($company->kode_emiten, 0, 2) }}</span>
+                            </div>
+                            {{-- Logo image --}}
+                            @if($company->logo_url)
                                 <img
                                     src="{{ $company->logo_url }}"
                                     alt="{{ $company->kode_emiten }}"
                                     class="absolute inset-0 w-10 h-10 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
-                                    onerror="this.style.display='none'"
+                                    x-show="imageLoaded && !imageError"
+                                    x-cloak
+                                    x-on:load="imageLoaded = true"
+                                    x-on:error="imageError = true"
                                 />
-                            </div>
-                        @else
-                            <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center shrink-0">
-                                <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($company->kode_emiten, 0, 2) }}</span>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                         <div>
                             <div class="flex items-center gap-3">
                                 <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $stockCode }}</h1>
@@ -631,23 +641,33 @@
                                     class="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors text-left {{ $stock->kode_emiten === $stockCode ? 'bg-blue-50 dark:bg-blue-500/10' : '' }}"
                                 >
                                     <!-- Logo -->
-                                    @if($stock->logo_url)
-                                        <div class="relative w-8 h-8 shrink-0">
-                                            <div class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center">
-                                                <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($stock->kode_emiten, 0, 2) }}</span>
-                                            </div>
+                                    <div
+                                        class="relative w-8 h-8 shrink-0"
+                                        x-data="{ imageLoaded: false, imageError: false }"
+                                        x-init="imageLoaded = false; imageError = false"
+                                        wire:key="stock-logo-{{ $stock->kode_emiten }}"
+                                    >
+                                        {{-- Fallback initials --}}
+                                        <div
+                                            class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
+                                            x-show="!imageLoaded || imageError"
+                                            x-cloak
+                                        >
+                                            <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($stock->kode_emiten, 0, 2) }}</span>
+                                        </div>
+                                        {{-- Logo image --}}
+                                        @if($stock->logo_url)
                                             <img
                                                 src="{{ $stock->logo_url }}"
                                                 alt="{{ $stock->kode_emiten }}"
                                                 class="absolute inset-0 w-8 h-8 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
-                                                onerror="this.style.display='none'"
+                                                x-show="imageLoaded && !imageError"
+                                                x-cloak
+                                                x-on:load="imageLoaded = true"
+                                                x-on:error="imageError = true"
                                             />
-                                        </div>
-                                    @else
-                                        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center shrink-0">
-                                            <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($stock->kode_emiten, 0, 2) }}</span>
-                                        </div>
-                                    @endif
+                                        @endif
+                                    </div>
 
                                     <!-- Stock Info -->
                                     <div class="flex-1 min-w-0">
