@@ -1,0 +1,1136 @@
+<div class="min-h-screen" data-dashboard>
+    <!-- TradingView Style Header -->
+    <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700">
+        <div class="px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        @if($company->logo_url)
+                            <div class="relative w-10 h-10 shrink-0">
+                                <div class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center">
+                                    <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($company->kode_emiten, 0, 2) }}</span>
+                                </div>
+                                <img
+                                    src="{{ $company->logo_url }}"
+                                    alt="{{ $company->kode_emiten }}"
+                                    class="absolute inset-0 w-10 h-10 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
+                                    onerror="this.style.display='none'"
+                                />
+                            </div>
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center shrink-0">
+                                <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($company->kode_emiten, 0, 2) }}</span>
+                            </div>
+                        @endif
+                        <div>
+                            <div class="flex items-center gap-3">
+                                <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $stockCode }}</h1>
+                                <span class="text-xs px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 font-medium">
+                                    {{ $company->papan_pencatatan ?? 'IDX' }}
+                                </span>
+                                <flux:tooltip content="Change Stock" position="right">
+                                    <flux:button
+                                        wire:click="openStockPickerModal"
+                                        variant="ghost"
+                                        icon="arrows-right-left"
+                                        size="xs"
+                                    >
+                                    </flux:button>
+                                </flux:tooltip>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-zinc-400">{{ $company?->nama_emiten ?? 'Unknown Company' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                @if($latestTrading)
+                    <div class="flex items-center gap-6">
+                        <!-- Current Price -->
+                        <div class="text-right">
+                            <div class="text-2xl font-bold {{ $latestTrading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
+                                {{ number_format($latestTrading->close, 0, ',', '.') }}
+                            </div>
+                            <div class="flex items-center justify-end gap-2 text-sm {{ $latestTrading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
+                                @if($latestTrading->change >= 0)
+                                    <span>+{{ number_format($latestTrading->change, 0, ',', '.') }}</span>
+                                    <span>(+{{ number_format($this->changePercent, 2) }}%)</span>
+                                @else
+                                    <span>{{ number_format($latestTrading->change, 0, ',', '.') }}</span>
+                                    <span>({{ number_format($this->changePercent, 2) }}%)</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    @if($latestTrading)
+        <!-- Quick Stats Bar -->
+        <div class="bg-gray-50 dark:bg-zinc-800/50 border-s border-r border-gray-200 dark:border-zinc-700">
+            <div class="px-4 py-2 flex items-center gap-6 overflow-x-auto text-xs">
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-gray-500 dark:text-zinc-500">O</span>
+                    <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->open_price, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-gray-500 dark:text-zinc-500">H</span>
+                    <span class="text-teal-600 dark:text-teal-400 font-medium">{{ number_format($latestTrading->high, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-gray-500 dark:text-zinc-500">L</span>
+                    <span class="text-red-600 dark:text-red-400 font-medium">{{ number_format($latestTrading->low, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-gray-500 dark:text-zinc-500">C</span>
+                    <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->close, 0, ',', '.') }}</span>
+                </div>
+                <div class="w-px h-4 bg-gray-300 dark:bg-zinc-600"></div>
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-gray-500 dark:text-zinc-500">Vol</span>
+                    <span class="text-gray-900 dark:text-white font-medium">
+                        @if($latestTrading->volume >= 1000000000)
+                            {{ number_format($latestTrading->volume / 1000000000, 2) }}B
+                        @elseif($latestTrading->volume >= 1000000)
+                            {{ number_format($latestTrading->volume / 1000000, 2) }}M
+                        @else
+                            {{ number_format($latestTrading->volume, 0, ',', '.') }}
+                        @endif
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-gray-500 dark:text-zinc-500">Val</span>
+                    <span class="text-gray-900 dark:text-white font-medium">
+                        @if($latestTrading->value >= 1000000000)
+                            {{ number_format($latestTrading->value / 1000000000, 2) }}B
+                        @elseif($latestTrading->value >= 1000000)
+                            {{ number_format($latestTrading->value / 1000000, 2) }}M
+                        @else
+                            {{ number_format($latestTrading->value, 0, ',', '.') }}
+                        @endif
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-gray-500 dark:text-zinc-500">Freq</span>
+                    <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->frequency, 0, ',', '.') }}</span>
+                </div>
+                <div class="w-px h-4 bg-gray-300 dark:bg-zinc-600"></div>
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-gray-500 dark:text-zinc-500">{{ $latestTrading->date->format('d M Y') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="border flex flex-col lg:flex-row dark:border-zinc-700">
+            <!-- Chart Area (Main) -->
+            <div class="flex-1 lg:w-80 space-y-1">
+                <!-- Chart Container -->
+                <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <!-- Chart Header -->
+                    <div class="px-4 py-3 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <span class="text-gray-900 dark:text-white font-medium">Price Chart</span>
+                            <div class="flex items-center gap-1 text-xs">
+                                @foreach(['7' => '1W', '14' => '2W', '30' => '1M', '60' => '2M', '90' => '3M', 'ytd' => 'YTD', '365' => '1Y', '1095' => '3Y', '1825' => '5Y'] as $value => $label)
+                                    <button
+                                        wire:click="$set('period', '{{ $value }}')"
+                                        class="px-3 py-1 rounded {{ !$isCustomRange && $period == $value ? 'bg-teal-400 text-white' : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white' }} transition-colors">
+                                        {{ $label }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-zinc-400">
+                            <span class="flex items-center gap-1">
+                                <span class="w-3 h-3 bg-teal-500 rounded-sm"></span> Bullish
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <span class="w-3 h-3 bg-red-500 rounded-sm"></span> Bearish
+                            </span>
+                        </div>
+                    </div>
+                    <!-- TradingView Chart -->
+                    <div
+                        wire:ignore
+                        class="relative"
+                        style="height: 450px;"
+                    >
+                        {{-- Legend at top --}}
+                        <div id="chart-legend" class="absolute top-2 left-2 z-50 text-xs font-mono" style="display: none;">
+                            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 rounded-md bg-white/90 dark:bg-zinc-900/90 border border-gray-200 dark:border-zinc-700 shadow-sm backdrop-blur-sm">
+                                <span id="legend-date" class="font-semibold text-gray-900 dark:text-white"></span>
+                                <span class="text-gray-400 dark:text-zinc-500">O:</span><span id="legend-open" class="text-gray-700 dark:text-zinc-300"></span>
+                                <span class="text-gray-400 dark:text-zinc-500">H:</span><span id="legend-high" class="text-teal-600 dark:text-teal-400"></span>
+                                <span class="text-gray-400 dark:text-zinc-500">L:</span><span id="legend-low" class="text-red-600 dark:text-red-400"></span>
+                                <span class="text-gray-400 dark:text-zinc-500">C:</span><span id="legend-close" class="font-semibold text-gray-900 dark:text-white"></span>
+                                <span id="legend-change"></span>
+                                <span class="text-gray-400 dark:text-zinc-500">Vol:</span><span id="legend-volume" class="text-gray-700 dark:text-zinc-300"></span>
+                            </div>
+                        </div>
+                        <div id="chart-container" class="w-full h-full"></div>
+                    </div>
+                </div>
+
+                <!-- Trading History -->
+                <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between">
+                        <span class="text-gray-900 dark:text-white font-medium text-sm">Trading History</span>
+                        @if(!$isCustomRange)
+                            <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $this->periodLabel }}</span>
+                        @endif
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto max-h-96">
+                        <table class="w-full text-xs">
+                            <thead class="sticky top-0 bg-gray-50 dark:bg-zinc-800">
+                                <tr class="text-gray-500 dark:text-zinc-400 border-b border-gray-200 dark:border-zinc-700">
+                                    <th class="px-4 py-2 text-left font-medium">Date</th>
+                                    <th class="px-4 py-2 text-right font-medium">Open</th>
+                                    <th class="px-4 py-2 text-right font-medium">High</th>
+                                    <th class="px-4 py-2 text-right font-medium">Low</th>
+                                    <th class="px-4 py-2 text-right font-medium">Close</th>
+                                    <th class="px-4 py-2 text-right font-medium">Chg</th>
+                                    <th class="px-4 py-2 text-right font-medium">Vol</th>
+                                    <th class="px-4 py-2 text-right font-medium">Val</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($tradingHistory as $trading)
+                                    <tr class="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                                        <td class="px-4 py-2 text-gray-900 dark:text-zinc-200">{{ $trading->date->format('d M') }}</td>
+                                        <td class="px-4 py-2 text-right text-gray-600 dark:text-zinc-400">{{ number_format($trading->open_price, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-right text-teal-600 dark:text-teal-400">{{ number_format($trading->high, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($trading->low, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-right text-gray-900 dark:text-white font-medium">{{ number_format($trading->close, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 text-right font-medium {{ $trading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
+                                            {{ $trading->change >= 0 ? '+' : '' }}{{ number_format($trading->change, 0, ',', '.') }}
+                                        </td>
+                                        <td class="px-4 py-2 text-right text-gray-600 dark:text-zinc-400">
+                                            @if($trading->volume >= 1000000)
+                                                {{ number_format($trading->volume / 1000000, 1) }}M
+                                            @else
+                                                {{ number_format($trading->volume / 1000, 1) }}K
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-2 text-right text-gray-600 dark:text-zinc-400">
+                                            @if($trading->value >= 1000000000)
+                                                {{ number_format($trading->value / 1000000000, 1) }}B
+                                            @elseif($trading->value >= 1000000)
+                                                {{ number_format($trading->value / 1000000, 1) }}M
+                                            @else
+                                                {{ number_format($trading->value / 1000, 1) }}K
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- News -->
+                <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                        <span class="text-gray-900 dark:text-white font-medium text-sm">Latest News</span>
+                    </div>
+                    @if($news->isNotEmpty())
+                        <div class="divide-y divide-gray-100 dark:divide-zinc-800 max-h-96 overflow-y-auto">
+                            @foreach($news as $newsItem)
+                                <div wire:click="openNewsModal('{{ $newsItem->item_id }}')" class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer">
+                                    <div class="flex gap-3">
+                                        @if($newsItem->image_url)
+                                            <div class="shrink-0">
+                                                <img
+                                                    src="//idx.co.id{{ $newsItem->image_url }}"
+                                                    alt="{{ $newsItem->title }}"
+                                                    class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-zinc-700"
+                                                    onerror="this.style.display='none'"
+                                                />
+                                            </div>
+                                        @endif
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
+                                                    {{ $newsItem->title }}
+                                                </h4>
+                                                @if($newsItem->is_headline)
+                                                    <span class="shrink-0 px-2 py-0.5 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium rounded">
+                                                        Headline
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            @if($newsItem->summary)
+                                                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                                                    {{ $newsItem->summary }}
+                                                </p>
+                                            @endif
+                                            <div class="flex items-center gap-2 mt-2">
+                                                <span class="text-xs text-gray-400 dark:text-zinc-500">
+                                                    {{ $newsItem->published_date->format('d M Y, H:i') }}
+                                                </span>
+                                                @if($newsItem->tags)
+                                                    <div class="flex flex-wrap gap-1">
+                                                        @php
+                                                            $tags = explode(',', $newsItem->tags);
+                                                        @endphp
+                                                        @foreach($tags as $tag)
+                                                            @if(trim($tag) === $stockCode)
+                                                                <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-xs font-medium rounded">
+                                                                    {{ trim($tag) }}
+                                                                </span>
+                                                            @else
+                                                                <span class="px-2 py-0.5 bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-zinc-400 text-xs rounded">
+                                                                    {{ trim($tag) }}
+                                                                </span>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="px-4 py-8 text-center">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                                <flux:icon.newspaper class="size-6 text-gray-400 dark:text-zinc-600" />
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-zinc-400">
+                                No news available for {{ $stockCode }}
+                            </p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="lg:w-80 lg:border-l border-gray-200 dark:border-zinc-700 space-y-1">
+                <!-- Order Book -->
+                <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                        <span class="text-gray-900 dark:text-white font-medium text-sm">Order Book</span>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <!-- Bid -->
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-teal-500/10 rounded" style="width: {{ min(($latestTrading->bid_volume / max($latestTrading->bid_volume + $latestTrading->offer_volume, 1)) * 100, 100) }}%"></div>
+                            <div class="relative flex items-center justify-between py-2 px-3">
+                                <div>
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Bid</div>
+                                    <div class="text-lg font-bold text-teal-600 dark:text-teal-400">{{ number_format($latestTrading->bid, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500">Volume</div>
+                                    <div class="text-sm text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->bid_volume, 0, ',', '.') }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spread -->
+                        <div class="text-center py-1">
+                            <span class="text-[10px] text-gray-500 dark:text-zinc-500">Spread</span>
+                            <div class="text-sm font-medium text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->offer - $latestTrading->bid, 0, ',', '.') }}</div>
+                        </div>
+
+                        <!-- Offer -->
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-red-500/10 rounded" style="width: {{ min(($latestTrading->offer_volume / max($latestTrading->bid_volume + $latestTrading->offer_volume, 1)) * 100, 100) }}%"></div>
+                            <div class="relative flex items-center justify-between py-2 px-3">
+                                <div>
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Offer</div>
+                                    <div class="text-lg font-bold text-red-600 dark:text-red-400">{{ number_format($latestTrading->offer, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500">Volume</div>
+                                    <div class="text-sm text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->offer_volume, 0, ',', '.') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Statistics -->
+                <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                        <span class="text-gray-900 dark:text-white font-medium text-sm">Key Statistics</span>
+                    </div>
+                    <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <div class="px-4 py-2 flex items-center justify-between">
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">Previous Close</span>
+                            <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ number_format($latestTrading->previous, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="px-4 py-2 flex items-center justify-between">
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $isCustomRange ? '' : $this->periodLabel . ' ' }}High</span>
+                            <span class="text-xs text-teal-600 dark:text-teal-400 font-medium">{{ number_format($this->highestPrice, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="px-4 py-2 flex items-center justify-between">
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $isCustomRange ? '' : $this->periodLabel . ' ' }}Low</span>
+                            <span class="text-xs text-red-600 dark:text-red-400 font-medium">{{ number_format($this->lowestPrice, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="px-4 py-2 flex items-center justify-between">
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">Avg Volume</span>
+                            <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                @if($this->avgVolume >= 1000000)
+                                    {{ number_format($this->avgVolume / 1000000, 2) }}M
+                                @else
+                                    {{ number_format($this->avgVolume / 1000, 2) }}K
+                                @endif
+                            </span>
+                        </div>
+                        <div class="px-4 py-2 flex items-center justify-between">
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">Listed Shares</span>
+                            <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                @if($latestTrading->listed_shares >= 1000000000)
+                                    {{ number_format($latestTrading->listed_shares / 1000000000, 2) }}B
+                                @else
+                                    {{ number_format($latestTrading->listed_shares / 1000000, 2) }}M
+                                @endif
+                            </span>
+                        </div>
+                        <div class="px-4 py-2 flex items-center justify-between">
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">Index Individual</span>
+                            <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ number_format($latestTrading->index_individual, 2, ',', '.') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Foreign Flow -->
+                <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                        <span class="text-gray-900 dark:text-white font-medium text-sm">Foreign Flow</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="text-center mb-4">
+                            <div class="text-2xl font-bold {{ $this->netForeign >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
+                                {{ $this->netForeign >= 0 ? '+' : '' }}{{ number_format($this->netForeign, 0, ',', '.') }}
+                            </div>
+                            <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Net Foreign</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center p-3 bg-teal-50 dark:bg-teal-500/10 rounded-lg">
+                                <div class="text-sm font-bold text-teal-600 dark:text-teal-400">{{ number_format($latestTrading->foreign_buy, 0, ',', '.') }}</div>
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500">Buy</div>
+                            </div>
+                            <div class="text-center p-3 bg-red-50 dark:bg-red-500/10 rounded-lg">
+                                <div class="text-sm font-bold text-red-600 dark:text-red-400">{{ number_format($latestTrading->foreign_sell, 0, ',', '.') }}</div>
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500">Sell</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if($company)
+                    <!-- Company Info -->
+                    <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                        <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Company Info</span>
+                        </div>
+                        <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Sector</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->sektor ?? '-' }}</div>
+                            </div>
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Industry</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->industri ?? '-' }}</div>
+                            </div>
+                            @if($this->isLq45)
+                                <div class="px-4 py-2">
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Index Membership</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                                            <flux:icon.check-circle class="size-3" />
+                                            LQ45
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Listing Date</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->tanggal_pencatatan?->format('d M Y') ?? '-' }}</div>
+                            </div>
+                            @if($company->website_url)
+                                <div class="px-4 py-2">
+                                    <a href="{{ $company->website_url }}" target="_blank" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                        <flux:icon.globe-alt class="size-3" />
+                                        {{ $company->website }}
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @else
+        <!-- No Data State -->
+        <div class="flex items-center justify-center min-h-[60vh]">
+            <div class="text-center">
+                <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+                    <flux:icon.chart-bar class="size-10 text-gray-400 dark:text-zinc-600" />
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Trading Data</h3>
+                <p class="text-gray-500 dark:text-zinc-400 mb-6">
+                    No data available for <span class="text-gray-900 dark:text-white font-medium">{{ $stockCode }}</span>
+                </p>
+                <button
+                    wire:click="openStockPickerModal"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                    <flux:icon.arrows-right-left class="size-4" />
+                    Change Stock
+                </button>
+            </div>
+        </div>
+    @endif
+
+    <!-- News Detail Modal -->
+    <flux:modal wire:model.self="showNewsModal" class="max-w-4xl max-h-[90vh] overflow-y-auto">
+        @if($selectedNews)
+            <div class="space-y-2">
+                <!-- Header -->
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {{ $selectedNews->title }}
+                        </h1>
+                        @if($selectedNews->is_headline)
+                            <span class="inline-block mt-2 px-3 py-1 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium rounded-full">
+                                Headline News
+                            </span>
+                        @endif
+                    </div>
+                    @if($selectedNews->image_url)
+                        <div class="shrink-0">
+                            <img
+                                src="https://idx.co.id{{ $selectedNews->image_url }}"
+                                alt="{{ $selectedNews->title }}"
+                                class="w-24 h-24 object-cover rounded-lg border border-gray-200 dark:border-zinc-700"
+                                onerror="this.style.display='none'"
+                            />
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Meta Information -->
+                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
+                    <span class="flex items-center gap-1">
+                        <flux:icon.calendar class="size-4" />
+                        {{ $selectedNews->published_date->format('l, d F Y \a\t H:i') }}
+                    </span>
+                    @if($selectedNews->tags)
+                        <div class="flex flex-wrap gap-1">
+                            <span class="text-gray-400 dark:text-zinc-500">Tags:</span>
+                            @php
+                                $tags = explode(',', $selectedNews->tags);
+                            @endphp
+                            @foreach($tags as $tag)
+                                @if(trim($tag) === $stockCode)
+                                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-xs font-medium rounded">
+                                        {{ trim($tag) }}
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-zinc-400 text-xs rounded">
+                                        {{ trim($tag) }}
+                                    </span>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Full Content -->
+                @if($selectedNews->contents)
+                    <div class="prose prose-sm dark:prose-invert max-w-none">
+                        <div class="text-gray-700 dark:text-zinc-300 leading-relaxed">
+                            {!! $selectedNews->contents !!}
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Footer Actions -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                    <flux:modal.close>
+                        <flux:button variant="ghost">Close</flux:button>
+                    </flux:modal.close>
+                    @if($selectedNews->path_base && $selectedNews->path_file)
+                        <a
+                            href="https://idx.co.id{{ $selectedNews->path_base }}{{ $selectedNews->path_file }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex"
+                        >
+                            <flux:button variant="primary">
+                                <flux:icon.arrow-up-right class="size-4 mr-2" />
+                                View Original
+                            </flux:button>
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @endif
+    </flux:modal>
+
+    <!-- Stock Picker Modal -->
+    <flux:modal wire:model.self="showStockPickerModal" class="md:w-xl max-h-[80vh]">
+        <div class="space-y-4">
+            <!-- Header -->
+            <div>
+                <flux:heading size="lg">Pilih Saham</flux:heading>
+                <flux:text class="mt-1">Cari dan pilih kode saham untuk ditampilkan di dashboard</flux:text>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative">
+                <flux:input
+                    wire:model.live.debounce.300ms="stockSearch"
+                    placeholder="Cari kode saham, nama perusahaan, atau sektor..."
+                    icon="magnifying-glass" clearable
+                />
+            </div>
+
+            <!-- Stock List -->
+            <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+                <div
+                    class="max-h-80 overflow-y-auto"
+                    x-data="{
+                        loadMore() {
+                            if ($wire.hasMoreStocks) {
+                                $wire.loadMoreStocks();
+                            }
+                        }
+                    }"
+                    x-on:scroll.debounce.100ms="
+                        if ($el.scrollHeight - $el.scrollTop - $el.clientHeight < 100) {
+                            loadMore();
+                        }
+                    "
+                >
+                    @if($stockList->isEmpty())
+                        <div class="px-4 py-8 text-center">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                                <flux:icon.magnifying-glass class="size-6 text-gray-400 dark:text-zinc-600" />
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-zinc-400">
+                                @if(!empty($stockSearch))
+                                    Tidak ditemukan saham dengan kata kunci "{{ $stockSearch }}"
+                                @else
+                                    Ketik untuk mencari saham
+                                @endif
+                            </p>
+                        </div>
+                    @else
+                        <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                            @foreach($stockList as $stock)
+                                <button
+                                    wire:click="selectStock('{{ $stock->kode_emiten }}')"
+                                    wire:key="stock-{{ $stock->kode_emiten }}"
+                                    class="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors text-left {{ $stock->kode_emiten === $stockCode ? 'bg-blue-50 dark:bg-blue-500/10' : '' }}"
+                                >
+                                    <!-- Logo -->
+                                    @if($stock->logo_url)
+                                        <div class="relative w-8 h-8 shrink-0">
+                                            <div class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center">
+                                                <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($stock->kode_emiten, 0, 2) }}</span>
+                                            </div>
+                                            <img
+                                                src="{{ $stock->logo_url }}"
+                                                alt="{{ $stock->kode_emiten }}"
+                                                class="absolute inset-0 w-8 h-8 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
+                                                onerror="this.style.display='none'"
+                                            />
+                                        </div>
+                                    @else
+                                        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center shrink-0">
+                                            <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($stock->kode_emiten, 0, 2) }}</span>
+                                        </div>
+                                    @endif
+
+                                    <!-- Stock Info -->
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-gray-900 dark:text-white">{{ $stock->kode_emiten }}</span>
+                                            @if($stock->papan_pencatatan)
+                                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-700 text-gray-500 dark:text-zinc-400">
+                                                    {{ $stock->papan_pencatatan }}
+                                                </span>
+                                            @endif
+                                            @if($stock->kode_emiten === $stockCode)
+                                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium">
+                                                    Current
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-zinc-400 truncate">{{ $stock->nama_emiten }}</p>
+                                    </div>
+
+                                    <!-- Sector/Industry -->
+                                    <div class="text-right shrink-0 hidden sm:block">
+                                        <p class="text-xs text-gray-400 dark:text-zinc-500">{{ $stock->sektor ?? '-' }}</p>
+                                    </div>
+
+                                    <!-- Arrow -->
+                                    <flux:icon.chevron-right class="size-4 text-gray-400 dark:text-zinc-600 shrink-0" />
+                                </button>
+                            @endforeach
+
+                            {{-- Loading indicator --}}
+                            @if($hasMoreStocks)
+                                <div class="px-4 py-3 flex items-center justify-center" wire:loading.class="opacity-100" wire:loading.class.remove="opacity-50">
+                                    <div class="flex items-center gap-2 text-gray-400 dark:text-zinc-500">
+                                        <flux:icon.arrow-path class="size-4 animate-spin" wire:loading wire:target="loadMoreStocks" />
+                                        <span class="text-xs" wire:loading wire:target="loadMoreStocks">Memuat lebih banyak...</span>
+                                        <span class="text-xs" wire:loading.remove wire:target="loadMoreStocks">Scroll untuk memuat lebih banyak</span>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-between pt-2">
+                <p class="text-xs text-gray-500 dark:text-zinc-400">
+                    @if($stockList->isNotEmpty())
+                        Menampilkan {{ $stockList->count() }} saham
+                        @if($hasMoreStocks)
+                            <span class="text-gray-400 dark:text-zinc-600">(scroll untuk lebih banyak)</span>
+                        @endif
+                    @endif
+                </p>
+                <flux:modal.close>
+                    <flux:button variant="ghost">Batal</flux:button>
+                </flux:modal.close>
+            </div>
+        </div>
+    </flux:modal>
+</div>
+
+@push('scripts')
+<script src="https://unpkg.com/lightweight-charts@5.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+(function() {
+    // Use window object to persist state across wire:navigate
+    if (!window.DashboardChart) {
+        window.DashboardChart = {
+            chart: null,
+            candlestickSeries: null,
+            volumeSeries: null,
+            candlestickData: null,
+            volumeData: null,
+            resizeObserver: null,
+            themeObserver: null,
+            retryCount: 0,
+            maxRetries: 15
+        };
+    }
+
+    const SC = window.DashboardChart;
+
+    function isOnDashboardPage() {
+        return document.querySelector('[data-dashboard]') !== null;
+    }
+
+    function getDashboardComponent() {
+        const el = document.querySelector('[data-dashboard][wire\\:id]');
+        if (el) {
+            const componentId = el.getAttribute('wire:id');
+            if (componentId && typeof Livewire !== 'undefined') {
+                return Livewire.find(componentId);
+            }
+        }
+        return null;
+    }
+
+    function getChartData() {
+        const component = getDashboardComponent();
+        return component ? component.chartData : null;
+    }
+
+    function cleanupChart() {
+        if (SC.chart) {
+            try { SC.chart.remove(); } catch(e) {}
+            SC.chart = null;
+        }
+        if (SC.resizeObserver) {
+            SC.resizeObserver.disconnect();
+            SC.resizeObserver = null;
+        }
+    }
+
+    function initChart(chartData, isRetry = false) {
+        // Check if we're on the dashboard page
+        if (!isOnDashboardPage()) {
+            console.log('Not on dashboard page, skipping chart init');
+            return;
+        }
+
+        const container = document.getElementById('chart-container');
+        if (!container) {
+            if (SC.retryCount < SC.maxRetries) {
+                SC.retryCount++;
+                console.log('Chart container not found, retrying...', SC.retryCount);
+                setTimeout(() => initChart(chartData, true), 100);
+            }
+            return;
+        }
+
+        // Use provided data, or stored data (for theme changes), or fetch from component
+        let data = chartData;
+        if (!data && SC.candlestickData && SC.candlestickData.length > 0) {
+            // Use stored data for theme change reinit
+            data = {
+                candlestick: SC.candlestickData,
+                volume: SC.volumeData || []
+            };
+        }
+        if (!data) {
+            data = getChartData();
+        }
+        if (!data || !data.candlestick || data.candlestick.length === 0) {
+            // console.log('No chart data available');
+            return;
+        }
+
+        if (typeof LightweightCharts === 'undefined') {
+            if (SC.retryCount < SC.maxRetries) {
+                SC.retryCount++;
+                console.log('LightweightCharts not loaded, retrying...', SC.retryCount);
+                setTimeout(() => initChart(chartData, true), 100);
+            }
+            return;
+        }
+
+        // Reset retry count on success
+        SC.retryCount = 0;
+
+        // Check dark mode - use class on <html> element (most reliable)
+        const isDark = document.documentElement.classList.contains('dark');
+
+        // Clean up existing chart
+        cleanupChart();
+
+        // Create chart - v5.1 API
+        SC.chart = LightweightCharts.createChart(container, {
+            width: container.clientWidth,
+            height: container.clientHeight,
+            layout: {
+                background: { type: 'solid', color: isDark ? '#18181b' : '#ffffff' },
+                textColor: isDark ? '#a1a1aa' : '#71717a',
+            },
+            grid: {
+                vertLines: { color: isDark ? '#27272a' : '#f4f4f5' },
+                horzLines: { color: isDark ? '#27272a' : '#f4f4f5' },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+                vertLine: {
+                    color: isDark ? '#6b7280' : '#9ca3af',
+                    width: 1,
+                    style: LightweightCharts.LineStyle.Dashed,
+                },
+                horzLine: {
+                    color: isDark ? '#6b7280' : '#9ca3af',
+                    width: 1,
+                    style: LightweightCharts.LineStyle.Dashed,
+                },
+            },
+            rightPriceScale: {
+                borderColor: isDark ? '#27272a' : '#e4e4e7',
+                scaleMargins: { top: 0.1, bottom: 0.2 },
+            },
+            timeScale: {
+                borderColor: isDark ? '#27272a' : '#e4e4e7',
+                timeVisible: true,
+                secondsVisible: false,
+            },
+        });
+
+        // Candlestick Series - v5.1 API
+        SC.candlestickSeries = SC.chart.addSeries(LightweightCharts.CandlestickSeries, {
+            upColor: '#26a69a',
+            downColor: '#ef5350',
+            borderUpColor: '#26a69a',
+            borderDownColor: '#ef5350',
+            wickUpColor: '#26a69a',
+            wickDownColor: '#ef5350',
+        });
+
+        if (data.candlestick && data.candlestick.length > 0) {
+            SC.candlestickSeries.setData(data.candlestick);
+            SC.candlestickData = data.candlestick; // Store for legend change calculation
+        }
+
+        // Volume Series - v5.1 API
+        SC.volumeSeries = SC.chart.addSeries(LightweightCharts.HistogramSeries, {
+            priceFormat: { type: 'volume' },
+            priceScaleId: 'volume',
+        });
+
+        SC.chart.priceScale('volume').applyOptions({
+            scaleMargins: { top: 0.85, bottom: 0 },
+        });
+
+        if (data.volume && data.volume.length > 0) {
+            SC.volumeSeries.setData(data.volume);
+            SC.volumeData = data.volume; // Store for theme change reinit
+        }
+
+        SC.chart.timeScale().fitContent();
+
+        // Handle resize
+        if (SC.resizeObserver) SC.resizeObserver.disconnect();
+        SC.resizeObserver = new ResizeObserver(entries => {
+            if (entries.length === 0 || entries[0].target !== container) return;
+            const { width, height } = entries[0].contentRect;
+            if (SC.chart && width > 0 && height > 0) {
+                SC.chart.applyOptions({ width, height });
+            }
+        });
+        SC.resizeObserver.observe(container);
+
+        // Setup legend
+        setupLegend();
+
+        // Setup infinite scroll (load more data on pan)
+        setupInfiniteScroll(data);
+
+        console.log('Dashboard chart initialized');
+    }
+
+    function setupInfiniteScroll(initialData) {
+        if (!SC.chart || !initialData.candlestick || initialData.candlestick.length === 0) return;
+
+        // Track loaded data range
+        SC.loadedDataRange = {
+            from: initialData.candlestick[0].time,
+            to: initialData.candlestick[initialData.candlestick.length - 1].time,
+        };
+        SC.isLoadingMore = false;
+        SC.noMoreData = false;
+        SC.initialLoadComplete = false;
+
+        // Delay enabling infinite scroll to prevent triggering on initial fitContent
+        setTimeout(() => {
+            SC.initialLoadComplete = true;
+        }, 500);
+
+        // Subscribe to visible time range changes
+        SC.chart.timeScale().subscribeVisibleLogicalRangeChange((logicalRange) => {
+            // Skip if initial load not complete, loading, or no more data
+            if (!SC.initialLoadComplete || !logicalRange || SC.isLoadingMore || SC.noMoreData) return;
+
+            // Check if user panned to the left edge (older data)
+            if (logicalRange.from < 5) {
+                loadMoreHistoricalData();
+            }
+        });
+    }
+
+    function loadMoreHistoricalData() {
+        if (SC.isLoadingMore || SC.noMoreData || !SC.loadedDataRange) return;
+
+        SC.isLoadingMore = true;
+        const beforeDate = SC.loadedDataRange.from;
+
+        console.log('Loading more data before:', beforeDate);
+
+        const component = getDashboardComponent();
+        if (component) {
+            // Mark as custom range (removes period highlight)
+            component.call('setCustomRange');
+            component.call('loadMoreData', beforeDate, 30);
+        }
+    }
+
+    function setupLegend() {
+        const legend = document.getElementById('chart-legend');
+        const legendDate = document.getElementById('legend-date');
+        const legendOpen = document.getElementById('legend-open');
+        const legendHigh = document.getElementById('legend-high');
+        const legendLow = document.getElementById('legend-low');
+        const legendClose = document.getElementById('legend-close');
+        const legendChange = document.getElementById('legend-change');
+        const legendVolume = document.getElementById('legend-volume');
+
+        if (!legend || !SC.chart) {
+            console.warn('Legend or chart not found');
+            return;
+        }
+
+        SC.chart.subscribeCrosshairMove(param => {
+            if (param.point === undefined || !param.time || param.point.x < 0 || param.point.y < 0) {
+                legend.style.display = 'none';
+                return;
+            }
+
+            const candleData = param.seriesData.get(SC.candlestickSeries);
+            if (!candleData) {
+                legend.style.display = 'none';
+                return;
+            }
+
+            const volumeData = param.seriesData.get(SC.volumeSeries);
+
+            const open = candleData.open || 0;
+            const high = candleData.high || 0;
+            const low = candleData.low || 0;
+            const close = candleData.close || 0;
+
+            // Get previous candle's close price for change calculation
+            let previous = open; // Fallback to open if no previous data
+            if (SC.candlestickData && SC.candlestickData.length > 0) {
+                const currentTime = param.time;
+                const currentIndex = SC.candlestickData.findIndex(c => c.time === currentTime);
+                if (currentIndex > 0) {
+                    previous = SC.candlestickData[currentIndex - 1].close || open;
+                }
+            }
+
+            const change = close - previous;
+            const changePercent = previous !== 0 ? ((change / previous) * 100).toFixed(2) : '0.00';
+            const volValue = volumeData ? formatVolume(volumeData.value) : '-';
+
+            legend.style.display = 'block';
+            legendDate.textContent = param.time;
+            legendOpen.textContent = open.toLocaleString('id-ID');
+            legendHigh.textContent = high.toLocaleString('id-ID');
+            legendLow.textContent = low.toLocaleString('id-ID');
+            legendClose.textContent = close.toLocaleString('id-ID');
+            legendVolume.textContent = volValue;
+
+            const changeText = (change >= 0 ? '+' : '') + change.toLocaleString('id-ID') + ' (' + changePercent + '%)';
+            legendChange.textContent = changeText;
+            legendChange.className = change >= 0
+                ? 'text-teal-600 dark:text-teal-400 font-medium'
+                : 'text-red-600 dark:text-red-400 font-medium';
+        });
+
+        console.log('Legend setup complete');
+    }
+
+    function formatVolume(value) {
+        if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+        if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
+        if (value >= 1e3) return (value / 1e3).toFixed(2) + 'K';
+        return value.toLocaleString('id-ID');
+    }
+
+    // Set period to 1M (30 days) via Livewire
+    function setPeriodTo1M() {
+        const component = getDashboardComponent();
+        if (component) {
+            component.set('period', '30');
+            return true;
+        }
+        return false;
+    }
+
+    // Initialize chart with retry
+    function startInit() {
+        if (!isOnDashboardPage()) return;
+
+        SC.retryCount = 0;
+        cleanupChart();
+
+        // Try to set period first, then init chart
+        setTimeout(() => {
+            setPeriodTo1M();
+            setTimeout(initChart, 150);
+        }, 50);
+    }
+
+    // Initial load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startInit);
+    } else {
+        startInit();
+    }
+
+    // Listen for Livewire events (only once)
+    if (!window.dashboardChartEventsRegistered) {
+        window.dashboardChartEventsRegistered = true;
+
+        // Re-init on Livewire navigation
+        document.addEventListener('livewire:navigated', () => {
+            if (isOnDashboardPage()) {
+                console.log('On dashboard page, initializing chart...');
+                // Period change updates chart
+                Livewire.on('chart-data-updated', (data) => {
+                    console.log('Dashboard chart data updated:', data.period);
+                    SC.retryCount = 0;
+                    SC.noMoreData = false;
+                    SC.initialLoadComplete = false; // Reset to prevent immediate load on period change
+                    initChart(data.chartData);
+                });
+
+                // More data loaded (infinite scroll)
+                Livewire.on('more-data-loaded', (eventData) => {
+                    const data = eventData[0] || eventData;
+                    console.log('Dashboard more data loaded:', data.candlestick?.length, 'candles');
+
+                    if (SC.candlestickSeries && data.candlestick && data.candlestick.length > 0) {
+                        // Get current data
+                        const currentData = SC.candlestickSeries.data() || [];
+
+                        // Prepend new data (older data comes before)
+                        const mergedCandlestick = [...data.candlestick, ...currentData];
+                        SC.candlestickSeries.setData(mergedCandlestick);
+                        SC.candlestickData = mergedCandlestick; // Update stored data for legend
+
+                        // Update loaded data range
+                        if (SC.loadedDataRange && data.candlestick.length > 0) {
+                            SC.loadedDataRange.from = data.candlestick[0].time;
+                        }
+                    }
+
+                    if (SC.volumeSeries && data.volume && data.volume.length > 0) {
+                        const currentVolume = SC.volumeSeries.data() || [];
+                        const mergedVolume = [...data.volume, ...currentVolume];
+                        SC.volumeSeries.setData(mergedVolume);
+                        SC.volumeData = mergedVolume; // Update stored data for theme change
+                    }
+
+                    SC.isLoadingMore = false;
+                });
+
+                // No more data available
+                Livewire.on('no-more-data', () => {
+                    console.log('No more historical data available');
+                    SC.noMoreData = true;
+                    SC.isLoadingMore = false;
+                });
+            }
+        });
+
+        // Theme change handler - watch for class changes on <html> element
+        let lastDarkState = document.documentElement.classList.contains('dark');
+
+        SC.themeObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class' && isOnDashboardPage()) {
+                    const currentDarkState = document.documentElement.classList.contains('dark');
+                    // Only reinit if dark state actually changed
+                    if (currentDarkState !== lastDarkState) {
+                        lastDarkState = currentDarkState;
+                        console.log('Theme changed to:', currentDarkState ? 'dark' : 'light');
+                        SC.retryCount = 0;
+                        // Use longer delay to ensure Flux has updated
+                        setTimeout(() => {
+                            if (isOnDashboardPage()) {
+                                initChart();
+                            }
+                        }, 100);
+                    }
+                }
+            });
+        });
+        SC.themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    }
+})();
+</script>
+@endpush
