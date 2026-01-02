@@ -703,7 +703,7 @@
                     >
                         {{-- Fallback initials - always visible until image loads --}}
                         <div
-                            class="absolute inset-0 rounded-lg bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
+                            class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
                             x-show="!imageLoaded || imageError"
                             x-cloak
                         >
@@ -714,7 +714,7 @@
                             <img
                                 src="{{ $company->logo_url }}"
                                 alt="{{ $company->kode_emiten }}"
-                                class="absolute inset-0 w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-zinc-700"
+                                class="absolute inset-0 w-16 h-16 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                 x-show="imageLoaded && !imageError"
                                 x-cloak
                                 x-on:load="imageLoaded = true"
