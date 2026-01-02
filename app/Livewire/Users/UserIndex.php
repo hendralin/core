@@ -443,9 +443,9 @@ class UserIndex extends Component
             ->when($this->createdDateTo, fn($q) => $q->whereDate('created_at', '<=', $this->createdDateTo))
             ->when($this->loginDateFrom, fn($q) => $q->whereDate('last_login_at', '>=', $this->loginDateFrom))
             ->when($this->loginDateTo, fn($q) => $q->whereDate('last_login_at', '<=', $this->loginDateTo))
-            ->whereDoesntHave('roles', function ($q) {
-                $q->whereIn('name', [RoleConstants::USER]);
-            })
+            // ->whereDoesntHave('roles', function ($q) {
+            //     $q->whereIn('name', [RoleConstants::USER]);
+            // })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
