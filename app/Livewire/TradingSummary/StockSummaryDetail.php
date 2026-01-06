@@ -374,6 +374,7 @@ class StockSummaryDetail extends Component
         return [
             'candlestick' => $candlestick,
             'volume' => $volume,
+            'indicators' => $this->technicalIndicators['chart_data'] ?? [],
         ];
     }
 
@@ -406,7 +407,22 @@ class StockSummaryDetail extends Component
         $lows = $data->pluck('low')->toArray();
         $volumes = $data->pluck('volume')->toArray();
 
+        // Calculate time series data for chart overlays
+        $sma20Series = $this->calculateSMAArray($closes, 20);
+        $sma50Series = $this->calculateSMAArray($closes, 50);
+        $ema20Series = $this->calculateEMAArray($closes, 20);
+        $ema50Series = $this->calculateEMAArray($closes, 50);
+        $bollingerBands = $this->calculateBollingerBandsArray($closes, 20, 2);
+
+        // Calculate RSI and MACD time series for separate panes
+        $rsiSeries = $this->calculateRSIArray($closes, 14);
+        $macdSeries = $this->calculateMACDArray($closes);
+
+        // Convert to chart data format
+        $dates = $data->pluck('date')->toArray();
+
         $this->technicalIndicators = [
+            // Current values for sidebar display
             'sma_20' => $this->calculateSMA($closes, 20),
             'sma_50' => $this->calculateSMA($closes, 50),
             'ema_20' => $this->calculateEMA($closes, 20),
@@ -416,6 +432,19 @@ class StockSummaryDetail extends Component
             'bollinger_bands' => $this->calculateBollingerBands($closes, 20, 2),
             'stochastic' => $this->calculateStochastic($highs, $lows, $closes, 14),
             'volume_sma' => $this->calculateSMA($volumes, 20),
+
+            // Time series data for chart overlays
+            'chart_data' => [
+                'sma_20' => $this->formatIndicatorSeries($dates, $sma20Series),
+                'sma_50' => $this->formatIndicatorSeries($dates, $sma50Series),
+                'ema_20' => $this->formatIndicatorSeries($dates, $ema20Series),
+                'ema_50' => $this->formatIndicatorSeries($dates, $ema50Series),
+                'bollinger_upper' => $this->formatIndicatorSeries($dates, $bollingerBands['upper'] ?? []),
+                'bollinger_middle' => $this->formatIndicatorSeries($dates, $bollingerBands['middle'] ?? []),
+                'bollinger_lower' => $this->formatIndicatorSeries($dates, $bollingerBands['lower'] ?? []),
+                'rsi' => $this->formatIndicatorSeries($dates, $rsiSeries),
+                'macd' => $macdSeries, // MACD is an array with macd, signal, histogram
+            ]
         ];
     }
 
@@ -556,6 +585,194 @@ class StockSummaryDetail extends Component
         $d = $k; // Simplified version
 
         return ['k' => $k, 'd' => $d];
+    }
+
+    /**
+     * Calculate RSI array for time series data
+     */
+    private function calculateRSIArray(array $closes, int $period = 14): array
+    {
+        $result = [];
+        $count = count($closes);
+
+        if ($count < $period + 1) {
+            return array_fill(0, $count, null);
+        }
+
+        // Calculate gains and losses
+        $gains = [];
+        $losses = [];
+
+        for ($i = 1; $i < $count; $i++) {
+            $change = $closes[$i] - $closes[$i - 1];
+            $gains[] = $change > 0 ? $change : 0;
+            $losses[] = $change < 0 ? abs($change) : 0;
+        }
+
+        // Calculate RSI for each period
+        for ($i = $period; $i < count($gains); $i++) {
+            $avgGain = array_sum(array_slice($gains, $i - $period, $period)) / $period;
+            $avgLoss = array_sum(array_slice($losses, $i - $period, $period)) / $period;
+
+            if ($avgLoss == 0) {
+                $rsi = 100;
+            } else {
+                $rs = $avgGain / $avgLoss;
+                $rsi = 100 - (100 / (1 + $rs));
+            }
+
+            $result[] = $rsi;
+        }
+
+        // Pad with nulls for earlier periods
+        return array_pad($result, -$count, null);
+    }
+
+    /**
+     * Calculate MACD array for time series data
+     */
+    private function calculateMACDArray(array $closes): array
+    {
+        $fastPeriod = 12;
+        $slowPeriod = 26;
+        $signalPeriod = 9;
+
+        $fastEMAs = $this->calculateEMAArray($closes, $fastPeriod);
+        $slowEMAs = $this->calculateEMAArray($closes, $slowPeriod);
+
+        $macdLine = [];
+        $signalLine = [];
+        $histogram = [];
+
+        $count = count($closes);
+        for ($i = 0; $i < $count; $i++) {
+            if ($fastEMAs[$i] !== null && $slowEMAs[$i] !== null) {
+                $macd = $fastEMAs[$i] - $slowEMAs[$i];
+                $macdLine[] = $macd;
+
+                // Calculate signal line (EMA of MACD)
+                if (count($macdLine) >= $signalPeriod) {
+                    $signal = $this->calculateEMA(array_slice($macdLine, -$signalPeriod), $signalPeriod);
+                    $signalLine[] = $signal ?? $macd;
+                    $histogram[] = $macd - ($signal ?? $macd);
+                } else {
+                    $signalLine[] = $macd;
+                    $histogram[] = 0;
+                }
+            } else {
+                $macdLine[] = null;
+                $signalLine[] = null;
+                $histogram[] = null;
+            }
+        }
+
+        return [
+            'macd' => $macdLine,
+            'signal' => $signalLine,
+            'histogram' => $histogram,
+        ];
+    }
+
+    /**
+     * Calculate SMA array for time series data
+     */
+    private function calculateSMAArray(array $data, int $period): array
+    {
+        $result = [];
+        $count = count($data);
+
+        for ($i = $period - 1; $i < $count; $i++) {
+            $sum = 0;
+            for ($j = $i - $period + 1; $j <= $i; $j++) {
+                $sum += $data[$j];
+            }
+            $result[] = $sum / $period;
+        }
+
+        // Pad with nulls for earlier periods
+        return array_pad($result, -$count, null);
+    }
+
+    /**
+     * Calculate EMA array for time series data
+     */
+    private function calculateEMAArray(array $data, int $period): array
+    {
+        $result = [];
+        $count = count($data);
+
+        if ($count < $period) {
+            return array_fill(0, $count, null);
+        }
+
+        $multiplier = 2 / ($period + 1);
+
+        // Start with SMA for the first EMA value
+        $sma = array_sum(array_slice($data, 0, $period)) / $period;
+        $ema = $sma;
+
+        // First EMA value
+        $result[] = $ema;
+
+        // Calculate EMA for the remaining values
+        for ($i = $period; $i < $count; $i++) {
+            $ema = ($data[$i] - $ema) * $multiplier + $ema;
+            $result[] = $ema;
+        }
+
+        // Pad with nulls for earlier periods
+        return array_pad($result, -$count, null);
+    }
+
+    /**
+     * Calculate Bollinger Bands array for time series data
+     */
+    private function calculateBollingerBandsArray(array $closes, int $period = 20, float $stdDev = 2): array
+    {
+        $upper = [];
+        $middle = [];
+        $lower = [];
+        $count = count($closes);
+
+        for ($i = $period - 1; $i < $count; $i++) {
+            $recentCloses = array_slice($closes, $i - $period + 1, $period);
+            $sma = array_sum($recentCloses) / $period;
+
+            $variance = 0;
+            foreach ($recentCloses as $close) {
+                $variance += pow($close - $sma, 2);
+            }
+            $stdDeviation = sqrt($variance / $period);
+
+            $upper[] = $sma + ($stdDev * $stdDeviation);
+            $middle[] = $sma;
+            $lower[] = $sma - ($stdDev * $stdDeviation);
+        }
+
+        // Pad with nulls for earlier periods
+        return [
+            'upper' => array_pad($upper, -$count, null),
+            'middle' => array_pad($middle, -$count, null),
+            'lower' => array_pad($lower, -$count, null),
+        ];
+    }
+
+    /**
+     * Format indicator series for chart data
+     */
+    private function formatIndicatorSeries(array $dates, array $values): array
+    {
+        $result = [];
+        foreach ($dates as $index => $date) {
+            $value = $values[$index] ?? null;
+            if ($value !== null) {
+                $result[] = [
+                    'time' => $date->format('Y-m-d'),
+                    'value' => (float) $value,
+                ];
+            }
+        }
+        return $result;
     }
 
     public function render()

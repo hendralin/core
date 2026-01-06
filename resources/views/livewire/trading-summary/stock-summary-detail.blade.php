@@ -340,7 +340,7 @@
                     <!-- Chart Header -->
                     <div class="px-4 py-3 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <span class="text-gray-900 dark:text-white font-medium">Price Chart</span>
+                            <span class="text-gray-900 dark:text-white font-medium">Time</span>
                             <div class="flex items-center gap-1 text-xs">
                                 @foreach(['7' => '1W', '14' => '2W', '30' => '1M', '60' => '2M', '90' => '3M', 'ytd' => 'YTD', '365' => '1Y', '1095' => '3Y', '1825' => '5Y'] as $value => $label)
                                     <button
@@ -358,6 +358,127 @@
                             <span class="flex items-center gap-1">
                                 <span class="w-3 h-3 bg-red-500 rounded-sm"></span> Bearish
                             </span>
+                            <!-- Indicator Selector Dropdown -->
+                            <div class="relative" x-data="{ open: false }">
+                                <button
+                                    @click="open = !open"
+                                    class="px-3 py-1 bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 text-gray-700 dark:text-zinc-300 rounded transition-colors flex items-center gap-1"
+                                    title="Select Technical Indicators"
+                                >
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    Indicators
+                                    <svg class="w-3 h-3 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Dropdown Menu -->
+                                <div
+                                    x-show="open"
+                                    @click.away="open = false"
+                                    x-transition
+                                    class="absolute top-full mt-1 right-0 z-50 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg py-2 min-w-48"
+                                    x-cloak
+                                >
+                                    <!-- Moving Averages -->
+                                    <div class="px-3 py-1 text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase">Moving Averages</div>
+                                    <div class="space-y-1">
+                                        <label class="flex items-center px-3 py-1 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                id="toggle-sma20"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            >
+                                            <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
+                                                <span class="w-3 h-3 bg-blue-500 rounded-sm"></span>
+                                                SMA 20
+                                            </span>
+                                        </label>
+                                        <label class="flex items-center px-3 py-1 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                id="toggle-sma50"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            >
+                                            <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
+                                                <span class="w-3 h-3 bg-orange-500 rounded-sm"></span>
+                                                SMA 50
+                                            </span>
+                                        </label>
+                                        <label class="flex items-center px-3 py-1 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                id="toggle-ema20"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            >
+                                            <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
+                                                <span class="w-3 h-3 bg-green-500 rounded-sm"></span>
+                                                EMA 20
+                                            </span>
+                                        </label>
+                                        <label class="flex items-center px-3 py-1 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                id="toggle-ema50"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            >
+                                            <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
+                                                <span class="w-3 h-3 bg-purple-500 rounded-sm"></span>
+                                                EMA 50
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <div class="border-t border-gray-200 dark:border-zinc-700 my-2"></div>
+
+                                    <!-- Bollinger Bands -->
+                                    <div class="px-3 py-1 text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase">Bollinger Bands</div>
+                                    <div class="space-y-1">
+                                        <label class="flex items-center px-3 py-1 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                id="toggle-bollinger"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            >
+                                            <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
+                                                <span class="w-3 h-3 bg-red-500 rounded-sm"></span>
+                                                Bollinger Bands
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <div class="border-t border-gray-200 dark:border-zinc-700 my-2"></div>
+
+                                    <!-- Oscillators -->
+                                    <div class="px-3 py-1 text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase">Oscillators</div>
+                                    <div class="space-y-1">
+                                        <label class="flex items-center px-3 py-1 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                id="toggle-rsi"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            >
+                                            <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
+                                                <span class="w-3 h-3 bg-red-500 rounded-sm"></span>
+                                                RSI
+                                            </span>
+                                        </label>
+                                        <label class="flex items-center px-3 py-1 hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                id="toggle-macd"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            >
+                                            <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
+                                                <span class="w-3 h-3 bg-teal-500 rounded-sm"></span>
+                                                MACD
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <!-- TradingView Chart -->
@@ -1351,6 +1472,19 @@
             chart: null,
             candlestickSeries: null,
             volumeSeries: null,
+            indicatorSeries: {
+                sma20: null,
+                sma50: null,
+                ema20: null,
+                ema50: null,
+                bollingerUpper: null,
+                bollingerMiddle: null,
+                bollingerLower: null,
+            },
+            rsiSeries: null,
+            macdSeries: null,
+            macdHistogramSeries: null,
+            indicatorData: null,
             candlestickData: null,
             volumeData: null,
             resizeObserver: null,
@@ -1361,6 +1495,17 @@
     }
 
     const SC = window.StockChart;
+
+    // Individual indicator visibility states (default: all OFF)
+    SC.indicatorStates = {
+        sma20: false,
+        sma50: false,
+        ema20: false,
+        ema50: false,
+        bollinger: false,
+        rsi: false,
+        macd: false
+    };
 
     function isOnStockDetailPage() {
         return document.querySelector('[data-stock-detail]') !== null;
@@ -1387,6 +1532,14 @@
             try { SC.chart.remove(); } catch(e) {}
             SC.chart = null;
         }
+        // Reset indicator series references
+        Object.keys(SC.indicatorSeries).forEach(key => {
+            SC.indicatorSeries[key] = null;
+        });
+        // Reset RSI and MACD series
+        SC.rsiSeries = null;
+        SC.macdSeries = null;
+        SC.macdHistogramSeries = null;
         if (SC.resizeObserver) {
             SC.resizeObserver.disconnect();
             SC.resizeObserver = null;
@@ -1416,7 +1569,8 @@
             // Use stored data for theme change reinit
             data = {
                 candlestick: SC.candlestickData,
-                volume: SC.volumeData || []
+                volume: SC.volumeData || [],
+                indicators: SC.indicatorData || {}
             };
         }
         if (!data) {
@@ -1528,6 +1682,239 @@
             SC.volumeData = data.volume; // Store for theme change reinit
         }
 
+        // RSI Pane
+        if (data.indicators && data.indicators.rsi && data.indicators.rsi.length > 0) {
+            SC.rsiSeries = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                priceScaleId: 'rsi',
+                color: '#FF6B6B',
+                lineWidth: 1,
+                title: 'RSI (14)',
+                priceLineVisible: false,
+                lastValueVisible: false,
+                visible: SC.indicatorStates.rsi,
+            });
+
+            // Set RSI scale to 0-100 range
+            SC.chart.priceScale('rsi').applyOptions({
+                scaleMargins: { top: 0.85, bottom: 0 },
+                autoScale: false,
+                mode: LightweightCharts.PriceScaleMode.Normal,
+            });
+
+            // Set fixed range for RSI (0-100)
+            SC.rsiSeries.priceScale().applyOptions({
+                scaleMargins: { top: 0.1, bottom: 0.1 },
+            });
+
+            SC.rsiSeries.setData(data.indicators.rsi);
+            // Apply visibility state after setting data
+            SC.rsiSeries.applyOptions({ visible: SC.indicatorStates.rsi });
+
+            // Add RSI reference lines (30 and 70)
+            SC.rsiSeries.createPriceLine({
+                price: 70,
+                color: '#FF9800',
+                lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'Overbought (70)',
+            });
+
+            SC.rsiSeries.createPriceLine({
+                price: 30,
+                color: '#4CAF50',
+                lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'Oversold (30)',
+            });
+        }
+
+        // MACD Pane
+        if (data.indicators && data.indicators.macd) {
+            // MACD Line
+            SC.macdSeries = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                priceScaleId: 'macd',
+                color: '#4ECDC4',
+                lineWidth: 1,
+                title: 'MACD',
+                priceLineVisible: false,
+                lastValueVisible: false,
+                visible: SC.indicatorStates.macd,
+            });
+
+            // MACD Signal Line
+            const signalSeries = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                priceScaleId: 'macd',
+                color: '#FF6B6B',
+                lineWidth: 1,
+                title: 'Signal',
+                priceLineVisible: false,
+                lastValueVisible: false,
+                visible: SC.indicatorStates.macd,
+            });
+
+            // MACD Histogram
+            SC.macdHistogramSeries = SC.chart.addSeries(LightweightCharts.HistogramSeries, {
+                priceScaleId: 'macd',
+                color: '#26a69a',
+                title: 'MACD Histogram',
+                priceLineVisible: false,
+                lastValueVisible: false,
+                visible: SC.indicatorStates.macd,
+            });
+
+            SC.chart.priceScale('macd').applyOptions({
+                scaleMargins: { top: 0.85, bottom: 0 },
+            });
+
+            // Format MACD data for chart
+            const macdData = [];
+            const signalData = [];
+            const histogramData = [];
+
+            data.indicators.macd.macd.forEach((macd, index) => {
+                const date = data.candlestick[index]?.time;
+                if (date && macd !== null) {
+                    macdData.push({ time: date, value: macd });
+                }
+            });
+
+            data.indicators.macd.signal.forEach((signal, index) => {
+                const date = data.candlestick[index]?.time;
+                if (date && signal !== null) {
+                    signalData.push({ time: date, value: signal });
+                }
+            });
+
+            data.indicators.macd.histogram.forEach((hist, index) => {
+                const date = data.candlestick[index]?.time;
+                if (date && hist !== null) {
+                    const color = hist >= 0 ? 'rgba(76, 175, 80, 0.8)' : 'rgba(244, 67, 54, 0.8)';
+                    histogramData.push({ time: date, value: hist, color });
+                }
+            });
+
+            SC.macdSeries.setData(macdData);
+            signalSeries.setData(signalData);
+            SC.macdHistogramSeries.setData(histogramData);
+
+            // Apply visibility state after setting data
+            SC.macdSeries.applyOptions({ visible: SC.indicatorStates.macd });
+            SC.macdHistogramSeries.applyOptions({ visible: SC.indicatorStates.macd });
+        }
+
+        // Technical Indicators - Line Series Overlays
+        if (data.indicators) {
+            // SMA 20
+            if (data.indicators.sma_20 && data.indicators.sma_20.length > 0) {
+                SC.indicatorSeries.sma20 = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                    color: '#2196F3',
+                    lineWidth: 1,
+                    title: 'SMA 20',
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                    visible: SC.indicatorStates.sma20,
+                });
+                SC.indicatorSeries.sma20.setData(data.indicators.sma_20);
+                // Apply visibility state after setting data
+                SC.indicatorSeries.sma20.applyOptions({ visible: SC.indicatorStates.sma20 });
+            }
+
+            // SMA 50
+            if (data.indicators.sma_50 && data.indicators.sma_50.length > 0) {
+                SC.indicatorSeries.sma50 = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                    color: '#FF9800',
+                    lineWidth: 1,
+                    title: 'SMA 50',
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                    visible: SC.indicatorStates.sma50,
+                });
+                SC.indicatorSeries.sma50.setData(data.indicators.sma_50);
+                // Apply visibility state after setting data
+                SC.indicatorSeries.sma50.applyOptions({ visible: SC.indicatorStates.sma50 });
+            }
+
+            // EMA 20
+            if (data.indicators.ema_20 && data.indicators.ema_20.length > 0) {
+                SC.indicatorSeries.ema20 = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                    color: '#4CAF50',
+                    lineWidth: 1,
+                    title: 'EMA 20',
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                    visible: SC.indicatorStates.ema20,
+                });
+                SC.indicatorSeries.ema20.setData(data.indicators.ema_20);
+                // Apply visibility state after setting data
+                SC.indicatorSeries.ema20.applyOptions({ visible: SC.indicatorStates.ema20 });
+            }
+
+            // EMA 50
+            if (data.indicators.ema_50 && data.indicators.ema_50.length > 0) {
+                SC.indicatorSeries.ema50 = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                    color: '#9C27B0',
+                    lineWidth: 1,
+                    title: 'EMA 50',
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                    visible: SC.indicatorStates.ema50,
+                });
+                SC.indicatorSeries.ema50.setData(data.indicators.ema_50);
+                // Apply visibility state after setting data
+                SC.indicatorSeries.ema50.applyOptions({ visible: SC.indicatorStates.ema50 });
+            }
+
+            // Bollinger Bands
+            if (data.indicators.bollinger_upper && data.indicators.bollinger_upper.length > 0) {
+                SC.indicatorSeries.bollingerUpper = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                    color: '#FF5722',
+                    lineWidth: 1,
+                    lineStyle: LightweightCharts.LineStyle.Dashed,
+                    title: 'BB Upper',
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                    visible: SC.indicatorStates.bollinger,
+                });
+                SC.indicatorSeries.bollingerUpper.setData(data.indicators.bollinger_upper);
+                // Apply visibility state after setting data
+                SC.indicatorSeries.bollingerUpper.applyOptions({ visible: SC.indicatorStates.bollinger });
+            }
+
+            if (data.indicators.bollinger_middle && data.indicators.bollinger_middle.length > 0) {
+                SC.indicatorSeries.bollingerMiddle = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                    color: '#795548',
+                    lineWidth: 1,
+                    lineStyle: LightweightCharts.LineStyle.Dotted,
+                    title: 'BB Middle',
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                    visible: SC.indicatorStates.bollinger,
+                });
+                SC.indicatorSeries.bollingerMiddle.setData(data.indicators.bollinger_middle);
+                // Apply visibility state after setting data
+                SC.indicatorSeries.bollingerMiddle.applyOptions({ visible: SC.indicatorStates.bollinger });
+            }
+
+            if (data.indicators.bollinger_lower && data.indicators.bollinger_lower.length > 0) {
+                SC.indicatorSeries.bollingerLower = SC.chart.addSeries(LightweightCharts.LineSeries, {
+                    color: '#3F51B5',
+                    lineWidth: 1,
+                    lineStyle: LightweightCharts.LineStyle.Dashed,
+                    title: 'BB Lower',
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                    visible: SC.indicatorStates.bollinger,
+                });
+                SC.indicatorSeries.bollingerLower.setData(data.indicators.bollinger_lower);
+                // Apply visibility state after setting data
+                SC.indicatorSeries.bollingerLower.applyOptions({ visible: SC.indicatorStates.bollinger });
+            }
+
+            SC.indicatorData = data.indicators; // Store for theme change reinit
+        }
+
         SC.chart.timeScale().fitContent();
 
         // Handle resize
@@ -1544,10 +1931,108 @@
         // Setup legend
         setupLegend();
 
+        // Setup indicator toggle
+        setupIndicatorToggle();
+
         // Setup infinite scroll (load more data on pan)
         setupInfiniteScroll(data);
 
         console.log('Chart initialized');
+    }
+
+    function setupIndicatorToggle() {
+        // Setup individual indicator checkboxes
+        const indicators = ['sma20', 'sma50', 'ema20', 'ema50', 'bollinger', 'rsi', 'macd'];
+
+        indicators.forEach(indicator => {
+            const checkbox = document.getElementById(`toggle-${indicator}`);
+            if (checkbox) {
+                // Set initial state from SC.indicatorStates
+                checkbox.checked = SC.indicatorStates[indicator];
+
+                // Add change event listener
+                checkbox.addEventListener('change', (e) => {
+                    SC.indicatorStates[indicator] = e.target.checked;
+                    toggleIndicator(indicator, e.target.checked);
+                });
+            }
+        });
+
+        // Update checkbox states to sync with current chart state
+        updateCheckboxStates();
+    }
+
+    function toggleIndicators(visible) {
+        Object.keys(SC.indicatorSeries).forEach(key => {
+            const series = SC.indicatorSeries[key];
+            if (series) {
+                try {
+                    series.applyOptions({ visible });
+                } catch (e) {
+                    // Some versions might not support visible option
+                    console.warn('Could not toggle visibility for', key);
+                }
+            }
+        });
+    }
+
+    function toggleIndicator(indicator, visible) {
+        switch (indicator) {
+            case 'sma20':
+                if (SC.indicatorSeries.sma20) {
+                    try { SC.indicatorSeries.sma20.applyOptions({ visible }); } catch(e) {}
+                }
+                break;
+            case 'sma50':
+                if (SC.indicatorSeries.sma50) {
+                    try { SC.indicatorSeries.sma50.applyOptions({ visible }); } catch(e) {}
+                }
+                break;
+            case 'ema20':
+                if (SC.indicatorSeries.ema20) {
+                    try { SC.indicatorSeries.ema20.applyOptions({ visible }); } catch(e) {}
+                }
+                break;
+            case 'ema50':
+                if (SC.indicatorSeries.ema50) {
+                    try { SC.indicatorSeries.ema50.applyOptions({ visible }); } catch(e) {}
+                }
+                break;
+            case 'bollinger':
+                if (SC.indicatorSeries.bollingerUpper) {
+                    try { SC.indicatorSeries.bollingerUpper.applyOptions({ visible }); } catch(e) {}
+                }
+                if (SC.indicatorSeries.bollingerMiddle) {
+                    try { SC.indicatorSeries.bollingerMiddle.applyOptions({ visible }); } catch(e) {}
+                }
+                if (SC.indicatorSeries.bollingerLower) {
+                    try { SC.indicatorSeries.bollingerLower.applyOptions({ visible }); } catch(e) {}
+                }
+                break;
+            case 'rsi':
+                if (SC.rsiSeries) {
+                    try { SC.rsiSeries.applyOptions({ visible }); } catch(e) {}
+                }
+                break;
+            case 'macd':
+                if (SC.macdSeries) {
+                    try { SC.macdSeries.applyOptions({ visible }); } catch(e) {}
+                }
+                if (SC.macdHistogramSeries) {
+                    try { SC.macdHistogramSeries.applyOptions({ visible }); } catch(e) {}
+                }
+                break;
+        }
+    }
+
+    // Update checkbox states when chart is initialized or reloaded
+    function updateCheckboxStates() {
+        Object.keys(SC.indicatorStates).forEach(indicator => {
+            const checkbox = document.getElementById(`toggle-${indicator}`);
+            if (checkbox) {
+                checkbox.checked = SC.indicatorStates[indicator];
+            }
+        });
     }
 
     function setupInfiniteScroll(initialData) {
@@ -1796,6 +2281,132 @@
                         SC.volumeData = mergedVolume; // Update stored data for theme change
                     }
 
+                        // Update indicator series if they exist
+                        if (data.indicators) {
+                            // SMA 20
+                            if (SC.indicatorSeries.sma20 && data.indicators.sma_20 && data.indicators.sma_20.length > 0) {
+                                const currentSMA20 = SC.indicatorSeries.sma20.data() || [];
+                                const mergedSMA20 = [...data.indicators.sma_20, ...currentSMA20];
+                                SC.indicatorSeries.sma20.setData(mergedSMA20);
+                                // Ensure visibility state is applied
+                                SC.indicatorSeries.sma20.applyOptions({ visible: SC.indicatorStates.sma20 });
+                            }
+
+                            // SMA 50
+                            if (SC.indicatorSeries.sma50 && data.indicators.sma_50 && data.indicators.sma_50.length > 0) {
+                                const currentSMA50 = SC.indicatorSeries.sma50.data() || [];
+                                const mergedSMA50 = [...data.indicators.sma_50, ...currentSMA50];
+                                SC.indicatorSeries.sma50.setData(mergedSMA50);
+                                // Ensure visibility state is applied
+                                SC.indicatorSeries.sma50.applyOptions({ visible: SC.indicatorStates.sma50 });
+                            }
+
+                            // EMA 20
+                            if (SC.indicatorSeries.ema20 && data.indicators.ema_20 && data.indicators.ema_20.length > 0) {
+                                const currentEMA20 = SC.indicatorSeries.ema20.data() || [];
+                                const mergedEMA20 = [...data.indicators.ema_20, ...currentEMA20];
+                                SC.indicatorSeries.ema20.setData(mergedEMA20);
+                                // Ensure visibility state is applied
+                                SC.indicatorSeries.ema20.applyOptions({ visible: SC.indicatorStates.ema20 });
+                            }
+
+                            // EMA 50
+                            if (SC.indicatorSeries.ema50 && data.indicators.ema_50 && data.indicators.ema_50.length > 0) {
+                                const currentEMA50 = SC.indicatorSeries.ema50.data() || [];
+                                const mergedEMA50 = [...data.indicators.ema_50, ...currentEMA50];
+                                SC.indicatorSeries.ema50.setData(mergedEMA50);
+                                // Ensure visibility state is applied
+                                SC.indicatorSeries.ema50.applyOptions({ visible: SC.indicatorStates.ema50 });
+                            }
+
+                        // Bollinger Bands
+                        if (SC.indicatorSeries.bollingerUpper && data.indicators.bollinger_upper && data.indicators.bollinger_upper.length > 0) {
+                            const currentBBUpper = SC.indicatorSeries.bollingerUpper.data() || [];
+                            const mergedBBUpper = [...data.indicators.bollinger_upper, ...currentBBUpper];
+                            SC.indicatorSeries.bollingerUpper.setData(mergedBBUpper);
+                        }
+
+                        if (SC.indicatorSeries.bollingerMiddle && data.indicators.bollinger_middle && data.indicators.bollinger_middle.length > 0) {
+                            const currentBBMiddle = SC.indicatorSeries.bollingerMiddle.data() || [];
+                            const mergedBBMiddle = [...data.indicators.bollinger_middle, ...currentBBMiddle];
+                            SC.indicatorSeries.bollingerMiddle.setData(mergedBBMiddle);
+                        }
+
+                        if (SC.indicatorSeries.bollingerLower && data.indicators.bollinger_lower && data.indicators.bollinger_lower.length > 0) {
+                            const currentBBLower = SC.indicatorSeries.bollingerLower.data() || [];
+                            const mergedBBLower = [...data.indicators.bollinger_lower, ...currentBBLower];
+                            SC.indicatorSeries.bollingerLower.setData(mergedBBLower);
+                        }
+
+                        // Bollinger Bands
+                        if (SC.indicatorSeries.bollingerUpper && data.indicators.bollinger_upper && data.indicators.bollinger_upper.length > 0) {
+                            const currentBBUpper = SC.indicatorSeries.bollingerUpper.data() || [];
+                            const mergedBBUpper = [...data.indicators.bollinger_upper, ...currentBBUpper];
+                            SC.indicatorSeries.bollingerUpper.setData(mergedBBUpper);
+                            // Ensure visibility state is applied
+                            SC.indicatorSeries.bollingerUpper.applyOptions({ visible: SC.indicatorStates.bollinger });
+                        }
+                        if (SC.indicatorSeries.bollingerMiddle && data.indicators.bollinger_middle && data.indicators.bollinger_middle.length > 0) {
+                            const currentBBMiddle = SC.indicatorSeries.bollingerMiddle.data() || [];
+                            const mergedBBMiddle = [...data.indicators.bollinger_middle, ...currentBBMiddle];
+                            SC.indicatorSeries.bollingerMiddle.setData(mergedBBMiddle);
+                            // Ensure visibility state is applied
+                            SC.indicatorSeries.bollingerMiddle.applyOptions({ visible: SC.indicatorStates.bollinger });
+                        }
+                        if (SC.indicatorSeries.bollingerLower && data.indicators.bollinger_lower && data.indicators.bollinger_lower.length > 0) {
+                            const currentBBLower = SC.indicatorSeries.bollingerLower.data() || [];
+                            const mergedBBLower = [...data.indicators.bollinger_lower, ...currentBBLower];
+                            SC.indicatorSeries.bollingerLower.setData(mergedBBLower);
+                            // Ensure visibility state is applied
+                            SC.indicatorSeries.bollingerLower.applyOptions({ visible: SC.indicatorStates.bollinger });
+                        }
+
+                        // Update RSI series
+                        if (SC.rsiSeries && data.indicators.rsi && data.indicators.rsi.length > 0) {
+                            const currentRSI = SC.rsiSeries.data() || [];
+                            const mergedRSI = [...data.indicators.rsi, ...currentRSI];
+                            SC.rsiSeries.setData(mergedRSI);
+                            // Ensure visibility state is applied
+                            SC.rsiSeries.applyOptions({ visible: SC.indicatorStates.rsi });
+                        }
+
+                        // Update MACD series
+                        if (data.indicators.macd) {
+                            if (SC.macdSeries && data.indicators.macd.macd && data.indicators.macd.macd.length > 0) {
+                                const currentMACD = SC.macdSeries.data() || [];
+                                // Format MACD data for chart
+                                const newMACDData = [];
+                                data.indicators.macd.macd.forEach((macd, index) => {
+                                    const date = data.candlestick[index]?.time;
+                                    if (date && macd !== null) {
+                                        newMACDData.push({ time: date, value: macd });
+                                    }
+                                });
+                                const mergedMACD = [...newMACDData, ...currentMACD];
+                                SC.macdSeries.setData(mergedMACD);
+                                // Ensure visibility state is applied
+                                SC.macdSeries.applyOptions({ visible: SC.indicatorStates.macd });
+                            }
+
+                            if (SC.macdHistogramSeries && data.indicators.macd.histogram && data.indicators.macd.histogram.length > 0) {
+                                const currentHistogram = SC.macdHistogramSeries.data() || [];
+                                // Format histogram data for chart
+                                const newHistogramData = [];
+                                data.indicators.macd.histogram.forEach((hist, index) => {
+                                    const date = data.candlestick[index]?.time;
+                                    if (date && hist !== null) {
+                                        const color = hist >= 0 ? 'rgba(76, 175, 80, 0.8)' : 'rgba(244, 67, 54, 0.8)';
+                                        newHistogramData.push({ time: date, value: hist, color });
+                                    }
+                                });
+                                const mergedHistogram = [...newHistogramData, ...currentHistogram];
+                                SC.macdHistogramSeries.setData(mergedHistogram);
+                                // Ensure visibility state is applied
+                                SC.macdHistogramSeries.applyOptions({ visible: SC.indicatorStates.macd });
+                            }
+                        }
+                    }
+
                     SC.isLoadingMore = false;
                 });
 
@@ -1824,6 +2435,10 @@
                         setTimeout(() => {
                             if (isOnStockDetailPage()) {
                                 initChart();
+                                // Update checkbox states after chart reinit
+                                setTimeout(() => {
+                                    updateCheckboxStates();
+                                }, 200);
                             }
                         }, 100);
                     }
