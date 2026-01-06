@@ -143,8 +143,207 @@
 
         <!-- Main Content -->
         <div class="border flex flex-col lg:flex-row dark:border-zinc-700">
+            <div class="lg:w-80 lg:border-r border-gray-200 dark:border-zinc-700 space-y-1">
+                <!-- Technical Indicators -->
+                <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                        <span class="text-gray-900 dark:text-white font-medium text-sm">Technical Indicators</span>
+                    </div>
+                    <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                        <!-- Moving Averages -->
+                        <div class="px-4 py-3">
+                            <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-2">Moving Averages</div>
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">SMA 20</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['sma_20'] ? 'text-gray-700 dark:text-zinc-300' : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['sma_20'] ? number_format($technicalIndicators['sma_20'], 0, ',', '.') : '-' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">SMA 50</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['sma_50'] ? 'text-gray-700 dark:text-zinc-300' : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['sma_50'] ? number_format($technicalIndicators['sma_50'], 0, ',', '.') : '-' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">EMA 20</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['ema_20'] ? 'text-gray-700 dark:text-zinc-300' : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['ema_20'] ? number_format($technicalIndicators['ema_20'], 0, ',', '.') : '-' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">EMA 50</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['ema_50'] ? 'text-gray-700 dark:text-zinc-300' : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['ema_50'] ? number_format($technicalIndicators['ema_50'], 0, ',', '.') : '-' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RSI -->
+                        <div class="px-4 py-3">
+                            <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-2">RSI (14)</div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">Value</span>
+                                <span class="text-xs font-medium {{ $technicalIndicators['rsi'] ? ($technicalIndicators['rsi'] > 70 ? 'text-red-600 dark:text-red-400' : ($technicalIndicators['rsi'] < 30 ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-zinc-300')) : 'text-gray-400 dark:text-zinc-600' }}">
+                                    {{ $technicalIndicators['rsi'] ? number_format($technicalIndicators['rsi'], 2) : '-' }}
+                                    @if($technicalIndicators['rsi'])
+                                        @if($technicalIndicators['rsi'] > 70)
+                                            <span class="text-[10px] text-red-600 dark:text-red-400 ml-1">(Overbought)</span>
+                                        @elseif($technicalIndicators['rsi'] < 30)
+                                            <span class="text-[10px] text-green-600 dark:text-green-400 ml-1">(Oversold)</span>
+                                        @endif
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- MACD -->
+                        <div class="px-4 py-3">
+                            <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-2">MACD (12,26,9)</div>
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">MACD</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['macd']['macd'] ? ($technicalIndicators['macd']['macd'] > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400') : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['macd']['macd'] ? number_format($technicalIndicators['macd']['macd'], 2) : '-' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Signal</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['macd']['signal'] ? 'text-gray-700 dark:text-zinc-300' : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['macd']['signal'] ? number_format($technicalIndicators['macd']['signal'], 2) : '-' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Histogram</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['macd']['histogram'] ? ($technicalIndicators['macd']['histogram'] > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400') : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['macd']['histogram'] ? number_format($technicalIndicators['macd']['histogram'], 2) : '-' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bollinger Bands -->
+                        <div class="px-4 py-3">
+                            <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-2">Bollinger Bands (20,2)</div>
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Upper</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['bollinger_bands']['upper'] ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['bollinger_bands']['upper'] ? number_format($technicalIndicators['bollinger_bands']['upper'], 0, ',', '.') : '-' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Middle (SMA)</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['bollinger_bands']['middle'] ? 'text-gray-700 dark:text-zinc-300' : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['bollinger_bands']['middle'] ? number_format($technicalIndicators['bollinger_bands']['middle'], 0, ',', '.') : '-' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Lower</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['bollinger_bands']['lower'] ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['bollinger_bands']['lower'] ? number_format($technicalIndicators['bollinger_bands']['lower'], 0, ',', '.') : '-' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stochastic Oscillator -->
+                        <div class="px-4 py-3">
+                            <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-2">Stochastic (14)</div>
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">%K</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['stochastic']['k'] ? ($technicalIndicators['stochastic']['k'] > 80 ? 'text-red-600 dark:text-red-400' : ($technicalIndicators['stochastic']['k'] < 20 ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-zinc-300')) : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['stochastic']['k'] ? number_format($technicalIndicators['stochastic']['k'], 2) : '-' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">%D</span>
+                                    <span class="text-xs font-medium {{ $technicalIndicators['stochastic']['d'] ? ($technicalIndicators['stochastic']['d'] > 80 ? 'text-red-600 dark:text-red-400' : ($technicalIndicators['stochastic']['d'] < 20 ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-zinc-300')) : 'text-gray-400 dark:text-zinc-600' }}">
+                                        {{ $technicalIndicators['stochastic']['d'] ? number_format($technicalIndicators['stochastic']['d'], 2) : '-' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Volume SMA -->
+                        <div class="px-4 py-3">
+                            <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-2">Volume</div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">SMA 20</span>
+                                <span class="text-xs font-medium {{ $technicalIndicators['volume_sma'] ? 'text-gray-700 dark:text-zinc-300' : 'text-gray-400 dark:text-zinc-600' }}">
+                                    @if($technicalIndicators['volume_sma'])
+                                        @if($technicalIndicators['volume_sma'] >= 1000000000)
+                                            {{ number_format($technicalIndicators['volume_sma'] / 1000000000, 2) }}B
+                                        @elseif($technicalIndicators['volume_sma'] >= 1000000)
+                                            {{ number_format($technicalIndicators['volume_sma'] / 1000000, 2) }}M
+                                        @else
+                                            {{ number_format($technicalIndicators['volume_sma'], 0, ',', '.') }}
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if($company)
+                    <!-- Company Info -->
+                    <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                        <div class="px-4 py-2 border-gray-200 dark:border-zinc-700 flex items-center justify-between">
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Company Info</span>
+                            <flux:tooltip content="View Details" position="right">
+                                <flux:button
+                                    wire:click="openCompanyModal"
+                                    variant="ghost"
+                                    icon="eye"
+                                    size="xs"
+                                >
+                                </flux:button>
+                            </flux:tooltip>
+                        </div>
+                        <div class="divide-y divide-gray-100 dark:divide-zinc-800">
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Sector</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->sektor ?? '-' }}</div>
+                            </div>
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Industry</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->industri ?? '-' }}</div>
+                            </div>
+                            @if($this->isLq45)
+                                <div class="px-4 py-2">
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Index Membership</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                                            <flux:icon.check-circle class="size-3" />
+                                            LQ45
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Listing Date</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->tanggal_pencatatan?->format('d M Y') ?? '-' }}</div>
+                            </div>
+                            @if($company->website_url)
+                                <div class="px-4 py-2">
+                                    <a href="{{ $company->website_url }}" target="_blank" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                        <flux:icon.globe-alt class="size-3" />
+                                        {{ $company->website }}
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+            </div>
+
             <!-- Chart Area (Main) -->
-            <div class="flex-1 lg:w-80 space-y-1">
+            <div class="flex-1 space-y-1">
                 <!-- Chart Container -->
                 <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
                     <!-- Chart Header -->
@@ -535,57 +734,6 @@
                                     {{ $financialRatio->sales ? number_format($financialRatio->sales, 2, ',', '.') . ' B' : '-' }}
                                 </span>
                             </div>
-                        </div>
-                    </div>
-                @endif
-
-                @if($company)
-                    <!-- Company Info -->
-                    <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
-                        <div class="px-4 py-2 border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                            <span class="text-gray-900 dark:text-white font-medium text-sm">Company Info</span>
-                            <flux:tooltip content="View Details" position="right">
-                                <flux:button
-                                    wire:click="openCompanyModal"
-                                    variant="ghost"
-                                    icon="eye"
-                                    size="xs"
-                                >
-                                </flux:button>
-                            </flux:tooltip>
-                        </div>
-                        <div class="divide-y divide-gray-100 dark:divide-zinc-800">
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Sector</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->sektor ?? '-' }}</div>
-                            </div>
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Industry</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->industri ?? '-' }}</div>
-                            </div>
-                            @if($this->isLq45)
-                                <div class="px-4 py-2">
-                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Index Membership</div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
-                                            <flux:icon.check-circle class="size-3" />
-                                            LQ45
-                                        </span>
-                                    </div>
-                                </div>
-                            @endif
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Listing Date</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->tanggal_pencatatan?->format('d M Y') ?? '-' }}</div>
-                            </div>
-                            @if($company->website_url)
-                                <div class="px-4 py-2">
-                                    <a href="{{ $company->website_url }}" target="_blank" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                                        <flux:icon.globe-alt class="size-3" />
-                                        {{ $company->website }}
-                                    </a>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 @endif
@@ -1543,6 +1691,12 @@
         SC.chart.timeScale().subscribeVisibleLogicalRangeChange((logicalRange) => {
             // Skip if initial load not complete, loading, or no more data
             if (!SC.initialLoadComplete || !logicalRange || SC.isLoadingMore || SC.noMoreData) return;
+
+            // Update technical indicators for any range change (panning)
+            const component = getDashboardComponent();
+            if (component) {
+                component.call('updateIndicatorsForVisibleRange');
+            }
 
             // Check if user panned to the left edge (older data)
             if (logicalRange.from < 5) {

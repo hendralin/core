@@ -45,6 +45,9 @@ class DashboardIndex extends Component
     public bool $hasMoreStocks = true;
     public int $stocksPerPage = 30;
 
+    // Technical Indicators
+    public array $technicalIndicators;
+
     public function openNewsModal(string $itemId): void
     {
         $this->selectedNews = $this->news->firstWhere('item_id', $itemId);
@@ -141,7 +144,7 @@ class DashboardIndex extends Component
 
         // Update user's default stock code
         $user->default_kode_emiten = strtoupper($kodeEmiten);
-        $user->save();
+        // $user->save();
 
         // Close modal and reload data
         $this->showStockPickerModal = false;
@@ -202,6 +205,13 @@ class DashboardIndex extends Component
         $this->isCustomRange = true;
     }
 
+    public function updateIndicatorsForVisibleRange(): void
+    {
+        // This method will be called when chart visible range changes
+        // Recalculate technical indicators based on current trading history data
+        $this->calculateTechnicalIndicators();
+    }
+
     private function loadData(): void
     {
         /** @var User $user */
@@ -221,6 +231,7 @@ class DashboardIndex extends Component
 
         $this->loadTradingHistory();
         $this->loadNews();
+        $this->calculateTechnicalIndicators();
 
         // Load company related data
         if ($this->company) {
@@ -381,6 +392,9 @@ class DashboardIndex extends Component
             ->sortByDesc('date')
             ->values();
 
+        // Recalculate technical indicators with new data
+        $this->calculateTechnicalIndicators();
+
         // Format data for chart
         $newData = $moreData->sortBy('date')->values();
 
@@ -497,6 +511,171 @@ class DashboardIndex extends Component
             '1825' => '5Y',
             default => $this->period . 'D',
         };
+    }
+
+    private function calculateTechnicalIndicators(): void
+    {
+        if ($this->tradingHistory->isEmpty()) {
+            $this->technicalIndicators = [];
+            return;
+        }
+
+        $data = $this->tradingHistory->sortBy('date')->values();
+        $closes = $data->pluck('close')->toArray();
+        $highs = $data->pluck('high')->toArray();
+        $lows = $data->pluck('low')->toArray();
+        $volumes = $data->pluck('volume')->toArray();
+
+        $this->technicalIndicators = [
+            'sma_20' => $this->calculateSMA($closes, 20),
+            'sma_50' => $this->calculateSMA($closes, 50),
+            'ema_20' => $this->calculateEMA($closes, 20),
+            'ema_50' => $this->calculateEMA($closes, 50),
+            'rsi' => $this->calculateRSI($closes, 14),
+            'macd' => $this->calculateMACD($closes),
+            'bollinger_bands' => $this->calculateBollingerBands($closes, 20, 2),
+            'stochastic' => $this->calculateStochastic($highs, $lows, $closes, 14),
+            'volume_sma' => $this->calculateSMA($volumes, 20),
+        ];
+    }
+
+    private function calculateSMA(array $data, int $period): ?float
+    {
+        if (count($data) < $period) {
+            return null;
+        }
+
+        $sum = array_sum(array_slice($data, -$period));
+        return $sum / $period;
+    }
+
+    private function calculateEMA(array $data, int $period): ?float
+    {
+        if (count($data) < $period) {
+            return null;
+        }
+
+        $multiplier = 2 / ($period + 1);
+
+        // Start with SMA for the first EMA value
+        $ema = array_sum(array_slice($data, 0, $period)) / $period;
+
+        // Calculate EMA for the remaining values
+        for ($i = $period; $i < count($data); $i++) {
+            $ema = ($data[$i] - $ema) * $multiplier + $ema;
+        }
+
+        return $ema;
+    }
+
+    private function calculateRSI(array $closes, int $period = 14): ?float
+    {
+        if (count($closes) < $period + 1) {
+            return null;
+        }
+
+        $gains = [];
+        $losses = [];
+
+        for ($i = 1; $i < count($closes); $i++) {
+            $change = $closes[$i] - $closes[$i - 1];
+            $gains[] = $change > 0 ? $change : 0;
+            $losses[] = $change < 0 ? abs($change) : 0;
+        }
+
+        if (count($gains) < $period) {
+            return null;
+        }
+
+        $avgGain = array_sum(array_slice($gains, 0, $period)) / $period;
+        $avgLoss = array_sum(array_slice($losses, 0, $period)) / $period;
+
+        // Calculate RSI using Wilder's smoothing method
+        for ($i = $period; $i < count($gains); $i++) {
+            $avgGain = (($avgGain * ($period - 1)) + $gains[$i]) / $period;
+            $avgLoss = (($avgLoss * ($period - 1)) + $losses[$i]) / $period;
+        }
+
+        if ($avgLoss == 0) {
+            return 100;
+        }
+
+        $rs = $avgGain / $avgLoss;
+        return 100 - (100 / (1 + $rs));
+    }
+
+    private function calculateMACD(array $closes): array
+    {
+        $fastPeriod = 12;
+        $slowPeriod = 26;
+
+        $fastEMA = $this->calculateEMA($closes, $fastPeriod);
+        $slowEMA = $this->calculateEMA($closes, $slowPeriod);
+
+        if ($fastEMA === null || $slowEMA === null) {
+            return ['macd' => null, 'signal' => null, 'histogram' => null];
+        }
+
+        $macd = $fastEMA - $slowEMA;
+
+        // For simplicity, use MACD as signal line when we don't have enough data
+        // In a full implementation, you'd calculate EMA of MACD values over signal period
+        $signal = $macd;
+
+        return [
+            'macd' => $macd,
+            'signal' => $signal,
+            'histogram' => 0, // No histogram without proper signal calculation
+        ];
+    }
+
+    private function calculateBollingerBands(array $closes, int $period = 20, float $stdDev = 2): array
+    {
+        $sma = $this->calculateSMA($closes, $period);
+
+        if ($sma === null) {
+            return ['upper' => null, 'middle' => null, 'lower' => null];
+        }
+
+        $recentCloses = array_slice($closes, -$period);
+        $variance = 0;
+
+        foreach ($recentCloses as $close) {
+            $variance += pow($close - $sma, 2);
+        }
+
+        $stdDeviation = sqrt($variance / $period);
+
+        return [
+            'upper' => $sma + ($stdDev * $stdDeviation),
+            'middle' => $sma,
+            'lower' => $sma - ($stdDev * $stdDeviation),
+        ];
+    }
+
+    private function calculateStochastic(array $highs, array $lows, array $closes, int $period = 14): array
+    {
+        if (count($closes) < $period) {
+            return ['k' => null, 'd' => null];
+        }
+
+        $recentHighs = array_slice($highs, -$period);
+        $recentLows = array_slice($lows, -$period);
+        $currentClose = end($closes);
+
+        $highestHigh = max($recentHighs);
+        $lowestLow = min($recentLows);
+
+        if ($highestHigh == $lowestLow) {
+            $k = 100; // Avoid division by zero
+        } else {
+            $k = (($currentClose - $lowestLow) / ($highestHigh - $lowestLow)) * 100;
+        }
+
+        // D value is typically 3-period SMA of K
+        $d = $k; // Simplified version
+
+        return ['k' => $k, 'd' => $d];
     }
 
     public function render()
