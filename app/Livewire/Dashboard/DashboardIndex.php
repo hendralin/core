@@ -194,6 +194,7 @@ class DashboardIndex extends Component
     {
         $this->isCustomRange = false; // Reset custom range when period is selected
         $this->loadTradingHistory();
+        $this->calculateTechnicalIndicators(); // Recalculate technical indicators for new period
         $this->dispatch('chart-data-updated',
             period: $this->period,
             chartData: $this->chartData
