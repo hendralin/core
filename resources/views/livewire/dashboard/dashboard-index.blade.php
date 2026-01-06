@@ -1,148 +1,7 @@
 <div class="min-h-screen" data-dashboard>
-    <!-- TradingView Style Header -->
-    <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700">
-        <div class="px-4 py-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="relative w-10 h-10 shrink-0"
-                            x-data="{ imageLoaded: false, imageError: false }"
-                            x-init="imageLoaded = false; imageError = false"
-                            wire:key="logo-{{ $company->kode_emiten }}"
-                        >
-                            {{-- Fallback initials - always visible until image loads --}}
-                            <div
-                                class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
-                                x-show="!imageLoaded || imageError"
-                                x-cloak
-                            >
-                                <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($company->kode_emiten, 0, 2) }}</span>
-                            </div>
-                            {{-- Logo image --}}
-                            @if($company->logo_url)
-                                <img
-                                    src="{{ $company->logo_url }}"
-                                    alt="{{ $company->kode_emiten }}"
-                                    class="absolute inset-0 w-10 h-10 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
-                                    x-show="imageLoaded && !imageError"
-                                    x-cloak
-                                    x-on:load="imageLoaded = true"
-                                    x-on:error="imageError = true"
-                                />
-                            @endif
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-3">
-                                <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $stockCode }}</h1>
-                                <span class="text-xs px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 font-medium">
-                                    {{ $company->papan_pencatatan ?? 'IDX' }}
-                                </span>
-                                <flux:tooltip content="View Details" position="right">
-                                    <flux:button
-                                        wire:click="openCompanyModal"
-                                        variant="ghost"
-                                        icon="eye"
-                                        size="xs"
-                                    >
-                                    </flux:button>
-                                </flux:tooltip>
-                                <flux:tooltip content="Change Stock" position="right">
-                                    <flux:button
-                                        wire:click="openStockPickerModal"
-                                        variant="ghost"
-                                        icon="arrows-right-left"
-                                        size="xs"
-                                    >
-                                    </flux:button>
-                                </flux:tooltip>
-                            </div>
-                            <p class="text-sm text-gray-500 dark:text-zinc-400">{{ $company?->nama_emiten ?? 'Unknown Company' }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                @if($latestTrading)
-                    <div class="flex items-center gap-6">
-                        <!-- Current Price -->
-                        <div class="text-right">
-                            <div class="text-2xl font-bold {{ $latestTrading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
-                                {{ number_format($latestTrading->close, 0, ',', '.') }}
-                            </div>
-                            <div class="flex items-center justify-end gap-2 text-sm {{ $latestTrading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
-                                @if($latestTrading->change >= 0)
-                                    <span>+{{ number_format($latestTrading->change, 0, ',', '.') }}</span>
-                                    <span>(+{{ number_format($this->changePercent, 2) }}%)</span>
-                                @else
-                                    <span>{{ number_format($latestTrading->change, 0, ',', '.') }}</span>
-                                    <span>({{ number_format($this->changePercent, 2) }}%)</span>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
     @if($latestTrading)
-        <!-- Quick Stats Bar -->
-        <div class="bg-gray-50 dark:bg-zinc-800/50 border-s border-r border-gray-200 dark:border-zinc-700">
-            <div class="px-4 py-2 flex items-center gap-6 overflow-x-auto text-xs">
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <span class="text-gray-500 dark:text-zinc-500">O</span>
-                    <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->open_price, 0, ',', '.') }}</span>
-                </div>
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <span class="text-gray-500 dark:text-zinc-500">H</span>
-                    <span class="text-teal-600 dark:text-teal-400 font-medium">{{ number_format($latestTrading->high, 0, ',', '.') }}</span>
-                </div>
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <span class="text-gray-500 dark:text-zinc-500">L</span>
-                    <span class="text-red-600 dark:text-red-400 font-medium">{{ number_format($latestTrading->low, 0, ',', '.') }}</span>
-                </div>
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <span class="text-gray-500 dark:text-zinc-500">C</span>
-                    <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->close, 0, ',', '.') }}</span>
-                </div>
-                <div class="w-px h-4 bg-gray-300 dark:bg-zinc-600"></div>
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <span class="text-gray-500 dark:text-zinc-500">Vol</span>
-                    <span class="text-gray-900 dark:text-white font-medium">
-                        @if($latestTrading->volume >= 1000000000)
-                            {{ number_format($latestTrading->volume / 1000000000, 2) }}B
-                        @elseif($latestTrading->volume >= 1000000)
-                            {{ number_format($latestTrading->volume / 1000000, 2) }}M
-                        @else
-                            {{ number_format($latestTrading->volume, 0, ',', '.') }}
-                        @endif
-                    </span>
-                </div>
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <span class="text-gray-500 dark:text-zinc-500">Val</span>
-                    <span class="text-gray-900 dark:text-white font-medium">
-                        @if($latestTrading->value >= 1000000000)
-                            {{ number_format($latestTrading->value / 1000000000, 2) }}B
-                        @elseif($latestTrading->value >= 1000000)
-                            {{ number_format($latestTrading->value / 1000000, 2) }}M
-                        @else
-                            {{ number_format($latestTrading->value, 0, ',', '.') }}
-                        @endif
-                    </span>
-                </div>
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <span class="text-gray-500 dark:text-zinc-500">Freq</span>
-                    <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->frequency, 0, ',', '.') }}</span>
-                </div>
-                <div class="w-px h-4 bg-gray-300 dark:bg-zinc-600"></div>
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <span class="text-gray-500 dark:text-zinc-500">{{ $latestTrading->date->format('d M Y') }}</span>
-                </div>
-            </div>
-        </div>
-
         <!-- Main Content -->
-        <div class="border flex flex-col lg:flex-row dark:border-zinc-700">
+        <div class="flex flex-col lg:flex-row dark:border-zinc-700">
             <div class="lg:w-80 lg:border-r border-gray-200 dark:border-zinc-700 space-y-1">
                 <!-- Technical Indicators -->
                 <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
@@ -290,53 +149,122 @@
                         </div>
                     </div>
                 </div>
-                @if($company)
-                    <!-- Company Info -->
+                @if($financialRatio)
+                    <!-- Financial Ratio -->
                     <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
                         <div class="px-4 py-2 border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                            <span class="text-gray-900 dark:text-white font-medium text-sm">Company Info</span>
-                            <flux:tooltip content="View Details" position="right">
-                                <flux:button
-                                    wire:click="openCompanyModal"
-                                    variant="ghost"
-                                    icon="eye"
-                                    size="xs"
-                                >
-                                </flux:button>
-                            </flux:tooltip>
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Financial Ratio</span>
+                            <div class="flex items-center gap-1">
+                                @if($financialRatio->isSharia())
+                                    <span class="px-1.5 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-[10px] font-medium rounded">Sharia</span>
+                                @endif
+                                <span class="px-1.5 py-0.5 {{ $financialRatio->isAudited() ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' : 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' }} text-[10px] font-medium rounded">
+                                    {{ $financialRatio->audit_label }}
+                                </span>
+                            </div>
                         </div>
                         <div class="divide-y divide-gray-100 dark:divide-zinc-800">
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Sector</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->sektor ?? '-' }}</div>
+                            <!-- Report Date -->
+                            <div class="px-4 py-1 flex items-center justify-between bg-gray-50 dark:bg-zinc-800/50">
+                                <span class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Report Date</span>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ $financialRatio->fs_date?->format('d M Y') ?? '-' }}</span>
                             </div>
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Industry</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->industri ?? '-' }}</div>
+
+                            <!-- Valuation Metrics -->
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Price to Book Value" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">PBV</span>
+                                </flux:tooltip>
+                                <span class="text-xs font-medium {{ $financialRatio->price_bv && $financialRatio->price_bv < 1 ? 'text-green-600 dark:text-green-400' : ($financialRatio->price_bv && $financialRatio->price_bv > 3 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->price_bv ? number_format($financialRatio->price_bv, 2, ',', '.') . 'x' : '-' }}
+                                </span>
                             </div>
-                            @if($this->isLq45)
-                                <div class="px-4 py-2">
-                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Index Membership</div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
-                                            <flux:icon.check-circle class="size-3" />
-                                            LQ45
-                                        </span>
-                                    </div>
-                                </div>
-                            @endif
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Listing Date</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->tanggal_pencatatan?->format('d M Y') ?? '-' }}</div>
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Price to Earnings Ratio" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">PER</span>
+                                </flux:tooltip>
+                                <span class="text-xs font-medium {{ $financialRatio->per && $financialRatio->per < 15 ? 'text-green-600 dark:text-green-400' : ($financialRatio->per && $financialRatio->per > 25 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->per ? number_format($financialRatio->per, 2, ',', '.') . 'x' : '-' }}
+                                </span>
                             </div>
-                            @if($company->website_url)
-                                <div class="px-4 py-2">
-                                    <a href="{{ $company->website_url }}" target="_blank" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                                        <flux:icon.globe-alt class="size-3" />
-                                        {{ $company->website }}
-                                    </a>
-                                </div>
-                            @endif
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Earnings Per Share" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">EPS</span>
+                                </flux:tooltip>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->eps ? number_format($financialRatio->eps, 2, ',', '.') : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Book Value" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Book Value</span>
+                                </flux:tooltip>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->book_value ? number_format($financialRatio->book_value, 2, ',', '.') : '-' }}
+                                </span>
+                            </div>
+
+                            <!-- Profitability Metrics -->
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Return on Equity" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">ROE</span>
+                                </flux:tooltip>
+                                <span class="text-xs font-medium {{ $financialRatio->roe && $financialRatio->roe > 15 ? 'text-green-600 dark:text-green-400' : ($financialRatio->roe && $financialRatio->roe < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->roe ? number_format($financialRatio->roe, 2, ',', '.') . '%' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Return on Assets" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">ROA</span>
+                                </flux:tooltip>
+                                <span class="text-xs font-medium {{ $financialRatio->roa && $financialRatio->roa > 10 ? 'text-green-600 dark:text-green-400' : ($financialRatio->roa && $financialRatio->roa < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->roa ? number_format($financialRatio->roa, 2, ',', '.') . '%' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Net Profit Margin" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">NPM</span>
+                                </flux:tooltip>
+                                <span class="text-xs font-medium {{ $financialRatio->npm && $financialRatio->npm > 10 ? 'text-green-600 dark:text-green-400' : ($financialRatio->npm && $financialRatio->npm < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->npm ? number_format($financialRatio->npm, 2, ',', '.') . '%' : '-' }}
+                                </span>
+                            </div>
+
+                            <!-- Leverage -->
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Debt to Equity Ratio" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">DER</span>
+                                </flux:tooltip>
+                                <span class="text-xs font-medium {{ $financialRatio->de_ratio && $financialRatio->de_ratio < 1 ? 'text-green-600 dark:text-green-400' : ($financialRatio->de_ratio && $financialRatio->de_ratio > 2 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
+                                    {{ $financialRatio->de_ratio ? number_format($financialRatio->de_ratio, 2, ',', '.') . 'x' : '-' }}
+                                </span>
+                            </div>
+
+                            <!-- Financial Position (in Billions) -->
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Assets" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Assets</span>
+                                </flux:tooltip>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->assets ? number_format($financialRatio->assets, 2, ',', '.') . ' B' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Equity" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Equity</span>
+                                </flux:tooltip>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->equity ? number_format($financialRatio->equity, 2, ',', '.') . ' B' : '-' }}
+                                </span>
+                            </div>
+                            <div class="px-4 py-1 flex items-center justify-between">
+                                <flux:tooltip content="Sales" position="right">
+                                    <span class="text-xs text-gray-500 dark:text-zinc-500">Sales</span>
+                                </flux:tooltip>
+                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
+                                    {{ $financialRatio->sales ? number_format($financialRatio->sales, 2, ',', '.') . ' B' : '-' }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -346,10 +274,149 @@
             <div class="flex-1 space-y-1">
                 <!-- Chart Container -->
                 <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <!-- TradingView Style Header -->
+                    <div class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700">
+                        <div class="px-4 py-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="relative w-10 h-10 shrink-0"
+                                            x-data="{ imageLoaded: false, imageError: false }"
+                                            x-init="imageLoaded = false; imageError = false"
+                                            wire:key="logo-{{ $company->kode_emiten }}"
+                                        >
+                                            {{-- Fallback initials - always visible until image loads --}}
+                                            <div
+                                                class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
+                                                x-show="!imageLoaded || imageError"
+                                                x-cloak
+                                            >
+                                                <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($company->kode_emiten, 0, 2) }}</span>
+                                            </div>
+                                            {{-- Logo image --}}
+                                            @if($company->logo_url)
+                                                <img
+                                                    src="{{ $company->logo_url }}"
+                                                    alt="{{ $company->kode_emiten }}"
+                                                    class="absolute inset-0 w-10 h-10 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
+                                                    x-show="imageLoaded && !imageError"
+                                                    x-cloak
+                                                    x-on:load="imageLoaded = true"
+                                                    x-on:error="imageError = true"
+                                                />
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-3">
+                                                <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $stockCode }}</h1>
+                                                <span class="text-xs px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 font-medium">
+                                                    {{ $company->papan_pencatatan ?? 'IDX' }}
+                                                </span>
+                                                <flux:tooltip content="View Details" position="right">
+                                                    <flux:button
+                                                        wire:click="openCompanyModal"
+                                                        variant="ghost"
+                                                        icon="eye"
+                                                        size="xs"
+                                                    >
+                                                    </flux:button>
+                                                </flux:tooltip>
+                                                <flux:tooltip content="Change Stock" position="right">
+                                                    <flux:button
+                                                        wire:click="openStockPickerModal"
+                                                        variant="ghost"
+                                                        icon="arrows-right-left"
+                                                        size="xs"
+                                                    >
+                                                    </flux:button>
+                                                </flux:tooltip>
+                                            </div>
+                                            <p class="text-sm text-gray-500 dark:text-zinc-400">{{ $company?->nama_emiten ?? 'Unknown Company' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if($latestTrading)
+                                    <div class="flex items-center gap-6">
+                                        <!-- Current Price -->
+                                        <div class="text-right">
+                                            <div class="text-2xl font-bold {{ $latestTrading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
+                                                {{ number_format($latestTrading->close, 0, ',', '.') }}
+                                            </div>
+                                            <div class="flex items-center justify-end gap-2 text-sm {{ $latestTrading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
+                                                @if($latestTrading->change >= 0)
+                                                    <span>+{{ number_format($latestTrading->change, 0, ',', '.') }}</span>
+                                                    <span>(+{{ number_format($this->changePercent, 2) }}%)</span>
+                                                @else
+                                                    <span>{{ number_format($latestTrading->change, 0, ',', '.') }}</span>
+                                                    <span>({{ number_format($this->changePercent, 2) }}%)</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Quick Stats Bar -->
+                    <div class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-700">
+                        <div class="px-4 py-2 flex items-center gap-6 overflow-x-auto text-xs">
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-gray-500 dark:text-zinc-500">O</span>
+                                <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->open_price, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-gray-500 dark:text-zinc-500">H</span>
+                                <span class="text-teal-600 dark:text-teal-400 font-medium">{{ number_format($latestTrading->high, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-gray-500 dark:text-zinc-500">L</span>
+                                <span class="text-red-600 dark:text-red-400 font-medium">{{ number_format($latestTrading->low, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-gray-500 dark:text-zinc-500">C</span>
+                                <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->close, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="w-px h-4 bg-gray-300 dark:bg-zinc-600"></div>
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-gray-500 dark:text-zinc-500">Vol</span>
+                                <span class="text-gray-900 dark:text-white font-medium">
+                                    @if($latestTrading->volume >= 1000000000)
+                                        {{ number_format($latestTrading->volume / 1000000000, 2) }}B
+                                    @elseif($latestTrading->volume >= 1000000)
+                                        {{ number_format($latestTrading->volume / 1000000, 2) }}M
+                                    @else
+                                        {{ number_format($latestTrading->volume, 0, ',', '.') }}
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-gray-500 dark:text-zinc-500">Val</span>
+                                <span class="text-gray-900 dark:text-white font-medium">
+                                    @if($latestTrading->value >= 1000000000)
+                                        {{ number_format($latestTrading->value / 1000000000, 2) }}B
+                                    @elseif($latestTrading->value >= 1000000)
+                                        {{ number_format($latestTrading->value / 1000000, 2) }}M
+                                    @else
+                                        {{ number_format($latestTrading->value, 0, ',', '.') }}
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-gray-500 dark:text-zinc-500">Freq</span>
+                                <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->frequency, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="w-px h-4 bg-gray-300 dark:bg-zinc-600"></div>
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="text-gray-500 dark:text-zinc-500">{{ $latestTrading->date->format('d M Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Chart Header -->
-                    <div class="px-4 py-3 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between">
+                    <div class="px-4 py-1 border-b border-gray-200 dark:border-zinc-700 flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <span class="text-gray-900 dark:text-white font-medium">Time</span>
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Time</span>
                             <div class="flex items-center gap-1 text-xs">
                                 @foreach(['7' => '1W', '14' => '2W', '30' => '1M', '60' => '2M', '90' => '3M', 'ytd' => 'YTD', '365' => '1Y', '1095' => '3Y', '1825' => '5Y'] as $value => $label)
                                     <button
@@ -494,7 +561,7 @@
                     <div
                         wire:ignore
                         class="relative"
-                        style="height: 450px;"
+                        style="height: 380px;"
                     >
                         {{-- Legend at top --}}
                         <div id="chart-legend" class="absolute top-2 left-2 z-50 text-xs font-mono" style="display: none;">
@@ -537,7 +604,7 @@
                             <tbody>
                                 @foreach($tradingHistory as $trading)
                                     <tr class="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
-                                        <td class="px-4 py-2 text-gray-900 dark:text-zinc-200">{{ $trading->date->format('d M') }}</td>
+                                        <td class="px-4 py-2 text-gray-900 dark:text-zinc-200 whitespace-nowrap">{{ $trading->date->format('d M') }}</td>
                                         <td class="px-4 py-2 text-right text-gray-600 dark:text-zinc-400">{{ number_format($trading->open_price, 0, ',', '.') }}</td>
                                         <td class="px-4 py-2 text-right text-teal-600 dark:text-teal-400">{{ number_format($trading->high, 0, ',', '.') }}</td>
                                         <td class="px-4 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($trading->low, 0, ',', '.') }}</td>
@@ -569,7 +636,7 @@
                 </div>
 
                 <!-- News -->
-                <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden" style="display: none;">
                     <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
                         <span class="text-gray-900 dark:text-white font-medium text-sm">Latest News</span>
                     </div>
@@ -761,100 +828,53 @@
                     </div>
                 </div>
 
-                @if($financialRatio)
-                    <!-- Financial Ratio -->
+                @if($company)
+                    <!-- Company Info -->
                     <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
                         <div class="px-4 py-2 border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                            <span class="text-gray-900 dark:text-white font-medium text-sm">Financial Ratio</span>
-                            <div class="flex items-center gap-1">
-                                @if($financialRatio->isSharia())
-                                    <span class="px-1.5 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-[10px] font-medium rounded">Sharia</span>
-                                @endif
-                                <span class="px-1.5 py-0.5 {{ $financialRatio->isAudited() ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' : 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' }} text-[10px] font-medium rounded">
-                                    {{ $financialRatio->audit_label }}
-                                </span>
-                            </div>
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Company Info</span>
+                            <flux:tooltip content="View Details" position="right">
+                                <flux:button
+                                    wire:click="openCompanyModal"
+                                    variant="ghost"
+                                    icon="eye"
+                                    size="xs"
+                                >
+                                </flux:button>
+                            </flux:tooltip>
                         </div>
                         <div class="divide-y divide-gray-100 dark:divide-zinc-800">
-                            <!-- Report Date -->
-                            <div class="px-4 py-2 flex items-center justify-between bg-gray-50 dark:bg-zinc-800/50">
-                                <span class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Report Date</span>
-                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ $financialRatio->fs_date?->format('d M Y') ?? '-' }}</span>
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Sector</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->sektor ?? '-' }}</div>
                             </div>
-
-                            <!-- Valuation Metrics -->
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">PBV</span>
-                                <span class="text-xs font-medium {{ $financialRatio->price_bv && $financialRatio->price_bv < 1 ? 'text-green-600 dark:text-green-400' : ($financialRatio->price_bv && $financialRatio->price_bv > 3 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
-                                    {{ $financialRatio->price_bv ? number_format($financialRatio->price_bv, 2, ',', '.') . 'x' : '-' }}
-                                </span>
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Industry</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->industri ?? '-' }}</div>
                             </div>
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">PER</span>
-                                <span class="text-xs font-medium {{ $financialRatio->per && $financialRatio->per < 15 ? 'text-green-600 dark:text-green-400' : ($financialRatio->per && $financialRatio->per > 25 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
-                                    {{ $financialRatio->per ? number_format($financialRatio->per, 2, ',', '.') . 'x' : '-' }}
-                                </span>
+                            @if($this->isLq45)
+                                <div class="px-4 py-2">
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Index Membership</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+                                            <flux:icon.check-circle class="size-3" />
+                                            LQ45
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+                            <div class="px-4 py-2">
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Listing Date</div>
+                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->tanggal_pencatatan?->format('d M Y') ?? '-' }}</div>
                             </div>
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">EPS</span>
-                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
-                                    {{ $financialRatio->eps ? number_format($financialRatio->eps, 2, ',', '.') : '-' }}
-                                </span>
-                            </div>
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">Book Value</span>
-                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
-                                    {{ $financialRatio->book_value ? number_format($financialRatio->book_value, 2, ',', '.') : '-' }}
-                                </span>
-                            </div>
-
-                            <!-- Profitability Metrics -->
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">ROE</span>
-                                <span class="text-xs font-medium {{ $financialRatio->roe && $financialRatio->roe > 15 ? 'text-green-600 dark:text-green-400' : ($financialRatio->roe && $financialRatio->roe < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
-                                    {{ $financialRatio->roe ? number_format($financialRatio->roe, 2, ',', '.') . '%' : '-' }}
-                                </span>
-                            </div>
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">ROA</span>
-                                <span class="text-xs font-medium {{ $financialRatio->roa && $financialRatio->roa > 10 ? 'text-green-600 dark:text-green-400' : ($financialRatio->roa && $financialRatio->roa < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
-                                    {{ $financialRatio->roa ? number_format($financialRatio->roa, 2, ',', '.') . '%' : '-' }}
-                                </span>
-                            </div>
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">NPM</span>
-                                <span class="text-xs font-medium {{ $financialRatio->npm && $financialRatio->npm > 10 ? 'text-green-600 dark:text-green-400' : ($financialRatio->npm && $financialRatio->npm < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
-                                    {{ $financialRatio->npm ? number_format($financialRatio->npm, 2, ',', '.') . '%' : '-' }}
-                                </span>
-                            </div>
-
-                            <!-- Leverage -->
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">DER</span>
-                                <span class="text-xs font-medium {{ $financialRatio->de_ratio && $financialRatio->de_ratio < 1 ? 'text-green-600 dark:text-green-400' : ($financialRatio->de_ratio && $financialRatio->de_ratio > 2 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-zinc-300') }}">
-                                    {{ $financialRatio->de_ratio ? number_format($financialRatio->de_ratio, 2, ',', '.') . 'x' : '-' }}
-                                </span>
-                            </div>
-
-                            <!-- Financial Position (in Billions) -->
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">Assets</span>
-                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
-                                    {{ $financialRatio->assets ? number_format($financialRatio->assets, 2, ',', '.') . ' B' : '-' }}
-                                </span>
-                            </div>
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">Equity</span>
-                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
-                                    {{ $financialRatio->equity ? number_format($financialRatio->equity, 2, ',', '.') . ' B' : '-' }}
-                                </span>
-                            </div>
-                            <div class="px-4 py-2 flex items-center justify-between">
-                                <span class="text-xs text-gray-500 dark:text-zinc-500">Sales</span>
-                                <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">
-                                    {{ $financialRatio->sales ? number_format($financialRatio->sales, 2, ',', '.') . ' B' : '-' }}
-                                </span>
-                            </div>
+                            @if($company->website_url)
+                                <div class="px-4 py-2">
+                                    <a href="{{ $company->website_url }}" target="_blank" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                        <flux:icon.globe-alt class="size-3" />
+                                        {{ $company->website }}
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endif
