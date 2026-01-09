@@ -37,7 +37,7 @@ class ChangeLogIndex extends Component
         return [
             [
                 'version' => 'v1.22.0',
-                'title' => 'Advanced Sales Report & Profit Analytics System',
+                'title' => 'Advanced Sales Report & Universal Month/Year Filter System',
                 'date' => 'Latest',
                 'color' => 'emerald',
                 'features' => [
@@ -57,7 +57,23 @@ class ChangeLogIndex extends Component
                     '✅ Audit Trail Integration: Activity logging lengkap untuk semua operasi sales report',
                     '✅ Permission-based Access: sales-reports.view permission untuk kontrol akses laporan penjualan',
                     '✅ UI/UX Excellence: Interface modern dengan hover effects, smooth transitions, dan visual hierarchy yang jelas',
-                    '✅ Bahasa Indonesia Support: Semua interface, pesan, dan labels menggunakan bahasa Indonesia yang konsisten'
+                    '✅ Bahasa Indonesia Support: Semua interface, pesan, dan labels menggunakan bahasa Indonesia yang konsisten',
+                    '🗓️ Universal Month/Year Filter System: Filter bulan/tahun dengan input type="month" di semua modul laporan',
+                    '✅ Cash Report Month/Year Filter: Filter bulan/tahun dengan auto-update date range dan visual cost type indicators',
+                    '✅ Sales Report Month/Year Filter: Filter bulan/tahun dengan auto-update date range dan profit analytics integration',
+                    '✅ Cash Inject Month/Year Filter: Filter bulan/tahun dengan auto-update date range untuk inject records',
+                    '✅ Cash Disbursement Month/Year Filter: Filter bulan/tahun dengan auto-update date range dan status filtering',
+                    '✅ Cost Management Month/Year Filter: Filter bulan/tahun dengan auto-update date range dan multi-filter support',
+                    '✅ Native HTML5 Month Picker: Input type="month" dengan native browser picker untuk UX optimal',
+                    '✅ Auto-update Date Range Logic: Otomatis set dateFrom dan dateTo berdasarkan bulan/tahun yang dipilih',
+                    '✅ Universal Filter Implementation: Konsistensi filter bulan/tahun di semua 5 modul laporan utama',
+                    '✅ Enhanced Clear Filters: Tombol clear filter yang mendukung semua filter aktif termasuk bulan/tahun',
+                    '✅ Footer Filter Display: Informasi filter aktif termasuk bulan/tahun di footer tabel laporan',
+                    '✅ Mobile-Responsive Month Picker: Native date picker yang bekerja optimal di mobile devices',
+                    '✅ Accessibility Compliant: Screen reader support dan keyboard navigation untuk input month',
+                    '✅ Consistent UI/UX Design: Styling seragam dengan dark mode support di semua modul',
+                    '✅ Real-time Filter Updates: Pagination reset dan data refresh otomatis saat filter berubah',
+                    '✅ Filter State Persistence: Filter bulan/tahun tersimpan selama session dan dapat di-clear anytime'
                 ]
             ],
             [

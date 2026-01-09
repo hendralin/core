@@ -19,6 +19,8 @@ class CashReportIndex extends Component
     public $perPage = 10;
     public $dateFrom;
     public $dateTo;
+    public $selectedCostType;
+    public $selectedMonthYear; // Format: YYYY-MM
 
     public function mount()
     {
@@ -28,18 +30,45 @@ class CashReportIndex extends Component
 
     public function updating($field)
     {
-        if (in_array($field, ['perPage', 'dateFrom', 'dateTo'])) {
+        if (in_array($field, ['perPage', 'dateFrom', 'dateTo', 'selectedCostType', 'selectedMonthYear'])) {
             $this->resetPage();
+        }
+    }
+
+    public function updatedSelectedMonthYear()
+    {
+        $this->updateDateRange();
+    }
+
+    private function updateDateRange()
+    {
+        if ($this->selectedMonthYear) {
+            $date = \Carbon\Carbon::createFromFormat('Y-m', $this->selectedMonthYear);
+            $this->dateFrom = $date->startOfMonth()->format('Y-m-d');
+            $this->dateTo = $date->endOfMonth()->format('Y-m-d');
+        } else {
+            $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
+            $this->dateTo = now()->endOfMonth()->format('Y-m-d');
         }
     }
 
 
     public function clearFilters()
     {
-        $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
-        $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+        $this->selectedCostType = null;
+        $this->selectedMonthYear = null;
+        $this->updateDateRange();
         $this->resetPage();
     }
+
+    public function filterByCostType($costType)
+    {
+        $this->selectedCostType = $this->selectedCostType === $costType ? null : $costType;
+        $this->resetPage();
+    }
+
+
+
 
     public function render()
     {
@@ -47,6 +76,7 @@ class CashReportIndex extends Component
             ->with(['createdBy', 'vehicle', 'vendor'])
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+            ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->orderBy('cost_date', 'asc')
             ->paginate($this->perPage);
 
@@ -54,12 +84,14 @@ class CashReportIndex extends Component
         $totalDebet = Cost::query()
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+            ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->where('cost_type', '!=', 'cash')
             ->sum('total_price');
 
         $totalKredit = Cost::query()
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+            ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->where('cost_type', 'cash')
             ->sum('total_price');
 
@@ -78,6 +110,7 @@ class CashReportIndex extends Component
             ->with(['vehicle', 'vendor'])
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+            ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->orderBy('cost_date', 'asc')
             ->get();
 

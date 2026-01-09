@@ -2,7 +2,7 @@
 
 Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu mengelola inventori kendaraan, mencatat riwayat biaya kendaraan (service, spare parts, maintenance) dengan approval workflow, mengelola perhitungan kredit kendaraan dengan leasing integration, mengelola penerimaan pembayaran dengan sistem kwitansi otomatis, dan audit trail lengkap untuk semua operasional bisnis.
 
-**Version 1.22.0** - Advanced Sales Report & Profit Analytics System
+**Version 1.22.0** - Advanced Sales Report & Universal Month/Year Filter System
 
 ## ✨ Fitur Utama
 
@@ -220,6 +220,8 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
   - **Cost Analysis**: Modal (harga beli + biaya + komisi), keuntungan per unit
   - **Buyer Information**: Data pembeli (nama, telepon, alamat, metode pembayaran)
   - **Salesman Tracking**: Informasi salesman yang menangani penjualan
+  - **Universal Month/Year Filter**: Filter bulan/tahun dengan input type="month" untuk periode penjualan
+  - **Auto-update Date Range**: Otomatis set dateFrom dan dateTo berdasarkan bulan/tahun yang dipilih
   - **Date-based Filtering**: Filter berdasarkan periode tanggal penjualan
 - **Advanced Profit Analysis**: Perhitungan keuntungan komprehensif
   - **Total Modal Calculation**: Harga beli + biaya approved + komisi pembelian
@@ -244,6 +246,24 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Permission-based Access**: sales-reports.view permission untuk kontrol akses
 - **Responsive Design**: Interface modern dengan hover effects dan smooth transitions
 
+### 🗓️ Universal Month/Year Filter System
+- **Universal Month/Year Filtering**: Filter bulan/tahun dengan input type="month" di semua modul laporan
+- **Native HTML5 Month Picker**: Input type="month" dengan native browser picker untuk UX optimal
+- **Auto-update Date Range Logic**: Otomatis set dateFrom dan dateTo berdasarkan bulan/tahun yang dipilih
+- **Universal Implementation**: Konsistensi filter bulan/tahun di semua 5 modul laporan utama:
+  - **Cash Report**: Filter bulan/tahun dengan visual cost type indicators
+  - **Sales Report**: Filter bulan/tahun dengan profit analytics integration
+  - **Cash Inject**: Filter bulan/tahun untuk inject records
+  - **Cash Disbursement**: Filter bulan/tahun dengan status filtering support
+  - **Cost Management**: Filter bulan/tahun dengan multi-filter support (vehicle/vendor/status)
+- **Enhanced Clear Filters**: Tombol clear filter yang mendukung semua filter aktif termasuk bulan/tahun
+- **Footer Filter Display**: Informasi filter aktif termasuk bulan/tahun di footer tabel laporan
+- **Mobile-Responsive Design**: Native date picker yang bekerja optimal di mobile devices
+- **Accessibility Compliant**: Screen reader support dan keyboard navigation untuk input month
+- **Consistent UI/UX Design**: Styling seragam dengan dark mode support di semua modul
+- **Real-time Filter Updates**: Pagination reset dan data refresh otomatis saat filter berubah
+- **Filter State Persistence**: Filter bulan/tahun tersimpan selama session dan dapat di-clear anytime
+
 ### 💵 Sistem Cash Disbursement (Pengeluaran Kas)
 - **Cash Disbursement Management**: Sistem lengkap pencatatan pengeluaran kas perusahaan (operasional, biaya administrasi, dll)
 - **Advanced Form Features**:
@@ -255,7 +275,7 @@ Sistem manajemen lengkap untuk showroom penjualan mobil bekas yang membantu meng
 - **Approval Workflow**: Sistem approval pending/approved/rejected untuk cash disbursement records
 - **Audit Trail**: Activity logging lengkap untuk semua perubahan cash disbursement records
 - **Status Management**: Pending/Approved/Rejected dengan conditional actions
-- **Advanced Filtering**: Filter berdasarkan status, tipe, tanggal dengan clear filters
+- **Advanced Filtering**: Filter berdasarkan status, tipe, tanggal, dan bulan/tahun dengan clear filters
 - **Export Features**: Excel dan PDF dengan template yang konsisten dan filter aktif
 - **Real-time Totals**: Hitung total pengeluaran berdasarkan filter aktif
 
@@ -1169,7 +1189,7 @@ FILESYSTEM_DISK=public
 
 ## 📝 Changelog
 
-### v1.22.0 - Advanced Sales Report & Profit Analytics System
+### v1.22.0 - Advanced Sales Report & Universal Month/Year Filter System
 - ✅ **Complete Sales Report Module**: Sistem lengkap laporan penjualan kendaraan dengan profit analytics dashboard
 - ✅ **Advanced Sales Analytics Dashboard**: 4 stat cards modern untuk overview penjualan lengkap (Total Penjualan, Total Kendaraan Terjual, Total Keuntungan, % Margin Keuntungan)
 - ✅ **Comprehensive Profit Analysis**: Perhitungan keuntungan komprehensif dengan margin terhadap harga jual aktual
@@ -1187,6 +1207,22 @@ FILESYSTEM_DISK=public
 - ✅ **Permission-based Access**: sales-reports.view permission untuk kontrol akses laporan penjualan
 - ✅ **UI/UX Excellence**: Interface modern dengan hover effects, smooth transitions, dan visual hierarchy yang jelas
 - ✅ **Bahasa Indonesia Support**: Semua interface, pesan, dan labels menggunakan bahasa Indonesia yang konsisten
+- 🗓️ **Universal Month/Year Filter System**: Filter bulan/tahun dengan input type="month" di semua modul laporan
+- ✅ **Cash Report Month/Year Filter**: Filter bulan/tahun dengan auto-update date range dan visual cost type indicators
+- ✅ **Sales Report Month/Year Filter**: Filter bulan/tahun dengan auto-update date range dan profit analytics integration
+- ✅ **Cash Inject Month/Year Filter**: Filter bulan/tahun dengan auto-update date range untuk inject records
+- ✅ **Cash Disbursement Month/Year Filter**: Filter bulan/tahun dengan auto-update date range dan status filtering
+- ✅ **Cost Management Month/Year Filter**: Filter bulan/tahun dengan auto-update date range dan multi-filter support
+- ✅ **Native HTML5 Month Picker**: Input type="month" dengan native browser picker untuk UX optimal
+- ✅ **Auto-update Date Range Logic**: Otomatis set dateFrom dan dateTo berdasarkan bulan/tahun yang dipilih
+- ✅ **Universal Filter Implementation**: Konsistensi filter bulan/tahun di semua 5 modul laporan utama
+- ✅ **Enhanced Clear Filters**: Tombol clear filter yang mendukung semua filter aktif termasuk bulan/tahun
+- ✅ **Footer Filter Display**: Informasi filter aktif termasuk bulan/tahun di footer tabel laporan
+- ✅ **Mobile-Responsive Month Picker**: Native date picker yang bekerja optimal di mobile devices
+- ✅ **Accessibility Compliant**: Screen reader support dan keyboard navigation untuk input month
+- ✅ **Consistent UI/UX Design**: Styling seragam dengan dark mode support di semua modul
+- ✅ **Real-time Filter Updates**: Pagination reset dan data refresh otomatis saat filter berubah
+- ✅ **Filter State Persistence**: Filter bulan/tahun tersimpan selama session dan dapat di-clear anytime
 
 ### v1.21.0 - Vehicle File Management System
 - ✅ **Complete Vehicle File Module**: Sistem lengkap manajemen file kendaraan dengan multiple upload support

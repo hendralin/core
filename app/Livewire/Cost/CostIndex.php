@@ -30,6 +30,7 @@ class CostIndex extends Component
     public $vendorFilter = '';
     public $dateFrom;
     public $dateTo;
+    public $selectedMonthYear; // Format: YYYY-MM
 
     public function mount()
     {
@@ -39,7 +40,7 @@ class CostIndex extends Component
 
     public function updating($field)
     {
-        if (in_array($field, ['search', 'perPage', 'statusFilter', 'vehicleFilter', 'vendorFilter', 'dateFrom', 'dateTo'])) {
+        if (in_array($field, ['search', 'perPage', 'statusFilter', 'vehicleFilter', 'vendorFilter', 'dateFrom', 'dateTo', 'selectedMonthYear'])) {
             $this->resetPage();
         }
     }
@@ -121,9 +122,26 @@ class CostIndex extends Component
     public function clearFilters()
     {
         $this->reset(['search', 'statusFilter', 'vehicleFilter', 'vendorFilter']);
-        $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
-        $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+        $this->selectedMonthYear = null;
+        $this->updateDateRange();
         $this->resetPage();
+    }
+
+    public function updatedSelectedMonthYear()
+    {
+        $this->updateDateRange();
+    }
+
+    private function updateDateRange()
+    {
+        if ($this->selectedMonthYear) {
+            $date = \Carbon\Carbon::createFromFormat('Y-m', $this->selectedMonthYear);
+            $this->dateFrom = $date->startOfMonth()->format('Y-m-d');
+            $this->dateTo = $date->endOfMonth()->format('Y-m-d');
+        } else {
+            $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
+            $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+        }
     }
 
     public function approve()

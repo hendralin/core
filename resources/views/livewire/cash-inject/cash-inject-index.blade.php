@@ -15,14 +15,24 @@
 
     <!-- Filter Section -->
     <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- Month/Year Filter -->
+            <div>
+                <label for="month-year" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Month & Year</label>
+                <input type="month"
+                       id="month-year"
+                       wire:model.live="selectedMonthYear"
+                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                       min="2019-01"
+                       max="{{ date('Y') + 1 }}-12">
+            </div>
+
             <!-- Date Period Filters -->
             <flux:input type="date" wire:model.live="dateFrom" label="From" size="sm" />
             <flux:input type="date" wire:model.live="dateTo" label="To" size="sm" />
 
-
             <!-- Clear Filters Button -->
-            @if($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d'))
+            @if($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedMonthYear)
             <div class="space-y-2 flex flex-col justify-end">
                 <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full cursor-pointer">
                     Clear Filter
