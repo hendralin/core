@@ -54,16 +54,16 @@
             </div>
         </div>
 
-        <!-- Total Cost This Month -->
+        <!-- Cash Balance -->
         <div class="rounded-xl bg-white p-4 shadow-lg border border-gray-200 dark:bg-zinc-800 dark:border-zinc-700 transition-shadow transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600 dark:text-zinc-400">Total Cost</p>
-                    <p class="text-xl font-bold text-gray-900 dark:text-white">Rp {{ number_format($this->totalCostThisMonth, 0, ',', '.') }}</p>
-                    <p class="text-xs text-gray-500 dark:text-zinc-500 mt-1">Expenses this month</p>
+                    <p class="text-sm font-medium text-gray-600 dark:text-zinc-400">Cash Balance</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white">Rp {{ number_format($this->finalCashBalance, 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-500 dark:text-zinc-500 mt-1">Todays cash balance</p>
                 </div>
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/20">
-                    <flux:icon.beaker class="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/20">
+                    <flux:icon.currency-dollar class="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
             </div>
         </div>

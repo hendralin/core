@@ -168,6 +168,7 @@
                         <flux:sidebar.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup and Restore') }}</flux:sidebar.item>
                     @endif
 
+                    <flux:sidebar.item icon="book-open-text" :href="route('change-log.index')" :current="request()->routeIs('change-log.index')" wire:navigate>{{ __('Change Log') }}</flux:sidebar.item>
                     <flux:sidebar.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>

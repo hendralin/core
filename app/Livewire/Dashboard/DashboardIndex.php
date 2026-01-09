@@ -38,6 +38,18 @@ class DashboardIndex extends Component
             ->sum('total_price');
     }
 
+    public function getFinalCashBalanceProperty()
+    {
+        // Calculate all cash inflows (cost_type = 'cash')
+        $totalCashIn = Cost::where('cost_type', 'cash')->sum('total_price');
+
+        // Calculate all other costs (cost_type != 'cash')
+        $totalCosts = Cost::where('cost_type', '!=', 'cash')->sum('total_price');
+
+        // Final balance = Cash In - All Other Costs
+        return $totalCashIn - $totalCosts;
+    }
+
     public function getTotalSalesThisYearProperty()
     {
         return Vehicle::where('status', '0')
