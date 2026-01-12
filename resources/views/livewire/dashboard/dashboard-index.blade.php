@@ -281,7 +281,7 @@
                                 <div class="flex items-center gap-4">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="relative w-10 h-10 shrink-0"
+                                            class="relative w-12 h-12 shrink-0"
                                             x-data="{ imageLoaded: false, imageError: false }"
                                             x-init="imageLoaded = false; imageError = false"
                                             wire:key="logo-{{ $company->kode_emiten }}"
@@ -297,9 +297,9 @@
                                             {{-- Logo image --}}
                                             @if($company->logo_url)
                                                 <img
-                                                    src="{{ $company->logo_url }}"
+                                                    src="//s3.goapi.io/logo/{{ $company->kode_emiten }}.jpg"
                                                     alt="{{ $company->kode_emiten }}"
-                                                    class="absolute inset-0 w-10 h-10 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
+                                                    class="absolute inset-0 w-12 h-12 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                                     x-show="imageLoaded && !imageError"
                                                     x-cloak
                                                     x-on:load="imageLoaded = true"
@@ -465,7 +465,7 @@
                                             <input
                                                 type="checkbox"
                                                 id="toggle-sma20"
-                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-zinc-700 dark:border-zinc-600"
                                             >
                                             <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
                                                 <span class="w-3 h-3 bg-blue-500 rounded-sm"></span>
@@ -476,7 +476,7 @@
                                             <input
                                                 type="checkbox"
                                                 id="toggle-sma50"
-                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-zinc-700 dark:border-zinc-600"
                                             >
                                             <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
                                                 <span class="w-3 h-3 bg-orange-500 rounded-sm"></span>
@@ -487,7 +487,7 @@
                                             <input
                                                 type="checkbox"
                                                 id="toggle-ema20"
-                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-zinc-700 dark:border-zinc-600"
                                             >
                                             <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
                                                 <span class="w-3 h-3 bg-green-500 rounded-sm"></span>
@@ -498,7 +498,7 @@
                                             <input
                                                 type="checkbox"
                                                 id="toggle-ema50"
-                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-zinc-700 dark:border-zinc-600"
                                             >
                                             <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
                                                 <span class="w-3 h-3 bg-purple-500 rounded-sm"></span>
@@ -516,7 +516,7 @@
                                             <input
                                                 type="checkbox"
                                                 id="toggle-bollinger"
-                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-zinc-700 dark:border-zinc-600"
                                             >
                                             <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
                                                 <span class="w-3 h-3 bg-red-500 rounded-sm"></span>
@@ -534,7 +534,7 @@
                                             <input
                                                 type="checkbox"
                                                 id="toggle-rsi"
-                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-zinc-700 dark:border-zinc-600"
                                             >
                                             <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
                                                 <span class="w-3 h-3 bg-red-500 rounded-sm"></span>
@@ -545,7 +545,7 @@
                                             <input
                                                 type="checkbox"
                                                 id="toggle-macd"
-                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                class="mr-2 w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-zinc-700 dark:border-zinc-600"
                                             >
                                             <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-zinc-300">
                                                 <span class="w-3 h-3 bg-teal-500 rounded-sm"></span>
@@ -1013,7 +1013,7 @@
                         {{-- Logo image --}}
                         @if($company->logo_url)
                             <img
-                                src="{{ $company->logo_url }}"
+                                src="//s3.goapi.io/logo/{{ $company->kode_emiten }}.jpg"
                                 alt="{{ $company->kode_emiten }}"
                                 class="absolute inset-0 w-16 h-16 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                 x-show="imageLoaded && !imageError"
@@ -1531,7 +1531,7 @@
                                 >
                                     <!-- Logo -->
                                     <div
-                                        class="relative w-8 h-8 shrink-0"
+                                        class="relative w-10 h-10 shrink-0"
                                         x-data="{ imageLoaded: false, imageError: false }"
                                         x-init="imageLoaded = false; imageError = false"
                                         wire:key="stock-logo-{{ $stock->kode_emiten }}"
@@ -1547,9 +1547,9 @@
                                         {{-- Logo image --}}
                                         @if($stock->logo_url)
                                             <img
-                                                src="{{ $stock->logo_url }}"
+                                                src="//s3.goapi.io/logo/{{ $stock->kode_emiten }}.jpg"
                                                 alt="{{ $stock->kode_emiten }}"
-                                                class="absolute inset-0 w-8 h-8 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
+                                                class="absolute inset-0 w-10 h-10 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                                 x-show="imageLoaded && !imageError"
                                                 x-cloak
                                                 x-on:load="imageLoaded = true"
@@ -1750,7 +1750,7 @@
             width: container.clientWidth,
             height: container.clientHeight,
             layout: {
-                background: { type: 'solid', color: isDark ? '#18181b' : '#ffffff' },
+                background: { type: 'solid', color: isDark ? '#171717' : '#ffffff' },
                 textColor: isDark ? '#a1a1aa' : '#71717a',
             },
             grid: {

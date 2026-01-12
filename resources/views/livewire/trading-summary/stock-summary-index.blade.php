@@ -141,58 +141,65 @@
                     @endphp
                     @forelse($isAllData ? $stocks : $stocks->items() as $index => $stock)
                         <tr wire:loading.class="opacity-50" class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 hover:bg-gray-100 dark:border-zinc-700 dark:hover:bg-zinc-700/50">
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-zinc-400">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600 dark:text-zinc-400">
                                 {{ $startNumber + $index }}
                             </td>
 
                             @if(in_array('kode_emiten', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-semibold">
-                                    <a href="{{ route('stock-summary.detail', $stock->kode_emiten) }}"
-                                       class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors"
-                                       wire:navigate>
-                                        {{ $stock->kode_emiten }}
-                                    </a>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm font-semibold">
+                                    <div class="flex items-center gap-2">
+                                        <img
+                                            src="//s3.goapi.io/logo/{{ $stock->kode_emiten }}.jpg"
+                                            alt="{{ $stock->kode_emiten }}"
+                                            class="w-4 h-4 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
+                                        />
+                                        <a href="{{ route('stock-summary.detail', $stock->kode_emiten) }}"
+                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors"
+                                        wire:navigate>
+                                            {{ $stock->kode_emiten }}
+                                        </a>
+                                    </div>
                                 </td>
                             @endif
 
                             @if(in_array('company_name', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600 dark:text-zinc-400">
                                     {{ $stock->stockCompany?->nama_emiten ?? '-' }}
                                 </td>
                             @endif
 
                             @if(in_array('previous', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->previous, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('open_price', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->open_price, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('high', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->high, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('low', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->low, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('close', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->close, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('change', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right font-medium {{ $stock->change > 0 ? 'text-green-600 dark:text-green-400' : ($stock->change < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-zinc-400') }}">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right font-medium {{ $stock->change > 0 ? 'text-green-600 dark:text-green-400' : ($stock->change < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-zinc-400') }}">
                                     @if($stock->change > 0)
                                         <span class="inline-flex items-center justify-end">
                                             <flux:icon.arrow-up class="size-3 mr-1" />
@@ -210,13 +217,13 @@
                             @endif
 
                             @if(in_array('volume', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->volume, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('value', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     @if($stock->value >= 1000000000)
                                         {{ number_format($stock->value / 1000000000, 2, ',', '.') }} B
                                     @elseif($stock->value >= 1000000)
@@ -228,73 +235,73 @@
                             @endif
 
                             @if(in_array('frequency', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->frequency, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('index_individual', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->index_individual, 4, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('offer', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->offer, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('offer_volume', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->offer_volume, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('bid', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->bid, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('bid_volume', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->bid_volume, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('listed_shares', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->listed_shares, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('tradeble_shares', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->tradeble_shares, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('foreign_sell', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->foreign_sell, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('foreign_buy', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->foreign_buy, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('non_regular_volume', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->non_regular_volume, 0, ',', '.') }}
                                 </td>
                             @endif
 
                             @if(in_array('non_regular_value', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     @if($stock->non_regular_value >= 1000000000)
                                         {{ number_format($stock->non_regular_value / 1000000000, 2, ',', '.') }} B
                                     @elseif($stock->non_regular_value >= 1000000)
@@ -306,7 +313,7 @@
                             @endif
 
                             @if(in_array('non_regular_frequency', $visibleColumns))
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-right text-gray-600 dark:text-zinc-400">
                                     {{ number_format($stock->non_regular_frequency, 0, ',', '.') }}
                                 </td>
                             @endif

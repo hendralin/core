@@ -10,33 +10,13 @@
 
                     <div class="flex items-center gap-3">
                         <!-- Company Logo -->
-                        <div
-                            class="relative w-10 h-10 shrink-0"
-                            x-data="{ imageLoaded: false, imageError: false }"
-                            x-init="imageLoaded = false; imageError = false"
-                            wire:key="header-logo-{{ $stockCode }}"
-                        >
-                            {{-- Fallback initials - always visible until image loads --}}
-                            <div
-                                class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
-                                x-show="!imageLoaded || imageError"
-                                x-cloak
-                            >
-                                <span class="text-gray-600 dark:text-zinc-400 font-bold text-xs">{{ substr($stockCode, 0, 2) }}</span>
-                            </div>
-                            {{-- Logo image --}}
-                            @if($company && $company->logo_url)
-                                <img
-                                    src="{{ $company->logo_url }}"
-                                    alt="{{ $stockCode }}"
-                                    class="absolute inset-0 w-10 h-10 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
-                                    x-show="imageLoaded && !imageError"
-                                    x-cloak
-                                    x-on:load="imageLoaded = true"
-                                    x-on:error="imageError = true"
-                                />
-                            @endif
-                        </div>
+                        @if($company && $company->logo_url)
+                            <img
+                                src="//s3.goapi.io/logo/{{ $company->kode_emiten }}.jpg"
+                                alt="{{ $stockCode }}"
+                                class="w-12 h-12 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
+                            />
+                        @endif
 
                         <div>
                             <div class="flex items-center gap-3">
@@ -986,33 +966,13 @@
                 <!-- Header -->
                 <div class="flex items-start justify-between gap-4">
                     <!-- Company Logo -->
-                    <div
-                        class="relative w-16 h-16 shrink-0"
-                        x-data="{ imageLoaded: false, imageError: false }"
-                        x-init="imageLoaded = false; imageError = false"
-                        wire:key="modal-logo-{{ $company->kode_emiten }}"
-                    >
-                        {{-- Fallback initials - always visible until image loads --}}
-                        <div
-                            class="absolute inset-0 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center"
-                            x-show="!imageLoaded || imageError"
-                            x-cloak
-                        >
-                            <span class="text-gray-600 dark:text-zinc-400 font-bold text-sm">{{ substr($company->kode_emiten, 0, 2) }}</span>
-                        </div>
-                        {{-- Logo image --}}
-                        @if($company->logo_url)
-                            <img
-                                src="{{ $company->logo_url }}"
-                                alt="{{ $company->kode_emiten }}"
-                                class="absolute inset-0 w-16 h-16 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
-                                x-show="imageLoaded && !imageError"
-                                x-cloak
-                                x-on:load="imageLoaded = true"
-                                x-on:error="imageError = true"
-                            />
-                        @endif
-                    </div>
+                    @if($company->logo_url)
+                        <img
+                            src="//s3.goapi.io/logo/{{ $company->kode_emiten }}.jpg"
+                            alt="{{ $company->kode_emiten }}"
+                            class="w-16 h-16 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
+                        />
+                    @endif
                     <div class="flex-1">
                         <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">
                             {{ $company->nama_emiten }}
