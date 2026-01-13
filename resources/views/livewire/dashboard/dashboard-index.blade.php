@@ -2,7 +2,7 @@
     @if($latestTrading)
         <!-- Main Content -->
         <div class="flex flex-col lg:flex-row dark:border-zinc-700">
-            <div class="lg:w-80 lg:border-r border-gray-200 dark:border-zinc-700 space-y-1">
+            <div class="lg:w-80 lg:border-r border-gray-200 dark:border-zinc-700 space-y-1 order-2 md:order-1">
                 <!-- Technical Indicators -->
                 <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
                     <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
@@ -271,11 +271,12 @@
             </div>
 
             <!-- Chart Area (Main) -->
-            <div class="flex-1 space-y-1">
+            <div class="flex-1 space-y-1 order-1 md:order-2">
                 <!-- Chart Container -->
                 <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
                     <!-- TradingView Style Header -->
-                    <div class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700">
+                    <div class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700"
+                         wire:poll.120s.keep-alive="refreshStockPrice">
                         <div class="px-4 py-2">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-4">
@@ -313,7 +314,7 @@
                                                 <span class="text-xs px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 font-medium">
                                                     {{ $company->papan_pencatatan ?? 'IDX' }}
                                                 </span>
-                                                <flux:tooltip content="View Details" position="right">
+                                                <flux:tooltip content="View Details">
                                                     <flux:button
                                                         wire:click="openCompanyModal"
                                                         variant="ghost"
@@ -322,7 +323,7 @@
                                                     >
                                                     </flux:button>
                                                 </flux:tooltip>
-                                                <flux:tooltip content="Change Stock" position="right">
+                                                <flux:tooltip content="Change Stock">
                                                     <flux:button
                                                         wire:click="openStockPickerModal"
                                                         variant="ghost"
@@ -337,20 +338,26 @@
                                     </div>
                                 </div>
 
-                                @if($latestTrading)
+                                @if($stockPriceSnapshot || $latestTrading)
                                     <div class="flex items-center gap-6">
                                         <!-- Current Price -->
                                         <div class="text-right">
-                                            <div class="text-2xl font-bold {{ $latestTrading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
-                                                {{ number_format($latestTrading->close, 0, ',', '.') }}
+                                            @php
+                                                // Prioritize API data over database data
+                                                $currentPrice = $stockPriceSnapshot ? $stockPriceSnapshot['close'] : $latestTrading->close;
+                                                $currentChange = $stockPriceSnapshot ? $stockPriceSnapshot['change'] : $latestTrading->change;
+                                                $currentChangePercent = $stockPriceSnapshot ? $stockPriceSnapshot['change_pct'] : $this->changePercent;
+                                            @endphp
+                                            <div class="text-2xl font-bold {{ $currentChange >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
+                                                {{ number_format($currentPrice, 0, ',', '.') }}
                                             </div>
-                                            <div class="flex items-center justify-end gap-2 text-sm {{ $latestTrading->change >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
-                                                @if($latestTrading->change >= 0)
-                                                    <span>+{{ number_format($latestTrading->change, 0, ',', '.') }}</span>
-                                                    <span>(+{{ number_format($this->changePercent, 2) }}%)</span>
+                                            <div class="flex items-center justify-end gap-2 text-sm {{ $currentChange >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-red-600 dark:text-red-400' }}">
+                                                @if($currentChange >= 0)
+                                                    <span>+{{ number_format($currentChange, 0, ',', '.') }}</span>
+                                                    <span>(+{{ number_format($currentChangePercent, 2) }}%)</span>
                                                 @else
-                                                    <span>{{ number_format($latestTrading->change, 0, ',', '.') }}</span>
-                                                    <span>({{ number_format($this->changePercent, 2) }}%)</span>
+                                                    <span>{{ number_format($currentChange, 0, ',', '.') }}</span>
+                                                    <span>({{ number_format($currentChangePercent, 2) }}%)</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -362,54 +369,79 @@
                     <!-- Quick Stats Bar -->
                     <div class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-700">
                         <div class="px-4 py-2 flex items-center gap-6 overflow-x-auto text-xs">
+                            @php
+                                // Use API data if available and from API, otherwise use database data
+                                $useApiData = $stockPriceSnapshot && $this->isStockPriceFromApi;
+                                $statsData = $useApiData ? $stockPriceSnapshot : $latestTrading;
+
+                                // Calculate value (volume * close for API data, direct value for DB data)
+                                $calculatedValue = $useApiData ? ($statsData['volume'] * $statsData['close']) : ($latestTrading ? $latestTrading->value : 0);
+
+                                // Format values
+                                $openValue = $useApiData ? $statsData['open'] : ($latestTrading ? $latestTrading->open_price : 0);
+                                $highValue = $useApiData ? $statsData['high'] : ($latestTrading ? $latestTrading->high : 0);
+                                $lowValue = $useApiData ? $statsData['low'] : ($latestTrading ? $latestTrading->low : 0);
+                                $closeValue = $useApiData ? $statsData['close'] : ($latestTrading ? $latestTrading->close : 0);
+                                $volumeValue = $useApiData ? $statsData['volume'] : ($latestTrading ? $latestTrading->volume : 0);
+                                $frequencyValue = $useApiData ? 1 : ($latestTrading ? $latestTrading->frequency : 0);
+                                $dateValue = $useApiData ? $statsData['date'] : ($latestTrading ? $latestTrading->date->format('Y-m-d') : null);
+                            @endphp
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="text-gray-500 dark:text-zinc-500">O</span>
-                                <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->open_price, 0, ',', '.') }}</span>
+                                <span class="text-gray-900 dark:text-white font-medium">{{ number_format($openValue, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="text-gray-500 dark:text-zinc-500">H</span>
-                                <span class="text-teal-600 dark:text-teal-400 font-medium">{{ number_format($latestTrading->high, 0, ',', '.') }}</span>
+                                <span class="text-teal-600 dark:text-teal-400 font-medium">{{ number_format($highValue, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="text-gray-500 dark:text-zinc-500">L</span>
-                                <span class="text-red-600 dark:text-red-400 font-medium">{{ number_format($latestTrading->low, 0, ',', '.') }}</span>
+                                <span class="text-red-600 dark:text-red-400 font-medium">{{ number_format($lowValue, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="text-gray-500 dark:text-zinc-500">C</span>
-                                <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->close, 0, ',', '.') }}</span>
+                                <span class="text-gray-900 dark:text-white font-medium">{{ number_format($closeValue, 0, ',', '.') }}</span>
                             </div>
                             <div class="w-px h-4 bg-gray-300 dark:bg-zinc-600"></div>
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="text-gray-500 dark:text-zinc-500">Vol</span>
                                 <span class="text-gray-900 dark:text-white font-medium">
-                                    @if($latestTrading->volume >= 1000000000)
-                                        {{ number_format($latestTrading->volume / 1000000000, 2) }}B
-                                    @elseif($latestTrading->volume >= 1000000)
-                                        {{ number_format($latestTrading->volume / 1000000, 2) }}M
+                                    @if($volumeValue >= 1000000000)
+                                        {{ number_format($volumeValue / 1000000000, 2) }}B
+                                    @elseif($volumeValue >= 1000000)
+                                        {{ number_format($volumeValue / 1000000, 2) }}M
                                     @else
-                                        {{ number_format($latestTrading->volume, 0, ',', '.') }}
+                                        {{ number_format($volumeValue, 0, ',', '.') }}
                                     @endif
                                 </span>
                             </div>
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="text-gray-500 dark:text-zinc-500">Val</span>
                                 <span class="text-gray-900 dark:text-white font-medium">
-                                    @if($latestTrading->value >= 1000000000)
-                                        {{ number_format($latestTrading->value / 1000000000, 2) }}B
-                                    @elseif($latestTrading->value >= 1000000)
-                                        {{ number_format($latestTrading->value / 1000000, 2) }}M
+                                    @if($calculatedValue >= 1000000000)
+                                        {{ number_format($calculatedValue / 1000000000, 2) }}B
+                                    @elseif($calculatedValue >= 1000000)
+                                        {{ number_format($calculatedValue / 1000000, 2) }}M
                                     @else
-                                        {{ number_format($latestTrading->value, 0, ',', '.') }}
+                                        {{ number_format($calculatedValue, 0, ',', '.') }}
                                     @endif
                                 </span>
                             </div>
-                            <div class="flex items-center gap-2 whitespace-nowrap">
-                                <span class="text-gray-500 dark:text-zinc-500">Freq</span>
-                                <span class="text-gray-900 dark:text-white font-medium">{{ number_format($latestTrading->frequency, 0, ',', '.') }}</span>
-                            </div>
+                            @if (!$useApiData)
+                                <div class="flex items-center gap-2 whitespace-nowrap">
+                                    <span class="text-gray-500 dark:text-zinc-500">Freq</span>
+                                    <span class="text-gray-900 dark:text-white font-medium">{{ number_format($frequencyValue, 0, ',', '.') }}</span>
+                                </div>
+                            @endif
                             <div class="w-px h-4 bg-gray-300 dark:bg-zinc-600"></div>
                             <div class="flex items-center gap-2 whitespace-nowrap">
-                                <span class="text-gray-500 dark:text-zinc-500">{{ $latestTrading->date->format('d M Y') }}</span>
+                                <span class="text-gray-500 dark:text-zinc-500">
+                                    @if($useApiData)
+                                        {{ \Carbon\Carbon::createFromFormat('Y-m-d', $dateValue)->format('d M Y') }}
+                                    @else
+                                        {{ $latestTrading ? $latestTrading->date->format('d M Y') : '-' }}
+                                    @endif
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -602,9 +634,63 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($tradingHistory as $trading)
-                                    <tr class="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
-                                        <td class="px-4 py-2 text-gray-900 dark:text-zinc-200 whitespace-nowrap">{{ $trading->date->format('d M') }}</td>
+                                @foreach($this->combinedTradingHistory as $trading)
+                                    <tr class="border-b border-gray-100 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors
+                                        @if(isset($trading->_isFromApi) && isset($trading->_marketStatus))
+                                            @php
+                                                switch($trading->_marketStatus) {
+                                                    case 'LIVE':
+                                                        echo 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/20';
+                                                        break;
+                                                    case 'BREAK':
+                                                        echo 'border-yellow-200 dark:border-yellow-800 bg-yellow-50/50 dark:bg-yellow-900/20';
+                                                        break;
+                                                    case 'CLOSED':
+                                                        echo 'border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-900/20';
+                                                        break;
+                                                    case 'WEEKEND':
+                                                        echo 'border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20';
+                                                        break;
+                                                }
+                                            @endphp
+                                        @endif
+                                    ">
+                                        <td class="px-4 py-2 text-gray-900 dark:text-zinc-200 whitespace-nowrap">
+                                            {{ $trading->date->format('d M') }}
+                                            @if(isset($trading->_isFromApi) && isset($trading->_marketStatus))
+                                                @php
+                                                    $badgeClass = '';
+                                                    $badgeText = '';
+                                                    $statusColor = '';
+
+                                                    switch($trading->_marketStatus) {
+                                                        case 'LIVE':
+                                                            $badgeClass = 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300';
+                                                            $badgeText = 'LIVE';
+                                                            $statusColor = 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/20';
+                                                            break;
+                                                        case 'BREAK':
+                                                            $badgeClass = 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300';
+                                                            $badgeText = 'BREAK';
+                                                            $statusColor = 'border-yellow-200 dark:border-yellow-800 bg-yellow-50/50 dark:bg-yellow-900/20';
+                                                            break;
+                                                        case 'CLOSED':
+                                                            $badgeClass = 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300';
+                                                            $badgeText = 'CLOSED';
+                                                            $statusColor = 'border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-900/20';
+                                                            break;
+                                                        case 'WEEKEND':
+                                                            $badgeClass = 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300';
+                                                            $badgeText = 'WEEKEND';
+                                                            $statusColor = 'border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20';
+                                                            break;
+                                                    }
+                                                @endphp
+                                                <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium {{ $badgeClass }}">
+                                                    {{ $badgeText }}
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-2 text-right text-gray-600 dark:text-zinc-400">{{ number_format($trading->open_price, 0, ',', '.') }}</td>
                                         <td class="px-4 py-2 text-right text-teal-600 dark:text-teal-400">{{ number_format($trading->high, 0, ',', '.') }}</td>
                                         <td class="px-4 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($trading->low, 0, ',', '.') }}</td>
@@ -713,50 +799,94 @@
             </div>
 
             <!-- Right Sidebar -->
-            <div class="lg:w-80 lg:border-l border-gray-200 dark:border-zinc-700 space-y-1">
-                <!-- Order Book -->
-                <div class="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 overflow-hidden">
+            <div class="lg:w-80 lg:border-l border-gray-200 dark:border-zinc-700 space-y-1 order-3 md:order-3">
+                <!-- Stock Price Snapshot -->
+                @if($latestTrading)
+                <!-- Stock Price Snapshot Card -->
+                <div class="bg-white dark:bg-zinc-900 border-t md:border-t-0 mt-1 md:mt-0 border-gray-200 dark:border-zinc-700 overflow-hidden relative"
+                     @if($this->isStockPriceCardVisible) wire:poll.120s.keep-alive="refreshStockPrice" @endif>
+
                     <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
-                        <span class="text-gray-900 dark:text-white font-medium text-sm">Order Book</span>
+                        <span class="text-gray-900 dark:text-white font-medium text-sm">Stock Price Snapshot</span>
+                        @if($this->isStockPriceCardVisible && $stockPriceSnapshot)
+                            <flux:badge color="green" icon="signal" class="ml-2 text-xs align-middle animate-pulse">Live</flux:badge>
+                        @else
+                            @if($this->isMarketBreak)
+                                <flux:badge color="yellow" icon="clock" size="sm" class="text-xs">Break Time</flux:badge>
+                            @else
+                                <flux:badge color="orange" icon="lock-closed" size="sm" class="text-xs">Market Closed</flux:badge>
+                            @endif
+                        @endif
                     </div>
                     <div class="p-4 space-y-3">
-                        <!-- Bid -->
-                        <div class="relative">
-                            <div class="absolute inset-0 bg-teal-500/10 rounded" style="width: {{ min(($latestTrading->bid_volume / max($latestTrading->bid_volume + $latestTrading->offer_volume, 1)) * 100, 100) }}%"></div>
-                            <div class="relative flex items-center justify-between py-2 px-3">
-                                <div>
-                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Bid</div>
-                                    <div class="text-lg font-bold text-teal-600 dark:text-teal-400">{{ number_format($latestTrading->bid, 0, ',', '.') }}</div>
+                        <!-- Price Info -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">Last Price</span>
+                                <span class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($stockPriceSnapshot['close'], 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">Change</span>
+                                <div class="flex items-center gap-1">
+                                    @if($stockPriceSnapshot['change'] > 0)
+                                        <flux:icon.arrow-up class="size-3 text-green-600 dark:text-green-400" />
+                                        <span class="text-sm font-medium text-green-600 dark:text-green-400">+{{ number_format($stockPriceSnapshot['change'], 0, ',', '.') }}</span>
+                                    @elseif($stockPriceSnapshot['change'] < 0)
+                                        <flux:icon.arrow-down class="size-3 text-red-600 dark:text-red-400" />
+                                        <span class="text-sm font-medium text-red-600 dark:text-red-400">{{ number_format($stockPriceSnapshot['change'], 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="text-sm font-medium text-gray-600 dark:text-zinc-400">{{ number_format($stockPriceSnapshot['change'], 0, ',', '.') }}</span>
+                                    @endif
                                 </div>
-                                <div class="text-right">
-                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500">Volume</div>
-                                    <div class="text-sm text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->bid_volume, 0, ',', '.') }}</div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-zinc-500">Change %</span>
+                                <div class="flex items-center gap-1">
+                                    @if($stockPriceSnapshot['change_pct'] > 0)
+                                        <span class="text-sm font-medium text-green-600 dark:text-green-400">(+{{ number_format($stockPriceSnapshot['change_pct'], 2) }}%)</span>
+                                    @elseif($stockPriceSnapshot['change_pct'] < 0)
+                                        <span class="text-sm font-medium text-red-600 dark:text-red-400">({{ number_format($stockPriceSnapshot['change_pct'], 2) }}%)</span>
+                                    @else
+                                        <span class="text-sm font-medium text-gray-600 dark:text-zinc-400">({{ number_format($stockPriceSnapshot['change_pct'], 2) }}%)</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Spread -->
-                        <div class="text-center py-1">
-                            <span class="text-[10px] text-gray-500 dark:text-zinc-500">Spread</span>
-                            <div class="text-sm font-medium text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->offer - $latestTrading->bid, 0, ',', '.') }}</div>
+                        <!-- OHLC -->
+                        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100 dark:border-zinc-800">
+                            <div>
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Open</div>
+                                <div class="text-sm font-medium text-gray-700 dark:text-zinc-300">{{ number_format($stockPriceSnapshot['open'], 0, ',', '.') }}</div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">High</div>
+                                <div class="text-sm font-medium text-green-600 dark:text-green-400">{{ number_format($stockPriceSnapshot['high'], 0, ',', '.') }}</div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Low</div>
+                                <div class="text-sm font-medium text-red-600 dark:text-red-400">{{ number_format($stockPriceSnapshot['low'], 0, ',', '.') }}</div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Volume</div>
+                                <div class="text-sm font-medium text-gray-700 dark:text-zinc-300">{{ number_format($stockPriceSnapshot['volume'], 0, ',', '.') }}</div>
+                            </div>
                         </div>
 
-                        <!-- Offer -->
-                        <div class="relative">
-                            <div class="absolute inset-0 bg-red-500/10 rounded" style="width: {{ min(($latestTrading->offer_volume / max($latestTrading->bid_volume + $latestTrading->offer_volume, 1)) * 100, 100) }}%"></div>
-                            <div class="relative flex items-center justify-between py-2 px-3">
-                                <div>
-                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Offer</div>
-                                    <div class="text-lg font-bold text-red-600 dark:text-red-400">{{ number_format($latestTrading->offer, 0, ',', '.') }}</div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500">Volume</div>
-                                    <div class="text-sm text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->offer_volume, 0, ',', '.') }}</div>
-                                </div>
+                        <!-- Date -->
+                        <div class="text-center pt-2 border-t border-gray-100 dark:border-zinc-800">
+                            <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Last Updated</div>
+                            <div class="text-xs text-gray-600 dark:text-zinc-400">
+                                @if($stockPriceLastUpdated)
+                                    {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $stockPriceLastUpdated)->format('d M Y, H:i:s') }}
+                                @else
+                                    {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $this->lastTradingSessionTime)->format('d M Y, H:i:s') }}
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <!-- Key Statistics -->
                 <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
@@ -803,10 +933,60 @@
                     </div>
                 </div>
 
+                <!-- Order Book -->
+                <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Order Book</span>
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $latestTrading ? $latestTrading->date->format('d M Y') : '-' }}</span>
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <!-- Bid -->
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-teal-500/10 rounded" style="width: {{ min(($latestTrading->bid_volume / max($latestTrading->bid_volume + $latestTrading->offer_volume, 1)) * 100, 100) }}%"></div>
+                            <div class="relative flex items-center justify-between py-2 px-3">
+                                <div>
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Bid</div>
+                                    <div class="text-lg font-bold text-teal-600 dark:text-teal-400">{{ number_format($latestTrading->bid, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500">Volume</div>
+                                    <div class="text-sm text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->bid_volume, 0, ',', '.') }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spread -->
+                        <div class="text-center py-1">
+                            <span class="text-[10px] text-gray-500 dark:text-zinc-500">Spread</span>
+                            <div class="text-sm font-medium text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->offer - $latestTrading->bid, 0, ',', '.') }}</div>
+                        </div>
+
+                        <!-- Offer -->
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-red-500/10 rounded" style="width: {{ min(($latestTrading->offer_volume / max($latestTrading->bid_volume + $latestTrading->offer_volume, 1)) * 100, 100) }}%"></div>
+                            <div class="relative flex items-center justify-between py-2 px-3">
+                                <div>
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Offer</div>
+                                    <div class="text-lg font-bold text-red-600 dark:text-red-400">{{ number_format($latestTrading->offer, 0, ',', '.') }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500">Volume</div>
+                                    <div class="text-sm text-gray-700 dark:text-zinc-300">{{ number_format($latestTrading->offer_volume, 0, ',', '.') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Foreign Flow -->
                 <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
                     <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
-                        <span class="text-gray-900 dark:text-white font-medium text-sm">Foreign Flow</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Foreign Flow</span>
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $latestTrading ? $latestTrading->date->format('d M Y') : '-' }}</span>
+                        </div>
                     </div>
                     <div class="p-4">
                         <div class="text-center mb-4">
@@ -827,57 +1007,6 @@
                         </div>
                     </div>
                 </div>
-
-                @if($company)
-                    <!-- Company Info -->
-                    <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
-                        <div class="px-4 py-2 border-gray-200 dark:border-zinc-700 flex items-center justify-between">
-                            <span class="text-gray-900 dark:text-white font-medium text-sm">Company Info</span>
-                            <flux:tooltip content="View Details" position="right">
-                                <flux:button
-                                    wire:click="openCompanyModal"
-                                    variant="ghost"
-                                    icon="eye"
-                                    size="xs"
-                                >
-                                </flux:button>
-                            </flux:tooltip>
-                        </div>
-                        <div class="divide-y divide-gray-100 dark:divide-zinc-800">
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Sector</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->sektor ?? '-' }}</div>
-                            </div>
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Industry</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->industri ?? '-' }}</div>
-                            </div>
-                            @if($this->isLq45)
-                                <div class="px-4 py-2">
-                                    <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Index Membership</div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
-                                            <flux:icon.check-circle class="size-3" />
-                                            LQ45
-                                        </span>
-                                    </div>
-                                </div>
-                            @endif
-                            <div class="px-4 py-2">
-                                <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase mb-1">Listing Date</div>
-                                <div class="text-xs text-gray-700 dark:text-zinc-300">{{ $company->tanggal_pencatatan?->format('d M Y') ?? '-' }}</div>
-                            </div>
-                            @if($company->website_url)
-                                <div class="px-4 py-2">
-                                    <a href="{{ $company->website_url }}" target="_blank" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                                        <flux:icon.globe-alt class="size-3" />
-                                        {{ $company->website }}
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
             </div>
         </div>
     @else
@@ -1695,7 +1824,6 @@
     function initChart(chartData, isRetry = false) {
         // Check if we're on the dashboard page
         if (!isOnDashboardPage()) {
-            console.log('Not on dashboard page, skipping chart init');
             return;
         }
 
@@ -1703,7 +1831,6 @@
         if (!container) {
             if (SC.retryCount < SC.maxRetries) {
                 SC.retryCount++;
-                console.log('Chart container not found, retrying...', SC.retryCount);
                 setTimeout(() => initChart(chartData, true), 100);
             }
             return;
@@ -1723,14 +1850,12 @@
             data = getChartData();
         }
         if (!data || !data.candlestick || data.candlestick.length === 0) {
-            // console.log('No chart data available');
             return;
         }
 
         if (typeof LightweightCharts === 'undefined') {
             if (SC.retryCount < SC.maxRetries) {
                 SC.retryCount++;
-                console.log('LightweightCharts not loaded, retrying...', SC.retryCount);
                 setTimeout(() => initChart(chartData, true), 100);
             }
             return;
@@ -2048,8 +2173,6 @@
 
         // Setup indicator toggles
         setupIndicatorToggle();
-
-        console.log('Dashboard chart initialized');
     }
 
     function setupInfiniteScroll(initialData) {
@@ -2092,8 +2215,6 @@
 
         SC.isLoadingMore = true;
         const beforeDate = SC.loadedDataRange.from;
-
-        console.log('Loading more data before:', beforeDate);
 
         const component = getDashboardComponent();
         if (component) {
@@ -2165,8 +2286,6 @@
                 ? 'text-teal-600 dark:text-teal-400 font-medium'
                 : 'text-red-600 dark:text-red-400 font-medium';
         });
-
-        console.log('Legend setup complete');
     }
 
     function formatVolume(value) {
@@ -2297,20 +2416,39 @@
         // Re-init on Livewire navigation
         document.addEventListener('livewire:navigated', () => {
             if (isOnDashboardPage()) {
-                console.log('On dashboard page, initializing chart...');
-                // Period change updates chart
-                Livewire.on('chart-data-updated', (data) => {
-                    console.log('Dashboard chart data updated:', data.period);
-                    SC.retryCount = 0;
-                    SC.noMoreData = false;
-                    SC.initialLoadComplete = false; // Reset to prevent immediate load on period change
-                    initChart(data.chartData);
+                // Chart will be reinitialized by the global event listeners
+
+        // Register event listeners globally
+        // Chart data updated
+        Livewire.on('chart-data-updated', (data) => {
+            // Handle both array and object formats
+            const eventData = Array.isArray(data) ? data[0] : data;
+
+            if (eventData && eventData.chartData) {
+                SC.retryCount = 0;
+                SC.noMoreData = false;
+                SC.initialLoadComplete = false; // Reset to prevent immediate load on period change
+                initChart(eventData.chartData);
+            }
+        });
+
+                // Stock price updated - refresh chart immediately
+                Livewire.on('stock-price-updated', (data) => {
+                    // Handle both array and object formats
+                    const eventData = Array.isArray(data) ? data[0] : data;
+
+                    if (eventData && eventData.hasNewData) {
+                        // Trigger chart refresh from server side
+                        const component = getDashboardComponent();
+                        if (component) {
+                            component.call('refreshChart');
+                        }
+                    }
                 });
 
                 // More data loaded (infinite scroll)
                 Livewire.on('more-data-loaded', (eventData) => {
                     const data = eventData[0] || eventData;
-                    console.log('Dashboard more data loaded:', data.candlestick?.length, 'candles');
 
                     if (SC.candlestickSeries && data.candlestick && data.candlestick.length > 0) {
                         // Get current data
@@ -2339,7 +2477,6 @@
 
                 // No more data available
                 Livewire.on('no-more-data', () => {
-                    console.log('No more historical data available');
                     SC.noMoreData = true;
                     SC.isLoadingMore = false;
                 });
@@ -2356,7 +2493,6 @@
                     // Only reinit if dark state actually changed
                     if (currentDarkState !== lastDarkState) {
                         lastDarkState = currentDarkState;
-                        console.log('Theme changed to:', currentDarkState ? 'dark' : 'light');
                         SC.retryCount = 0;
                         // Use longer delay to ensure Flux has updated
                         setTimeout(() => {

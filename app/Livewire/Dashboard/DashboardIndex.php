@@ -12,6 +12,7 @@ use App\Models\FinancialRatio;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 #[Title('Dashboard')]
 class DashboardIndex extends Component
@@ -47,6 +48,11 @@ class DashboardIndex extends Component
 
     // Technical Indicators
     public array $technicalIndicators;
+
+    // Stock Price Snapshot
+    public ?array $stockPriceSnapshot = null;
+    public ?string $stockPriceLastUpdated = null;
+    public bool $isStockPriceFromApi = false;
 
     public function openNewsModal(string $itemId): void
     {
@@ -144,7 +150,15 @@ class DashboardIndex extends Component
 
         // Update user's default stock code
         $user->default_kode_emiten = strtoupper($kodeEmiten);
-        // $user->save();
+        $user->save();
+
+        // Update component stock code immediately
+        $this->stockCode = strtoupper($kodeEmiten);
+
+        // Reset API data for new stock
+        $this->stockPriceSnapshot = null;
+        $this->stockPriceLastUpdated = null;
+        $this->isStockPriceFromApi = false;
 
         // Close modal and reload data
         $this->showStockPickerModal = false;
@@ -154,7 +168,7 @@ class DashboardIndex extends Component
 
         $this->loadData();
 
-        // Dispatch event to reinitialize chart
+        // Dispatch chart update event - Livewire will handle timing
         $this->dispatch('chart-data-updated',
             period: $this->period,
             chartData: $this->chartData
@@ -178,6 +192,11 @@ class DashboardIndex extends Component
         $this->subsidiaries = collect();
         $this->dividends = collect();
         $this->bonds = collect();
+
+        // Initialize stock price snapshot with latest trading data
+        $this->stockPriceSnapshot = null;
+        $this->stockPriceLastUpdated = null;
+        $this->isStockPriceFromApi = false;
 
         /** @var User $user */
         $user = Auth::user();
@@ -233,6 +252,7 @@ class DashboardIndex extends Component
         $this->loadTradingHistory();
         $this->loadNews();
         $this->calculateTechnicalIndicators();
+        $this->fetchStockPriceSnapshot();
 
         // Load company related data
         if ($this->company) {
@@ -247,6 +267,26 @@ class DashboardIndex extends Component
             $this->subsidiaries = collect();
             $this->dividends = collect();
             $this->bonds = collect();
+        }
+
+        // Initialize stock price snapshot with latest trading data if no API data exists
+        if (!$this->stockPriceSnapshot && $this->latestTrading) {
+            $this->stockPriceSnapshot = [
+                'symbol' => $this->latestTrading->kode_emiten,
+                'company' => [
+                    'name' => $this->company ? $this->company->nama_emiten : 'Unknown Company',
+                    'logo' => $this->company && $this->company->logo_url ? $this->company->logo_url : null
+                ],
+                'date' => $this->latestTrading->date->format('Y-m-d'),
+                'open' => (float) $this->latestTrading->open_price,
+                'high' => (float) $this->latestTrading->high,
+                'low' => (float) $this->latestTrading->low,
+                'close' => (float) $this->latestTrading->close,
+                'volume' => (float) $this->latestTrading->volume,
+                'change' => (float) $this->latestTrading->change,
+                'change_pct' => (float) $this->changePercent
+            ];
+            $this->isStockPriceFromApi = false; // Mark as from database fallback
         }
     }
 
@@ -316,6 +356,123 @@ class DashboardIndex extends Component
         $this->news = $query->orderBy('published_date', 'desc')
                            ->limit(10)
                            ->get();
+    }
+
+    private function fetchStockPriceSnapshot(): void
+    {
+        // Check if current time is within IDX market hours using user's timezone
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user || !$user->timezone) {
+            // Fallback to server time if no user timezone is set
+            $now = now();
+        } else {
+            // Use user's timezone
+            $now = now($user->timezone);
+        }
+
+        $dayOfWeek = $now->format('N'); // 1=Monday, 7=Sunday
+        $currentTime = $now->format('H:i:s');
+        $isMarketHours = false;
+
+        // Monday-Thursday (1-4)
+        if ($dayOfWeek >= 1 && $dayOfWeek <= 4) {
+            // Session I: 09:00:00 - 12:00:00
+            // Session II: 13:30:00 - 15:49:59
+            $isMarketHours = ($currentTime >= '09:00:00' && $currentTime <= '12:00:00') ||
+                           ($currentTime >= '13:30:00' && $currentTime <= '15:49:59');
+        }
+        // Friday (5)
+        elseif ($dayOfWeek == 5) {
+            // Session I: 09:00:00 - 11:30:00
+            // Session II: 14:00:00 - 15:49:59
+            $isMarketHours = ($currentTime >= '09:00:00' && $currentTime <= '11:30:00') ||
+                           ($currentTime >= '14:00:00' && $currentTime <= '15:49:59');
+        }
+        // Saturday-Sunday (6-7) - No trading
+
+
+        // Always try to fetch data, but only update timestamps during market hours
+        if (!$isMarketHours) {
+            // Outside market hours - still fetch data but don't update timestamp
+            // This ensures we always have the latest data available
+            // Keep existing timestamp to show when data was last updated
+        }
+
+        try {
+            $goapiBaseUrl = env('GOAPI_BASE_URL');
+            $goapiKey = env('GOAPI_KEY');
+
+            if (!$goapiBaseUrl || !$goapiKey) {
+                $this->stockPriceSnapshot = null;
+                $this->stockPriceLastUpdated = null;
+                $this->isStockPriceFromApi = false;
+                return;
+            }
+
+            /** @var \Illuminate\Http\Client\Response $response */
+            $response = Http::timeout(10)->withHeaders([
+                'Accept' => 'application/json',
+                'X-API-KEY' => $goapiKey,
+            ])->get("{$goapiBaseUrl}/stock/idx/prices", [
+                'symbols' => $this->stockCode
+            ]);
+
+            if ($response->successful()) {
+                /** @var array $data */
+                $data = $response->json();
+
+                if (isset($data['status']) && $data['status'] === 'success' && isset($data['data']['results'][0])) {
+                    $this->stockPriceSnapshot = $data['data']['results'][0];
+                    $this->isStockPriceFromApi = true; // Mark as from API
+                    // Only update timestamp during market hours
+                    if ($isMarketHours) {
+                        /** @var User $user */
+                        $user = Auth::user();
+                        if ($user && $user->timezone) {
+                            $this->stockPriceLastUpdated = now($user->timezone)->toDateTimeString();
+                        } else {
+                            $this->stockPriceLastUpdated = now()->toDateTimeString();
+                        }
+                    }
+                    // If outside market hours, keep existing timestamp to show when data was last updated
+
+                    // Dispatch event to update chart and UI immediately after API success
+                    $this->dispatch('stock-price-updated', [
+                        'stockCode' => $this->stockCode,
+                        'hasNewData' => true
+                    ]);
+
+                    // Force re-render of trading history table
+                    $this->dispatch('$refresh');
+                } else {
+                    // Only clear data if API completely fails, not just returns invalid format
+                    // This ensures we keep the last successful data
+                    if (!$this->stockPriceSnapshot) {
+                        $this->stockPriceSnapshot = null;
+                        $this->stockPriceLastUpdated = null;
+                        $this->isStockPriceFromApi = false;
+                    }
+                }
+            } else {
+                logger()->error('GOAPI request failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'headers' => $response->headers()
+                ]);
+                $this->stockPriceSnapshot = null;
+                $this->stockPriceLastUpdated = null;
+            }
+        } catch (\Exception $e) {
+            logger()->error('GOAPI request exception', [
+                'message' => $e->getMessage(),
+                'stock_code' => $this->stockCode
+            ]);
+            $this->stockPriceSnapshot = null;
+            $this->stockPriceLastUpdated = null;
+            $this->isStockPriceFromApi = false;
+        }
     }
 
     /**
@@ -473,24 +630,332 @@ class DashboardIndex extends Component
         return $this->tradingHistory->sum('value') ?? 0;
     }
 
+    public function getIsStockPriceCardVisibleProperty(): bool
+    {
+        // IDX Market Hours using user's timezone
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user || !$user->timezone) {
+            // Fallback to server time if no user timezone is set
+            $now = now();
+        } else {
+            // Use user's timezone
+            $now = now($user->timezone);
+        }
+
+        $dayOfWeek = $now->format('N'); // 1=Monday, 7=Sunday
+        $currentTime = $now->format('H:i:s');
+
+        // Monday-Thursday (1-4)
+        if ($dayOfWeek >= 1 && $dayOfWeek <= 4) {
+            // Session I: 09:00:00 - 12:00:00
+            // Session II: 13:30:00 - 15:49:59
+            return ($currentTime >= '09:00:00' && $currentTime <= '12:00:00') ||
+                   ($currentTime >= '13:30:00' && $currentTime <= '15:49:59');
+        }
+        // Friday (5)
+        elseif ($dayOfWeek == 5) {
+            // Session I: 09:00:00 - 11:30:00
+            // Session II: 14:00:00 - 15:49:59
+            return ($currentTime >= '09:00:00' && $currentTime <= '11:30:00') ||
+                   ($currentTime >= '14:00:00' && $currentTime <= '15:49:59');
+        }
+        // Saturday-Sunday (6-7) - No trading
+        else {
+            return false;
+        }
+    }
+
+    public function getIsMarketBreakProperty(): bool
+    {
+        // Check if market is currently in break time (between sessions)
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user || !$user->timezone) {
+            // Fallback to server time if no user timezone is set
+            $now = now();
+        } else {
+            // Use user's timezone
+            $now = now($user->timezone);
+        }
+
+        $dayOfWeek = $now->format('N'); // 1=Monday, 7=Sunday
+        $currentTime = $now->format('H:i:s');
+
+        // Monday-Thursday (1-4)
+        if ($dayOfWeek >= 1 && $dayOfWeek <= 4) {
+            // Break between sessions: 12:00:00 - 13:30:00
+            return $currentTime >= '12:00:00' && $currentTime < '13:30:00';
+        }
+        // Friday (5)
+        elseif ($dayOfWeek == 5) {
+            // Break between sessions: 11:30:00 - 14:00:00
+            return $currentTime >= '11:30:00' && $currentTime < '14:00:00';
+        }
+
+        // No break time on weekends
+        return false;
+    }
+
+    public function getLastTradingSessionTimeProperty(): string
+    {
+        // Get the end time of the last trading session based on current session
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user || !$user->timezone) {
+            // Fallback to server time if no user timezone is set
+            $now = now();
+        } else {
+            // Use user's timezone
+            $now = now($user->timezone);
+        }
+
+        $dayOfWeek = $now->format('N'); // 1=Monday, 7=Sunday
+        $currentTime = $now->format('H:i:s');
+
+        // Determine which session we're currently in or when the last session ended
+        if ($dayOfWeek >= 1 && $dayOfWeek <= 4) {
+            // Monday-Thursday schedule
+            if ($currentTime < '09:00:00') {
+                // Before market opens - last session was yesterday at 15:49:59
+                return $now->subDay()->format('Y-m-d') . ' 15:49:59';
+            } elseif ($currentTime >= '09:00:00' && $currentTime < '12:00:00') {
+                // Currently in Session I - data should be from current session
+                return $now->format('Y-m-d') . ' ' . $currentTime;
+            } elseif ($currentTime >= '12:00:00' && $currentTime < '13:30:00') {
+                // Break time after Session I - last session ended at 12:00:00
+                return $now->format('Y-m-d') . ' 12:00:00';
+            } elseif ($currentTime >= '13:30:00' && $currentTime <= '15:49:59') {
+                // Currently in Session II - data should be from current session
+                return $now->format('Y-m-d') . ' ' . $currentTime;
+            } else {
+                // After market closes - last session ended at 15:49:59
+                return $now->format('Y-m-d') . ' 15:49:59';
+            }
+        } elseif ($dayOfWeek == 5) {
+            // Friday schedule
+            if ($currentTime < '09:00:00') {
+                // Before market opens - last session was yesterday (Thursday) at 15:49:59
+                return $now->subDay()->format('Y-m-d') . ' 15:49:59';
+            } elseif ($currentTime >= '09:00:00' && $currentTime < '11:30:00') {
+                // Currently in Session I - data should be from current session
+                return $now->format('Y-m-d') . ' ' . $currentTime;
+            } elseif ($currentTime >= '11:30:00' && $currentTime < '14:00:00') {
+                // Break time after Session I - last session ended at 11:30:00
+                return $now->format('Y-m-d') . ' 11:30:00';
+            } elseif ($currentTime >= '14:00:00' && $currentTime <= '15:49:59') {
+                // Currently in Session II - data should be from current session
+                return $now->format('Y-m-d') . ' ' . $currentTime;
+            } else {
+                // After market closes - last session ended at 15:49:59
+                return $now->format('Y-m-d') . ' 15:49:59';
+            }
+        } elseif ($dayOfWeek == 6) {
+            // Saturday - last session was Friday at 15:49:59
+            return $now->subDay()->format('Y-m-d') . ' 15:49:59';
+        } elseif ($dayOfWeek == 7) {
+            // Sunday - last session was Friday at 15:49:59
+            return $now->subDays(2)->format('Y-m-d') . ' 15:49:59';
+        }
+
+        // Fallback
+        return $now->format('Y-m-d H:i:s');
+    }
+
+    public function getCombinedTradingHistoryProperty()
+    {
+        $history = collect($this->tradingHistory);
+
+        // Add latest data from API if available and not already in history
+        if ($this->stockPriceSnapshot) {
+            $apiDate = $this->stockPriceSnapshot['date'];
+            $existingDates = $history->filter(function ($item) use ($apiDate) {
+                return is_object($item) && isset($item->date) && $item->date instanceof \Carbon\Carbon;
+            })->pluck('date')->map(function ($date) {
+                return $date->format('Y-m-d');
+            });
+
+            $apiDataExists = $existingDates->contains($apiDate);
+
+            // Only add if not already exists in history
+            if (!$apiDataExists) {
+                // Convert API data to match database model structure
+                $latestData = (object) [
+                    'date' => \Carbon\Carbon::createFromFormat('Y-m-d', $apiDate),
+                    'open_price' => (float) $this->stockPriceSnapshot['open'],
+                    'high' => (float) $this->stockPriceSnapshot['high'],
+                    'low' => (float) $this->stockPriceSnapshot['low'],
+                    'close' => (float) $this->stockPriceSnapshot['close'],
+                    'change' => (float) $this->stockPriceSnapshot['change'],
+                    'volume' => (float) $this->stockPriceSnapshot['volume'],
+                    'value' => (float) ($this->stockPriceSnapshot['volume'] * $this->stockPriceSnapshot['close']), // Calculate value
+                    'frequency' => 1, // Default frequency for API data
+                ];
+
+                // Determine market status badge for API data
+                $user = Auth::user();
+                $now = $user && $user->timezone ? now($user->timezone) : now();
+                $dayOfWeek = $now->format('N');
+                $currentTime = $now->format('H:i:s');
+
+                $marketStatus = 'CLOSED'; // Default
+
+                if ($dayOfWeek >= 1 && $dayOfWeek <= 4) {
+                    // Monday-Thursday
+                    if (($currentTime >= '09:00:00' && $currentTime <= '12:00:00') ||
+                        ($currentTime >= '13:30:00' && $currentTime <= '15:49:59')) {
+                        $marketStatus = 'LIVE';
+                    } elseif ($currentTime >= '12:00:00' && $currentTime < '13:30:00') {
+                        $marketStatus = 'BREAK';
+                    }
+                } elseif ($dayOfWeek == 5) {
+                    // Friday
+                    if (($currentTime >= '09:00:00' && $currentTime <= '11:30:00') ||
+                        ($currentTime >= '14:00:00' && $currentTime <= '15:49:59')) {
+                        $marketStatus = 'LIVE';
+                    } elseif ($currentTime >= '11:30:00' && $currentTime < '14:00:00') {
+                        $marketStatus = 'BREAK';
+                    }
+                } elseif ($dayOfWeek == 6 || $dayOfWeek == 7) {
+                    $marketStatus = 'WEEKEND';
+                }
+
+                // Add to beginning of collection (most recent first)
+                $latestData->_isFromApi = true; // Mark as API data
+                $latestData->_marketStatus = $marketStatus; // Add market status
+                $history->prepend($latestData);
+            }
+        }
+
+        return $history;
+    }
+
+    public function refreshStockPrice(): void
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Calculate market hours for logging
+        $logUserTimezone = $user && $user->timezone ? $user->timezone : 'server';
+        $logNow = $user && $user->timezone ? now($user->timezone) : now();
+        $logDayOfWeek = $logNow->format('N');
+        $logCurrentTime = $logNow->format('H:i:s');
+        $logIsMarketHours = false;
+
+        if ($logDayOfWeek >= 1 && $logDayOfWeek <= 4) {
+            $logIsMarketHours = ($logCurrentTime >= '09:00:00' && $logCurrentTime <= '12:00:00') ||
+                              ($logCurrentTime >= '13:30:00' && $logCurrentTime <= '15:49:59');
+        } elseif ($logDayOfWeek == 5) {
+            $logIsMarketHours = ($logCurrentTime >= '09:00:00' && $logCurrentTime <= '11:30:00') ||
+                              ($logCurrentTime >= '14:00:00' && $logCurrentTime <= '15:49:59');
+        }
+
+
+        // Only refresh if user is authenticated
+        if (!$user) {
+            logger()->warning('Stock price refresh skipped - user not authenticated');
+            return;
+        }
+
+        // Ensure stock_code is set
+        if (empty($this->stockCode)) {
+            logger()->warning('Stock price refresh skipped - stock_code is empty');
+            // Try to reload stock code from user
+            if ($user->default_kode_emiten) {
+                $this->stockCode = strtoupper($user->default_kode_emiten);
+                logger()->info('Stock code reloaded from user', ['stock_code' => $this->stockCode]);
+            } else {
+                return;
+            }
+        }
+
+        $this->fetchStockPriceSnapshot();
+    }
+
+    public function refreshChart(): void
+    {
+        // Dispatch chart update event with fresh data
+        $this->dispatch('chart-data-updated', [
+            'period' => $this->period,
+            'chartData' => $this->chartData
+        ]);
+    }
+
     public function getChartDataProperty(): array
     {
-        $data = $this->tradingHistory->sortBy('date')->values();
+        $data = $this->combinedTradingHistory->sortBy('date')->values();
 
         // Format for TradingView Lightweight Charts
-        $candlestick = $data->map(fn($item) => [
-            'time' => $item->date->format('Y-m-d'),
-            'open' => (float) $item->open_price,
-            'high' => (float) $item->high,
-            'low' => (float) $item->low,
-            'close' => (float) $item->close,
-        ])->toArray();
+        $candlestick = $data->map(function($item) {
+            $candleData = [
+                'time' => $item->date->format('Y-m-d'),
+                'open' => (float) $item->open_price,
+                'high' => (float) $item->high,
+                'low' => (float) $item->low,
+                'close' => (float) $item->close,
+            ];
 
-        $volume = $data->map(fn($item) => [
-            'time' => $item->date->format('Y-m-d'),
-            'value' => (float) $item->volume,
-            'color' => $item->change >= 0 ? 'rgba(38, 166, 154, 0.7)' : 'rgba(239, 83, 80, 0.7)',
-        ])->toArray();
+            // Add special styling for API data (latest candle)
+            if (isset($item->_isFromApi) && $item->_isFromApi) {
+                $status = isset($item->_marketStatus) ? $item->_marketStatus : 'LIVE';
+                switch ($status) {
+                    case 'LIVE':
+                        // Green border for live data
+                        $candleData['borderColor'] = '#10b981'; // emerald-500
+                        $candleData['wickColor'] = '#10b981';
+                        break;
+                    case 'BREAK':
+                        // Yellow border for break time
+                        $candleData['borderColor'] = '#f59e0b'; // amber-500
+                        $candleData['wickColor'] = '#f59e0b';
+                        break;
+                    case 'CLOSED':
+                        // Orange border for closed market
+                        $candleData['borderColor'] = '#f97316'; // orange-500
+                        $candleData['wickColor'] = '#f97316';
+                        break;
+                    case 'WEEKEND':
+                        // Gray border for weekend
+                        $candleData['borderColor'] = '#6b7280'; // gray-500
+                        $candleData['wickColor'] = '#6b7280';
+                        break;
+                }
+            }
+
+            return $candleData;
+        })->toArray();
+
+        $volume = $data->map(function($item) {
+            $volumeData = [
+                'time' => $item->date->format('Y-m-d'),
+                'value' => (float) $item->volume,
+                'color' => $item->change >= 0 ? 'rgba(38, 166, 154, 0.7)' : 'rgba(239, 83, 80, 0.7)',
+            ];
+
+            // Add special styling for API data volume bars
+            if (isset($item->_isFromApi) && $item->_isFromApi) {
+                $status = isset($item->_marketStatus) ? $item->_marketStatus : 'LIVE';
+                switch ($status) {
+                    case 'LIVE':
+                        $volumeData['color'] = $item->change >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'; // emerald/red
+                        break;
+                    case 'BREAK':
+                        $volumeData['color'] = $item->change >= 0 ? 'rgba(245, 158, 11, 0.8)' : 'rgba(245, 158, 11, 0.8)'; // amber
+                        break;
+                    case 'CLOSED':
+                        $volumeData['color'] = $item->change >= 0 ? 'rgba(249, 115, 22, 0.8)' : 'rgba(249, 115, 22, 0.8)'; // orange
+                        break;
+                    case 'WEEKEND':
+                        $volumeData['color'] = $item->change >= 0 ? 'rgba(107, 114, 128, 0.8)' : 'rgba(107, 114, 128, 0.8)'; // gray
+                        break;
+                }
+            }
+
+            return $volumeData;
+        })->toArray();
 
         return [
             'candlestick' => $candlestick,
@@ -517,12 +982,13 @@ class DashboardIndex extends Component
 
     private function calculateTechnicalIndicators(): void
     {
-        if ($this->tradingHistory->isEmpty()) {
+        $combinedHistory = $this->combinedTradingHistory;
+        if ($combinedHistory->isEmpty()) {
             $this->technicalIndicators = [];
             return;
         }
 
-        $data = $this->tradingHistory->sortBy('date')->values();
+        $data = $combinedHistory->sortBy('date')->values();
         $closes = $data->pluck('close')->toArray();
         $highs = $data->pluck('high')->toArray();
         $lows = $data->pluck('low')->toArray();
