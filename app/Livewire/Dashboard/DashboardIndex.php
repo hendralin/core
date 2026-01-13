@@ -627,7 +627,50 @@ class DashboardIndex extends Component
 
     public function getAvgVolumeProperty(): float
     {
-        return $this->tradingHistory->avg('volume') ?? 0;
+        return $this->combinedTradingHistory->avg('volume') ?? 0;
+    }
+
+    public function getPreviousCloseProperty(): float
+    {
+        $combinedHistory = $this->combinedTradingHistory;
+
+        // If we have API data, get the previous trading day from combined history
+        if ($this->stockPriceSnapshot && $this->isStockPriceFromApi) {
+            $apiDate = \Carbon\Carbon::createFromFormat('Y-m-d', $this->stockPriceSnapshot['date']);
+
+            // Find data from the previous trading day
+            $previousDayData = $combinedHistory->filter(function ($item) use ($apiDate) {
+                return isset($item->date) &&
+                       $item->date instanceof \Carbon\Carbon &&
+                       $item->date->lt($apiDate) &&
+                       isset($item->close);
+            })->sortByDesc('date')->first();
+
+            if ($previousDayData && isset($previousDayData->close)) {
+                return (float) $previousDayData->close;
+            }
+        }
+
+        // Fallback to database value
+        return $this->latestTrading ? (float) $this->latestTrading->previous : 0;
+    }
+
+    public function getEstimatedIndexIndividualProperty(): float
+    {
+        if (!$this->latestTrading || !$this->stockPriceSnapshot || !$this->isStockPriceFromApi) {
+            return $this->latestTrading ? (float) $this->latestTrading->index_individual : 0;
+        }
+
+        // Estimasi sederhana: indeks hari ini = indeks kemarin * (harga hari ini / harga kemarin)
+        $previousClose = $this->previousClose;
+        $currentPrice = $this->stockPriceSnapshot['close'];
+
+        if ($previousClose > 0) {
+            $priceRatio = $currentPrice / $previousClose;
+            return (float) $this->latestTrading->index_individual * $priceRatio;
+        }
+
+        return (float) $this->latestTrading->index_individual;
     }
 
     public function getAvgValueProperty(): float

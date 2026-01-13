@@ -896,15 +896,25 @@
                     <div class="divide-y divide-gray-100 dark:divide-zinc-800">
                         <div class="px-4 py-2 flex items-center justify-between">
                             <span class="text-xs text-gray-500 dark:text-zinc-500">Previous Close</span>
-                            <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ number_format($latestTrading->previous, 0, ',', '.') }}</span>
+                            <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ number_format($this->previousClose, 0, ',', '.') }}</span>
                         </div>
                         <div class="px-4 py-2 flex items-center justify-between">
                             <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $isCustomRange ? '' : $this->periodLabel . ' ' }}High</span>
-                            <span class="text-xs text-teal-600 dark:text-teal-400 font-medium">{{ number_format($this->highestPrice, 0, ',', '.') }}</span>
+                            <span class="text-xs text-teal-600 dark:text-teal-400 font-medium">
+                                @php
+                                    $displayHigh = $stockPriceSnapshot && $this->isStockPriceFromApi ? max($stockPriceSnapshot['high'], $this->highestPrice) : $this->highestPrice;
+                                @endphp
+                                {{ number_format($displayHigh, 0, ',', '.') }}
+                            </span>
                         </div>
                         <div class="px-4 py-2 flex items-center justify-between">
                             <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $isCustomRange ? '' : $this->periodLabel . ' ' }}Low</span>
-                            <span class="text-xs text-red-600 dark:text-red-400 font-medium">{{ number_format($this->lowestPrice, 0, ',', '.') }}</span>
+                            <span class="text-xs text-red-600 dark:text-red-400 font-medium">
+                                @php
+                                    $displayLow = $stockPriceSnapshot && $this->isStockPriceFromApi ? min($stockPriceSnapshot['low'], $this->lowestPrice) : $this->lowestPrice;
+                                @endphp
+                                {{ number_format($displayLow, 0, ',', '.') }}
+                            </span>
                         </div>
                         <div class="px-4 py-2 flex items-center justify-between">
                             <span class="text-xs text-gray-500 dark:text-zinc-500">Avg Volume</span>
@@ -926,9 +936,19 @@
                                 @endif
                             </span>
                         </div>
+                        @php
+                            $indexLabel = 'Index Individual';
+                            $indexValue = $this->estimatedIndexIndividual;
+
+                            // Jika menggunakan estimasi, beri label yang jelas
+                            if ($stockPriceSnapshot && $this->isStockPriceFromApi) {
+                                $indexLabel = 'Index Individual (Est)';
+                            }
+                        @endphp
+
                         <div class="px-4 py-2 flex items-center justify-between">
-                            <span class="text-xs text-gray-500 dark:text-zinc-500">Index Individual</span>
-                            <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ number_format($latestTrading->index_individual, 2, ',', '.') }}</span>
+                            <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $indexLabel }}</span>
+                            <span class="text-xs text-gray-700 dark:text-zinc-300 font-medium">{{ number_format($indexValue, 2, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -937,7 +957,7 @@
                 <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
                     <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-900 dark:text-white font-medium text-sm">Order Book</span>
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Order Book (H-1)</span>
                             <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $latestTrading ? $latestTrading->date->format('d M Y') : '-' }}</span>
                         </div>
                     </div>
@@ -984,7 +1004,7 @@
                 <div class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 overflow-hidden">
                     <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-900 dark:text-white font-medium text-sm">Foreign Flow</span>
+                            <span class="text-gray-900 dark:text-white font-medium text-sm">Foreign Flow (H-1)</span>
                             <span class="text-xs text-gray-500 dark:text-zinc-500">{{ $latestTrading ? $latestTrading->date->format('d M Y') : '-' }}</span>
                         </div>
                     </div>
