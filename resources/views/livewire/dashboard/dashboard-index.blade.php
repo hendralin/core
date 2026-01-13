@@ -1882,12 +1882,48 @@
                 vertLines: { color: isDark ? '#27272a' : '#f4f4f5' },
                 horzLines: { color: isDark ? '#27272a' : '#f4f4f5' },
             },
+            localization: {
+                timeFormatter: (time) => {
+                    // Check if this time point has API data
+                    const component = getDashboardComponent();
+                    if (component && SC.candlestickData && SC.candlestickData.length > 0) {
+                        const currentIndex = SC.candlestickData.findIndex(c => c.time === time);
+                        const isFromApi = currentIndex >= 0 ? SC.candlestickData[currentIndex]._isFromApi : false;
+
+                        if (currentIndex >= 0 && isFromApi && component.candlestickLastUpdated) {
+                            // For API data, show date and time
+                            const updateDate = new Date(component.candlestickLastUpdated);
+                            const dateStr = updateDate.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                            });
+                            const timeStr = updateDate.toLocaleTimeString('id-ID', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            }).replace('.', ':');
+                            return `${dateStr}, ${timeStr}`;
+                        }
+                    }
+
+                    // Default formatting for non-API data
+                    const date = new Date(time);
+                    return date.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                }
+            },
             crosshair: {
                 mode: LightweightCharts.CrosshairMode.Normal,
                 vertLine: {
                     color: isDark ? '#6b7280' : '#9ca3af',
                     width: 1,
                     style: LightweightCharts.LineStyle.Dashed,
+                    labelVisible: true,
+                    labelBackgroundColor: isDark ? '#374151' : '#f9fafb',
                 },
                 horzLine: {
                     color: isDark ? '#6b7280' : '#9ca3af',
@@ -1903,6 +1939,38 @@
                 borderColor: isDark ? '#27272a' : '#e4e4e7',
                 timeVisible: true,
                 secondsVisible: false,
+                // tickMarkFormatter: (time) => {
+                //     // Check if this time point has API data
+                //     const component = getDashboardComponent();
+                //     if (component && SC.candlestickData && SC.candlestickData.length > 0) {
+                //         const currentIndex = SC.candlestickData.findIndex(c => c.time === time);
+                //         const isFromApi = currentIndex >= 0 ? SC.candlestickData[currentIndex]._isFromApi : false;
+
+                //         if (currentIndex >= 0 && isFromApi && component.candlestickLastUpdated) {
+                //             // For API data, show date and time
+                //             const updateDate = new Date(component.candlestickLastUpdated);
+                //             const dateStr = updateDate.toLocaleDateString('id-ID', {
+                //                 day: '2-digit',
+                //                 month: 'short',
+                //                 year: 'numeric'
+                //             });
+                //             const timeStr = updateDate.toLocaleTimeString('id-ID', {
+                //                 hour: '2-digit',
+                //                 minute: '2-digit',
+                //                 hour12: false
+                //             }).replace('.', ':');
+                //             return `${dateStr} ${timeStr}`;
+                //         }
+                //     }
+
+                //     // Default formatting for non-API data
+                //     const date = new Date(time);
+                //     return date.toLocaleDateString('id-ID', {
+                //         day: '2-digit',
+                //         month: 'short',
+                //         year: 'numeric'
+                //     });
+                // }
             },
         });
 
@@ -2273,7 +2341,40 @@
             const volValue = volumeData ? formatVolume(volumeData.value) : '-';
 
             legend.style.display = 'block';
-            legendDate.textContent = param.time;
+
+            // Check if this is API candlestick data
+            const component = getDashboardComponent();
+            let displayTime = param.time;
+
+            if (component && SC.candlestickData && SC.candlestickData.length > 0) {
+                const currentIndex = SC.candlestickData.findIndex(c => c.time === param.time);
+
+                // If this candlestick has API data, show last update time
+                if (currentIndex >= 0 && SC.candlestickData[currentIndex]._isFromApi && component.candlestickLastUpdated) {
+                    // Format the timestamp to show date and time (DD MMM YYYY HH:MM)
+                    const updateDate = new Date(component.candlestickLastUpdated);
+                    const dateStr = updateDate.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    const timeStr = updateDate.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    }).replace('.', ':');
+                    displayTime = `${dateStr}, ${timeStr}`;
+                } else {
+                    const dateStr = new Date(param.time).toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    displayTime = `${dateStr}`;
+                }
+            }
+
+            legendDate.textContent = displayTime;
             legendOpen.textContent = open.toLocaleString('id-ID');
             legendHigh.textContent = high.toLocaleString('id-ID');
             legendLow.textContent = low.toLocaleString('id-ID');
@@ -2454,10 +2555,24 @@
                         // Get current data
                         const currentData = SC.candlestickSeries.data() || [];
 
-                        // Prepend new data (older data comes before)
+                        // Prepend new data (older data comes before) and preserve _isFromApi flags
                         const mergedCandlestick = [...data.candlestick, ...currentData];
                         SC.candlestickSeries.setData(mergedCandlestick);
-                        SC.candlestickData = mergedCandlestick; // Update stored data for legend
+
+                        // Preserve _isFromApi flags from existing data
+                        const existingDataWithFlags = SC.candlestickData || [];
+                        const updatedCandlestickData = mergedCandlestick.map((candle, index) => {
+                            // For newly added data (from the beginning), check if there's existing data with same time
+                            const existingIndex = existingDataWithFlags.findIndex(existing => existing.time === candle.time);
+                            if (existingIndex >= 0) {
+                                // Preserve the _isFromApi flag from existing data
+                                return { ...candle, _isFromApi: existingDataWithFlags[existingIndex]._isFromApi || false };
+                            }
+                            // For truly new data, set _isFromApi to false
+                            return { ...candle, _isFromApi: false };
+                        });
+
+                        SC.candlestickData = updatedCandlestickData; // Update stored data for legend
 
                         // Update loaded data range
                         if (SC.loadedDataRange && data.candlestick.length > 0) {

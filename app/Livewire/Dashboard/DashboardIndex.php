@@ -54,6 +54,9 @@ class DashboardIndex extends Component
     public ?string $stockPriceLastUpdated = null;
     public bool $isStockPriceFromApi = false;
 
+    // Candlestick Data Timestamp
+    public ?string $candlestickLastUpdated = null;
+
     public function openNewsModal(string $itemId): void
     {
         $this->selectedNews = $this->news->firstWhere('item_id', $itemId);
@@ -159,6 +162,7 @@ class DashboardIndex extends Component
         $this->stockPriceSnapshot = null;
         $this->stockPriceLastUpdated = null;
         $this->isStockPriceFromApi = false;
+        $this->candlestickLastUpdated = null;
 
         // Close modal and reload data
         $this->showStockPickerModal = false;
@@ -197,6 +201,7 @@ class DashboardIndex extends Component
         $this->stockPriceSnapshot = null;
         $this->stockPriceLastUpdated = null;
         $this->isStockPriceFromApi = false;
+        $this->candlestickLastUpdated = null;
 
         /** @var User $user */
         $user = Auth::user();
@@ -426,7 +431,17 @@ class DashboardIndex extends Component
                 if (isset($data['status']) && $data['status'] === 'success' && isset($data['data']['results'][0])) {
                     $this->stockPriceSnapshot = $data['data']['results'][0];
                     $this->isStockPriceFromApi = true; // Mark as from API
-                    // Only update timestamp during market hours
+
+                    // Update candlestick timestamp whenever API data is received
+                    /** @var User $user */
+                    $user = Auth::user();
+                    if ($user && $user->timezone) {
+                        $this->candlestickLastUpdated = now($user->timezone)->toDateTimeString();
+                    } else {
+                        $this->candlestickLastUpdated = now()->toDateTimeString();
+                    }
+
+                    // Only update stock price timestamp during market hours
                     if ($isMarketHours) {
                         /** @var User $user */
                         $user = Auth::user();
@@ -896,6 +911,7 @@ class DashboardIndex extends Component
                 'high' => (float) $item->high,
                 'low' => (float) $item->low,
                 'close' => (float) $item->close,
+                '_isFromApi' => isset($item->_isFromApi) ? $item->_isFromApi : false,
             ];
 
             // Add special styling for API data (latest candle)
