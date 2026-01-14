@@ -72,7 +72,8 @@
     </div>
 
     <!-- Desktop Table Section -->
-    <div class="hidden md:block overflow-x-auto">
+    {{-- <div class="hidden md:block overflow-x-auto"> --}}
+    <div class="overflow-x-auto">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 border dark:border-zinc-700 dark:text-zinc-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b dark:border-b-0 dark:bg-zinc-700 dark:text-zinc-400">
                 <tr>
@@ -480,7 +481,7 @@
     </div>
 
     <!-- Mobile Card Layout -->
-    <div class="md:hidden space-y-4">
+    {{-- <div class="md:hidden space-y-4">
         @if(isset($vehicles) && $vehicles->count() > 0)
             @foreach($vehicles as $index => $vehicle)
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 shadow-sm overflow-hidden">
@@ -828,7 +829,7 @@
                 </p>
             </div>
         @endif
-    </div>
+    </div> --}}
 
     <flux:modal name="delete-vehicle" class="min-w-88">
         <div class="space-y-6">
