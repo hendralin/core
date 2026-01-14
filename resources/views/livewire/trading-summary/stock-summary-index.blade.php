@@ -153,11 +153,12 @@
                                             alt="{{ $stock->kode_emiten }}"
                                             class="w-4 h-4 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                         />
-                                        <a href="{{ route('stock-summary.detail', $stock->kode_emiten) }}"
-                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors"
-                                        wire:navigate>
+                                        <button
+                                            wire:click="selectStock('{{ $stock->kode_emiten }}')"
+                                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors cursor-pointer bg-transparent border-none p-0"
+                                            type="button">
                                             {{ $stock->kode_emiten }}
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             @endif

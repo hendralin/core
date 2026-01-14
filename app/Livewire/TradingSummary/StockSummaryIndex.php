@@ -3,6 +3,7 @@
 namespace App\Livewire\TradingSummary;
 
 use App\Models\TradingInfo;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -204,5 +205,14 @@ class StockSummaryIndex extends Component
     public function getVisibleColumnCountProperty()
     {
         return count($this->visibleColumns);
+    }
+
+    public function selectStock($kodeEmiten)
+    {
+        // Update default_kode_emiten for current user
+        auth()->user()->update(['default_kode_emiten' => $kodeEmiten]);
+
+        // Redirect to dashboard
+        return $this->redirect('/dashboard', true);
     }
 }
