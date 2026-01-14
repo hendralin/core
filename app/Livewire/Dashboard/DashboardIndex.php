@@ -632,19 +632,16 @@ class DashboardIndex extends Component
 
     public function getPreviousCloseProperty(): float
     {
-        $combinedHistory = $this->combinedTradingHistory;
-
-        // If we have API data, get the previous trading day from combined history
+        // If we have API data, get the previous trading day directly from database
+        // to avoid dependency on filtered chart data
         if ($this->stockPriceSnapshot && $this->isStockPriceFromApi) {
             $apiDate = \Carbon\Carbon::createFromFormat('Y-m-d', $this->stockPriceSnapshot['date']);
 
-            // Find data from the previous trading day
-            $previousDayData = $combinedHistory->filter(function ($item) use ($apiDate) {
-                return isset($item->date) &&
-                       $item->date instanceof \Carbon\Carbon &&
-                       $item->date->lt($apiDate) &&
-                       isset($item->close);
-            })->sortByDesc('date')->first();
+            // Query database directly for previous trading day data
+            $previousDayData = TradingInfo::where('kode_emiten', $this->stockCode)
+                ->where('date', '<', $apiDate->format('Y-m-d'))
+                ->orderBy('date', 'desc')
+                ->first();
 
             if ($previousDayData && isset($previousDayData->close)) {
                 return (float) $previousDayData->close;
