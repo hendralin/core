@@ -1911,14 +1911,133 @@
                         const isFromApi = currentIndex >= 0 ? SC.candlestickData[currentIndex]._isFromApi : false;
 
                         if (currentIndex >= 0 && isFromApi && component.candlestickLastUpdated) {
-                            // For API data, show date and time
+                            // For API data, show date and time according to market hours
+                            const now = new Date();
                             const updateDate = new Date(component.candlestickLastUpdated);
-                            const dateStr = updateDate.toLocaleDateString('id-ID', {
+
+                            // Function to check if current time is within market operating hours
+                            function isMarketOpen(currentTime) {
+                                const dayOfWeek = currentTime.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday
+                                const hours = currentTime.getHours();
+                                const minutes = currentTime.getMinutes();
+                                const seconds = currentTime.getSeconds();
+                                const currentTimeInSeconds = hours * 3600 + minutes * 60 + seconds;
+
+                                // Market closed on weekends
+                                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                                    return false;
+                                }
+
+                                // Session I: Monday-Thursday 09:00:00 – 12:00:00, Friday 09:00:00 – 11:30:00
+                                const session1Start = 9 * 3600; // 09:00:00
+                                const session1EndFriday = 11 * 3600 + 30 * 60; // 11:30:00
+                                const session1EndWeekday = 12 * 3600; // 12:00:00
+
+                                // Session II: Monday-Thursday 13:30:00 – 15:49:59, Friday 14:00:00 – 15:49:59
+                                const session2StartWeekday = 13 * 3600 + 30 * 60; // 13:30:00
+                                const session2StartFriday = 14 * 3600; // 14:00:00
+                                const session2End = 15 * 3600 + 49 * 60 + 59; // 15:49:59
+
+                                if (dayOfWeek === 5) { // Friday
+                                    // Check Session I: 09:00:00 – 11:30:00
+                                    if (currentTimeInSeconds >= session1Start && currentTimeInSeconds <= session1EndFriday) {
+                                        return true;
+                                    }
+                                    // Check Session II: 14:00:00 – 15:49:59
+                                    if (currentTimeInSeconds >= session2StartFriday && currentTimeInSeconds <= session2End) {
+                                        return true;
+                                    }
+                                } else { // Monday-Thursday
+                                    // Check Session I: 09:00:00 – 12:00:00
+                                    if (currentTimeInSeconds >= session1Start && currentTimeInSeconds <= session1EndWeekday) {
+                                        return true;
+                                    }
+                                    // Check Session II: 13:30:00 – 15:49:59
+                                    if (currentTimeInSeconds >= session2StartWeekday && currentTimeInSeconds <= session2End) {
+                                        return true;
+                                    }
+                                }
+
+                                return false;
+                            }
+
+                            // Function to get last market closing time
+                            function getLastMarketClose(currentTime) {
+                                const dayOfWeek = currentTime.getDay();
+                                const hours = currentTime.getHours();
+                                const minutes = currentTime.getMinutes();
+                                const seconds = currentTime.getSeconds();
+                                const currentTimeInSeconds = hours * 3600 + minutes * 60 + seconds;
+                                const year = currentTime.getFullYear();
+                                const month = currentTime.getMonth();
+                                const day = currentTime.getDate();
+
+                                // Market closed on weekends - show previous Friday's closing
+                                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                                    const friday = new Date(currentTime);
+                                    friday.setDate(day - ((dayOfWeek === 0) ? 2 : 1)); // Sunday = -2, Saturday = -1
+                                    return new Date(friday.getFullYear(), friday.getMonth(), friday.getDate(), 15, 49, 59);
+                                }
+
+                                // Session times in seconds
+                                const session1Start = 9 * 3600; // 09:00:00
+                                const session1EndWeekday = 12 * 3600; // 12:00:00
+                                const session1EndFriday = 11 * 3600 + 30 * 60; // 11:30:00
+                                const session2StartWeekday = 13 * 3600 + 30 * 60; // 13:30:00
+                                const session2StartFriday = 14 * 3600; // 14:00:00
+                                const session2End = 15 * 3600 + 49 * 60 + 59; // 15:49:59
+
+                                if (dayOfWeek === 5) { // Friday
+                                    if (currentTimeInSeconds <= session1EndFriday) {
+                                        // Before or during Session I - show yesterday's (Thursday) closing
+                                        const thursday = new Date(currentTime);
+                                        thursday.setDate(day - 1);
+                                        return new Date(thursday.getFullYear(), thursday.getMonth(), thursday.getDate(), 15, 49, 59);
+                                    } else if (currentTimeInSeconds <= session2StartFriday) {
+                                        // Break period after Session I - show Session I closing (11:30:00)
+                                        return new Date(year, month, day, 11, 30, 0);
+                                    } else if (currentTimeInSeconds <= session2End) {
+                                        // During Session II - show Session I closing during break, but this is handled by isMarketOpen check
+                                        return new Date(year, month, day, 11, 30, 0);
+                                    } else {
+                                        // After market close - show Session II closing
+                                        return new Date(year, month, day, 15, 49, 59);
+                                    }
+                                } else { // Monday-Thursday
+                                    if (currentTimeInSeconds <= session1EndWeekday) {
+                                        // Before or during Session I - show yesterday's closing
+                                        const yesterday = new Date(currentTime);
+                                        yesterday.setDate(day - 1);
+                                        return new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 15, 49, 59);
+                                    } else if (currentTimeInSeconds <= session2StartWeekday) {
+                                        // Break period after Session I - show Session I closing (12:00:00)
+                                        return new Date(year, month, day, 12, 0, 0);
+                                    } else if (currentTimeInSeconds <= session2End) {
+                                        // During Session II - show Session I closing during break, but this is handled by isMarketOpen check
+                                        return new Date(year, month, day, 12, 0, 0);
+                                    } else {
+                                        // After market close - show Session II closing
+                                        return new Date(year, month, day, 15, 49, 59);
+                                    }
+                                }
+                            }
+
+                            // Determine which time to display
+                            let displayTime;
+                            if (isMarketOpen(now)) {
+                                // Market is open, show actual last update time
+                                displayTime = updateDate;
+                            } else {
+                                // Market is closed, show last market closing time
+                                displayTime = getLastMarketClose(now);
+                            }
+
+                            const dateStr = displayTime.toLocaleDateString('id-ID', {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric'
                             });
-                            const timeStr = updateDate.toLocaleTimeString('id-ID', {
+                            const timeStr = displayTime.toLocaleTimeString('id-ID', {
                                 hour: '2-digit',
                                 minute: '2-digit',
                                 hour12: false
@@ -2369,16 +2488,134 @@
             if (component && SC.candlestickData && SC.candlestickData.length > 0) {
                 const currentIndex = SC.candlestickData.findIndex(c => c.time === param.time);
 
-                // If this candlestick has API data, show last update time
+                // If this candlestick has API data, show last update time according to market hours
                 if (currentIndex >= 0 && SC.candlestickData[currentIndex]._isFromApi && component.candlestickLastUpdated) {
-                    // Format the timestamp to show date and time (DD MMM YYYY HH:MM)
+                    const now = new Date();
                     const updateDate = new Date(component.candlestickLastUpdated);
-                    const dateStr = updateDate.toLocaleDateString('id-ID', {
+
+                    // Function to check if current time is within market operating hours
+                    function isMarketOpen(currentTime) {
+                        const dayOfWeek = currentTime.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday
+                        const hours = currentTime.getHours();
+                        const minutes = currentTime.getMinutes();
+                        const seconds = currentTime.getSeconds();
+                        const currentTimeInSeconds = hours * 3600 + minutes * 60 + seconds;
+
+                        // Market closed on weekends
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            return false;
+                        }
+
+                        // Session I: Monday-Thursday 09:00:00 – 12:00:00, Friday 09:00:00 – 11:30:00
+                        const session1Start = 9 * 3600; // 09:00:00
+                        const session1EndFriday = 11 * 3600 + 30 * 60; // 11:30:00
+                        const session1EndWeekday = 12 * 3600; // 12:00:00
+
+                        // Session II: Monday-Thursday 13:30:00 – 15:49:59, Friday 14:00:00 – 15:49:59
+                        const session2StartWeekday = 13 * 3600 + 30 * 60; // 13:30:00
+                        const session2StartFriday = 14 * 3600; // 14:00:00
+                        const session2End = 15 * 3600 + 49 * 60 + 59; // 15:49:59
+
+                        if (dayOfWeek === 5) { // Friday
+                            // Check Session I: 09:00:00 – 11:30:00
+                            if (currentTimeInSeconds >= session1Start && currentTimeInSeconds <= session1EndFriday) {
+                                return true;
+                            }
+                            // Check Session II: 14:00:00 – 15:49:59
+                            if (currentTimeInSeconds >= session2StartFriday && currentTimeInSeconds <= session2End) {
+                                return true;
+                            }
+                        } else { // Monday-Thursday
+                            // Check Session I: 09:00:00 – 12:00:00
+                            if (currentTimeInSeconds >= session1Start && currentTimeInSeconds <= session1EndWeekday) {
+                                return true;
+                            }
+                            // Check Session II: 13:30:00 – 15:49:59
+                            if (currentTimeInSeconds >= session2StartWeekday && currentTimeInSeconds <= session2End) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }
+
+                    // Function to get last market closing time
+                    function getLastMarketClose(currentTime) {
+                        const dayOfWeek = currentTime.getDay();
+                        const hours = currentTime.getHours();
+                        const minutes = currentTime.getMinutes();
+                        const seconds = currentTime.getSeconds();
+                        const currentTimeInSeconds = hours * 3600 + minutes * 60 + seconds;
+                        const year = currentTime.getFullYear();
+                        const month = currentTime.getMonth();
+                        const day = currentTime.getDate();
+
+                        // Market closed on weekends - show previous Friday's closing
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            const friday = new Date(currentTime);
+                            friday.setDate(day - ((dayOfWeek === 0) ? 2 : 1)); // Sunday = -2, Saturday = -1
+                            return new Date(friday.getFullYear(), friday.getMonth(), friday.getDate(), 15, 49, 59);
+                        }
+
+                        // Session times in seconds
+                        const session1Start = 9 * 3600; // 09:00:00
+                        const session1EndWeekday = 12 * 3600; // 12:00:00
+                        const session1EndFriday = 11 * 3600 + 30 * 60; // 11:30:00
+                        const session2StartWeekday = 13 * 3600 + 30 * 60; // 13:30:00
+                        const session2StartFriday = 14 * 3600; // 14:00:00
+                        const session2End = 15 * 3600 + 49 * 60 + 59; // 15:49:59
+
+                        if (dayOfWeek === 5) { // Friday
+                            if (currentTimeInSeconds <= session1EndFriday) {
+                                // Before or during Session I - show yesterday's (Thursday) closing
+                                const thursday = new Date(currentTime);
+                                thursday.setDate(day - 1);
+                                return new Date(thursday.getFullYear(), thursday.getMonth(), thursday.getDate(), 15, 49, 59);
+                            } else if (currentTimeInSeconds <= session2StartFriday) {
+                                // Break period after Session I - show Session I closing (11:30:00)
+                                return new Date(year, month, day, 11, 30, 0);
+                            } else if (currentTimeInSeconds <= session2End) {
+                                // During Session II - show Session I closing during break, but this is handled by isMarketOpen check
+                                return new Date(year, month, day, 11, 30, 0);
+                            } else {
+                                // After market close - show Session II closing
+                                return new Date(year, month, day, 15, 49, 59);
+                            }
+                        } else { // Monday-Thursday
+                            if (currentTimeInSeconds <= session1EndWeekday) {
+                                // Before or during Session I - show yesterday's closing
+                                const yesterday = new Date(currentTime);
+                                yesterday.setDate(day - 1);
+                                return new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 15, 49, 59);
+                            } else if (currentTimeInSeconds <= session2StartWeekday) {
+                                // Break period after Session I - show Session I closing (12:00:00)
+                                return new Date(year, month, day, 12, 0, 0);
+                            } else if (currentTimeInSeconds <= session2End) {
+                                // During Session II - show Session I closing during break, but this is handled by isMarketOpen check
+                                return new Date(year, month, day, 12, 0, 0);
+                            } else {
+                                // After market close - show Session II closing
+                                return new Date(year, month, day, 15, 49, 59);
+                            }
+                        }
+                    }
+
+                    // Determine which time to display
+                    let displayDate;
+                    if (isMarketOpen(now)) {
+                        // Market is open, show actual last update time
+                        displayDate = updateDate;
+                    } else {
+                        // Market is closed, show last market closing time
+                        displayDate = getLastMarketClose(now);
+                    }
+
+                    const dateStr = displayDate.toLocaleDateString('id-ID', {
                         day: '2-digit',
                         month: 'short',
                         year: 'numeric'
                     });
-                    const timeStr = updateDate.toLocaleTimeString('id-ID', {
+                    const timeStr = displayDate.toLocaleTimeString('id-ID', {
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: false
