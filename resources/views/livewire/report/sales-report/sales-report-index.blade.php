@@ -297,16 +297,24 @@
                                 Rp {{ number_format($vehicle->selling_price, 0) }}
                             </div>
                         </div>
+                        @if($vehicle->commissions->where('type', 1)->count() > 0)
+                        <div class="flex justify-between">
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Komisi Penjualan ({{ $vehicle->commissions->where('type', 1)->count() }}x)</h4>
+                            <div class="text-sm text-gray-900 dark:text-white">
+                                Rp {{ number_format($vehicle->commissions->where('type', 1)->sum('amount'), 0) }}
+                            </div>
+                        </div>
+                        @endif
                         <div class="flex justify-between">
                             <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Keuntungan</h4>
                             <div class="text-sm text-gray-900 dark:text-white">
-                                Rp {{ number_format($vehicle->selling_price - $vehicle->purchase_price - $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') - $vehicle->costs->sum('total_price'), 0) }}
+                                Rp {{ number_format($vehicle->selling_price - $vehicle->commissions->where('type', 1)->sum('amount') - $vehicle->purchase_price - $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') - $vehicle->costs->sum('total_price'), 0) }}
                             </div>
                         </div>
                         <div class="flex justify-between">
                             <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Margin Keuntungan</h4>
                             <div class="text-sm text-gray-900 dark:text-white">
-                                {{ number_format(($vehicle->selling_price - $vehicle->purchase_price - $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') - $vehicle->costs->sum('total_price')) / $vehicle->selling_price * 100, 1, ',', '.') }}%
+                                {{ number_format(($vehicle->selling_price - $vehicle->commissions->where('type', 1)->sum('amount') - $vehicle->purchase_price - $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') - $vehicle->costs->sum('total_price')) / $vehicle->selling_price * 100, 1, ',', '.') }}%
                             </div>
                         </div>
                     </div>

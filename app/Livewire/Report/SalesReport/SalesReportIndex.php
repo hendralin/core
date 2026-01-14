@@ -98,7 +98,11 @@ class SalesReportIndex extends Component
             return $purchasePrice + $totalCosts + $purchaseCommissions;
         });
 
-        $totalProfit = $totalSales - $totalCost;
+        $totalSellingCommissions = $soldVehicles->sum(function ($vehicle) {
+            return $vehicle->commissions->where('type', 1)->sum('amount');
+        });
+
+        $totalProfit = $totalSales - $totalSellingCommissions - $totalCost;
 
         // Calculate average profit margin
         $averageProfitMargin = $totalSales > 0 ? ($totalProfit / $totalSales) * 100 : 0;
@@ -166,7 +170,11 @@ class SalesReportIndex extends Component
             return $purchasePrice + $totalCosts + $purchaseCommissions;
         });
 
-        $totalProfit = $totalSales - $totalCost;
+        $totalSellingCommissions = $vehicles->sum(function ($vehicle) {
+            return $vehicle->commissions->where('type', 1)->sum('amount');
+        });
+
+        $totalProfit = $totalSales - $totalSellingCommissions - $totalCost;
         $averageProfitMargin = $totalSales > 0 ? ($totalProfit / $totalSales) * 100 : 0;
 
         $stats = [

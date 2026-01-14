@@ -188,6 +188,9 @@ class VehicleShow extends Component
         // Hitung komisi pembelian (type = 2)
         $purchaseCommission = $this->vehicle->commissions->where('type', 2)->sum('amount');
 
+        // Hitung komisi penjualan (type = 1)
+        $sellingCommission = $this->vehicle->commissions->where('type', 1)->sum('amount');
+
         // Total modal = harga beli + total cost (semua status) + komisi pembelian
         $totalModal = $purchasePrice + $this->costSummary['total'] + $purchaseCommission;
 
@@ -208,15 +211,16 @@ class VehicleShow extends Component
             'total_cost_all' => $this->costSummary['total'],
             'total_cost_approved' => $approvedCosts,
             'purchase_commission' => $purchaseCommission,
+            'selling_commission' => $sellingCommission,
             'total_modal_all' => $totalModal,
             'total_modal_approved' => $totalModalApproved,
             'recommended_min_price' => $recommendedMinPrice,
             'is_display_price_correct' => $displayPrice >= $recommendedMinPrice,
             'is_selling_price_correct' => $sellingPrice > 0 ? $sellingPrice >= $recommendedMinPrice : null,
             'display_price_difference' => $displayPrice - $recommendedMinPrice,
-            'selling_price_difference' => $sellingPrice > 0 ? $sellingPrice - $recommendedMinPrice : 0,
+            'selling_price_difference' => $sellingPrice > 0 ? $sellingPrice - $sellingCommission - $recommendedMinPrice : 0,
             'display_profit_margin' => $displayPrice > 0 ? (($displayPrice - $recommendedMinPrice) / $displayPrice) * 100 : 0,
-            'selling_profit_margin' => $sellingPrice > 0 ? (($sellingPrice - $recommendedMinPrice) / $sellingPrice) * 100 : 0,
+            'selling_profit_margin' => $sellingPrice > 0 ? (($sellingPrice - $sellingCommission - $recommendedMinPrice) / $sellingPrice) * 100 : 0,
             'price_vs_selling_gap' => $sellingPrice > 0 ? $displayPrice - $sellingPrice : 0,
         ];
 

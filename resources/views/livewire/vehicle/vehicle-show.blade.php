@@ -2014,10 +2014,10 @@
                                     <flux:text class="text-sm">Total Cost (All):</flux:text>
                                     <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['total_cost_all'], 0, ',', '.') }}</flux:text>
                                 </div>
-                                <div class="flex justify-between">
+                                {{-- <div class="flex justify-between">
                                     <flux:text class="text-sm">Total Cost (Approved):</flux:text>
                                     <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['total_cost_approved'], 0, ',', '.') }}</flux:text>
-                                </div>
+                                </div> --}}
                                 @if($priceAnalysis['purchase_commission'] > 0)
                                 <div class="flex justify-between">
                                     <flux:text class="text-sm">Komisi Pembelian:</flux:text>
@@ -2069,6 +2069,10 @@
                                 <div class="flex justify-between">
                                     <flux:text class="text-sm">Harga Jual Aktual:</flux:text>
                                     <flux:text class="text-sm font-medium text-purple-600 dark:text-purple-400">Rp {{ number_format($priceAnalysis['selling_price'], 0, ',', '.') }}</flux:text>
+                                </div>
+                                <div class="flex justify-between">
+                                    <flux:text class="text-sm">Komisi Penjualan:</flux:text>
+                                    <flux:text class="text-sm font-medium text-blue-600 dark:text-blue-400">Rp {{ number_format($priceAnalysis['selling_commission'], 0, ',', '.') }}</flux:text>
                                 </div>
                                 <div class="flex justify-between">
                                     <flux:text class="text-sm">Selisih vs Modal:</flux:text>
@@ -2180,13 +2184,13 @@
                                         @else
                                             <flux:badge size="sm" color="orange">Other Cost</flux:badge>
                                         @endif
-                                        @if($cost->status === 'approved')
+                                        {{-- @if($cost->status === 'approved')
                                             <flux:badge size="sm" color="green">Approved</flux:badge>
                                         @elseif($cost->status === 'rejected')
                                             <flux:badge size="sm" color="red">Rejected</flux:badge>
                                         @else
                                             <flux:badge size="sm" color="yellow">Pending</flux:badge>
-                                        @endif
+                                        @endif --}}
                                     </div>
 
                                     <div class="mt-1 flex items-center space-x-4 text-sm text-gray-600 dark:text-zinc-400">
