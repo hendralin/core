@@ -3,7 +3,7 @@
         <livewire:dashboard.dashboard-index />
     </x-layouts.app-admin>
 @else
-    <x-layouts.app-user :title="__('Dashboard')">
+    <x-layouts.app-admin :title="__('Dashboard')">
         <livewire:dashboard.dashboard-index />
-    </x-layouts.app-user>
+    </x-layouts.app-admin>
 @endif
