@@ -9,12 +9,14 @@ use Maatwebsite\Excel\Concerns\FromView;
 class VehicleExport implements FromView
 {
     protected $search;
+    protected $statusFilter;
     protected $sortField;
     protected $sortDirection;
 
-    public function __construct($search = '', $sortField = 'police_number', $sortDirection = 'asc')
+    public function __construct($search = '', $statusFilter = '', $sortField = 'police_number', $sortDirection = 'asc')
     {
         $this->search = $search;
+        $this->statusFilter = $statusFilter;
         $this->sortField = $sortField;
         $this->sortDirection = $sortDirection;
     }
@@ -36,6 +38,10 @@ class VehicleExport implements FromView
                         ->orWhereHas('vehicle_model', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
                         ->orWhereHas('warehouse', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
                 })
+            )
+            ->when(
+                $this->statusFilter !== '',
+                fn($q) => $q->where('status', $this->statusFilter)
             )
             ->orderBy($this->sortField, $this->sortDirection)
             ->get();

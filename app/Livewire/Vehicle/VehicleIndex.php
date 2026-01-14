@@ -20,13 +20,14 @@ class VehicleIndex extends Component
 
     public $vehicleIdToDelete = null;
     public $search = '';
+    public $statusFilter = '';
     public $sortField = 'police_number';
     public $sortDirection = 'asc';
     public $perPage = 10;
 
     public function updating($field)
     {
-        if (in_array($field, ['search', 'perPage'])) {
+        if (in_array($field, ['search', 'perPage', 'statusFilter'])) {
             $this->resetPage();
         }
     }
@@ -125,6 +126,10 @@ class VehicleIndex extends Component
                         ->orWhereHas('warehouse', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
                 })
             )
+            ->when(
+                $this->statusFilter !== '',
+                fn($q) => $q->where('status', $this->statusFilter)
+            )
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
@@ -134,7 +139,7 @@ class VehicleIndex extends Component
     public function exportExcel()
     {
         return Excel::download(
-            new VehicleExport($this->search, $this->sortField, $this->sortDirection),
+            new VehicleExport($this->search, $this->statusFilter, $this->sortField, $this->sortDirection),
             'vehicles_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
@@ -156,6 +161,10 @@ class VehicleIndex extends Component
                         ->orWhereHas('vehicle_model', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
                         ->orWhereHas('warehouse', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
                 })
+            )
+            ->when(
+                $this->statusFilter !== '',
+                fn($q) => $q->where('status', $this->statusFilter)
             )
             ->orderBy($this->sortField, $this->sortDirection)
             ->get();

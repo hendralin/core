@@ -45,7 +45,7 @@
     </div>
 
     <!-- Filter Section -->
-    <div class="grid grid-cols-1 md:grid-cols-4 mb-3 mt-4">
+    <div class="grid grid-cols-1 md:grid-cols-5 mb-3 mt-4">
         <div class="flex items-center gap-2 w-44 mb-2 md:mb-0">
             <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">Show:</label>
             <flux:select id="per-page" wire:model.live="perPage">
@@ -57,6 +57,14 @@
         </div>
         <flux:spacer class="hidden md:inline" />
         <flux:spacer class="hidden md:inline" />
+        <div class="flex items-center gap-2 mb-2 md:mb-0 mr-0 md:mr-2">
+            <label for="status-filter" class="text-sm text-gray-700 dark:text-zinc-300 whitespace-nowrap">Status:</label>
+            <flux:select id="status-filter" wire:model.live="statusFilter">
+                <flux:select.option value="">All</flux:select.option>
+                <flux:select.option value="1">Available</flux:select.option>
+                <flux:select.option value="0">Sold</flux:select.option>
+            </flux:select>
+        </div>
         <div class="flex items-center gap-2 flex-1">
             <label for="search-input" class="text-sm text-gray-700 dark:text-zinc-300 whitespace-nowrap">Search:</label>
             <flux:input id="search-input" wire:model.live.debounce.500ms="search" placeholder="Vehicles..." clearable class="flex-1" />
