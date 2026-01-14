@@ -13,14 +13,16 @@ class CashReportExport implements FromView
     protected $sortDirection;
     protected $dateFrom;
     protected $dateTo;
+    protected $selectedCostType;
 
-    public function __construct($search = '', $sortField = 'cost_date', $sortDirection = 'desc', $dateFrom = '', $dateTo = '')
+    public function __construct($search = '', $sortField = 'cost_date', $sortDirection = 'desc', $dateFrom = '', $dateTo = '', $selectedCostType = '')
     {
         $this->search = $search;
         $this->sortField = $sortField;
         $this->sortDirection = $sortDirection;
         $this->dateFrom = $dateFrom;
         $this->dateTo = $dateTo;
+        $this->selectedCostType = $selectedCostType;
     }
 
     public function view(): View
@@ -29,6 +31,8 @@ class CashReportExport implements FromView
             ->with(['createdBy', 'vehicle', 'vendor'])
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+            ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
+            ->where('big_cash', '!=', 1) // Exclude big cash payments from Excel export
             ->orderBy('cost_date', 'asc')
             ->get();
 
@@ -36,13 +40,26 @@ class CashReportExport implements FromView
         $openingBalanceExcel = Cost::query()
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
             ->get()->sum(function ($item) {
-                return $item->cost_type === 'cash' ? $item->total_price : -$item->total_price;
+                if ($item->cost_type === 'cash') {
+                    return $item->total_price;
+                } elseif ($item->big_cash == 1) {
+                    return 0; // Big cash payments don't affect balance
+                } else {
+                    return -$item->total_price;
+                }
             }) ?? 0;
 
         // Calculate running balance for export (using all data)
         $runningBalance = $openingBalanceExcel;
         $costsWithBalance = $costs->map(function ($cost) use (&$runningBalance) {
-            $runningBalance += $cost->cost_type === 'cash' ? $cost->total_price : -$cost->total_price;
+            if ($cost->cost_type === 'cash') {
+                $runningBalance += $cost->total_price;
+            } elseif ($cost->big_cash == 1) {
+                // Big cash payments don't affect running balance
+                $runningBalance += 0;
+            } else {
+                $runningBalance -= $cost->total_price;
+            }
             $cost->running_balance = $runningBalance;
             return $cost;
         });

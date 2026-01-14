@@ -23,11 +23,14 @@ class CostCreate extends Component
     public $description;
     public $total_price;
     public $document;
+    public $big_cash;
 
     public function mount()
     {
         // Set default cost date to today
         $this->cost_date = now()->format('Y-m-d');
+        // Set default big_cash to false
+        $this->big_cash = false;
     }
 
     public function submit()
@@ -39,6 +42,7 @@ class CostCreate extends Component
             'description' => 'required|string',
             'total_price' => 'required|string',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
+            'big_cash' => 'nullable|boolean',
         ];
 
         $messages = [
@@ -82,6 +86,7 @@ class CostCreate extends Component
             'description' => $this->description,
             'total_price' => $totalPrice,
             'document' => $documentPath,
+            'big_cash' => $this->big_cash ?? false,
             'created_by' => Auth::id(),
         ]);
 
@@ -98,6 +103,7 @@ class CostCreate extends Component
                     'description' => $this->description,
                     'total_price' => $totalPrice,
                     'document' => $documentPath,
+                    'big_cash' => $this->big_cash ?? false,
                 ]
             ])
             ->log('created cost record');

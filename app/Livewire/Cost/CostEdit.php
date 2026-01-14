@@ -28,6 +28,7 @@ class CostEdit extends Component
     public $total_price;
     public $document;
     public $existing_document;
+    public $big_cash;
 
     public function mount(Cost $cost)
     {
@@ -45,6 +46,7 @@ class CostEdit extends Component
         $this->description = $cost->description;
         $this->total_price = number_format($cost->total_price, 0);
         $this->existing_document = $cost->document;
+        $this->big_cash = $cost->big_cash;
     }
 
     public function submit()
@@ -56,6 +58,7 @@ class CostEdit extends Component
             'description' => 'required|string',
             'total_price' => 'required|string',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
+            'big_cash' => 'nullable|boolean',
         ];
 
         $messages = [
@@ -106,6 +109,7 @@ class CostEdit extends Component
             'description' => $this->cost->getOriginal('description'),
             'total_price' => $this->cost->getOriginal('total_price'),
             'document' => $this->cost->getOriginal('document'),
+            'big_cash' => $this->cost->getOriginal('big_cash'),
         ];
 
         $this->cost->update([
@@ -116,6 +120,7 @@ class CostEdit extends Component
             'description' => $this->description,
             'total_price' => $totalPrice,
             'document' => $documentPath,
+            'big_cash' => $this->big_cash ?? false,
         ]);
 
         // Log the update activity
@@ -132,6 +137,7 @@ class CostEdit extends Component
                     'description' => $this->description,
                     'total_price' => $totalPrice,
                     'document' => $documentPath,
+                    'big_cash' => $this->big_cash ?? false,
                 ]
             ])
             ->log('updated cost record');

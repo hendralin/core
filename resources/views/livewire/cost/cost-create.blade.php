@@ -128,6 +128,11 @@
                             rows="4"
                         />
                     </div>
+
+                    <div class="mt-6">
+                        <flux:checkbox wire:model="big_cash" label="Pembayaran melalui Kas Besar" :checked="$big_cash" />
+                        <p class="text-xs text-slate-500 dark:text-zinc-400 ml-6">Apakah pembayaran melalui Kas Besar?</p>
+                    </div>
                 </div>
 
                 <!-- Document Upload Section -->

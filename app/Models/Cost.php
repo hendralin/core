@@ -24,6 +24,7 @@ class Cost extends Model
         'description',
         'total_price',
         'document',
+        'big_cash',
         'created_by',
         'status',
     ];
@@ -33,8 +34,14 @@ class Cost extends Model
      *
      * @var array<string, string>
      */
-    protected $dates = [
-        'cost_date',
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'big_cash' => 'boolean',
+        'cost_date' => 'date',
     ];
 
     /**
@@ -51,6 +58,7 @@ class Cost extends Model
                 'description',
                 'total_price',
                 'document',
+                'big_cash',
                 'created_by',
             ])
             ->logOnlyDirty()

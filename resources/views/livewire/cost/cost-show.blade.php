@@ -53,12 +53,23 @@
                         </div>
                         @endif
 
+                        <div>
+                            <flux:heading size="sm">Pembayaran Kas Besar</flux:heading>
+                            <flux:text class="mt-1">
+                                @if($cost->big_cash)
+                                    <flux:badge size="sm" color="green" icon="check">Ya</flux:badge>
+                                @else
+                                    <flux:badge size="sm" color="gray" icon="x-circle">Tidak</flux:badge>
+                                @endif
+                            </flux:text>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-zinc-700">
                             <div>
                                 <flux:heading size="sm">Dibuat Oleh</flux:heading>
                                 <flux:text class="text-sm">{{ $cost->createdBy->name ?? 'N/A' }}</flux:text>
                             </div>
-                            <div>
+                            {{-- <div>
                                 <flux:heading size="sm">Status</flux:heading>
                                 <flux:text class="text-sm">
                                     @if($cost->status === 'approved')
@@ -69,7 +80,7 @@
                                         <flux:badge size="sm" color="yellow" icon="clock">Pending</flux:badge>
                                     @endif
                                 </flux:text>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div>
@@ -147,10 +158,10 @@
             <!-- Statistics Sidebar -->
             <div class="space-y-6">
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
-                    <flux:heading size="lg" class="mb-4">Status & Actions</flux:heading>
+                    <flux:heading size="lg" class="mb-4">Actions</flux:heading>
 
                     <div class="space-y-4">
-                        <div class="text-center">
+                        {{-- <div class="text-center">
                             @if($cost->status === 'approved')
                                 <flux:badge color="green" icon="check">Approved</flux:badge>
                             @elseif($cost->status === 'rejected')
@@ -173,7 +184,7 @@
                                     </flux:button>
                                 @endcan
                             </div>
-                        @endif
+                        @endif --}}
 
                         <div class="border-t border-gray-200 dark:border-zinc-700 pt-4 space-y-2">
                             @can('cost.view')

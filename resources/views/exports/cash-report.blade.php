@@ -29,7 +29,7 @@
                 <td>
                     {{ $cost->description }}
                     @if($cost->vehicle)
-                        - {{ $cost->vehicle->license_plate }}
+                        - {{ $cost->vehicle->police_number }}
                     @endif
                     @if($cost->vendor)
                         - {{ $cost->vendor->name }}

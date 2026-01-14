@@ -98,10 +98,10 @@
                     <td style="max-width: 250px; word-wrap: break-word;">
                         {{ Str::limit($cost->description, 120) }}
                         @if($cost->vehicle)
-                            <br><small style="color: #2563eb;">🚗 {{ $cost->vehicle->license_plate }}</small>
+                            <br><small style="color: #2563eb;">{{ $cost->vehicle->police_number }}</small>
                         @endif
                         @if($cost->vendor)
-                            <br><small style="color: #16a34a;">🏢 {{ $cost->vendor->name }}</small>
+                            <br><small style="color: #16a34a;">{{ $cost->vendor->name }}</small>
                         @endif
                     </td>
                     @if($cost->cost_type === 'cash')

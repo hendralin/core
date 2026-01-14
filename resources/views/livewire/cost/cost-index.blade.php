@@ -15,7 +15,7 @@
 
     <!-- Filter Section -->
     <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <!-- Month/Year Filter -->
             <div>
                 <label for="month-year" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Month & Year</label>
@@ -46,11 +46,11 @@
             </flux:select>
 
             <!-- Status Filter -->
-            <flux:select wire:model.live="statusFilter" label="Status" size="sm" class="w-full">
+            {{-- <flux:select wire:model.live="statusFilter" label="Status" size="sm" class="w-full">
                 @foreach($this->statusOptions as $value => $label)
                     <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
                 @endforeach>
-            </flux:select>
+            </flux:select> --}}
 
             <!-- Clear Filters Button -->
             @if($statusFilter || $vehicleFilter || $vendorFilter || $dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedMonthYear)
@@ -160,7 +160,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-4 py-3">
+                    {{-- <th scope="col" class="px-4 py-3">
                         <div class="flex items-center justify-center cursor-pointer @if ($sortField == 'status') {{ $sortDirection }} @endif" wire:click="sortBy('status')">
                             Status
                             @if ($sortField == 'status' && $sortDirection == 'asc')
@@ -169,7 +169,7 @@
                                 <flux:icon.chevron-down class="ml-2 size-4" />
                             @endif
                         </div>
-                    </th>
+                    </th> --}}
                     <th scope="col" class="px-4 py-3 w-1/12">Actions</th>
                 </tr>
             </thead>
@@ -183,7 +183,7 @@
                             <td class="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white">{{ $cost->vendor->name ?? 'N/A' }}</td>
                             <td class="px-4 py-2 whitespace-nowrap lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs truncate" title="{{ $cost->description }}">{{ $cost->description }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-gray-900 dark:text-white">Rp {{ number_format($cost->total_price, 0) }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-center">
+                            {{-- <td class="px-4 py-2 whitespace-nowrap text-center">
                                 @if($cost->status === 'approved')
                                     <flux:badge size="sm" color="green">Approved</flux:badge>
                                 @elseif($cost->status === 'rejected')
@@ -191,7 +191,7 @@
                                 @else
                                     <flux:badge size="sm" color="yellow">Pending</flux:badge>
                                 @endif
-                            </td>
+                            </td> --}}
                             <td class="px-4 py-2 whitespace-nowrap">
                                 @can('cost.view')
                                     <flux:button variant="ghost" size="xs" square href="{{ route('costs.show', $cost) }}" wire:navigate tooltip="View Details">
@@ -199,14 +199,14 @@
                                     </flux:button>
                                 @endcan
 
-                                @if($cost->status === 'pending')
+                                {{-- @if($cost->status === 'pending') --}}
                                     @can('cost.edit')
                                         <flux:button variant="ghost" size="xs" square href="{{ route('costs.edit', $cost) }}" wire:navigate tooltip="Edit">
                                             <flux:icon.pencil-square variant="mini" class="text-indigo-500 dark:text-indigo-300" />
                                         </flux:button>
                                     @endcan
 
-                                    @can('cost.approve')
+                                    {{-- @can('cost.approve')
                                         <flux:modal.trigger name="approve-cost">
                                             <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setCostToApprove({{ $cost->id }})" tooltip="Approve">
                                                 <flux:icon.check variant="mini" class="text-green-500 dark:text-green-300" />
@@ -220,17 +220,17 @@
                                                 <flux:icon.x-mark variant="mini" class="text-red-500 dark:text-red-300" />
                                             </flux:button>
                                         </flux:modal.trigger>
-                                    @endcan
-                                @endif
+                                    @endcan --}}
+                                {{-- @endif --}}
 
                                 @can('cost.delete')
-                                    @if($cost->status === 'pending')
+                                    {{-- @if($cost->status === 'pending') --}}
                                     <flux:modal.trigger name="delete-cost">
                                         <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setCostToDelete({{ $cost->id }})" tooltip="Delete">
                                             <flux:icon.trash variant="mini" class="text-red-500 dark:text-red-300" />
                                         </flux:button>
                                     </flux:modal.trigger>
-                                    @endif
+                                    {{-- @endif --}}
                                 @endcan
                             </td>
                         </tr>

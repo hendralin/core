@@ -93,7 +93,7 @@
                 <th>Vendor</th>
                 <th>Description</th>
                 <th class="text-right">Total Cost</th>
-                <th class="text-center">Status</th>
+                {{-- <th class="text-center">Status</th> --}}
                 <th>Created By</th>
             </tr>
         </thead>
@@ -111,7 +111,7 @@
                     <td>{{ $cost->vendor?->name ?? '-' }}</td>
                     <td style="max-width: 150px; word-wrap: break-word;">{{ Str::limit($cost->description, 100) }}</td>
                     <td class="text-right no-wrap"><strong>{{ 'Rp ' . number_format($cost->total_price, 0) }}</strong></td>
-                    <td class="text-center">
+                    {{-- <td class="text-center">
                         @if($cost->status === 'approved')
                             <span class="status-approved">Approved</span>
                         @elseif($cost->status === 'rejected')
@@ -119,7 +119,7 @@
                         @else
                             <span class="status-pending">Pending</span>
                         @endif
-                    </td>
+                    </td> --}}
                     <td>{{ $cost->createdBy?->name ?? '-' }}</td>
                 </tr>
             @endforeach
@@ -127,7 +127,7 @@
             <tr class="total-row">
                 <td colspan="5" class="text-right"><strong>TOTAL PEMBUKUAN MODAL:</strong></td>
                 <td class="text-right no-wrap"><strong>{{ 'Rp ' . number_format($costs->sum('total_price'), 0) }}</strong></td>
-                <td colspan="2"></td>
+                <td></td>
             </tr>
         </tbody>
     </table>

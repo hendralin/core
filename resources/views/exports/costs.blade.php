@@ -9,7 +9,7 @@
             <th>Vendor Name</th>
             <th>Description</th>
             <th>Total Cost</th>
-            <th>Status</th>
+            {{-- <th>Status</th> --}}
             <th>Created By</th>
             <th>Created At</th>
         </tr>
@@ -25,7 +25,7 @@
                 <td>{{ $cost->vendor?->name ?? '-' }}</td>
                 <td>{{ $cost->description }}</td>
                 <td>{{ $cost->total_price }}</td>
-                <td>{{ ucfirst($cost->status) }}</td>
+                {{-- <td>{{ ucfirst($cost->status) }}</td> --}}
                 <td>{{ $cost->createdBy?->name ?? '-' }}</td>
                 <td>{{ $cost->created_at ? \Carbon\Carbon::parse($cost->created_at)->format('d/m/Y H:i') : '-' }}</td>
             </tr>
