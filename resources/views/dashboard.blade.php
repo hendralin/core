@@ -1,3 +1,9 @@
-<x-layouts.appx :title="__('Dashboard')">
-    <livewire:dashboard.dashboard-index />
-</x-layouts.appx>
+@if (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('admin'))
+    <x-layouts.app-admin :title="__('Dashboard')">
+        <livewire:dashboard.dashboard-index />
+    </x-layouts.app-admin>
+@else
+    <x-layouts.app-user :title="__('Dashboard')">
+        <livewire:dashboard.dashboard-index />
+    </x-layouts.app-user>
+@endif
