@@ -2382,6 +2382,97 @@
         setupIndicatorToggle();
     }
 
+    // Update chart data without full re-initialization (for polling updates)
+    function updateChartData(chartData) {
+        if (!SC.chart || !chartData) return;
+
+        try {
+            // Update candlestick data
+            if (SC.candlestickSeries && chartData.candlestick && chartData.candlestick.length > 0) {
+                SC.candlestickSeries.setData(chartData.candlestick);
+                SC.candlestickData = chartData.candlestick;
+            }
+
+            // Update volume data
+            if (SC.volumeSeries && chartData.volume && chartData.volume.length > 0) {
+                SC.volumeSeries.setData(chartData.volume);
+                SC.volumeData = chartData.volume;
+            }
+
+            // Update indicators if they exist
+            if (chartData.indicators) {
+                // RSI
+                if (SC.rsiSeries && chartData.indicators.rsi && chartData.indicators.rsi.length > 0) {
+                    SC.rsiSeries.setData(chartData.indicators.rsi);
+                }
+
+                // MACD
+                if (SC.macdSeries && chartData.indicators.macd && chartData.indicators.macd.length > 0) {
+                    const macdData = chartData.indicators.macd.map((item, index) => ({
+                        time: item.time,
+                        value: item.value || item.macd || 0
+                    }));
+                    SC.macdSeries.setData(macdData);
+                }
+
+                if (SC.macdSignalSeries && chartData.indicators.macd && chartData.indicators.macd.length > 0) {
+                    const signalData = chartData.indicators.macd.map((item, index) => ({
+                        time: item.time,
+                        value: item.signal || 0
+                    }));
+                    SC.macdSignalSeries.setData(signalData);
+                }
+
+                if (SC.macdHistogramSeries && chartData.indicators.macd && chartData.indicators.macd.length > 0) {
+                    const histogramData = chartData.indicators.macd.map((item, index) => ({
+                        time: item.time,
+                        value: item.histogram || 0,
+                        color: (item.histogram || 0) >= 0 ? 'rgba(38, 166, 154, 0.7)' : 'rgba(239, 83, 80, 0.7)'
+                    }));
+                    SC.macdHistogramSeries.setData(histogramData);
+                }
+
+                // SMA 20
+                if (SC.indicatorSeries && SC.indicatorSeries.sma20 && chartData.indicators.sma_20 && chartData.indicators.sma_20.length > 0) {
+                    SC.indicatorSeries.sma20.setData(chartData.indicators.sma_20);
+                }
+
+                // SMA 50
+                if (SC.indicatorSeries && SC.indicatorSeries.sma50 && chartData.indicators.sma_50 && chartData.indicators.sma_50.length > 0) {
+                    SC.indicatorSeries.sma50.setData(chartData.indicators.sma_50);
+                }
+
+                // EMA 20
+                if (SC.indicatorSeries && SC.indicatorSeries.ema20 && chartData.indicators.ema_20 && chartData.indicators.ema_20.length > 0) {
+                    SC.indicatorSeries.ema20.setData(chartData.indicators.ema_20);
+                }
+
+                // EMA 50
+                if (SC.indicatorSeries && SC.indicatorSeries.ema50 && chartData.indicators.ema_50 && chartData.indicators.ema_50.length > 0) {
+                    SC.indicatorSeries.ema50.setData(chartData.indicators.ema_50);
+                }
+
+                // Bollinger Bands
+                if (SC.indicatorSeries && SC.indicatorSeries.bollingerUpper && chartData.indicators.bollinger_upper && chartData.indicators.bollinger_upper.length > 0) {
+                    SC.indicatorSeries.bollingerUpper.setData(chartData.indicators.bollinger_upper);
+                }
+
+                if (SC.indicatorSeries && SC.indicatorSeries.bollingerMiddle && chartData.indicators.bollinger_middle && chartData.indicators.bollinger_middle.length > 0) {
+                    SC.indicatorSeries.bollingerMiddle.setData(chartData.indicators.bollinger_middle);
+                }
+
+                if (SC.indicatorSeries && SC.indicatorSeries.bollingerLower && chartData.indicators.bollinger_lower && chartData.indicators.bollinger_lower.length > 0) {
+                    SC.indicatorSeries.bollingerLower.setData(chartData.indicators.bollinger_lower);
+                }
+            }
+
+            // Legend is already set up and doesn't need re-initialization
+
+        } catch (error) {
+            console.warn('Error updating chart data:', error);
+        }
+    }
+
     function setupInfiniteScroll(initialData) {
         if (!SC.chart || !initialData.candlestick || initialData.candlestick.length === 0) return;
 
@@ -2393,16 +2484,21 @@
         SC.isLoadingMore = false;
         SC.noMoreData = false;
         SC.initialLoadComplete = false;
+        SC.preventAutoLoadMore = true; // Prevent automatic load more during initial setup
 
         // Delay enabling infinite scroll to prevent triggering on initial fitContent
         setTimeout(() => {
             SC.initialLoadComplete = true;
+            // Allow automatic load more after setup is complete and user has had time to interact
+            setTimeout(() => {
+                SC.preventAutoLoadMore = false;
+            }, 1000); // Additional delay to prevent auto-trigger after setup
         }, 500);
 
         // Subscribe to visible time range changes
         SC.chart.timeScale().subscribeVisibleLogicalRangeChange((logicalRange) => {
-            // Skip if initial load not complete, loading, or no more data
-            if (!SC.initialLoadComplete || !logicalRange || SC.isLoadingMore || SC.noMoreData) return;
+            // Skip if initial load not complete, loading, no more data, or auto-load is prevented
+            if (!SC.initialLoadComplete || !logicalRange || SC.isLoadingMore || SC.noMoreData || SC.preventAutoLoadMore) return;
 
             // Update technical indicators for any range change (panning)
             const component = getDashboardComponent();
@@ -2410,7 +2506,7 @@
                 component.call('updateIndicatorsForVisibleRange');
             }
 
-            // Check if user panned to the left edge (older data)
+            // Check if user panned to the left edge (older data) - only trigger on actual user interaction
             if (logicalRange.from < 5) {
                 loadMoreHistoricalData();
             }
@@ -2783,10 +2879,23 @@
             const eventData = Array.isArray(data) ? data[0] : data;
 
             if (eventData && eventData.chartData) {
-                SC.retryCount = 0;
-                SC.noMoreData = false;
-                SC.initialLoadComplete = false; // Reset to prevent immediate load on period change
-                initChart(eventData.chartData);
+                // Check if this is a period change (requires full re-initialization)
+                if (eventData.isPeriodChange) {
+                    // Full initialization for period changes
+                    SC.retryCount = 0;
+                    SC.noMoreData = false;
+                    SC.initialLoadComplete = false; // Reset to prevent immediate load on period change
+                    initChart(eventData.chartData);
+                } else if (SC.chart && SC.candlestickSeries) {
+                    // Use efficient data update for polling refreshes
+                    updateChartData(eventData.chartData);
+                } else {
+                    // Full initialization for first load
+                    SC.retryCount = 0;
+                    SC.noMoreData = false;
+                    SC.initialLoadComplete = false; // Reset to prevent immediate load on period change
+                    initChart(eventData.chartData);
+                }
             }
         });
 

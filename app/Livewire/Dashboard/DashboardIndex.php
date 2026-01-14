@@ -221,7 +221,8 @@ class DashboardIndex extends Component
         $this->calculateTechnicalIndicators(); // Recalculate technical indicators for new period
         $this->dispatch('chart-data-updated',
             period: $this->period,
-            chartData: $this->chartData
+            chartData: $this->chartData,
+            isPeriodChange: true
         );
     }
 
