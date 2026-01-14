@@ -88,7 +88,7 @@
         <div class="flex items-center space-x-4">
             <div class="text-center">
                 <flux:text class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($vehicle->kilometer, 0, ',', '.') }}</flux:text>
-                <flux:text class="text-xs text-gray-600 dark:text-gray-400">KM</flux:text>
+                <flux:text class="text-xs text-gray-600 dark:text-zinc-400">KM</flux:text>
             </div>
             <div class="text-center">
                 <flux:text class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -98,7 +98,7 @@
                         -
                     @endif
                 </flux:text>
-                <flux:text class="text-xs text-gray-600 dark:text-gray-400">Sell</flux:text>
+                <flux:text class="text-xs text-gray-600 dark:text-zinc-400">Sell</flux:text>
             </div>
             <div class="text-center">
                 <flux:text class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -113,7 +113,7 @@
                         -
                     @endif
                 </flux:text>
-                <flux:text class="text-xs text-gray-600 dark:text-gray-400">Years Old</flux:text>
+                <flux:text class="text-xs text-gray-600 dark:text-zinc-400">Years Old</flux:text>
             </div>
         </div>
     </div>
@@ -497,7 +497,7 @@
                                                     @endforeach
                                                 </div>
                                             @else
-                                                <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                                <flux:text class="text-sm text-gray-500 dark:text-zinc-400">-</flux:text>
                                             @endif
                                         </td>
                                         @if(auth()->user()->can('vehicle-purchase-payment.edit') || auth()->user()->can('vehicle-purchase-payment.delete'))
@@ -690,7 +690,7 @@
                                                     @endforeach
                                                 </div>
                                             @else
-                                                <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                                <flux:text class="text-sm text-gray-500 dark:text-zinc-400">-</flux:text>
                                             @endif
                                         </td>
                                         @if(auth()->user()->can('vehicle-payment-receipt.edit') || auth()->user()->can('vehicle-payment-receipt.delete') || auth()->user()->can('vehicle-payment-receipt.print'))
@@ -801,7 +801,7 @@
                                                     @endforeach
                                                 </div>
                                             @else
-                                                <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                                <flux:text class="text-sm text-gray-500 dark:text-zinc-400">-</flux:text>
                                             @endif
                                         </td>
                                         @if(auth()->user()->can('vehicle-registration-certificate-receipt.edit') || auth()->user()->can('vehicle-registration-certificate-receipt.delete') || auth()->user()->can('vehicle-registration-certificate-receipt.print'))
@@ -934,7 +934,7 @@
                                                         @endforeach
                                                     </div>
                                                 @else
-                                                    <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                                    <flux:text class="text-sm text-gray-500 dark:text-zinc-400">-</flux:text>
                                                 @endif
                                             </td>
                                             @if(auth()->user()->can('vehicle-handover.edit') || auth()->user()->can('vehicle-handover.delete') || auth()->user()->can('vehicle-handover.print'))
@@ -1429,7 +1429,7 @@
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <flux:heading size="lg">Foto Kendaraan</flux:heading>
-                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                    <span class="text-sm text-gray-600 dark:text-zinc-400">
                         {{ $vehicle->images->count() }} foto
                     </span>
                 </div>
@@ -1519,7 +1519,7 @@
                                                 @endforeach
                                             </div>
                                         @else
-                                            <flux:text class="text-sm text-gray-500 dark:text-gray-400">-</flux:text>
+                                            <flux:text class="text-sm text-gray-500 dark:text-zinc-400">-</flux:text>
                                         @endif
                                     </td>
                                     <td class="px-4 py-1 text-center">
@@ -1914,7 +1914,7 @@
                     </div>
                 @else
                     <div class="text-center py-6">
-                        <flux:icon.document-text class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-600" />
+                        <flux:icon.document-text class="mx-auto h-8 w-8 text-gray-400 dark:text-zinc-600" />
                         <flux:text class="mt-2 text-sm text-gray-600 dark:text-zinc-400">
                             No recent activities recorded for this vehicle.
                         </flux:text>
@@ -2217,7 +2217,7 @@
                 </div>
             @else
                 <div class="text-center py-12">
-                    <flux:icon.document-text class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" />
+                    <flux:icon.document-text class="mx-auto h-12 w-12 text-gray-400 dark:text-zinc-600" />
                     <flux:heading size="md" class="mt-4 text-gray-900 dark:text-white">Belum ada data biaya</flux:heading>
                     <flux:text class="mt-2 text-gray-600 dark:text-zinc-400">
                         Belum ada catatan biaya untuk kendaraan ini.
@@ -3064,8 +3064,9 @@
                     <flux:modal.close>
                         <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
                     </flux:modal.close>
-                    <flux:button type="submit" variant="primary" class="cursor-pointer">
-                        Perbarui Penerimaan
+                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled" class="cursor-pointer">
+                        <span wire:loading.remove>Perbarui Penerimaan</span>
+                        <span wire:loading>Menyimpan...</span>
                     </flux:button>
                 </div>
             </form>
@@ -3357,7 +3358,7 @@
                         multiple
                         accept=".pdf,.jpg,.jpeg,.png"
                     />
-                    <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
                         Format: PDF, JPG, JPEG, PNG. Maksimal 5 file, ukuran maksimal 2MB per file.
                     </flux:text>
                     <flux:error name="handover_file" />
@@ -3405,7 +3406,7 @@
                         multiple
                         accept=".pdf,.jpg,.jpeg,.png"
                     />
-                    <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
                         Format: PDF, JPG, JPEG, PNG. Maksimal 5 file, ukuran maksimal 2MB per file.
                     </flux:text>
                     <flux:error name="certificate_receipt_file" />
@@ -3471,7 +3472,7 @@
                             accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                             multiple
                         />
-                        <flux:text class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
                             Format: PDF, JPG, JPEG, PNG, DOC, DOCX. Maksimal 5 file, ukuran maksimal 5MB per file.
                         </flux:text>
                         <flux:error name="vehicle_file" />
