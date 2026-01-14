@@ -199,7 +199,7 @@ class VehicleEdit extends Component
         'status' => 'required|in:0,1',
         'description' => 'nullable|string',
         'tempImages.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB per image
-        'tempImages' => 'nullable|array|max:10', // Max 10 images
+        'tempImages' => 'nullable|array|max:20', // Max 20 images
     ];
 
     protected $messages = [
@@ -256,7 +256,7 @@ class VehicleEdit extends Component
         'tempImages.*.mimes' => 'Image format must be JPEG, JPG, PNG, GIF, or WebP.',
         'tempImages.*.max' => 'Image size must not exceed 5MB.',
         'tempImages.array' => 'Invalid image upload format.',
-        'tempImages.max' => 'Maximum 10 images can be uploaded.',
+        'tempImages.max' => 'Maximum 20 images can be uploaded.',
     ];
 
     public function mount(Vehicle $vehicle)
@@ -388,7 +388,7 @@ class VehicleEdit extends Component
 
             // Add new images to existing array
             foreach ($this->tempImages as $image) {
-                if (count($this->images) < 10) { // Only add if under limit
+                if (count($this->images) < 20) { // Only add if under limit
                     $this->images[] = $image;
                 }
             }

@@ -311,7 +311,7 @@
                                 Tambah File
                             </flux:button>
                             <p class="text-xs text-gray-500 dark:text-zinc-500 mt-2">
-                                Format: JPG, PNG, GIF, WebP • Maksimal 5MB per gambar • Total maksimal 10 gambar
+                                Format: JPG, PNG, GIF, WebP • Maksimal 5MB per gambar • Total maksimal 20 gambar
                             </p>
                         </div>
                         <flux:error name="tempImages.*" />
