@@ -298,7 +298,7 @@
                                             {{-- Logo image --}}
                                             @if($company->logo_url)
                                                 <img
-                                                    src="//s3.goapi.io/logo/{{ $company->kode_emiten }}.jpg"
+                                                    src="{{ $company->logo_url }}"
                                                     alt="{{ $company->kode_emiten }}"
                                                     class="absolute inset-0 w-12 h-12 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                                     x-show="imageLoaded && !imageError"
@@ -1162,7 +1162,7 @@
                         {{-- Logo image --}}
                         @if($company->logo_url)
                             <img
-                                src="//s3.goapi.io/logo/{{ $company->kode_emiten }}.jpg"
+                                src="{{ $company->logo_url }}"
                                 alt="{{ $company->kode_emiten }}"
                                 class="absolute inset-0 w-16 h-16 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                 x-show="imageLoaded && !imageError"
@@ -1696,7 +1696,7 @@
                                         {{-- Logo image --}}
                                         @if($stock->logo_url)
                                             <img
-                                                src="//s3.goapi.io/logo/{{ $stock->kode_emiten }}.jpg"
+                                                src="{{ $stock->logo_url }}"
                                                 alt="{{ $stock->kode_emiten }}"
                                                 class="absolute inset-0 w-10 h-10 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                                 x-show="imageLoaded && !imageError"

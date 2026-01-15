@@ -149,7 +149,7 @@
                                 <td class="px-4 py-2 whitespace-nowrap text-sm font-semibold">
                                     <div class="flex items-center gap-2">
                                         <img
-                                            src="//s3.goapi.io/logo/{{ $stock->kode_emiten }}.jpg"
+                                            src="{{ $stock->stockCompany->logo_url }}"
                                             alt="{{ $stock->kode_emiten }}"
                                             class="w-4 h-4 rounded-full object-contain bg-white dark:bg-zinc-800 p-0.5"
                                         />
