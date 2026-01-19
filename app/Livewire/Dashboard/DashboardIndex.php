@@ -723,6 +723,23 @@ class DashboardIndex extends Component
         }
     }
 
+    public function getIsStockPriceLiveProperty(): bool
+    {
+        // Check if stock price data is actually live (API data with new date not in database)
+        if (!$this->stockPriceSnapshot || !$this->isStockPriceFromApi) {
+            return false;
+        }
+
+        // Check if the API date already exists in database
+        $apiDate = $this->stockPriceSnapshot['date'];
+        $existingRecord = TradingInfo::where('kode_emiten', $this->stockCode)
+            ->where('date', $apiDate)
+            ->exists();
+
+        // If date already exists in database, API data is not live/updated
+        return !$existingRecord;
+    }
+
     public function getIsMarketBreakProperty(): bool
     {
         // Check if market is currently in break time (between sessions)

@@ -15,6 +15,7 @@ class RoleService
         'System' => ['company', 'backup-restore'],
         'Users & Roles' => ['user', 'role'],
         'Trading Summary' => ['stock-summary'],
+        'Featuring' => ['admin.signal'],
     ];
     /**
      * Check if a role can be deleted

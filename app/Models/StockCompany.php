@@ -128,7 +128,7 @@ class StockCompany extends Model
             return null;
         }
 
-        return 'https://www.idx.co.id' . $this->logo;
+        return 'https://s3.goapi.io/logo/' . $this->kode_emiten . '.jpg';
     }
 
     /**

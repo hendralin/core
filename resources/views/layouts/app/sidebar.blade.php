@@ -66,6 +66,18 @@
                     </flux:sidebar.group>
                 @endif
 
+                @if (auth()->user()->can('admin.signal.view'))
+                    <flux:sidebar.group expandable icon="sparkles" heading="Featuring" class="grid">
+                        @if (auth()->user()->can('admin.signal.view') ||
+                        auth()->user()->can('admin.signal.create') ||
+                        auth()->user()->can('admin.signal.edit') ||
+                        auth()->user()->can('admin.signal.publish') ||
+                        auth()->user()->can('admin.signal.unpublish'))
+                            <flux:sidebar.item icon="signal" :href="route('admin.signals.index')" :current="request()->routeIs('admin.signals.*')" wire:navigate>{{ __('Signals') }}</flux:sidebar.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endif
+
                 <flux:sidebar.group expandable icon="wrench-screwdriver" heading="Tool" class="grid">
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
                         <flux:sidebar.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup and Restore') }}</flux:sidebar.item>
@@ -177,6 +189,18 @@
                     <flux:navlist.group :heading="__('Trading Summary')" class="grid">
                         @if (auth()->user()->can('stock-summary.view'))
                             <flux:navlist.item icon="chart-bar" :href="route('stock-summary.index')" :current="request()->routeIs('stock-summary.index')" wire:navigate>{{ __('Stock Summary') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
+
+                @if (auth()->user()->can('admin.signal.view'))
+                    <flux:navlist.group :heading="__('Featuring')" class="grid">
+                        @if (auth()->user()->can('admin.signal.view') ||
+                        auth()->user()->can('admin.signal.create') ||
+                        auth()->user()->can('admin.signal.edit') ||
+                        auth()->user()->can('admin.signal.publish') ||
+                        auth()->user()->can('admin.signal.unpublish'))
+                            <flux:navlist.item icon="signal" :href="route('admin.signals.index')" :current="request()->routeIs('admin.signals.*')" wire:navigate>{{ __('Signals') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

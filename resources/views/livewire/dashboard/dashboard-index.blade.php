@@ -808,8 +808,12 @@
 
                     <div class="px-4 py-2 border-gray-200 dark:border-zinc-700">
                         <span class="text-gray-900 dark:text-white font-medium text-sm">Stock Price Snapshot</span>
-                        @if($this->isStockPriceCardVisible && $stockPriceSnapshot)
-                            <flux:badge color="green" icon="signal" class="ml-2 text-xs align-middle animate-pulse">Live</flux:badge>
+                        @if($this->isStockPriceCardVisible)
+                            @if($this->isStockPriceLive)
+                                <flux:badge color="green" icon="signal" class="ml-2 text-xs align-middle animate-pulse">Live</flux:badge>
+                            @else
+                                <flux:badge color="red" icon="signal" class="ml-2 text-xs align-middle animate-pulse">Offline</flux:badge>
+                            @endif
                         @else
                             @if($this->isMarketBreak)
                                 <flux:badge color="yellow" icon="clock" size="sm" class="text-xs">Break Time</flux:badge>
@@ -818,6 +822,7 @@
                             @endif
                         @endif
                     </div>
+                    @if($stockPriceSnapshot)
                     <div class="p-4 space-y-3">
                         <!-- Price Info -->
                         <div class="space-y-2">
@@ -877,7 +882,7 @@
                         <div class="text-center pt-2 border-t border-gray-100 dark:border-zinc-800">
                             <div class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase">Last Updated</div>
                             <div class="text-xs text-gray-600 dark:text-zinc-400">
-                                @if($stockPriceLastUpdated)
+                                @if($stockPriceLastUpdated && $this->isStockPriceLive)
                                     {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $stockPriceLastUpdated)->format('d M Y, H:i:s') }}
                                 @else
                                     {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $this->lastTradingSessionTime)->format('d M Y, H:i:s') }}
@@ -885,6 +890,11 @@
                             </div>
                         </div>
                     </div>
+                    @else
+                    <div class="p-4 text-center">
+                        <div class="text-gray-500 dark:text-zinc-400 text-sm">No stock price data available</div>
+                    </div>
+                    @endif
                 </div>
                 @endif
 

@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockSignal extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'signal_type',
         'kode_emiten',
@@ -54,6 +58,40 @@ class StockSignal extends Model
         'after_date' => 'date',
         'published_at' => 'datetime',
     ];
+
+    /**
+     * Get the activity log options
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'kode_emiten',
+                'signal_type',
+                'market_cap',
+                'pbv',
+                'per',
+                'before_date',
+                'before_value',
+                'before_close',
+                'before_volume',
+                'hit_date',
+                'hit_value',
+                'hit_close',
+                'hit_volume',
+                'after_date',
+                'after_value',
+                'after_close',
+                'after_volume',
+                'status',
+                'published_at',
+                'notes',
+                'recommendation',
+                'user_id',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
     /**
      * Get the user that created this signal
@@ -167,6 +205,116 @@ class StockSignal extends Model
             return number_format($this->market_cap / 1000000000, 2) . 'B';
         } else {
             return number_format($this->market_cap);
+        }
+    }
+
+    /**
+     * Get formatted before value
+     */
+    public function getFormattedBeforeValueAttribute(): string
+    {
+        if (!$this->before_value) return '-';
+
+        if ($this->before_value >= 1000000000000) { // Triliun
+            return number_format($this->before_value / 1000000000000, 2) . 'T';
+        } elseif ($this->before_value >= 1000000000) { // Miliar
+            return number_format($this->before_value / 1000000000, 2) . 'B';
+        } elseif ($this->before_value >= 1000000) { // Juta
+            return number_format($this->before_value / 1000000, 2) . 'M';
+        } elseif ($this->before_value >= 1000) { // Ribu
+            return number_format($this->before_value / 1000, 2) . 'K';
+        } else {
+            return number_format($this->before_value);
+        }
+    }
+
+    /**
+     * Get formatted before volume
+     */
+    public function getFormattedBeforeVolumeAttribute(): string
+    {
+        if (!$this->before_volume) return '-';
+
+        if ($this->before_volume >= 1000000000000) { // Triliun
+            return number_format($this->before_volume / 1000000000000, 2) . 'T';
+        } elseif ($this->before_volume >= 1000000000) { // Miliar
+            return number_format($this->before_volume / 1000000000, 2) . 'B';
+        } elseif ($this->before_volume >= 1000000) { // Juta
+            return number_format($this->before_volume / 1000000, 2) . 'M';
+        } else {
+            return number_format($this->before_volume);
+        }
+    }
+
+    /**
+     * Get formatted hit value
+     */
+    public function getFormattedHitValueAttribute(): string
+    {
+        if (!$this->hit_value) return '-';
+
+        if ($this->hit_value >= 1000000000000) { // Triliun
+            return number_format($this->hit_value / 1000000000000, 2) . 'T';
+        } elseif ($this->hit_value >= 1000000000) { // Miliar
+            return number_format($this->hit_value / 1000000000, 2) . 'B';
+        } elseif ($this->hit_value >= 1000000) { // Juta
+            return number_format($this->hit_value / 1000000, 2) . 'M';
+        } else {
+            return number_format($this->hit_value);
+        }
+    }
+
+    /**
+     * Get formatted hit volume
+     */
+    public function getFormattedHitVolumeAttribute(): string
+    {
+        if (!$this->hit_volume) return '-';
+
+        if ($this->hit_volume >= 1000000000000) { // Triliun
+            return number_format($this->hit_volume / 1000000000000, 2) . 'T';
+        } elseif ($this->hit_volume >= 1000000000) { // Miliar
+            return number_format($this->hit_volume / 1000000000, 2) . 'B';
+        } elseif ($this->hit_volume >= 1000000) { // Juta
+            return number_format($this->hit_volume / 1000000, 2) . 'M';
+        } else {
+            return number_format($this->hit_volume);
+        }
+    }
+
+    /**
+     * Get formatted after value
+     */
+    public function getFormattedAfterValueAttribute(): string
+    {
+        if (!$this->after_value) return '-';
+
+        if ($this->after_value >= 1000000000000) { // Triliun
+            return number_format($this->after_value / 1000000000000, 2) . 'T';
+        } elseif ($this->after_value >= 1000000000) { // Miliar
+            return number_format($this->after_value / 1000000000, 2) . 'B';
+        } elseif ($this->after_value >= 1000000) { // Juta
+            return number_format($this->after_value / 1000000, 2) . 'M';
+        } else {
+            return number_format($this->after_value);
+        }
+    }
+
+    /**
+     * Get formatted after volume
+     */
+    public function getFormattedAfterVolumeAttribute(): string
+    {
+        if (!$this->after_volume) return '-';
+
+        if ($this->before_volume >= 1000000000000) { // Triliun
+            return number_format($this->after_volume / 1000000000000, 2) . 'T';
+        } elseif ($this->after_volume >= 1000000000) { // Miliar
+            return number_format($this->after_volume / 1000000000, 2) . 'B';
+        } elseif ($this->after_volume >= 1000000) { // Juta
+            return number_format($this->after_volume / 1000000, 2) . 'M';
+        } else {
+            return number_format($this->after_volume);
         }
     }
 

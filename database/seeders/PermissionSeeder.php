@@ -35,6 +35,14 @@ class PermissionSeeder extends Seeder
 
             // Trading Summary
             'stock-summary.view',
+
+            // Featuring
+            'admin.signal.view',
+            'admin.signal.create',
+            'admin.signal.edit',
+            'admin.signal.publish',
+            'admin.signal.unpublish',
+            'admin.signal.audit',
         ];
 
         foreach ($permissions as $key => $value) {
