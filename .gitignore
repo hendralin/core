@@ -25,5 +25,6 @@ yarn-error.log
 /public/photos
 /public/logos
 /public/avatars
+/storage/app/trading-data
 
 /data

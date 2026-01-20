@@ -26,3 +26,9 @@ Schedule::command('license:check-expiration')
 //     ->weeklyOn(1, '09:00') // Every Monday at 9 AM
 //     ->withoutOverlapping()
 //     ->runInBackground();
+
+// Schedule IDX stock data scraping
+Schedule::command('stock:scrape-idx')
+    ->dailyAt('17:35') // Run daily at 17:35 (5:35 PM)
+    ->withoutOverlapping() // Prevent overlapping runs
+    ->runInBackground(); // Run in background
