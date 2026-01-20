@@ -28,10 +28,10 @@ return new class extends Migration
             $table->bigInteger('before_volume')->nullable();
 
             // Data H (Hit/Breakthrough)
-            $table->date('hit_date');
-            $table->decimal('hit_value', 20, 2);
-            $table->decimal('hit_close', 10, 2);
-            $table->bigInteger('hit_volume');
+            $table->date('hit_date')->nullable();
+            $table->decimal('hit_value', 20, 2)->nullable();
+            $table->decimal('hit_close', 10, 2)->nullable();
+            $table->bigInteger('hit_volume')->nullable();
 
             // Data H+1 (After)
             $table->date('after_date')->nullable();

@@ -126,6 +126,7 @@
             </div>
 
             <!-- Technical Data -->
+            @if($signal->signal_type === 'value_breakthrough')
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- H-1 Data -->
                 <div class="bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800 overflow-hidden">
@@ -211,6 +212,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Recommendation -->
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
