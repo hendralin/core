@@ -307,7 +307,8 @@ class DashboardIndex extends Component
             $query->where('date', '>=', $startOfYear);
         } else {
             $days = (int) $this->period;
-            $query->limit($days);
+            $startDate = now()->subDays($days + 3);
+            $query->where('date', '>=', $startDate);
         }
 
         $this->tradingHistory = $query->get();
