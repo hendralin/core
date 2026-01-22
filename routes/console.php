@@ -33,8 +33,8 @@ Schedule::command('stock:scrape-idx')
     ->withoutOverlapping() // Prevent overlapping runs
     ->runInBackground(); // Run in background
 
-// Schedule GoAPI stock prices fetching
-Schedule::command('stock:fetch-goapi-prices')
+// Schedule combined stock prices fetching and breakthrough analysis
+Schedule::command('stock:fetch-and-analyze-breakthroughs')
     ->everyTenMinutes() // Run every 10 minutes
     ->withoutOverlapping() // Prevent overlapping runs
     ->runInBackground(); // Run in background
