@@ -32,3 +32,9 @@ Schedule::command('stock:scrape-idx')
     ->dailyAt('17:35') // Run daily at 17:35 (5:35 PM)
     ->withoutOverlapping() // Prevent overlapping runs
     ->runInBackground(); // Run in background
+
+// Schedule GoAPI stock prices fetching
+Schedule::command('stock:fetch-goapi-prices')
+    ->everyTenMinutes() // Run every 10 minutes
+    ->withoutOverlapping() // Prevent overlapping runs
+    ->runInBackground(); // Run in background
