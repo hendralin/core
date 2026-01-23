@@ -29,12 +29,27 @@ Schedule::command('license:check-expiration')
 
 // Schedule IDX stock data scraping
 Schedule::command('stock:scrape-idx')
-    ->dailyAt('17:35') // Run daily at 17:35 (5:35 PM)
+    ->dailyAt('17:35') // Run daily at 17:35 WIB (5:35 PM)
+    ->weekdays()
+    ->timezone('Asia/Jakarta')
     ->withoutOverlapping() // Prevent overlapping runs
     ->runInBackground(); // Run in background
 
 // Schedule combined stock prices fetching and breakthrough analysis
+// Session 1: 09:00 - 12:00 WIB (02:00 - 05:00 UTC)
 Schedule::command('stock:fetch-and-analyze-breakthroughs')
-    ->everyTenMinutes() // Run every 10 minutes
-    ->withoutOverlapping() // Prevent overlapping runs
-    ->runInBackground(); // Run in background
+    ->everyTenMinutes()
+    ->weekdays()
+    ->timezone('Asia/Jakarta')
+    ->between('09:00', '12:00')
+    ->withoutOverlapping()
+    ->runInBackground();
+
+// Session 2: 13:30 - 16:00 WIB (06:30 - 09:00 UTC)
+Schedule::command('stock:fetch-and-analyze-breakthroughs')
+    ->everyTenMinutes()
+    ->weekdays()
+    ->timezone('Asia/Jakarta')
+    ->between('13:30', '16:00')
+    ->withoutOverlapping()
+    ->runInBackground();
