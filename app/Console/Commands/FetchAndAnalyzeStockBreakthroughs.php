@@ -59,7 +59,7 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
 
         // Get yesterday's date
         $today = now()->toDateString();
-        $yesterday = now()->subDay()->toDateString();
+        $yesterday = now()->previousWeekday()->toDateString();
         $this->info("Fetching stock symbols for date: {$today}");
 
         // Query kode_emiten from trading_infos where date = yesterday
@@ -70,6 +70,7 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
             ->toArray();
 
         if (empty($stockCodes)) {
+            Log::info('No stock codes found for date ' . $yesterday);
             $this->warn("No stock codes found for date {$yesterday}");
             return Command::SUCCESS;
         }
