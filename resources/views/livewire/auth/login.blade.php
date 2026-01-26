@@ -13,7 +13,7 @@
             required
             autofocus
             autocomplete="email"
-            placeholder="user@invyra.cloud"
+            placeholder="email@example.com"
         />
 
         <!-- Password -->
