@@ -26,6 +26,7 @@
                         </div>
                     </div>
 
+                    @if(auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('admin'))
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <flux:heading size="sm" level="3">PHP Version</flux:heading>
@@ -52,6 +53,7 @@
                         <flux:heading size="sm" level="3">Timezone</flux:heading>
                         <flux:text class="text-sm">{{ $systemInfo['timezone'] }}</flux:text>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>

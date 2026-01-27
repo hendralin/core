@@ -30,3 +30,5 @@ yarn-error.log
 /data
 
 error_log
+public/.user.ini
+public/vendor/livewire
