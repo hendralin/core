@@ -608,6 +608,9 @@
                             </div>
                         </div>
                         <div id="chart-container" class="w-full h-full"></div>
+                        <div id="chart-watermark" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                            <span class="text-4xl font-bold opacity-20 dark:opacity-10 text-gray-900 dark:text-white uppercase">Bandar Saham</span>
+                        </div>
                     </div>
                 </div>
 
