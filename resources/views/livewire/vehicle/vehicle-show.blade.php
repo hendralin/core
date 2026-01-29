@@ -1122,11 +1122,11 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
-                                    @foreach($vehicle->commissions->where('type', 2)->sortByDesc('commission_date') as $commission)
+                                    @foreach(($vehicle->commissions?->where('type', 2)?->sortByDesc('commission_date')) ?? [] as $commission)
                                     <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
                                         <td class="px-4 py-1">
                                             <flux:text class="text-sm whitespace-nowrap">
-                                                {{ Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') }}
+                                                {{ $commission && $commission->commission_date ? Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') : '-' }}
                                             </flux:text>
                                         </td>
                                         <td class="px-4 py-1">
@@ -1136,7 +1136,7 @@
                                         </td>
                                         <td class="px-4 py-1 text-right">
                                             <flux:text class="text-sm whitespace-nowrap">
-                                                Rp {{ number_format($commission->amount, 0, ',', '.') }}
+                                                Rp {{ isset($commission->amount) ? number_format($commission->amount, 0, ',', '.') : '0' }}
                                             </flux:text>
                                         </td>
                                         @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
@@ -1221,21 +1221,21 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
-                                @foreach($vehicle->commissions->where('type', 1)->sortByDesc('commission_date') as $commission)
+                                @foreach(($vehicle->commissions?->where('type', 1)?->sortByDesc('commission_date')) ?? [] as $commission)
                                 <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
                                     <td class="px-4 py-1">
                                         <flux:text class="text-sm whitespace-nowrap">
-                                            {{ Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') }}
+                                            {{ $commission && $commission->commission_date ? Carbon\Carbon::parse($commission->commission_date)->format('d-m-Y') : '-' }}
                                         </flux:text>
                                     </td>
                                     <td class="px-4 py-1">
                                         <flux:text class="text-sm whitespace-nowrap">
-                                            {{ $commission->description ?? '-' }}
+                                            {{ $commission && isset($commission->description) ? $commission->description : '-' }}
                                         </flux:text>
                                     </td>
                                     <td class="px-4 py-1 text-right">
                                         <flux:text class="text-sm whitespace-nowrap">
-                                            Rp {{ number_format($commission->amount, 0, ',', '.') }}
+                                            Rp {{ isset($commission->amount) ? number_format($commission->amount, 0, ',', '.') : '0' }}
                                         </flux:text>
                                     </td>
                                     @if(auth()->user()->can('vehicle-commission.edit') || auth()->user()->can('vehicle-commission.delete'))
@@ -3455,7 +3455,8 @@
                             Title File
                             <span class="text-red-600 ml-1">*</span>
                         </flux:label>
-                        <flux:select wire:model="vehicle_file_title_id" placeholder="Pilih title file">
+                        <flux:select wire:model="vehicle_file_title_id">
+                            <flux:select.option value="">Pilih Title File</flux:select.option>
                             @if(isset($vehicleFileTitles))
                                 @foreach($vehicleFileTitles as $title)
                                     <flux:select.option value="{{ $title->id }}">{{ $title->title }}</flux:select.option>

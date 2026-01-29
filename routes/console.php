@@ -10,16 +10,18 @@ Artisan::command('inspire', function () {
 
 // Schedule license expiration checks
 Schedule::command('license:check-expiration')
-    ->dailyAt('09:00') // Run daily at 9 AM
+    ->dailyAt('01:00') // Run daily at 1 AM
+    ->timezone('Asia/Jakarta')
     ->withoutOverlapping() // Prevent overlapping runs
     ->runInBackground(); // Run in background
 
 // Optional: Also check at other times for more frequent monitoring
-Schedule::command('license:check-expiration')
-    ->hourly() // Run hourly for more frequent checks
-    ->between('8:00', '18:00') // Only during business hours
-    ->withoutOverlapping()
-    ->runInBackground();
+// Schedule::command('license:check-expiration')
+//     ->hourly() // Run hourly for more frequent checks
+//     ->between('8:00', '18:00') // Only during business hours
+//     ->timezone('Asia/Jakarta')
+//     ->withoutOverlapping()
+//     ->runInBackground();
 
 // Weekly license monitoring summary (optional)
 // Schedule::command('license:check-expiration --days=90')

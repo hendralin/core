@@ -186,10 +186,10 @@ class VehicleShow extends Component
         $sellingPrice = $this->vehicle->selling_price ?? 0;
 
         // Hitung komisi pembelian (type = 2)
-        $purchaseCommission = $this->vehicle->commissions->where('type', 2)->sum('amount');
+        $purchaseCommission = $this->vehicle->commissions?->where('type', 2)->sum('amount') ?? 0;
 
         // Hitung komisi penjualan (type = 1)
-        $sellingCommission = $this->vehicle->commissions->where('type', 1)->sum('amount');
+        $sellingCommission = $this->vehicle->commissions?->where('type', 1)->sum('amount') ?? 0;
 
         // Total modal = harga beli + total cost (semua status) + komisi pembelian
         $totalModal = $purchasePrice + $this->costSummary['total'] + $purchaseCommission;
