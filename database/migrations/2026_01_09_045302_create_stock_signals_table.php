@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('signal_type')->default('value_breakthrough');
             $table->string('kode_emiten', 10);
             $table->decimal('market_cap', 20, 2)->nullable();
-            $table->decimal('pbv', 8, 4)->nullable();
-            $table->decimal('per', 8, 4)->nullable();
+            $table->decimal('pbv', 10, 4)->nullable();
+            $table->decimal('per', 10, 4)->nullable();
 
             // Data H-1 (Before)
             $table->date('before_date')->nullable();
