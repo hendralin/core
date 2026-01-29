@@ -11,7 +11,7 @@ use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-#[Title('Edit Pengeluaran Kas')]
+#[Title('Edit Biaya Showroom')]
 class CashDisbursementEdit extends Component
 {
     use WithFileUploads;
@@ -31,11 +31,11 @@ class CashDisbursementEdit extends Component
 
         // Only allow editing if status is pending and cost_type is showroom
         if ($cost->status !== 'pending') {
-            abort(403, 'Tidak dapat mengubah pengeluaran kas yang telah disetujui atau ditolak.');
+            abort(403, 'Tidak dapat mengubah biaya showroom yang telah disetujui atau ditolak.');
         }
 
         if (!in_array($cost->cost_type, ['showroom'])) {
-            abort(403, 'Record ini bukan merupakan pengeluaran kas showroom.');
+            abort(403, 'Record ini bukan merupakan biaya showroom.');
         }
 
         $this->cost_type = $cost->cost_type;
@@ -55,13 +55,13 @@ class CashDisbursementEdit extends Component
         ];
 
         $messages = [
-            'cost_date.required' => 'Tanggal pengeluaran kas harus dipilih.',
-            'cost_date.date' => 'Tanggal pengeluaran kas harus berupa tanggal.',
-            'cost_date.before_or_equal' => 'Tanggal pengeluaran kas tidak boleh lebih dari hari ini.',
-            'description.required' => 'Deskripsi pengeluaran harus diisi.',
-            'description.string' => 'Deskripsi pengeluaran harus berupa teks.',
-            'total_price.required' => 'Total pengeluaran harus diisi.',
-            'total_price.string' => 'Total pengeluaran harus berupa angka.',
+            'cost_date.required' => 'Tanggal biaya showroom harus dipilih.',
+            'cost_date.date' => 'Tanggal biaya showroom harus berupa tanggal.',
+            'cost_date.before_or_equal' => 'Tanggal biaya showroom tidak boleh lebih dari hari ini.',
+            'description.required' => 'Deskripsi biaya showroom harus diisi.',
+            'description.string' => 'Deskripsi biaya showroom harus berupa teks.',
+            'total_price.required' => 'Total biaya showroom harus diisi.',
+            'total_price.string' => 'Total biaya showroom harus berupa angka.',
             'document.file' => 'Dokumen harus berupa file.',
             'document.mimes' => 'Dokumen harus berupa PDF, JPG, JPEG, atau PNG.',
             'document.max' => 'Dokumen maksimal ukuran 5MB.',
@@ -115,9 +115,9 @@ class CashDisbursementEdit extends Component
                     'document' => $documentPath,
                 ]
             ])
-            ->log('updated cash disbursement record');
+            ->log('updated biaya showroom record');
 
-        session()->flash('success', 'Pengeluaran kas berhasil diperbarui.');
+        session()->flash('success', 'Biaya showroom berhasil diperbarui.');
 
         return $this->redirect('/cash-disbursements', true);
     }

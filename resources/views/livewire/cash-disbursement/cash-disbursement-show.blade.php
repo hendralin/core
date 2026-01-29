@@ -4,13 +4,13 @@
 
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('Detail Pengeluaran Kas') }}</flux:heading>
-        <flux:subheading size="lg" class="mb-6">{{ __('Detail informasi pengeluaran kas perusahaan') }}</flux:subheading>
+        <flux:heading size="xl" level="1">{{ __('Detail Biaya Showroom') }}</flux:heading>
+        <flux:subheading size="lg" class="mb-6">{{ __('Detail informasi biaya showroom perusahaan') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
 
     <div>
-        <flux:button variant="primary" size="sm" href="{{ route('cash-disbursements.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Pengeluaran Kas">Back</flux:button>
+        <flux:button variant="primary" size="sm" href="{{ route('cash-disbursements.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Biaya Showroom">Back</flux:button>
         @can('cashdisbursement.edit')
             @if($cost->status === 'pending')
                 <flux:button variant="filled" size="sm" href="{{ route('cash-disbursements.edit', $cost) }}" wire:navigate icon="pencil-square" class="ml-1">Edit</flux:button>
@@ -35,7 +35,7 @@
             <!-- Main Information -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
-                    <flux:heading size="lg" class="mb-4">Informasi Pengeluaran Kas</flux:heading>
+                    <flux:heading size="lg" class="mb-4">Informasi Biaya Showroom</flux:heading>
 
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
@@ -44,7 +44,7 @@
                                 <flux:text class="mt-1">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</flux:text>
                             </div>
                             <div>
-                                <flux:heading size="sm">Total Pengeluaran</flux:heading>
+                                <flux:heading size="sm">Total Biaya</flux:heading>
                                 <flux:text class="mt-1 font-medium text-lg">Rp {{ number_format($cost->total_price) }}</flux:text>
                             </div>
                         </div>
@@ -61,7 +61,7 @@
                                 <flux:heading size="sm">Dibuat Oleh</flux:heading>
                                 <flux:text class="text-sm">{{ $cost->createdBy->name ?? 'N/A' }}</flux:text>
                             </div>
-                            <div>
+                            {{-- <div>
                                 <flux:heading size="sm">Status</flux:heading>
                                 <flux:text class="text-sm">
                                     @if($cost->status === 'approved')
@@ -72,7 +72,7 @@
                                         <flux:badge size="sm" color="yellow" icon="clock">Pending</flux:badge>
                                     @endif
                                 </flux:text>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div>
@@ -117,7 +117,7 @@
 
             <!-- Action Sidebar -->
             <div class="space-y-6">
-                @if($cost->status === 'pending')
+                {{-- @if($cost->status === 'pending')
                     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                         <flux:heading size="lg" class="mb-4">Aksi</flux:heading>
 
@@ -125,7 +125,7 @@
                             @can('cashdisbursement.approve')
                                 <flux:modal.trigger name="approve-modal">
                                     <flux:button variant="primary" icon="check" class="w-full cursor-pointer mb-2">
-                                        Setujui Pengeluaran
+                                        Setujui Biaya Showroom
                                     </flux:button>
                                 </flux:modal.trigger>
                             @endcan
@@ -133,13 +133,13 @@
                             @can('cashdisbursement.reject')
                                 <flux:modal.trigger name="reject-modal">
                                     <flux:button variant="danger" icon="x-mark" class="w-full cursor-pointer">
-                                        Tolak Pengeluaran
+                                        Tolak Biaya Showroom
                                     </flux:button>
                                 </flux:modal.trigger>
                             @endcan
                         </div>
                     </div>
-                @endif
+                @endif --}}
 
                 <!-- Activity Log -->
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
@@ -149,7 +149,7 @@
                         @foreach($cost->activities ?? [] as $activity)
                             <div class="flex items-start space-x-3">
                                 <div class="shrink-0">
-                                    @if($activity->description === 'created cost record' || $activity->description === 'created cash disbursement record')
+                                    @if($activity->description === 'created cost record' || $activity->description === 'created biaya showroom record')
                                         <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
                                             <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -171,7 +171,7 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ ucfirst(str_replace(['cost record', 'cash disbursement record'], ['pengeluaran kas', 'pengeluaran kas'], $activity->description)) }}
+                                        {{ ucfirst(str_replace(['cost record', 'biaya showroom record'], ['biaya showroom', 'biaya showroom'], $activity->description)) }}
                                     </p>
                                     <p class="text-sm text-gray-500 dark:text-zinc-400">
                                         {{ $activity->causer?->name ?? 'System' }} • {{ $activity->created_at->diffForHumans() }}
@@ -193,10 +193,10 @@
     <flux:modal name="approve-modal" class="min-w-88">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">Setujui pengeluaran kas?</flux:heading>
+                <flux:heading size="lg">Setujui biaya showroom?</flux:heading>
                 <flux:text class="mt-2">
-                    <p>Anda akan menyetujui pengeluaran kas ini sebesar <strong>Rp {{ number_format($cost->total_price) }}</strong>.</p>
-                    <p>Setelah disetujui, pengeluaran ini akan tercatat sebagai pengeluaran yang sah.</p>
+                    <p>Anda akan menyetujui biaya showroom ini sebesar <strong>Rp {{ number_format($cost->total_price) }}</strong>.</p>
+                    <p>Setelah disetujui, biaya showroom ini akan tercatat sebagai biaya showroom yang sah.</p>
                 </flux:text>
             </div>
             <div class="flex gap-2">
@@ -213,10 +213,10 @@
     <flux:modal name="reject-modal" class="min-w-88">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">Tolak pengeluaran kas?</flux:heading>
+                <flux:heading size="lg">Tolak biaya showroom?</flux:heading>
                 <flux:text class="mt-2">
-                    <p>Anda akan menolak pengeluaran kas ini sebesar <strong>Rp {{ number_format($cost->total_price) }}</strong>.</p>
-                    <p>Setelah ditolak, pengeluaran ini tidak akan dapat diubah lagi.</p>
+                    <p>Anda akan menolak biaya showroom ini sebesar <strong>Rp {{ number_format($cost->total_price) }}</strong>.</p>
+                    <p>Setelah ditolak, biaya showroom ini tidak akan dapat diubah lagi.</p>
                 </flux:text>
             </div>
             <div class="flex gap-2">

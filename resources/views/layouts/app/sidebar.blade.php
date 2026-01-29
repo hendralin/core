@@ -139,7 +139,7 @@
                         auth()->user()->can('cashdisbursement.create') ||
                         auth()->user()->can('cashdisbursement.edit') ||
                         auth()->user()->can('cashdisbursement.delete'))
-                            <flux:navlist.item icon="credit-card" :href="route('cash-disbursements.index')" :current="request()->routeIs('cash-disbursements.*')" wire:navigate>{{ __('Pengeluaran Kas') }}</flux:navlist.item>
+                            <flux:navlist.item icon="credit-card" :href="route('cash-disbursements.index')" :current="request()->routeIs('cash-disbursements.*')" wire:navigate>{{ __('Biaya Showroom') }}</flux:navlist.item>
                         @endif
 
                         @if (auth()->user()->can('cash-inject.view') ||
@@ -352,7 +352,7 @@
                         auth()->user()->can('cashdisbursement.create') ||
                         auth()->user()->can('cashdisbursement.edit') ||
                         auth()->user()->can('cashdisbursement.delete'))
-                            <flux:navlist.item icon="credit-card" :href="route('cash-disbursements.index')" :current="request()->routeIs('cash-disbursements.*')" wire:navigate>{{ __('Pengeluaran Kas') }}</flux:navlist.item>
+                            <flux:navlist.item icon="credit-card" :href="route('cash-disbursements.index')" :current="request()->routeIs('cash-disbursements.*')" wire:navigate>{{ __('Biaya Showroom') }}</flux:navlist.item>
                         @endif
 
                         @if (auth()->user()->can('cash-inject.view') ||

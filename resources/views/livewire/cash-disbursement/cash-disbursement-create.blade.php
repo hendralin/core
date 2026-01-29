@@ -1,7 +1,7 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('Tambah Pengeluaran Kas') }}</flux:heading>
-        <flux:subheading size="lg" class="mb-6">{{ __('Tambahkan informasi pengeluaran kas perusahaan') }}</flux:subheading>
+        <flux:heading size="xl" level="1">{{ __('Tambah Biaya Showroom') }}</flux:heading>
+        <flux:subheading size="lg" class="mb-6">{{ __('Tambahkan informasi biaya showroom') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
 
@@ -15,27 +15,27 @@
                     href="{{ route('cash-disbursements.index') }}"
                     wire:navigate
                     icon="arrow-uturn-left"
-                    tooltip="Kembali ke Pengeluaran Kas"
+                    tooltip="Kembali ke Biaya Showroom"
                 >
                     Back
                 </flux:button>
             </div>
 
             <form wire:submit="submit" id="cash-disbursement-form" class="mt-6 space-y-6" enctype="multipart/form-data">
-                <!-- Cash Disbursement Information Section -->
+                <!-- Biaya Showroom Information Section -->
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6 mb-6">
                     <div class="flex items-center gap-3 mb-4">
                         <flux:icon.identification class="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         <div>
-                            <flux:heading size="md">Informasi Dasar Pengeluaran</flux:heading>
-                            <flux:subheading size="sm">Data identitas dan waktu pengeluaran kas</flux:subheading>
+                            <flux:heading size="md">Informasi Dasar</flux:heading>
+                            <flux:subheading size="sm">Data tanggal dan total biaya showroom</flux:subheading>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <flux:input wire:model="cost_date" type="date" label="Tanggal Pengeluaran Kas" class="w-full" />
-                            <p class="text-xs text-slate-500 dark:text-zinc-400">Kapan pengeluaran kas dilakukan?</p>
+                            <flux:input wire:model="cost_date" type="date" label="Tanggal" class="w-full" />
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Kapan biaya showroom dilakukan?</p>
                         </div>
 
                         <div class="space-y-1">
@@ -43,12 +43,11 @@
                                 wire:model="total_price"
                                 mask:dynamic="$money($input)"
                                 icon="currency-dollar"
-                                label="Total Pengeluaran (Rp)"
+                                label="Total Biaya (Rp)"
                                 placeholder="180.000"
                                 class="w-full"
-                                helper="Masukkan jumlah pengeluaran kas"
                             />
-                            <p class="text-xs text-slate-500 dark:text-zinc-400">Total pengeluaran kas</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Total biaya showroom</p>
                         </div>
                     </div>
                 </div>
@@ -58,16 +57,16 @@
                     <div class="flex items-center gap-3 mb-4">
                         <flux:icon.document-text class="w-5 h-5 text-green-600 dark:text-green-400" />
                         <div>
-                            <flux:heading size="md">Detail Pengeluaran</flux:heading>
-                            <flux:subheading size="sm">Deskripsi lengkap pengeluaran kas yang dilakukan</flux:subheading>
+                            <flux:heading size="md">Detail</flux:heading>
+                            <flux:subheading size="sm">Deskripsi lengkap biaya showroom yang dilakukan</flux:subheading>
                         </div>
                     </div>
 
                     <div class="mt-6">
                         <flux:textarea
                             wire:model="description"
-                            label="Deskripsi Pengeluaran"
-                            placeholder="Masukkan detail pengeluaran kas yang dilakukan, keperluan apa, dan catatan tambahan..."
+                            label="Deskripsi"
+                            placeholder="Masukkan detail biaya showroom yang dilakukan, keperluan apa, dan catatan tambahan..."
                             rows="4"
                         />
                     </div>
@@ -79,7 +78,7 @@
                         <flux:icon.document-text class="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         <div>
                             <flux:heading size="md">Dokumentasi (Opsional)</flux:heading>
-                            <flux:subheading size="sm">Upload dokumen pendukung pengeluaran kas</flux:subheading>
+                            <flux:subheading size="sm">Upload dokumen pendukung</flux:subheading>
                         </div>
                     </div>
 
@@ -141,7 +140,7 @@
                     </flux:button>
 
                     <flux:button type="submit" variant="primary" icon="plus">
-                        <span wire:loading.remove wire:target="submit">Simpan Pengeluaran Kas</span>
+                        <span wire:loading.remove wire:target="submit">Simpan</span>
                         <span wire:loading wire:target="submit">Menyimpan...</span>
                     </flux:button>
                 </div>

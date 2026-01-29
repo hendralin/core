@@ -1,11 +1,11 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('Audit Trail Pengeluaran Kas') }}</flux:heading>
-        <flux:subheading size="lg" class="mb-6">{{ __('Pantau semua aktivitas yang dilakukan pada pengeluaran kas') }}</flux:subheading>
+        <flux:heading size="xl" level="1">{{ __('Audit Trail Biaya Showroom') }}</flux:heading>
+        <flux:subheading size="lg" class="mb-6">{{ __('Pantau semua aktivitas yang dilakukan pada biaya showroom') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
 
-    <flux:button variant="primary" size="sm" href="{{ route('cash-disbursements.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Pengeluaran Kas" class="mb-4">Back</flux:button>
+    <flux:button variant="primary" size="sm" href="{{ route('cash-disbursements.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Biaya Showroom" class="mb-4">Back</flux:button>
 
     <!-- Statistics Overview -->
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
@@ -67,7 +67,7 @@
             <flux:input type="text" label="Search Activities" wire:model.live.debounce.300ms="search" placeholder="Search activities..." clearable />
 
             <!-- Cost Filter -->
-            <flux:select label="Pengeluaran Kas" wire:model.live="selectedCost">
+            <flux:select label="Biaya Showroom" wire:model.live="selectedCost">
                 <flux:select.option value="">All Records</flux:select.option>
                 @foreach($costs as $cost)
                     <flux:select.option value="{{ $cost->id }}">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }} - {{ Str::limit($cost->description, 30) }}</flux:select.option>
@@ -101,13 +101,13 @@
                             <div class="shrink-0">
                                 <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
                                     @switch($activity->description)
-                                        @case('created pengeluaran kas')
+                                        @case('created biaya showroom')
                                             <flux:icon.plus class="w-5 h-5 text-green-600 dark:text-green-400" />
                                             @break
-                                        @case('updated pengeluaran kas')
+                                        @case('updated biaya showroom')
                                             <flux:icon.pencil-square class="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                                             @break
-                                        @case('deleted cash disbursement record')
+                                        @case('deleted biaya showroom record')
                                             <flux:icon.trash class="w-5 h-5 text-red-600 dark:text-red-400" />
                                             @break
                                         @default
@@ -134,13 +134,13 @@
                                     </div>
                                 @endif
 
-                                <!-- Cash Disbursement Record Info -->
+                                <!-- Biaya Showroom Record Info -->
                                 @if($activity->subject)
                                     <div class="mt-2 p-3 bg-gray-50 dark:bg-zinc-700/50 rounded-lg">
                                         <div class="flex items-center justify-between">
                                             <div>
                                                 <flux:text class="text-sm font-medium text-gray-900 dark:text-zinc-100">
-                                                    Pengeluaran Kas
+                                                    Biaya Showroom
                                                 </flux:text>
                                                 <div class="text-xs text-gray-600 dark:text-zinc-400 mt-1">
                                                     {{ Carbon\Carbon::parse($activity->subject->cost_date)->format('d-m-Y') }}
@@ -155,7 +155,7 @@
                                     </div>
                                 @else
                                     <div class="mt-2 text-xs text-gray-500 dark:text-zinc-400 italic">
-                                        Pengeluaran kas telah dihapus
+                                        Biaya showroom telah dihapus
                                     </div>
                                 @endif
 
@@ -164,7 +164,7 @@
                                     <div class="mt-3">
                                         <flux:text class="text-xs font-medium text-gray-700 dark:text-zinc-300 mb-2">Detail:</flux:text>
                                         <div class="bg-gray-50 dark:bg-zinc-700 rounded-lg p-3">
-                                            @if($activity->description === 'updated cash disbursement record' && isset($activity->properties['old']))
+                                            @if($activity->description === 'updated biaya showroom record' && isset($activity->properties['old']))
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div>
                                                         <flux:text class="text-xs font-medium text-red-600 dark:text-red-400 mb-1">Before:</flux:text>
@@ -233,7 +233,7 @@
                     @if($search || $selectedCost)
                         No activities match your current filters. Try adjusting your search criteria.
                     @else
-                        No cash disbursement activities have been recorded yet.
+                        No biaya showroom activities have been recorded yet.
                     @endif
                 </flux:text>
             </div>

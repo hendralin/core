@@ -6,7 +6,7 @@ use App\Models\Cost;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 
-#[Title('Detail Pengeluaran Kas')]
+#[Title('Detail Biaya Showroom')]
 class CashDisbursementShow extends Component
 {
     public Cost $cost;
@@ -17,19 +17,19 @@ class CashDisbursementShow extends Component
 
         // Check if this is actually a cash disbursement
         if (!in_array($cost->cost_type, ['showroom'])) {
-            abort(403, 'Record ini bukan merupakan pengeluaran kas showroom.');
+            abort(403, 'Record ini bukan merupakan biaya showroom.');
         }
     }
 
     public function approve()
     {
         if ($this->cost->status !== 'pending') {
-            session()->flash('error', 'Pengeluaran kas ini sudah diproses.');
+            session()->flash('error', 'Biaya showroom ini sudah diproses.');
             return;
         }
 
         $this->cost->update(['status' => 'approved']);
-        session()->flash('success', 'Pengeluaran kas disetujui.');
+        session()->flash('success', 'Biaya showroom disetujui.');
         $this->cost->refresh();
         $this->modal('approve-modal')->close();
     }
@@ -37,12 +37,12 @@ class CashDisbursementShow extends Component
     public function reject()
     {
         if ($this->cost->status !== 'pending') {
-            session()->flash('error', 'Pengeluaran kas ini sudah diproses.');
+            session()->flash('error', 'Biaya showroom ini sudah diproses.');
             return;
         }
 
         $this->cost->update(['status' => 'rejected']);
-        session()->flash('success', 'Pengeluaran kas ditolak.');
+        session()->flash('success', 'Biaya showroom ditolak.');
         $this->cost->refresh();
         $this->modal('reject-modal')->close();
     }

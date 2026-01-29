@@ -2,12 +2,12 @@
     <thead>
         <tr>
             <th>No</th>
-            <th>Cost Date</th>
-            <th>Description</th>
-            <th>Total Cost</th>
-            <th>Status</th>
-            <th>Created By</th>
-            <th>Created At</th>
+            <th>Tanggal</th>
+            <th>Deskripsi</th>
+            <th>Total Biaya</th>
+            {{-- <th>Status</th> --}}
+            <th>Dibuat Oleh</th>
+            {{-- <th>Created At</th> --}}
         </tr>
     </thead>
     <tbody>
@@ -17,9 +17,9 @@
                 <td>{{ $cost->cost_date ? \Carbon\Carbon::parse($cost->cost_date)->format('d/m/Y') : '-' }}</td>
                 <td>{{ $cost->description }}</td>
                 <td>{{ $cost->total_price }}</td>
-                <td>{{ ucfirst($cost->status) }}</td>
+                {{-- <td>{{ ucfirst($cost->status) }}</td> --}}
                 <td>{{ $cost->createdBy?->name ?? '-' }}</td>
-                <td>{{ $cost->created_at ? \Carbon\Carbon::parse($cost->created_at)->format('d/m/Y H:i') : '-' }}</td>
+                {{-- <td>{{ $cost->created_at ? \Carbon\Carbon::parse($cost->created_at)->format('d/m/Y H:i') : '-' }}</td> --}}
             </tr>
         @endforeach
     </tbody>

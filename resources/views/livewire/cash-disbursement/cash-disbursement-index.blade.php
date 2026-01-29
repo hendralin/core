@@ -1,7 +1,7 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('Pengeluaran Kas') }}</flux:heading>
-        <flux:subheading size="lg" class="mb-6">{{ __('Kelola pengeluaran kas perusahaan') }}</flux:subheading>
+        <flux:heading size="xl" level="1">{{ __('Biaya Showroom') }}</flux:heading>
+        <flux:subheading size="lg" class="mb-6">{{ __('Kelola biaya showroom perusahaan') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
 
@@ -15,7 +15,7 @@
 
     <!-- Filter Section -->
     <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Month/Year Filter -->
             <div>
                 <label for="month-year" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Month & Year</label>
@@ -32,11 +32,11 @@
             <flux:input type="date" wire:model.live="dateTo" label="To" size="sm" />
 
             <!-- Status Filter -->
-            <flux:select wire:model.live="statusFilter" label="Status" size="sm" class="w-full">
+            {{-- <flux:select wire:model.live="statusFilter" label="Status" size="sm" class="w-full">
                 @foreach($this->statusOptions as $value => $label)
                     <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
                 @endforeach
-            </flux:select>
+            </flux:select> --}}
 
             <!-- Clear Filters Button -->
             @if($statusFilter || $dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedMonthYear)
@@ -55,7 +55,7 @@
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
                 @can('cashdisbursement.create')
-                    <flux:button variant="primary" size="sm" href="{{ route('cash-disbursements.create') }}" wire:navigate icon="plus" class="w-full sm:w-auto" tooltip="Tambah Pengeluaran Kas">Tambah</flux:button>
+                    <flux:button variant="primary" size="sm" href="{{ route('cash-disbursements.create') }}" wire:navigate icon="plus" class="w-full sm:w-auto" tooltip="Tambah Biaya Showroom">Tambah</flux:button>
                 @endcan
 
                 <!-- Button Actions -->
@@ -95,7 +95,7 @@
         <flux:spacer class="hidden md:inline" />
         <div class="flex items-center">
             <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300 mr-2">Search:</label>
-            <flux:input wire:model.live.debounce.500ms="search" placeholder="Cari pengeluaran kas..." clearable />
+            <flux:input wire:model.live.debounce.500ms="search" placeholder="Cari biaya showroom..." clearable />
         </div>
     </div>
 
@@ -126,7 +126,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-4 py-3 w-32">
+                    {{-- <th scope="col" class="px-4 py-3 w-32">
                         <div class="flex items-center justify-center cursor-pointer @if ($sortField == 'status') {{ $sortDirection }} @endif" wire:click="sortBy('status')">
                             Status
                             @if ($sortField == 'status' && $sortDirection == 'asc')
@@ -135,7 +135,7 @@
                                 <flux:icon.chevron-down class="ml-2 size-4" />
                             @endif
                         </div>
-                    </th>
+                    </th> --}}
                     <th scope="col" class="px-4 py-3 w-1/12">Actions</th>
                 </tr>
             </thead>
@@ -147,7 +147,7 @@
                             <td class="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</td>
                             <td class="px-4 py-2 whitespace-nowrap lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs truncate" title="{{ $cost->description }}">{{ $cost->description }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-gray-900 dark:text-white">Rp {{ number_format($cost->total_price, 0) }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-center w-32">
+                            {{-- <td class="px-4 py-2 whitespace-nowrap text-center w-32">
                                 @if($cost->status === 'approved')
                                     <flux:badge size="sm" color="green">Approved</flux:badge>
                                 @elseif($cost->status === 'rejected')
@@ -155,7 +155,7 @@
                                 @else
                                     <flux:badge size="sm" color="yellow">Pending</flux:badge>
                                 @endif
-                            </td>
+                            </td> --}}
                             <td class="px-4 py-2 whitespace-nowrap">
                                 @can('cashdisbursement.view')
                                     <flux:button variant="ghost" size="xs" square href="{{ route('cash-disbursements.show', $cost) }}" wire:navigate tooltip="View Details">
@@ -170,21 +170,21 @@
                                         </flux:button>
                                     @endcan
 
-                                    @can('cashdisbursement.approve')
+                                    {{-- @can('cashdisbursement.approve')
                                         <flux:modal.trigger name="approve-cost">
                                             <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setCostToApprove({{ $cost->id }})" tooltip="Approve">
                                                 <flux:icon.check variant="mini" class="text-green-500 dark:text-green-300" />
                                             </flux:button>
                                         </flux:modal.trigger>
-                                    @endcan
+                                    @endcan --}}
 
-                                    @can('cashdisbursement.reject')
+                                    {{-- @can('cashdisbursement.reject')
                                         <flux:modal.trigger name="reject-cost">
                                             <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setCostToReject({{ $cost->id }})" tooltip="Reject">
                                                 <flux:icon.x-mark variant="mini" class="text-red-500 dark:text-red-300" />
                                             </flux:button>
                                         </flux:modal.trigger>
-                                    @endcan
+                                    @endcan --}}
                                 @endif
 
                                 @can('cashdisbursement.delete')
@@ -205,7 +205,7 @@
                             @if(isset($search) && !empty($search))
                                 No results found for "{{ $search }}"
                             @else
-                                Tidak ada Pengeluaran Kas yang ditemukan.
+                                Tidak ada biaya showroom yang ditemukan.
                             @endif
                         </td>
                     </tr>
@@ -255,9 +255,9 @@
     <flux:modal name="approve-cost" class="min-w-88">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">Approve cash disbursement record?</flux:heading>
+                <flux:heading size="lg">Approve biaya showroom record?</flux:heading>
                 <flux:text class="mt-2">
-                    <p>You're about to approve this cash disbursement record.</p>
+                    <p>You're about to approve this biaya showroom record.</p>
                     <p>This will mark the record as approved and cannot be edited anymore.</p>
                 </flux:text>
             </div>
@@ -275,9 +275,9 @@
     <flux:modal name="reject-cost" class="min-w-88">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">Reject cash disbursement record?</flux:heading>
+                <flux:heading size="lg">Reject biaya showroom record?</flux:heading>
                 <flux:text class="mt-2">
-                    <p>You're about to reject this cash disbursement record.</p>
+                    <p>You're about to reject this biaya showroom record.</p>
                     <p>This will mark the record as rejected and cannot be edited anymore.</p>
                 </flux:text>
             </div>
@@ -295,9 +295,9 @@
     <flux:modal name="delete-cost" class="min-w-88">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">Delete cash disbursement record?</flux:heading>
+                <flux:heading size="lg">Delete biaya showroom record?</flux:heading>
                 <flux:text class="mt-2">
-                    <p>You're about to delete this cash disbursement record.</p>
+                    <p>You're about to delete this biaya showroom record.</p>
                     <p>This action cannot be reversed.</p>
                 </flux:text>
             </div>

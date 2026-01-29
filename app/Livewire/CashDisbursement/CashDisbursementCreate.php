@@ -9,7 +9,7 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 
-#[Title('Tambah Pengeluaran Kas')]
+#[Title('Tambah Biaya Showroom')]
 class CashDisbursementCreate extends Component
 {
     use WithFileUploads;
@@ -36,13 +36,13 @@ class CashDisbursementCreate extends Component
         ];
 
         $messages = [
-            'cost_date.required' => 'Tanggal pengeluaran kas harus dipilih.',
-            'cost_date.date' => 'Tanggal pengeluaran kas harus berupa tanggal.',
-            'cost_date.before_or_equal' => 'Tanggal pengeluaran kas tidak boleh lebih dari hari ini.',
-            'description.required' => 'Deskripsi pengeluaran harus diisi.',
-            'description.string' => 'Deskripsi pengeluaran harus berupa teks.',
-            'total_price.required' => 'Total pengeluaran harus diisi.',
-            'total_price.string' => 'Total pengeluaran harus berupa angka.',
+            'cost_date.required' => 'Tanggal biaya showroom harus dipilih.',
+            'cost_date.date' => 'Tanggal biaya showroom harus berupa tanggal.',
+            'cost_date.before_or_equal' => 'Tanggal biaya showroom tidak boleh lebih dari hari ini.',
+            'description.required' => 'Deskripsi biaya showroom harus diisi.',
+            'description.string' => 'Deskripsi biaya showroom harus berupa teks.',
+            'total_price.required' => 'Total biaya showroom harus diisi.',
+            'total_price.string' => 'Total biaya showroom harus berupa angka.',
             'document.file' => 'Dokumen harus berupa file.',
             'document.mimes' => 'Dokumen harus berupa PDF, JPG, JPEG, atau PNG.',
             'document.max' => 'Dokumen maksimal ukuran 5MB.',
@@ -61,9 +61,9 @@ class CashDisbursementCreate extends Component
 
         $cost = Cost::create([
             'cost_type' => $this->cost_type,
-            'vehicle_id' => null, // No vehicle for cash disbursements
+            'vehicle_id' => null, // No vehicle for biaya showroom
             'cost_date' => $this->cost_date,
-            'vendor_id' => null, // No vendor for cash disbursements
+            'vendor_id' => null, // No vendor for biaya showroom
             'description' => $this->description,
             'total_price' => $totalPrice,
             'document' => $documentPath,
@@ -83,9 +83,9 @@ class CashDisbursementCreate extends Component
                     'document' => $documentPath,
                 ]
             ])
-            ->log('created cash disbursement record');
+            ->log('created biaya showroom record');
 
-        session()->flash('success', 'Pengeluaran kas berhasil ditambahkan.');
+        session()->flash('success', 'Biaya showroom berhasil ditambahkan.');
 
         return $this->redirect('/cash-disbursements', true);
     }

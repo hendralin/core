@@ -7,13 +7,13 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\CostDisbursementExport;
+use App\Exports\CashDisbursementExport;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
-#[Title('Pengeluaran Kas')]
+#[Title('Biaya Showroom')]
 class CashDisbursementIndex extends Component
 {
     use WithPagination, WithoutUrlPagination;
@@ -61,7 +61,7 @@ class CashDisbursementIndex extends Component
     {
         try {
             if (!$this->costIdToDelete) {
-                session()->flash('error', 'Tidak ada pengeluaran kas yang dipilih untuk dihapus.');
+                session()->flash('error', 'Tidak ada biaya showroom yang dipilih untuk dihapus.');
                 return;
             }
 
@@ -88,14 +88,14 @@ class CashDisbursementIndex extends Component
                     ->withProperties([
                         'attributes' => $costData
                     ])
-                    ->log('deleted cash disbursement record');
+                    ->log('deleted showroom fees record');
             });
 
             $this->reset(['costIdToDelete']);
 
-            session()->flash('success', 'Pengeluaran kas berhasil dihapus.');
+            session()->flash('success', 'Biaya showroom berhasil dihapus.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            session()->flash('error', 'Pengeluaran kas tidak ditemukan.');
+            session()->flash('error', 'Biaya showroom tidak ditemukan.');
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
         }
@@ -143,7 +143,7 @@ class CashDisbursementIndex extends Component
     {
         try {
             if (!$this->costIdToApprove) {
-                session()->flash('error', 'Tidak ada pengeluaran kas yang dipilih untuk disetujui.');
+                session()->flash('error', 'Tidak ada biaya showroom yang dipilih untuk disetujui.');
                 return;
             }
 
@@ -152,7 +152,7 @@ class CashDisbursementIndex extends Component
 
             $this->reset(['costIdToApprove']);
 
-            session()->flash('success', 'Pengeluaran kas berhasil disetujui.');
+            session()->flash('success', 'Biaya showroom berhasil disetujui.');
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
         }
@@ -162,7 +162,7 @@ class CashDisbursementIndex extends Component
     {
         try {
             if (!$this->costIdToReject) {
-                session()->flash('error', 'Tidak ada pengeluaran kas yang dipilih untuk ditolak.');
+                session()->flash('error', 'Tidak ada biaya showroom yang dipilih untuk ditolak.');
                 return;
             }
 
@@ -171,7 +171,7 @@ class CashDisbursementIndex extends Component
 
             $this->reset(['costIdToReject']);
 
-            session()->flash('success', 'Pengeluaran kas berhasil ditolak.');
+            session()->flash('success', 'Biaya showroom berhasil ditolak.');
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
         }
@@ -218,8 +218,8 @@ class CashDisbursementIndex extends Component
     public function exportExcel()
     {
         return Excel::download(
-            new CostDisbursementExport($this->search, $this->sortField, $this->sortDirection, $this->statusFilter, null, $this->dateFrom, $this->dateTo),
-            'cash_disbursements_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
+            new CashDisbursementExport($this->search, $this->sortField, $this->sortDirection, $this->statusFilter, null, $this->dateFrom, $this->dateTo),
+            'biaya_showroom_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
 
@@ -248,7 +248,7 @@ class CashDisbursementIndex extends Component
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
-        }, 'cash_disbursements_' . now()->format('Y-m-d_H-i-s') . '.pdf');
+        }, 'biaya_showroom_' . now()->format('Y-m-d_H-i-s') . '.pdf');
     }
 
     public function getPerPageOptionsProperty()

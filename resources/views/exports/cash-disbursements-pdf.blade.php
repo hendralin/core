@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Cash Disbursement Records Export</title>
+    <title>Showroom Fees Records Export</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -93,7 +93,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Laporan Pengeluaran Kas</h1>
+        <h1>Laporan Biaya Showroom</h1>
         <p>Generated on {{ now()->format('d F Y H:i') }}</p>
         <p>Total Records: {{ $costs->count() }}</p>
     </div>
@@ -102,11 +102,11 @@
         <thead>
             <tr>
                 <th class="text-center">No</th>
-                <th>Cost Date</th>
-                <th>Description</th>
-                <th class="text-right">Total Cost</th>
-                <th class="text-center">Status</th>
-                <th>Created By</th>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th class="text-right">Total Biaya</th>
+                {{-- <th class="text-center">Status</th> --}}
+                <th>Dibuat Oleh</th>
             </tr>
         </thead>
         <tbody>
@@ -114,9 +114,9 @@
                 <tr>
                     <td class="text-center">{{ $i + 1 }}</td>
                     <td class="no-wrap">{{ $cost->cost_date ? \Carbon\Carbon::parse($cost->cost_date)->format('d/m/Y') : '-' }}</td>
-                    <td style="max-width: 200px; word-wrap: break-word;">{{ Str::limit($cost->description, 100) }}</td>
+                    <td style="max-width: 300px; word-wrap: break-word;">{{ Str::limit($cost->description, 100) }}</td>
                     <td class="text-right no-wrap"><strong>{{ 'Rp ' . number_format($cost->total_price, 0) }}</strong></td>
-                    <td class="text-center">
+                    {{-- <td class="text-center">
                         @if($cost->status === 'approved')
                             <span class="status-approved">Approved</span>
                         @elseif($cost->status === 'rejected')
@@ -124,15 +124,15 @@
                         @else
                             <span class="status-pending">Pending</span>
                         @endif
-                    </td>
+                    </td> --}}
                     <td>{{ $cost->createdBy?->name ?? '-' }}</td>
                 </tr>
             @endforeach
             <!-- Total Row -->
             <tr class="total-row">
-                <td colspan="3" class="text-right"><strong>TOTAL PENGELUARAN KAS:</strong></td>
+                <td colspan="3" class="text-right"><strong>TOTAL BIAYA:</strong></td>
                 <td class="text-right no-wrap"><strong>{{ 'Rp ' . number_format($costs->sum('total_price'), 0) }}</strong></td>
-                <td colspan="2"></td>
+                <td></td>
             </tr>
         </tbody>
     </table>

@@ -10,7 +10,7 @@ use Livewire\Attributes\Title;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Str;
 
-#[Title('Audit Trail Pengeluaran Kas')]
+#[Title('Audit Trail Biaya Showroom')]
 class CashDisbursementAudit extends Component
 {
     use WithPagination, WithoutUrlPagination;
@@ -96,7 +96,7 @@ class CashDisbursementAudit extends Component
                 )", [])
                 ->whereDate('created_at', today())->count(),
             'created_count' => Activity::where('subject_type', Cost::class)
-                ->where('description', 'created cash disbursement record')
+                ->where('description', 'created showroom fees record')
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
@@ -106,7 +106,7 @@ class CashDisbursementAudit extends Component
                 )", [])
                 ->count(),
             'updated_count' => Activity::where('subject_type', Cost::class)
-                ->where('description', 'updated cash disbursement record')
+                ->where('description', 'updated showroom fees record')
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
@@ -116,7 +116,7 @@ class CashDisbursementAudit extends Component
                 )", [])
                 ->count(),
             'deleted_count' => Activity::where('subject_type', Cost::class)
-                ->where('description', 'deleted cash disbursement record')
+                ->where('description', 'deleted showroom fees record')
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id

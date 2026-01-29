@@ -6,7 +6,7 @@ use App\Models\Cost;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 
-class CostDisbursementExport implements FromView
+class CashDisbursementExport implements FromView
 {
     protected $search;
     protected $sortField;
@@ -30,7 +30,7 @@ class CostDisbursementExport implements FromView
     public function view(): View
     {
         $costs = Cost::query()
-            ->where('cost_type', 'other_cost')
+            ->where('cost_type', 'showroom')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
             ->with(['createdBy'])
