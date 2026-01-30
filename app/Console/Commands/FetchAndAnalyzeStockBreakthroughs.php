@@ -80,27 +80,27 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
         $this->info("Found {$this->stats['total_symbols']} stock symbols to process");
 
         // Migrate data from goapi_get_stock_prices to goapi_stock_prices
-        $timeFetch = now()->toDateTimeString();
-        GoapiGetStockPrice::query()
-            ->orderBy('id')
-            ->chunkById(100, function ($chunk) use ($timeFetch) {
-                foreach ($chunk as $item) {
-                    GoapiStockPrice::create([
-                        'symbol' => $item->symbol,
-                        'date' => $timeFetch,
-                        'open' => $item->open,
-                        'high' => $item->high,
-                        'low' => $item->low,
-                        'close' => $item->close,
-                        'volume' => $item->volume,
-                        'change' => $item->change,
-                        'change_pct' => $item->change_pct,
-                        'value' => $item->value,
-                    ]);
-                }
-            });
+        // $timeFetch = now()->toDateTimeString();
+        // GoapiGetStockPrice::query()
+        //     ->orderBy('id')
+        //     ->chunkById(100, function ($chunk) use ($timeFetch) {
+        //         foreach ($chunk as $item) {
+        //             GoapiStockPrice::create([
+        //                 'symbol' => $item->symbol,
+        //                 'date' => $timeFetch,
+        //                 'open' => $item->open,
+        //                 'high' => $item->high,
+        //                 'low' => $item->low,
+        //                 'close' => $item->close,
+        //                 'volume' => $item->volume,
+        //                 'change' => $item->change,
+        //                 'change_pct' => $item->change_pct,
+        //                 'value' => $item->value,
+        //             ]);
+        //         }
+        //     });
 
-        $this->info('Migrated data from goapi_get_stock_prices to goapi_stock_prices');
+        // $this->info('Migrated data from goapi_get_stock_prices to goapi_stock_prices');
 
         // Truncate table before processing to ensure fresh data
         GoapiGetStockPrice::truncate();
@@ -243,6 +243,18 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
                 $records,
                 ['symbol'], // Unique keys
                 ['open', 'high', 'low', 'close', 'volume', 'change', 'change_pct', 'value'] // Columns to update
+            );
+
+            // Also save to GoapiStockPrice table with current timestamp
+            $currentTime = now()->toDateTimeString();
+            $stockPriceRecords = array_map(function ($record) use ($currentTime) {
+                return array_merge($record, ['date' => $currentTime]);
+            }, $records);
+
+            GoapiStockPrice::upsert(
+                $stockPriceRecords,
+                ['symbol'], // Unique keys
+                ['date', 'open', 'high', 'low', 'close', 'volume', 'change', 'change_pct', 'value'] // Columns to update
             );
 
             $savedCount = count($records);

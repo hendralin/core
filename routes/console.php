@@ -38,20 +38,46 @@ Schedule::command('stock:scrape-idx')
     ->runInBackground(); // Run in background
 
 // Schedule combined stock prices fetching and breakthrough analysis
-// Session 1: 09:00 - 12:00 WIB (02:00 - 05:00 UTC)
+// Session 1: 09:00 – 12:10 WIB
 Schedule::command('stock:fetch-and-analyze-breakthroughs')
     ->everyTenMinutes()
     ->weekdays()
+    ->when(fn () => ! now()->isFriday())
     ->timezone('Asia/Jakarta')
     ->between('09:00', '12:10')
     ->withoutOverlapping()
     ->runInBackground();
 
-// Session 2: 13:30 - 16:00 WIB (06:30 - 09:00 UTC)
+// Session 2: 13:30 – 16:10 WIB
 Schedule::command('stock:fetch-and-analyze-breakthroughs')
     ->everyTenMinutes()
     ->weekdays()
+    ->when(fn () => ! now()->isFriday())
     ->timezone('Asia/Jakarta')
     ->between('13:30', '16:10')
+    ->withoutOverlapping()
+    ->runInBackground();
+
+/*
+|--------------------------------------------------------------------------
+| KHUSUS JUMAT
+|--------------------------------------------------------------------------
+*/
+
+// Session 1 Jumat: 09:00 – 11:30 WIB
+Schedule::command('stock:fetch-and-analyze-breakthroughs')
+    ->everyTenMinutes()
+    ->fridays()
+    ->timezone('Asia/Jakarta')
+    ->between('09:00', '11:30')
+    ->withoutOverlapping()
+    ->runInBackground();
+
+// Session 2 Jumat: 14:00 – 16:10 WIB
+Schedule::command('stock:fetch-and-analyze-breakthroughs')
+    ->everyTenMinutes()
+    ->fridays()
+    ->timezone('Asia/Jakarta')
+    ->between('14:00', '16:10')
     ->withoutOverlapping()
     ->runInBackground();
