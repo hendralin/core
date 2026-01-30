@@ -2,12 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Models\GoapiGetStockPrice;
 use App\Models\TradingInfo;
+use App\Models\GoapiStockPrice;
 use Illuminate\Console\Command;
+use App\Models\GoapiGetStockPrice;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class FetchGoapiStockPrices extends Command
 {
@@ -68,6 +69,29 @@ class FetchGoapiStockPrices extends Command
 
         $this->stats['total_symbols'] = count($stockCodes);
         $this->info("Found {$this->stats['total_symbols']} stock symbols to process");
+
+        // Migrate data from goapi_get_stock_prices to goapi_stock_prices
+        $timeFetch = now()->toDateTimeString();
+        GoapiGetStockPrice::query()
+            ->orderBy('id')
+            ->chunkById(100, function ($chunk) use ($timeFetch) {
+                foreach ($chunk as $item) {
+                    GoapiStockPrice::create([
+                        'symbol' => $item->symbol,
+                        'date' => $timeFetch,
+                        'open' => $item->open,
+                        'high' => $item->high,
+                        'low' => $item->low,
+                        'close' => $item->close,
+                        'volume' => $item->volume,
+                        'change' => $item->change,
+                        'change_pct' => $item->change_pct,
+                        'value' => $item->value,
+                    ]);
+                }
+            });
+
+        $this->info('Migrated data from goapi_get_stock_prices to goapi_stock_prices');
 
         // Truncate table before processing to ensure fresh data
         GoapiGetStockPrice::truncate();

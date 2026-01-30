@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Models\GoapiGetStockPrice;
 use App\Models\StockSignal;
 use App\Models\TradingInfo;
+use App\Models\GoapiStockPrice;
 use Illuminate\Console\Command;
+use App\Models\GoapiGetStockPrice;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class FetchAndAnalyzeStockBreakthroughs extends Command
 {
@@ -77,6 +78,29 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
 
         $this->stats['total_symbols'] = count($stockCodes);
         $this->info("Found {$this->stats['total_symbols']} stock symbols to process");
+
+        // Migrate data from goapi_get_stock_prices to goapi_stock_prices
+        $timeFetch = now()->toDateTimeString();
+        GoapiGetStockPrice::query()
+            ->orderBy('id')
+            ->chunkById(100, function ($chunk) use ($timeFetch) {
+                foreach ($chunk as $item) {
+                    GoapiStockPrice::create([
+                        'symbol' => $item->symbol,
+                        'date' => $timeFetch,
+                        'open' => $item->open,
+                        'high' => $item->high,
+                        'low' => $item->low,
+                        'close' => $item->close,
+                        'volume' => $item->volume,
+                        'change' => $item->change,
+                        'change_pct' => $item->change_pct,
+                        'value' => $item->value,
+                    ]);
+                }
+            });
+
+        $this->info('Migrated data from goapi_get_stock_prices to goapi_stock_prices');
 
         // Truncate table before processing to ensure fresh data
         GoapiGetStockPrice::truncate();
@@ -168,7 +192,6 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
             if ($savedRecords > 0) {
                 $this->analyzeForBreakthroughs($marketCapMax, $autoPublish);
             }
-
         } catch (\Exception $e) {
             $this->stats['errors'][] = "API call failed for symbols {$symbols}: {$e->getMessage()}";
             Log::error('FetchAndAnalyzeStockBreakthroughs API error', [
@@ -250,7 +273,6 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
             foreach ($breakthroughs as $breakthrough) {
                 $this->processBreakthroughSignal($breakthrough, $autoPublish);
             }
-
         } catch (\Exception $e) {
             $this->stats['errors'][] = "Breakthrough analysis error: {$e->getMessage()}";
             Log::error('FetchAndAnalyzeStockBreakthroughs analysis error', [
@@ -416,8 +438,6 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
 
             // Send WhatsApp message to the Group
             $this->sendWhatsAppMessage($signal, $breakthrough);
-
-
         } catch (\Exception $e) {
             $this->stats['errors'][] = "Failed to save signal for {$breakthrough->kode_emiten}: {$e->getMessage()}";
             Log::error('Failed to save breakthrough signal', [
@@ -524,17 +544,17 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
             $formattedMarketCap = $this->formatCurrency($breakthrough->market_cap);
 
             $message = "🚀 *BREAKTHROUGH SIGNAL DETECTED!*\n\n" .
-                      "📈 *Stock*: {$breakthrough->kode_emiten}\n" .
-                      "💰 *Value*: {$formattedValue}\n" .
-                      "🏢 *Market Cap*: {$formattedMarketCap}\n" .
-                      "📊 *PBV*: {$breakthrough->pbv}x\n" .
-                      "📊 *PER*: {$breakthrough->per}x\n" .
-                      "📅 *Date*: {$breakthrough->hit_date}\n" .
-                      "📈 *Close*: Rp " . number_format($breakthrough->hit_close, 0) . "\n" .
-                      "📦 *Volume*: " . number_format($breakthrough->hit_volume) . "\n\n" .
-                      "⚡ *Status*: {$signal->status}\n" .
-                      "🔗 *Signal ID*: {$signal->id}\n\n" .
-                      "Saham ini baru saja mencapai value di atas 100 miliar untuk pertama kalinya dalam 200 hari terakhir!";
+                "📈 *Stock*: {$breakthrough->kode_emiten}\n" .
+                "💰 *Value*: {$formattedValue}\n" .
+                "🏢 *Market Cap*: {$formattedMarketCap}\n" .
+                "📊 *PBV*: {$breakthrough->pbv}x\n" .
+                "📊 *PER*: {$breakthrough->per}x\n" .
+                "📅 *Date*: {$breakthrough->hit_date}\n" .
+                "📈 *Close*: Rp " . number_format($breakthrough->hit_close, 0) . "\n" .
+                "📦 *Volume*: " . number_format($breakthrough->hit_volume) . "\n\n" .
+                "⚡ *Status*: {$signal->status}\n" .
+                "🔗 *Signal ID*: {$signal->id}\n\n" .
+                "Saham ini baru saja mencapai value di atas 100 miliar untuk pertama kalinya dalam 200 hari terakhir!";
 
             $response = Http::withHeaders([
                 'accept' => 'application/json',
@@ -562,7 +582,6 @@ class FetchAndAnalyzeStockBreakthroughs extends Command
                     'response' => $response->body()
                 ]);
             }
-
         } catch (\Exception $e) {
             Log::error('Exception while sending WhatsApp message', [
                 'signal_id' => $signal->id,

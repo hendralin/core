@@ -33,3 +33,4 @@ error_log
 public/.user.ini
 public/vendor/livewire
 public/flux
+public/tmp
