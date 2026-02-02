@@ -44,7 +44,7 @@ class DashboardIndex extends Component
         $totalCashIn = Cost::where('cost_type', 'cash')->sum('total_price');
 
         // Calculate all other costs (cost_type != 'cash')
-        $totalCosts = Cost::where('cost_type', '!=', 'cash')->sum('total_price');
+        $totalCosts = Cost::where('cost_type', '!=', 'cash')->where('big_cash', 0)->sum('total_price');
 
         // Final balance = Cash In - All Other Costs
         return $totalCashIn - $totalCosts;

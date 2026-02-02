@@ -151,6 +151,43 @@
                     </flux:sidebar.group>
                 @endif
 
+                @if (auth()->user()->can('position.view') ||
+                auth()->user()->can('salary-component.view') ||
+                auth()->user()->can('employee.view') ||
+                auth()->user()->can('salary.view'))
+                    <flux:sidebar.group expandable icon="wallet" heading="Payroll" class="grid">
+                        @if (auth()->user()->can('position.view') ||
+                        auth()->user()->can('position.create') ||
+                        auth()->user()->can('position.edit') ||
+                        auth()->user()->can('position.delete'))
+                            <flux:navlist.item icon="briefcase" :href="route('positions.index')" :current="request()->routeIs('positions.*')" wire:navigate>{{ __('Jabatan') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('salary-component.view') ||
+                        auth()->user()->can('salary-component.create') ||
+                        auth()->user()->can('salary-component.edit') ||
+                        auth()->user()->can('salary-component.delete'))
+                            <flux:navlist.item icon="currency-dollar" :href="route('salary-components.index')" :current="request()->routeIs('salary-components.*')" wire:navigate>{{ __('Komponen Gaji') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('employee.view') ||
+                        auth()->user()->can('employee.create') ||
+                        auth()->user()->can('employee.edit') ||
+                        auth()->user()->can('employee.delete'))
+                            <flux:navlist.item icon="user-group" :href="route('employees.index')" :current="request()->routeIs('employees.*')" wire:navigate>{{ __('Pegawai') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('salary.view') ||
+                        auth()->user()->can('salary.create') ||
+                        auth()->user()->can('salary.edit') ||
+                        auth()->user()->can('salary.delete') ||
+                        auth()->user()->can('salary.print') ||
+                        auth()->user()->can('salary.export'))
+                            <flux:navlist.item icon="currency-dollar" :href="route('salaries.index')" :current="request()->routeIs('salaries.*')" wire:navigate>{{ __('Penggajian') }}</flux:navlist.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endif
+
                 @if (auth()->user()->can('cash-report.view'))
                     <flux:sidebar.group expandable icon="presentation-chart-line" heading="Report" class="grid">
                         @if (auth()->user()->can('cash-report.view'))
@@ -362,6 +399,43 @@
                             <flux:navlist.item icon="currency-dollar" :href="route('cash-injects.index')" :current="request()->routeIs('cash-injects.*')" wire:navigate>{{ __('Inject Kas') }}</flux:navlist.item>
                         @endif
 
+                    </flux:navlist.group>
+                @endif
+
+                @if (auth()->user()->can('position.view') ||
+                auth()->user()->can('salary-component.view') ||
+                auth()->user()->can('employee.view') ||
+                auth()->user()->can('salary.view'))
+                    <flux:navlist.group :heading="__('Payroll')" class="grid">
+                        @if (auth()->user()->can('position.view') ||
+                        auth()->user()->can('position.create') ||
+                        auth()->user()->can('position.edit') ||
+                        auth()->user()->can('position.delete'))
+                            <flux:navlist.item icon="briefcase" :href="route('positions.index')" :current="request()->routeIs('positions.*')" wire:navigate>{{ __('Jabatan') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('salary-component.view') ||
+                        auth()->user()->can('salary-component.create') ||
+                        auth()->user()->can('salary-component.edit') ||
+                        auth()->user()->can('salary-component.delete'))
+                            <flux:navlist.item icon="currency-dollar" :href="route('salary-components.index')" :current="request()->routeIs('salary-components.*')" wire:navigate>{{ __('Komponen Gaji') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('employee.view') ||
+                        auth()->user()->can('employee.create') ||
+                        auth()->user()->can('employee.edit') ||
+                        auth()->user()->can('employee.delete'))
+                            <flux:navlist.item icon="user-group" :href="route('employees.index')" :current="request()->routeIs('employees.*')" wire:navigate>{{ __('Pegawai') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('salary.view') ||
+                        auth()->user()->can('salary.create') ||
+                        auth()->user()->can('salary.edit') ||
+                        auth()->user()->can('salary.delete') ||
+                        auth()->user()->can('salary.print') ||
+                        auth()->user()->can('salary.export'))
+                            <flux:navlist.item icon="currency-dollar" :href="route('salaries.index')" :current="request()->routeIs('salaries.*')" wire:navigate>{{ __('Penggajian') }}</flux:navlist.item>
+                        @endif
                     </flux:navlist.group>
                 @endif
 

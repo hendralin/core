@@ -168,6 +168,38 @@ class PermissionSeeder extends Seeder
             'cash-inject.delete',
             'cash-inject.audit',
 
+
+            // PAYROLL
+            // POSITION
+            'position.view',
+            'position.create',
+            'position.edit',
+            'position.delete',
+            'position.audit',
+
+            // SALARY COMPONENT
+            'salary-component.view',
+            'salary-component.create',
+            'salary-component.edit',
+            'salary-component.delete',
+            'salary-component.audit',
+
+            // EMPLOYEE
+            'employee.view',
+            'employee.create',
+            'employee.edit',
+            'employee.delete',
+            'employee.audit',
+
+            // SALARY
+            'salary.view',
+            'salary.create',
+            'salary.edit',
+            'salary.delete',
+            'salary.print',
+            'salary.export',
+            'salary.audit',
+
             // CASH REPORT
             'cash-report.view',
 

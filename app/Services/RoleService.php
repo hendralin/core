@@ -19,6 +19,7 @@ class RoleService
         'Cost Management' => ['cost'],
         'Cash Management' => ['cashdisbursement'],
         'Cash Inject Management' => ['cash-inject'],
+        'Payroll' => ['position', 'salary-component', 'employee', 'salary'],
         'Reports' => ['cash-report', 'sales-report'],
     ];
     /**
