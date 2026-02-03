@@ -111,7 +111,7 @@ class VehicleIndex extends Component
     public function render()
     {
         $vehicles = Vehicle::query()
-            ->with(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images'])
+            ->with(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'costs', 'commissions'])
             ->when(
                 $this->search,
                 fn($q) =>
@@ -147,7 +147,7 @@ class VehicleIndex extends Component
     public function exportPdf()
     {
         $vehicles = Vehicle::query()
-            ->with(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images'])
+            ->with(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'costs', 'commissions'])
             ->when(
                 $this->search,
                 fn($q) =>

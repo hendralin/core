@@ -187,13 +187,13 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('salesmen/{salesman}', SalesmanShow::class)->name('salesmen.show')->middleware(['permission:salesman.view']);
 
     Route::livewire('warehouses', WarehouseIndex::class)->name('warehouses.index')->middleware(['permission:warehouse.view|warehouse.create|warehouse.edit|warehouse.delete']);
-    Route::livewire('warehouses/audit', WarehouseAudit::class)->name('warehouses.audit')->middleware(['permission:warehouse.view']);
+    Route::livewire('warehouses/audit', WarehouseAudit::class)->name('warehouses.audit')->middleware(['permission:warehouse.audit']);
     Route::livewire('warehouses/create', WarehouseCreate::class)->name('warehouses.create')->middleware(['permission:warehouse.create']);
     Route::livewire('warehouses/{warehouse}/edit', WarehouseEdit::class)->name('warehouses.edit')->middleware(['permission:warehouse.edit']);
     Route::livewire('warehouses/{warehouse}', WarehouseShow::class)->name('warehouses.show')->middleware(['permission:warehouse.view']);
 
     Route::livewire('vehicles', VehicleIndex::class)->name('vehicles.index')->middleware(['permission:vehicle.view|vehicle.create|vehicle.edit|vehicle.delete']);
-    Route::livewire('vehicles/audit', VehicleAudit::class)->name('vehicles.audit')->middleware(['permission:vehicle.view']);
+    Route::livewire('vehicles/audit', VehicleAudit::class)->name('vehicles.audit')->middleware(['permission:vehicle.audit']);
     Route::livewire('vehicles/create', VehicleCreate::class)->name('vehicles.create')->middleware(['permission:vehicle.create']);
     Route::livewire('vehicles/{vehicle}/edit', VehicleEdit::class)->name('vehicles.edit')->middleware(['permission:vehicle.edit']);
     Route::livewire('vehicles/{vehicle}', VehicleShow::class)->name('vehicles.show')->middleware(['permission:vehicle.view']);

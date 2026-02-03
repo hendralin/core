@@ -17,6 +17,10 @@ class ChangeLogIndex extends Component
 
     public function render()
     {
+        if (!auth()->user()->hasRole('superadmin')) {
+            abort(403);
+        }
+
         $changeLogsData = $this->getChangeLogs();
         $currentPage = $this->getPage();
         $perPage = $this->perPage;

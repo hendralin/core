@@ -200,14 +200,16 @@
                     </flux:sidebar.group>
                 @endif
 
-                <flux:sidebar.group expandable icon="wrench-screwdriver" heading="Tool" class="grid">
-                    @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
+                @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create') || auth()->user()->hasRole('superadmin'))
+                    <flux:sidebar.group expandable icon="wrench-screwdriver" heading="Tool" class="grid">
                         <flux:sidebar.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup and Restore') }}</flux:sidebar.item>
-                    @endif
 
-                    <flux:sidebar.item icon="book-open-text" :href="route('change-log.index')" :current="request()->routeIs('change-log.index')" wire:navigate>{{ __('Change Log') }}</flux:sidebar.item>
-                    <flux:sidebar.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:sidebar.item>
-                </flux:sidebar.group>
+                        @if (auth()->user()->hasRole('superadmin'))
+                            <flux:sidebar.item icon="book-open-text" :href="route('change-log.index')" :current="request()->routeIs('change-log.index')" wire:navigate>{{ __('Change Log') }}</flux:sidebar.item>
+                            <flux:sidebar.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:sidebar.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endif
             </flux:sidebar.nav>
 
             <flux:sidebar.spacer class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:hidden max-lg:hidden" />
@@ -451,13 +453,15 @@
                     </flux:navlist.group>
                 @endif
 
-                <flux:navlist.group :heading="__('Tool')" class="grid">
-                    @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
+                @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create') || auth()->user()->hasRole('superadmin'))
+                    <flux:navlist.group :heading="__('Tool')" class="grid">
                         <flux:navlist.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup & Restore') }}</flux:navlist.item>
-                    @endif
-                    <flux:navlist.item icon="book-open-text" :href="route('change-log.index')" :current="request()->routeIs('change-log.index')" wire:navigate>{{ __('Change Log') }}</flux:navlist.item>
-                    <flux:navlist.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:navlist.item>
-                </flux:navlist.group>
+                        @if (auth()->user()->hasRole('superadmin'))
+                            <flux:navlist.item icon="book-open-text" :href="route('change-log.index')" :current="request()->routeIs('change-log.index')" wire:navigate>{{ __('Change Log') }}</flux:navlist.item>
+                            <flux:navlist.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
             </flux:navlist>
 
             <flux:spacer class="in-data-flux-sidebar-collapsed-desktop:hidden" />

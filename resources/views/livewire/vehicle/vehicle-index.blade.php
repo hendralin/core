@@ -27,6 +27,7 @@
             </div>
 
             <!-- Export Actions -->
+            @if(auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
             <div class="flex gap-2">
                 <flux:button variant="ghost" size="sm" wire:click="exportExcel" icon="document-arrow-down" tooltip="Export to Excel" class="flex-1 sm:flex-none cursor-pointer">
                     <span class="hidden sm:inline">Excel</span>
@@ -41,6 +42,7 @@
                     <flux:icon.loading class="text-red-600 w-4 h-4" />
                 </div>
             </div>
+            @endif
         </div>
     </div>
 
@@ -193,6 +195,19 @@
                                                     HK: Rp {{ number_format($vehicle->loan_price / 1000000, 0) }}Jt
                                                 </div>
                                             @endif
+                                            @if(auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
+                                                @php
+                                                    $totalModal = ($vehicle->purchase_price ?? 0) +
+                                                                ($vehicle->costs->sum('total_price') ?? 0) +
+                                                                ($vehicle->commissions->where('type', 2)->sum('amount') ?? 0) +
+                                                                ($vehicle->roadside_allowance ?? 0);
+                                                @endphp
+                                                @if($totalModal > 0)
+                                                    <div class="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                                                        Modal: Rp {{ number_format($totalModal / 1000000, 0) }}Jt
+                                                    </div>
+                                                @endif
+                                            @endif
                                         </div>
                                     @endif
                                     @if($vehicle->kilometer)
@@ -343,12 +358,12 @@
                                                 <span class="text-blue-600 dark:text-blue-400 font-medium">{{ $vehicle->loan_price ? 'Rp ' . number_format($vehicle->loan_price, 0, ',', '.') : '-' }}</span>
                                             </div>
                                             @endif
-                                            @if($vehicle->roadside_allowance)
+                                            {{-- @if($vehicle->roadside_allowance)
                                             <div class="flex justify-between">
                                                 <span class="text-gray-600 dark:text-zinc-400">Biaya Uang Jalan:</span>
                                                 <span class="text-gray-900 dark:text-white font-medium">{{ $vehicle->roadside_allowance ? 'Rp ' . number_format($vehicle->roadside_allowance, 0, ',', '.') : '-' }}</span>
                                             </div>
-                                            @endif
+                                            @endif --}}
                                             @if($vehicle->selling_price)
                                             <div class="flex justify-between">
                                                 <span class="text-gray-600 dark:text-zinc-400">Harga Penjualan:</span>

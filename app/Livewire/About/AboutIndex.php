@@ -10,6 +10,10 @@ class AboutIndex extends Component
 {
     public function render()
     {
+        if (!auth()->user()->hasRole('superadmin')) {
+            abort(403);
+        }
+
         $systemInfo = [
             'version' => '1.22.0',
             'php_version' => PHP_VERSION,

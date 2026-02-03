@@ -109,7 +109,7 @@
                                 <div class="flex-1">
                                     <flux:text class="font-medium text-gray-900 dark:text-white">{{ $employee->name ?? 'N/A' }}</flux:text>
                                     <div class="flex items-center gap-4 mt-1">
-                                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">{{ $employee->email ?? 'No email' }}</flux:text>
+                                        <flux:text class="text-sm text-gray-600 dark:text-zinc-400">{{ $employee->user?->email ?? 'No email' }}</flux:text>
                                         @if($employee->phone)
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
                                                 {{ $employee->phone }}

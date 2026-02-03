@@ -2,11 +2,10 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\Vehicle;
-use App\Models\Cost;
-use Illuminate\Support\Facades\DB;
-use Livewire\Component;
 use Carbon\Carbon;
+use App\Models\Cost;
+use App\Models\Vehicle;
+use Livewire\Component;
 
 class DashboardIndex extends Component
 {
@@ -128,6 +127,14 @@ class DashboardIndex extends Component
 
     public function render()
     {
-        return view('livewire.dashboard.dashboard-index');
+        if (auth()->user()->hasRole('salesman')) {
+            return view('livewire.dashboard.dashboard-salesman');
+        }
+
+        if (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin')) {
+            return view('livewire.dashboard.dashboard-index');
+        }
+
+        return view('livewire.dashboard.dashboard-empty');
     }
 }

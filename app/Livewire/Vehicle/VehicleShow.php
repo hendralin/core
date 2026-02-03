@@ -191,15 +191,16 @@ class VehicleShow extends Component
         // Hitung komisi penjualan (type = 1)
         $sellingCommission = $this->vehicle->commissions?->where('type', 1)->sum('amount') ?? 0;
 
-        // Total modal = harga beli + total cost (semua status) + komisi pembelian
-        $totalModal = $purchasePrice + $this->costSummary['total'] + $purchaseCommission;
+        // Total modal = harga beli + total cost (semua status) + komisi pembelian + biaya uang jalan
+        $roadsideAllowance = $this->vehicle->roadside_allowance ?? 0;
+        $totalModal = $purchasePrice + $this->costSummary['total'] + $purchaseCommission + $roadsideAllowance;
 
-        // Total modal approved = harga beli + cost approved saja + komisi pembelian
+        // Total modal approved = harga beli + cost approved saja + komisi pembelian + biaya uang jalan
         $approvedCosts = Cost::query()
             ->where('vehicle_id', $this->vehicle->id)
             ->where('status', 'approved')
             ->sum('total_price');
-        $totalModalApproved = $purchasePrice + $approvedCosts + $purchaseCommission;
+        $totalModalApproved = $purchasePrice + $approvedCosts + $purchaseCommission + $roadsideAllowance;
 
         $recommendedMinPrice = max($totalModal, $totalModalApproved);
 
@@ -212,6 +213,7 @@ class VehicleShow extends Component
             'total_cost_approved' => $approvedCosts,
             'purchase_commission' => $purchaseCommission,
             'selling_commission' => $sellingCommission,
+            'roadside_allowance' => $roadsideAllowance,
             'total_modal_all' => $totalModal,
             'total_modal_approved' => $totalModalApproved,
             'recommended_min_price' => $recommendedMinPrice,
@@ -345,6 +347,19 @@ class VehicleShow extends Component
             'amount' => $commissionAmount,
             'description' => $this->commission_description,
         ]);
+
+        // Sales Commission Cost paid from Cash Disbursement
+        if ($this->commission_type == 1) {
+            Cost::create([
+                'cost_type' => 'sales_commission',
+                'vehicle_id' => $this->vehicle->id,
+                'cost_date' => $this->commission_date,
+                'commission_id' => $commission->id,
+                'description' => $this->commission_description,
+                'total_price' => $commissionAmount,
+                'created_by' => Auth::id(),
+            ]);
+        }
 
         // Reload vehicle with commissions
         $this->vehicle->load('commissions');
@@ -500,6 +515,8 @@ class VehicleShow extends Component
                 ],
             ])
             ->log('deleted commission');
+
+        $this->modal('delete-commission-{{ $commission->id }}')->close();
 
         // Show success message
         session()->flash('message', 'Komisi ' . ($commission->type == 1 ? 'Penjualan' : 'Pembelian') . ' berhasil dihapus.');

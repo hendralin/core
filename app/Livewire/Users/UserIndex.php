@@ -201,7 +201,7 @@ class UserIndex extends Component
 
     public function mount()
     {
-        $this->roles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
+        $this->roles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'employee', 'owner'])->get();
     }
 
     public function delete($id)
@@ -452,7 +452,7 @@ class UserIndex extends Component
             ->when($this->loginDateFrom, fn($q) => $q->whereDate('last_login_at', '>=', $this->loginDateFrom))
             ->when($this->loginDateTo, fn($q) => $q->whereDate('last_login_at', '<=', $this->loginDateTo))
             ->whereDoesntHave('roles', function ($q) {
-                $q->whereIn('name', ['salesman', 'customer', 'supplier', 'cashier']);
+                $q->whereIn('name', ['salesman', 'customer', 'supplier', 'employee', 'owner']);
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);

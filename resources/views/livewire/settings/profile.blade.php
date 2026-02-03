@@ -38,6 +38,8 @@
             </div>
         </form>
 
-        <livewire:settings.delete-user-form />
+        @if (auth()->user()->hasRole('superadmin'))
+            <livewire:settings.delete-user-form />
+        @endif
     </x-settings.layout>
 </section>

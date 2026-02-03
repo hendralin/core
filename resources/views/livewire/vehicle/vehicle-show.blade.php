@@ -427,10 +427,12 @@
                         <flux:text class="mt-1">{{ $vehicle->loan_price ? 'Rp ' . number_format($vehicle->loan_price, 0, ',', '.') : '-' }}</flux:text>
                     </div>
 
+                    @if (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
                     <div>
                         <flux:heading size="md">Biaya Uang Jalan</flux:heading>
                         <flux:text class="mt-1">{{ $vehicle->roadside_allowance ? 'Rp ' . number_format($vehicle->roadside_allowance, 0, ',', '.') : '-' }}</flux:text>
                     </div>
+                    @endif
                 </div>
 
                 <!-- Purchase Payments -->
@@ -564,6 +566,112 @@
                     </flux:modal>
                     @endforeach
                 @endif
+
+                <!-- Loan Calculation -->
+                @if(auth()->user()->can('vehicle-loan-calculation.view') || auth()->user()->can('vehicle-loan-calculation.create') || auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete') || auth()->user()->can('vehicle-loan-calculation.audit'))
+                    @if($vehicle->loanCalculations && $vehicle->loanCalculations->count() > 0)
+                        <div class="flex items-center justify-between mt-6 mb-4">
+                            <flux:heading size="md">Perhitungan Kredit</flux:heading>
+                            <div class="flex items-center gap-2">
+                                @can('vehicle-loan-calculation.audit')
+                                    <flux:button variant="filled" size="sm" href="{{ route('loan-calculations.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
+                                @endcan
+                                @can('vehicle-loan-calculation.create')
+                                    <flux:button wire:click="openLoanCalculationModal" size="sm" variant="filled" icon="plus" class="cursor-pointer" tooltip="Tambah Perhitungan Kredit">Tambah</flux:button>
+                                @endcan
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Leasing</th>
+                                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
+                                        <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Tanggal Dibuat</th>
+                                        @if(auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete'))
+                                        <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
+                                        @endif
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
+                                    @foreach($vehicle->loanCalculations->sortBy('leasing.name') as $loanCalculation)
+                                    <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
+                                        <td class="px-4 py-1">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                {{ $loanCalculation->leasing->name ?? '-' }}
+                                            </flux:text>
+                                        </td>
+                                        <td class="px-4 py-1">
+                                            <flux:text class="text-sm">
+                                                {{ $loanCalculation->description ?? '-' }}
+                                            </flux:text>
+                                        </td>
+                                        <td class="px-4 py-1 text-center">
+                                            <flux:text class="text-sm whitespace-nowrap">
+                                                {{ Carbon\Carbon::parse($loanCalculation->created_at)->format('d-m-Y') }}
+                                            </flux:text>
+                                        </td>
+                                        @if(auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete'))
+                                        <td class="px-4 py-1 text-center">
+                                            <div class="flex items-center justify-center space-x-1">
+                                                @can('vehicle-loan-calculation.edit')
+                                                <flux:button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    icon="pencil-square"
+                                                    tooltip="Edit"
+                                                    wire:click="openEditLoanCalculationModal({{ $loanCalculation->id }})"
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                                ></flux:button>
+                                                @endcan
+                                                @can('vehicle-loan-calculation.delete')
+                                                <flux:modal.trigger name="delete-loan-calculation-{{ $loanCalculation->id }}">
+                                                    <flux:button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon="trash"
+                                                        tooltip="Delete"
+                                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                                                    ></flux:button>
+                                                </flux:modal.trigger>
+                                                @endcan
+                                            </div>
+                                        </td>
+                                        @endif
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Delete Loan Calculation Confirmation Modals -->
+                        @foreach($vehicle->loanCalculations as $loanCalculation)
+                            <flux:modal name="delete-loan-calculation-{{ $loanCalculation->id }}" class="min-w-88">
+                                <div class="space-y-6">
+                                    <div>
+                                        <flux:heading size="lg">Hapus Perhitungan Kredit?</flux:heading>
+                                        <flux:text class="mt-2">
+                                            Apakah Anda yakin ingin menghapus perhitungan kredit ini? Tindakan ini tidak dapat dibatalkan.
+                                        </flux:text>
+                                    </div>
+                                    <div class="flex justify-end gap-2">
+                                        <flux:modal.close>
+                                            <flux:button variant="ghost">Batal</flux:button>
+                                        </flux:modal.close>
+                                        <flux:button
+                                            wire:click="deleteLoanCalculation({{ $loanCalculation->id }})"
+                                            variant="danger"
+                                            class="cursor-pointer"
+                                        >
+                                            Hapus Perhitungan Kredit
+                                        </flux:button>
+                                    </div>
+                                </div>
+                            </flux:modal>
+                        @endforeach
+                    @endif
+                @endif
             </div>
 
             <!-- Buyer Information (only shown when status is Sold) -->
@@ -620,9 +728,19 @@
                         <flux:text class="mt-1">{{ $vehicle->buyer_phone ?? '-' }}</flux:text>
                     </div>
 
-                    <div class="md:col-span-2">
+                    <div>
                         <flux:heading size="md">Alamat Pembeli</flux:heading>
                         <flux:text class="mt-1">{!! $vehicle->buyer_address ? nl2br(e($vehicle->buyer_address)) : '-' !!}</flux:text>
+                    </div>
+
+                    <div>
+                        <flux:heading size="md">Nama Salesman</flux:heading>
+                        <flux:text class="mt-1 flex items-center gap-1">
+                            {{ $vehicle->salesman?->name ?? '-' }}
+                            @if(auth()->user()->name == $vehicle->salesman?->name)
+                                <flux:icon.star variant="solid" class="text-amber-500 dark:text-amber-300 w-4 h-4" />
+                            @endif
+                        </flux:text>
                     </div>
                 </div>
 
@@ -1103,7 +1221,7 @@
                     </div>
 
                     <!-- Purchase Commissions -->
-                    @if($vehicle->commissions->where('type', 2)->count() > 0)
+                    @if($vehicle->commissions->where('type', 2)->count() > 0 && (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin')))
                     <div class="mb-8">
                         <div class="flex items-center justify-between">
                             <flux:heading size="md" class="mb-2">Komisi Pembelian (Max 4)</flux:heading>
@@ -1299,114 +1417,6 @@
                     </flux:modal>
                     @endforeach
                     @endif
-                </div>
-                @endif
-            @endif
-
-            <!-- Loan Calculation -->
-            @if(auth()->user()->can('vehicle-loan-calculation.view') || auth()->user()->can('vehicle-loan-calculation.create') || auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete') || auth()->user()->can('vehicle-loan-calculation.audit'))
-                @if($vehicle->loanCalculations && $vehicle->loanCalculations->count() > 0)
-                <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <flux:heading size="lg">Perhitungan Kredit</flux:heading>
-                        <div class="flex items-center gap-2">
-                            @can('vehicle-loan-calculation.audit')
-                                <flux:button variant="filled" size="sm" href="{{ route('loan-calculations.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" tooltip="Audit Trail">Audit</flux:button>
-                            @endcan
-                            @can('vehicle-loan-calculation.create')
-                                <flux:button wire:click="openLoanCalculationModal" size="sm" variant="filled" icon="plus" class="cursor-pointer" tooltip="Tambah Perhitungan Kredit">Tambah</flux:button>
-                            @endcan
-                        </div>
-                    </div>
-
-                    <div class="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50 dark:bg-zinc-700 border-b border-gray-200 dark:border-zinc-700">
-                                <tr>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Leasing</th>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-white">Deskripsi</th>
-                                    <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Tanggal Dibuat</th>
-                                    @if(auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete'))
-                                    <th class="px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white">Actions</th>
-                                    @endif
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
-                                @foreach($vehicle->loanCalculations->sortBy('leasing.name') as $loanCalculation)
-                                <tr class="bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
-                                    <td class="px-4 py-1">
-                                        <flux:text class="text-sm whitespace-nowrap">
-                                            {{ $loanCalculation->leasing->name ?? '-' }}
-                                        </flux:text>
-                                    </td>
-                                    <td class="px-4 py-1">
-                                        <flux:text class="text-sm">
-                                            {{ $loanCalculation->description ?? '-' }}
-                                        </flux:text>
-                                    </td>
-                                    <td class="px-4 py-1 text-center">
-                                        <flux:text class="text-sm whitespace-nowrap">
-                                            {{ Carbon\Carbon::parse($loanCalculation->created_at)->format('d-m-Y') }}
-                                        </flux:text>
-                                    </td>
-                                    @if(auth()->user()->can('vehicle-loan-calculation.edit') || auth()->user()->can('vehicle-loan-calculation.delete'))
-                                    <td class="px-4 py-1 text-center">
-                                        <div class="flex items-center justify-center space-x-1">
-                                            @can('vehicle-loan-calculation.edit')
-                                            <flux:button
-                                                variant="ghost"
-                                                size="sm"
-                                                icon="pencil-square"
-                                                tooltip="Edit"
-                                                wire:click="openEditLoanCalculationModal({{ $loanCalculation->id }})"
-                                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
-                                            ></flux:button>
-                                            @endcan
-                                            @can('vehicle-loan-calculation.delete')
-                                            <flux:modal.trigger name="delete-loan-calculation-{{ $loanCalculation->id }}">
-                                                <flux:button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    icon="trash"
-                                                    tooltip="Delete"
-                                                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                                                ></flux:button>
-                                            </flux:modal.trigger>
-                                            @endcan
-                                        </div>
-                                    </td>
-                                    @endif
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Delete Loan Calculation Confirmation Modals -->
-                    @foreach($vehicle->loanCalculations as $loanCalculation)
-                    <flux:modal name="delete-loan-calculation-{{ $loanCalculation->id }}" class="min-w-88">
-                        <div class="space-y-6">
-                            <div>
-                                <flux:heading size="lg">Hapus Perhitungan Kredit?</flux:heading>
-                                <flux:text class="mt-2">
-                                    Apakah Anda yakin ingin menghapus perhitungan kredit ini? Tindakan ini tidak dapat dibatalkan.
-                                </flux:text>
-                            </div>
-                            <div class="flex justify-end gap-2">
-                                <flux:modal.close>
-                                    <flux:button variant="ghost">Batal</flux:button>
-                                </flux:modal.close>
-                                <flux:button
-                                    wire:click="deleteLoanCalculation({{ $loanCalculation->id }})"
-                                    variant="danger"
-                                    class="cursor-pointer"
-                                >
-                                    Hapus Perhitungan Kredit
-                                </flux:button>
-                            </div>
-                        </div>
-                    </flux:modal>
-                    @endforeach
                 </div>
                 @endif
             @endif
@@ -1669,7 +1679,7 @@
                 </div>
             </div>
 
-            @can('vehicle-modal.view')
+            @hasrole('superadmin|owner|admin')
                 <!-- Financial Overview -->
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                     <flux:heading size="lg" class="mb-4">Financial Overview</flux:heading>
@@ -1741,7 +1751,7 @@
                         </div>
                     </div>
                 </div>
-            @endcan
+            @endhasrole
 
             <!-- Quick Actions -->
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
@@ -1757,7 +1767,7 @@
                         </flux:button>
                     @endcan
 
-                    @can('vehicle.view')
+                    @can('vehicle.audit')
                         <flux:button size="sm" href="{{ route('vehicles.audit') }}?selectedVehicle={{ $vehicle->id }}" wire:navigate icon="document-text" class="w-full justify-start p-6">
                             <div class="flex flex-col items-start">
                                 <span>View Audit Trail</span>
@@ -2011,7 +2021,7 @@
                                     <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['purchase_price'], 0, ',', '.') }}</flux:text>
                                 </div>
                                 <div class="flex justify-between">
-                                    <flux:text class="text-sm">Total Cost (All):</flux:text>
+                                    <flux:text class="text-sm">Total Cost:</flux:text>
                                     <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['total_cost_all'], 0, ',', '.') }}</flux:text>
                                 </div>
                                 {{-- <div class="flex justify-between">
@@ -2022,6 +2032,12 @@
                                 <div class="flex justify-between">
                                     <flux:text class="text-sm">Komisi Pembelian:</flux:text>
                                     <flux:text class="text-sm font-medium">Rp {{ number_format($priceAnalysis['purchase_commission'], 0, ',', '.') }}</flux:text>
+                                </div>
+                                @endif
+                                @if($vehicle->roadside_allowance > 0)
+                                <div class="flex justify-between">
+                                    <flux:text class="text-sm">Biaya Uang Jalan:</flux:text>
+                                    <flux:text class="text-sm font-medium">Rp {{ number_format($vehicle->roadside_allowance, 0, ',', '.') }}</flux:text>
                                 </div>
                                 @endif
                                 <div class="flex justify-between border-t border-gray-300 dark:border-zinc-600 pt-2">
@@ -2677,7 +2693,9 @@
                 <flux:text class="mt-2">Tambahkan komisi baru untuk kendaraan ini.</flux:text>
             </div>
             <flux:select wire:model="commission_type" label="Tipe Komisi">
-                <flux:select.option value="1">Komisi Penjualan</flux:select.option>
+                @if($vehicle->status == 0)
+                    <flux:select.option value="1">Komisi Penjualan</flux:select.option>
+                @endif
                 <flux:select.option value="2">Komisi Pembelian</flux:select.option>
             </flux:select>
             <flux:input
