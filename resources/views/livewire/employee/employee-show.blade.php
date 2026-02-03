@@ -117,18 +117,17 @@
 
                     <!-- Search and Per Page Controls -->
                     <div class="space-y-4 mb-6">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="flex items-center">
-                                <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300 mr-2">Per Page:</label>
-                                <select id="per-page" wire:model.live="perPage"
-                                        class="text-sm rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300 mr-2 w-16">Per Page:</label>
+                                <flux:select id="per-page" wire:model.live="perPage" class="w-18">
                                     @foreach ($this->perPageOptions as $option)
-                                        <option value="{{ $option }}">{{ $option }}</option>
+                                    <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
                                     @endforeach
-                                </select>
+                                </flux:select>
                             </div>
                             <flux:spacer class="hidden md:inline" />
-                            <flux:spacer class="hidden md:inline" />
+
                             <div class="flex items-center">
                                 <label for="search-salary-components" class="text-sm text-gray-700 dark:text-zinc-300 mr-2">Search:</label>
                                 <flux:input wire:model.live.debounce.500ms="search" id="search-salary-components" placeholder="Component name, description..." clearable />
@@ -138,32 +137,47 @@
 
                     <!-- Employee Salary Components List -->
                     @if(isset($employeeSalaryComponents) && $employeeSalaryComponents->count() > 0)
-                        <div class="space-y-3">
-                            @foreach($employeeSalaryComponents as $employeeSalaryComponent)
-                            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700/70 transition-colors">
-                                <div class="flex-1">
-                                    <flux:text class="font-medium text-gray-900 dark:text-white">{{ $employeeSalaryComponent->salaryComponent->name ?? 'N/A' }}</flux:text>
-                                    <div class="flex items-center gap-4 mt-1">
-                                        @if($employeeSalaryComponent->is_quantitative)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                Quantitative: {{ number_format($employeeSalaryComponent->amount, 2) }}
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
-                                                Fixed: {{ number_format($employeeSalaryComponent->amount, 2) }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                    @if($employeeSalaryComponent->description)
-                                        <flux:text class="text-sm text-gray-500 dark:text-zinc-400 mt-1">{{ $employeeSalaryComponent->description }}</flux:text>
-                                    @endif
-                                </div>
-                                <div class="text-right">
-                                    <flux:text class="text-sm text-gray-500 dark:text-zinc-400">{{ $employeeSalaryComponent->updated_at->format('M d, Y') }}</flux:text>
-                                    <flux:text class="text-xs text-gray-400 dark:text-zinc-500 block">{{ $employeeSalaryComponent->updated_at->format('H:i') }}</flux:text>
-                                </div>
-                            </div>
-                            @endforeach
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700 border dark:border-zinc-700 rounded-lg">
+                                <thead class="bg-gray-50 dark:bg-zinc-700/50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">No.</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Component</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Type</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Amount</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-zinc-800 divide-y divide-gray-200 dark:divide-zinc-700">
+                                    @foreach($employeeSalaryComponents as $employeeSalaryComponent)
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-zinc-700/50">
+                                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                            {{ $loop->iteration + ($employeeSalaryComponents->currentPage() - 1) * $employeeSalaryComponents->perPage() }}
+                                        </td>
+                                        <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ $employeeSalaryComponent->salaryComponent->name ?? 'N/A' }}
+                                        </td>
+                                        <td class="px-6 py-3 whitespace-nowrap">
+                                            @if($employeeSalaryComponent->is_quantitative)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                    Quantitative
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                                                    Fixed
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white text-right">
+                                            {{ number_format($employeeSalaryComponent->amount, 0) }}
+                                        </td>
+                                        <td class="px-6 py-3 text-sm text-gray-500 dark:text-zinc-400">
+                                            {{ $employeeSalaryComponent->description ?: '-' }}
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
 
                         <!-- Pagination -->
