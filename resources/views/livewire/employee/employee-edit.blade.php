@@ -9,6 +9,10 @@
         <flux:button variant="primary" size="sm" href="{{ route('employees.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Back to Employees">Back</flux:button>
 
         <div class="w-full max-w-4xl">
+            @session('error')
+                <flux:callout variant="warning" icon="exclamation-circle" heading="{{ $value }}" class="mt-4" />
+            @endsession
+
             <form wire:submit="submit" class="mt-6 space-y-6">
                 <!-- Basic Employee Information -->
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">

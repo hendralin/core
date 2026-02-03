@@ -69,8 +69,26 @@ class EmployeeCreate extends Component
             'selectedSalaryComponents' => 'array',
             'selectedSalaryComponents.*.salary_component_id' => 'required|exists:salary_components,id',
             'selectedSalaryComponents.*.is_quantitative' => 'boolean',
-            'selectedSalaryComponents.*.amount' => 'required|numeric|min:0',
+            'selectedSalaryComponents.*.amount' => 'required',
             'selectedSalaryComponents.*.description' => 'nullable|string|max:500',
+        ], [
+            'user_id.unique' => 'User account already linked to another employee.',
+            'name.required' => 'Employee name is required.',
+            'name.string' => 'Employee name must be a string.',
+            'name.max' => 'Employee name must be less than 255 characters.',
+            'join_date.required' => 'Join date is required.',
+            'join_date.date' => 'Join date must be a date.',
+            'position_id.required' => 'Position is required.',
+            'position_id.exists' => 'Position is invalid.',
+            'status.required' => 'Status is required.',
+            'status.in' => 'Status is invalid.',
+            'selectedSalaryComponents.array' => 'Selected salary components must be an array.',
+            'selectedSalaryComponents.*.salary_component_id.required' => 'Salary component is required.',
+            'selectedSalaryComponents.*.salary_component_id.exists' => 'Salary component is invalid.',
+            'selectedSalaryComponents.*.is_quantitative.boolean' => 'Is quantitative must be a boolean.',
+            'selectedSalaryComponents.*.amount.required' => 'Amount is required.',
+            'selectedSalaryComponents.*.description.string' => 'Description must be a string.',
+            'selectedSalaryComponents.*.description.max' => 'Description must be less than 500 characters.',
         ]);
 
         // Validate unique salary components
