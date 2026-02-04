@@ -79,6 +79,24 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('admin/signals/{signal}/edit', SignalsEdit::class)->name('admin.signals.edit')->middleware(['permission:admin.signal.edit']);
     Route::livewire('admin/signals/{signal}', SignalsShow::class)->name('admin.signals.show')->middleware(['permission:admin.signal.view']);
 
+    Route::livewire('categories', 'pages::blog.categories.index')->name('blog.categories.index')->middleware(['permission:blog.category.view|blog.category.create|blog.category.edit|blog.category.delete|blog.category.audit']);
+    // Route::livewire('categories/audit', CategoriesAudit::class)->name('blog.categories.audit')->middleware(['permission:blog.category.audit']);
+    // Route::livewire('categories/create', CategoriesCreate::class)->name('blog.categories.create')->middleware(['permission:blog.category.create']);
+    // Route::livewire('categories/{category}/edit', CategoriesEdit::class)->name('blog.categories.edit')->middleware(['permission:blog.category.edit']);
+    // Route::livewire('categories/{category}', CategoriesShow::class)->name('blog.categories.show')->middleware(['permission:blog.category.view']);
+
+    // Route::livewire('tags', TagsIndex::class)->name('tags.index')->middleware(['permission:blog.tag.view|blog.tag.create|blog.tag.edit|blog.tag.delete|blog.tag.audit']);
+    // Route::livewire('tags/audit', TagsAudit::class)->name('tags.audit')->middleware(['permission:blog.tag.audit']);
+    // Route::livewire('tags/create', TagsCreate::class)->name('tags.create')->middleware(['permission:blog.tag.create']);
+    // Route::livewire('tags/{tag}/edit', TagsEdit::class)->name('tags.edit')->middleware(['permission:blog.tag.edit']);
+    // Route::livewire('tags/{tag}', TagsShow::class)->name('tags.show')->middleware(['permission:blog.tag.view']);
+
+    // Route::livewire('posts', PostsIndex::class)->name('posts.index')->middleware(['permission:blog.post.view|blog.post.create|blog.post.edit.own|blog.post.edit.all|blog.post.delete.own|blog.post.delete.all|blog.post.publish|blog.post.audit']);
+    // Route::livewire('posts/audit', PostsAudit::class)->name('posts.audit')->middleware(['permission:blog.post.audit']);
+    // Route::livewire('posts/create', PostsCreate::class)->name('posts.create')->middleware(['permission:blog.post.create']);
+    // Route::livewire('posts/{post}/edit', PostsEdit::class)->name('posts.edit')->middleware(['permission:blog.post.edit']);
+    // Route::livewire('posts/{post}', PostsShow::class)->name('posts.show')->middleware(['permission:blog.post.view']);
+
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::livewire('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
     });

@@ -78,6 +78,40 @@
                     </flux:sidebar.group>
                 @endif
 
+                @if (auth()->user()->can('blog.category.view') ||
+                auth()->user()->can('blog.tag.view') ||
+                auth()->user()->can('blog.post.view'))
+                    <flux:sidebar.group expandable icon="newspaper" heading="Blogs" class="grid">
+                        @if (auth()->user()->can('blog.category.view') ||
+                        auth()->user()->can('blog.category.create') ||
+                        auth()->user()->can('blog.category.edit') ||
+                        auth()->user()->can('blog.category.delete') ||
+                        auth()->user()->can('blog.category.audit'))
+                            <flux:sidebar.item icon="folder-git-2" :href="route('blog.categories.index')" :current="request()->routeIs('blog.categories.*')" wire:navigate>{{ __('Categories') }}</flux:sidebar.item>
+                        @endif
+
+                        {{-- @if (auth()->user()->can('blog.tag.view') ||
+                        auth()->user()->can('blog.tag.create') ||
+                        auth()->user()->can('blog.tag.edit') ||
+                        auth()->user()->can('blog.tag.delete') ||
+                        auth()->user()->can('blog.tag.audit'))
+                            <flux:sidebar.item icon="tag" :href="route('blog.tags.index')" :current="request()->routeIs('blog.tags.*')" wire:navigate>{{ __('Tags') }}</flux:sidebar.item>
+                        @endif --}}
+
+                        {{-- @if (auth()->user()->can('blog.post.view') ||
+                        auth()->user()->can('blog.post.create') ||
+                        auth()->user()->can('blog.post.edit.own') ||
+                        auth()->user()->can('blog.post.edit.all') ||
+                        auth()->user()->can('blog.post.delete.own') ||
+                        auth()->user()->can('blog.post.delete.all') ||
+                        auth()->user()->can('blog.post.publish') ||
+                        auth()->user()->can('blog.post.audit'))
+                            <flux:sidebar.item icon="book-open-text" :href="route('blog.posts.index')" :current="request()->routeIs('blog.posts.*')" wire:navigate>{{ __('Posts') }}</flux:sidebar.item>
+                        @endif --}}
+                    </flux:sidebar.group>
+                @endif
+
+
                 <flux:sidebar.group expandable icon="wrench-screwdriver" heading="Tool" class="grid">
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
                         <flux:sidebar.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup and Restore') }}</flux:sidebar.item>
@@ -202,6 +236,39 @@
                         auth()->user()->can('admin.signal.unpublish'))
                             <flux:navlist.item icon="signal" :href="route('admin.signals.index')" :current="request()->routeIs('admin.signals.*')" wire:navigate>{{ __('Signals') }}</flux:navlist.item>
                         @endif
+                    </flux:navlist.group>
+                @endif
+
+                @if (auth()->user()->can('blog.category.view') ||
+                auth()->user()->can('blog.tag.view') ||
+                auth()->user()->can('blog.post.view'))
+                    <flux:navlist.group :heading="__('Blogs')" class="grid">
+                        @if (auth()->user()->can('blog.category.view') ||
+                        auth()->user()->can('blog.category.create') ||
+                        auth()->user()->can('blog.category.edit') ||
+                        auth()->user()->can('blog.category.delete') ||
+                        auth()->user()->can('blog.category.audit'))
+                            <flux:navlist.item icon="folder-git-2" :href="route('blog.categories.index')" :current="request()->routeIs('blog.categories.*')" wire:navigate>{{ __('Categories') }}</flux:navlist.item>
+                        @endif
+
+                        {{-- @if (auth()->user()->can('blog.tag.view') ||
+                        auth()->user()->can('blog.tag.create') ||
+                        auth()->user()->can('blog.tag.edit') ||
+                        auth()->user()->can('blog.tag.delete') ||
+                        auth()->user()->can('blog.tag.audit'))
+                            <flux:navlist.item icon="tag" :href="route('blog.tags.index')" :current="request()->routeIs('blog.tags.*')" wire:navigate>{{ __('Tags') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('blog.post.view') ||
+                        auth()->user()->can('blog.post.create') ||
+                        auth()->user()->can('blog.post.edit.own') ||
+                        auth()->user()->can('blog.post.edit.all') ||
+                        auth()->user()->can('blog.post.delete.own') ||
+                        auth()->user()->can('blog.post.delete.all') ||
+                        auth()->user()->can('blog.post.publish') ||
+                        auth()->user()->can('blog.post.audit'))
+                            <flux:navlist.item icon="book-open-text" :href="route('blog.posts.index')" :current="request()->routeIs('blog.posts.*')" wire:navigate>{{ __('Posts') }}</flux:navlist.item>
+                        @endif --}}
                     </flux:navlist.group>
                 @endif
 

@@ -14,8 +14,9 @@ class RoleService
     private const PERMISSION_GROUPS = [
         'System' => ['company', 'backup-restore'],
         'Users & Roles' => ['user', 'role'],
-        'Trading Summary' => ['stock-summary'],
-        'Featuring' => ['admin.signal'],
+        'Stock Summary' => ['stock-summary'],
+        'Signal Management' => ['admin.signal'],
+        'Blog Management' => ['blog.category', 'blog.tag', 'blog.post'],
     ];
     /**
      * Check if a role can be deleted
@@ -50,15 +51,16 @@ class RoleService
         $grouped = array_fill_keys(array_keys(self::PERMISSION_GROUPS), []);
 
         foreach ($permissions as $permission) {
-            $parts = explode('.', $permission->name);
-            $resource = $parts[0] ?? null;
+            $permissionName = $permission->name;
 
             $groupFound = false;
-            foreach (self::PERMISSION_GROUPS as $groupName => $resources) {
-                if (in_array($resource, $resources)) {
-                    $grouped[$groupName][] = $permission;
-                    $groupFound = true;
-                    break;
+            foreach (self::PERMISSION_GROUPS as $groupName => $prefixes) {
+                foreach ($prefixes as $prefix) {
+                    if (str_starts_with($permissionName, $prefix . '.')) {
+                        $grouped[$groupName][] = $permission;
+                        $groupFound = true;
+                        break 2;
+                    }
                 }
             }
 

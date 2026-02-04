@@ -43,6 +43,31 @@ class PermissionSeeder extends Seeder
             'admin.signal.publish',
             'admin.signal.unpublish',
             'admin.signal.audit',
+
+            // Blogs
+            // Categories
+            'blog.category.view',
+            'blog.category.create',
+            'blog.category.edit',
+            'blog.category.delete',
+            'blog.category.audit',
+
+            // Tags
+            'blog.tag.view',
+            'blog.tag.create',
+            'blog.tag.edit',
+            'blog.tag.delete',
+            'blog.tag.audit',
+
+            // Posts
+            'blog.post.view',
+            'blog.post.create',
+            'blog.post.edit.own',
+            'blog.post.edit.all',
+            'blog.post.delete.own',
+            'blog.post.delete.all',
+            'blog.post.publish',
+            'blog.post.audit',
         ];
 
         foreach ($permissions as $key => $value) {
