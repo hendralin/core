@@ -56,5 +56,9 @@ class Tag extends Model
                 $tag->slug = Str::slug($tag->name);
             }
         });
+
+        static::updating(function ($tag) {
+            $tag->slug = Str::slug($tag->name);
+        });
     }
 }
