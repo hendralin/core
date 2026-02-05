@@ -104,7 +104,7 @@
     </div>
 
     <!-- Table Section -->
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto rounded-lg">
         <table class="w-full min-w-225 text-sm text-left rtl:text-right text-gray-500 border dark:border-zinc-700 dark:text-zinc-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b dark:border-b-0 dark:bg-zinc-700 dark:text-zinc-400">
                 <tr>
