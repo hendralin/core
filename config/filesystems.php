@@ -81,10 +81,10 @@ return [
             'visibility' => 'public',
         ],
 
-        'blogs' => [
+        'posts' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/blogs'),
-            'url' => env('APP_URL') . '/blogs',
+            'root' => storage_path('app/public/posts'),
+            'url' => env('APP_URL') . '/posts',
             'visibility' => 'public',
         ],
 
@@ -106,7 +106,7 @@ return [
         public_path('photos') => storage_path('app/public/photos'),
         public_path('logos') => storage_path('app/public/logos'),
         public_path('avatars') => storage_path('app/public/avatars'),
-        public_path('blogs') => storage_path('app/public/blogs'),
+        public_path('posts') => storage_path('app/public/posts'),
     ],
 
 ];

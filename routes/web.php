@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Home\HomeIndex;
 use App\Livewire\Roles\RoleEdit;
 use App\Livewire\Roles\RoleShow;
 use App\Livewire\Users\UserEdit;
@@ -40,11 +41,19 @@ use App\Livewire\Blog\Categories\CategoryIndex;
 use App\Livewire\Blog\Categories\CategoryCreate;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
 use App\Livewire\TradingSummary\StockSummaryIndex;
+use App\Livewire\PublicBlog\BlogIndex;
+use App\Livewire\PublicBlog\BlogShow;
 
 // License expired page (accessible even when license is expired)
 Route::get('/license-expired', function () {
     return view('license.expired');
 })->name('license.expired');
+
+// Public routes (landing & blog)
+Route::livewire('/', HomeIndex::class)->name('home');
+
+Route::livewire('blogs', BlogIndex::class)->name('blogs.index');
+Route::livewire('blogs/{post:slug}', BlogShow::class)->name('blogs.show');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
@@ -52,10 +61,6 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('settings/profile', Profile::class)->name('settings.profile');
     Route::livewire('settings/password', Password::class)->name('settings.password');
     Route::livewire('settings/appearance', Appearance::class)->name('settings.appearance');
-
-    Route::get('/', function () {
-        return view('dashboard');
-    })->name('home');
 
     Route::get('dashboard', function () {
         return view('dashboard');

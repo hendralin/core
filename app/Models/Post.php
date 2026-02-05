@@ -97,11 +97,19 @@ class Post extends Model
      */
     public function getFeaturedImageUrlAttribute(): string
     {
-        if ($this->featured_image && Storage::disk('blogs')->exists($this->featured_image)) {
-            return Storage::disk('blogs')->url($this->featured_image);
+        if ($this->featured_image && Storage::disk('posts')->exists($this->featured_image)) {
+            return Storage::disk('posts')->url($this->featured_image);
         }
 
         return "";
+    }
+
+    /**
+     * Get the route key for the model (public blog URLs use slug).
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 
     /**
