@@ -104,8 +104,8 @@
     </div>
 
     <!-- Table Section -->
-    <div class="overflow-x-auto rounded-lg">
-        <table class="w-full min-w-225 text-sm text-left rtl:text-right text-gray-500 border dark:border-zinc-700 dark:text-zinc-400">
+    <div class="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
+        <table class="w-full min-w-200 text-sm text-left rtl:text-right text-zinc-500 dark:text-zinc-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b dark:border-b-0 dark:bg-zinc-700 dark:text-zinc-400">
                 <tr>
                     <th scope="col" class="px-4 py-3 w-10 text-center">No.</th>
