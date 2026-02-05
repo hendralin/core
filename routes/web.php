@@ -31,6 +31,7 @@ use App\Livewire\Signals\Admin\SignalsEdit;
 use App\Livewire\Signals\Admin\SignalsShow;
 use App\Livewire\Signals\Admin\SignalsAudit;
 use App\Livewire\Signals\Admin\SignalsIndex;
+use App\Livewire\Blog\Comments\CommentsIndex;
 use App\Livewire\Signals\Admin\SignalsCreate;
 use App\Livewire\Blog\Categories\CategoryEdit;
 use App\Livewire\Blog\Categories\CategoryShow;
@@ -111,6 +112,8 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('posts/create', PostsCreate::class)->name('blog.posts.create')->middleware(['permission:blog.post.create']);
     Route::livewire('posts/{post}/edit', PostsEdit::class)->name('blog.posts.edit')->middleware(['permission:blog.post.edit.own|blog.post.edit.all']);
     Route::livewire('posts/{post}', PostsShow::class)->name('blog.posts.show')->middleware(['permission:blog.post.view']);
+
+    Route::livewire('comments', CommentsIndex::class)->name('blog.comments.index')->middleware(['permission:blog.comment.view|blog.comment.status']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::livewire('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);

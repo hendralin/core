@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="flex items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-                    <flux:avatar name="{{ $post->user->name }}" size="sm" />
+                    <flux:avatar src="{{ $post->user->avatar_url }}" name="{{ $post->user->name }}" size="sm" />
                     <div>
                         <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ $post->user->name }}</span>
                         <span class="text-zinc-500 dark:text-zinc-500"> · {{ $post->created_at->format('M d, Y') }}</span>

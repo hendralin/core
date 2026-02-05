@@ -104,6 +104,11 @@
                         auth()->user()->can('blog.post.delete.all'))
                             <flux:sidebar.item icon="book-open-text" :href="route('blog.posts.index')" :current="request()->routeIs('blog.posts.*')" wire:navigate>{{ __('Posts') }}</flux:sidebar.item>
                         @endif
+
+                        @if (auth()->user()->can('blog.comment.view') ||
+                        auth()->user()->can('blog.comment.status'))
+                            <flux:sidebar.item icon="chat-bubble-left-right" :href="route('blog.comments.index')" :current="request()->routeIs('blog.comments.*')" wire:navigate>{{ __('Comments') }}</flux:sidebar.item>
+                        @endif
                     </flux:sidebar.group>
                 @endif
 
@@ -260,6 +265,11 @@
                         auth()->user()->can('blog.post.delete.own') ||
                         auth()->user()->can('blog.post.delete.all'))
                             <flux:navlist.item icon="book-open-text" :href="route('blog.posts.index')" :current="request()->routeIs('blog.posts.*')" wire:navigate>{{ __('Posts') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('blog.comment.view') ||
+                        auth()->user()->can('blog.comment.status'))
+                            <flux:navlist.item icon="chat-bubble-left-right" :href="route('blog.comments.index')" :current="request()->routeIs('blog.comments.*')" wire:navigate>{{ __('Comments') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

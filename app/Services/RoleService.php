@@ -16,7 +16,7 @@ class RoleService
         'Users & Roles' => ['user', 'role'],
         'Stock Summary' => ['stock-summary'],
         'Signal Management' => ['admin.signal'],
-        'Blog Management' => ['blog.category', 'blog.tag', 'blog.post'],
+        'Blog Management' => ['blog.category', 'blog.tag', 'blog.post', 'blog.comment'],
     ];
     /**
      * Check if a role can be deleted

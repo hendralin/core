@@ -68,6 +68,9 @@ class PermissionSeeder extends Seeder
             'blog.post.delete.all',
             'blog.post.publish',
             'blog.post.audit',
+            'blog.comment.view',
+            'blog.comment.status',
+            'blog.comment.delete',
         ];
 
         foreach ($permissions as $key => $value) {
