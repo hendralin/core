@@ -21,7 +21,12 @@ use App\Livewire\Company\CompanyEdit;
 use App\Livewire\Company\CompanyShow;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Blog\Posts\PostsEdit;
+use App\Livewire\Blog\Posts\PostsShow;
 use App\Livewire\Blog\Tags\TagsCreate;
+use App\Livewire\Blog\Posts\PostsAudit;
+use App\Livewire\Blog\Posts\PostsIndex;
+use App\Livewire\Blog\Posts\PostsCreate;
 use App\Livewire\Signals\Admin\SignalsEdit;
 use App\Livewire\Signals\Admin\SignalsShow;
 use App\Livewire\Signals\Admin\SignalsAudit;
@@ -101,11 +106,11 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('tags/{tag}/edit', TagsEdit::class)->name('blog.tags.edit')->middleware(['permission:blog.tag.edit']);
     Route::livewire('tags/{tag}/audit', TagsAudit::class)->name('blog.tags.audit')->middleware(['permission:blog.tag.audit']);
 
-    // Route::livewire('posts', PostsIndex::class)->name('blog.posts.index')->middleware(['permission:blog.post.view|blog.post.create|blog.post.edit.own|blog.post.edit.all|blog.post.delete.own|blog.post.delete.all|blog.post.publish']);
-    // Route::livewire('posts/{post}/audit', PostsAudit::class)->name('blog.posts.audit')->middleware(['permission:blog.post.audit']);
-    // Route::livewire('posts/create', PostsCreate::class)->name('blog.posts.create')->middleware(['permission:blog.post.create']);
-    // Route::livewire('posts/{post}/edit', PostsEdit::class)->name('blog.posts.edit')->middleware(['permission:blog.post.edit']);
-    // Route::livewire('posts/{post}', PostsShow::class)->name('blog.posts.show')->middleware(['permission:blog.post.view']);
+    Route::livewire('posts', PostsIndex::class)->name('blog.posts.index')->middleware(['permission:blog.post.view|blog.post.create|blog.post.edit.own|blog.post.edit.all|blog.post.delete.own|blog.post.delete.all']);
+    Route::livewire('posts/{post}/audit', PostsAudit::class)->name('blog.posts.audit')->middleware(['permission:blog.post.audit']);
+    Route::livewire('posts/create', PostsCreate::class)->name('blog.posts.create')->middleware(['permission:blog.post.create']);
+    Route::livewire('posts/{post}/edit', PostsEdit::class)->name('blog.posts.edit')->middleware(['permission:blog.post.edit.own|blog.post.edit.all']);
+    Route::livewire('posts/{post}', PostsShow::class)->name('blog.posts.show')->middleware(['permission:blog.post.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::livewire('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);

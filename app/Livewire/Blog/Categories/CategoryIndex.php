@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Blog\Categories;
 
-use App\Models\Category;
 use Livewire\Component;
+use App\Models\Category;
 use Livewire\WithPagination;
-use App\Services\CategoryService;
 use Livewire\Attributes\Title;
+use App\Services\CategoryService;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Auth;
@@ -109,10 +109,13 @@ class CategoryIndex extends Component
 
     public function render()
     {
+        $perPage = (strtolower((string) $this->perPage) === 'all') ? null : (max(1, (int) $this->perPage) ?: 10);
+
         $categories = $this->categoryService->getEnhancedCategoriesForIndex(
             $this->search,
             $this->sortField,
-            $this->sortDirection
+            $this->sortDirection,
+            $perPage
         );
 
         return view('livewire.blog.categories.category-index', compact('categories'));
@@ -120,6 +123,6 @@ class CategoryIndex extends Component
 
     public function getPerPageOptionsProperty()
     {
-        return [5, 10, 25, 50];
+        return [5, 10, 25, 50, 'all'];
     }
 }

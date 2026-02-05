@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -89,6 +90,18 @@ class Post extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Get the featured image URL for the post
+     */
+    public function getFeaturedImageUrlAttribute(): string
+    {
+        if ($this->featured_image && Storage::disk('blogs')->exists($this->featured_image)) {
+            return Storage::disk('blogs')->url($this->featured_image);
+        }
+
+        return "";
     }
 
     /**

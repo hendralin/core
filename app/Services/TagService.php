@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Tag;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator as LengthAwarePaginatorConcrete;
 
 class TagService
 {
@@ -28,14 +29,15 @@ class TagService
 
     /**
      * Get tags with post counts for index page
+     * When $perPage is null, returns all results in a single page (no pagination limit).
      */
-    public function getTagsForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
+    public function getTagsForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = 10): LengthAwarePaginator
     {
         // Validate sort field
         $validSortFields = ['name', 'posts_count', 'created_at', 'updated_at'];
         $sortField = in_array($sortField, $validSortFields) ? $sortField : 'name';
 
-        return Tag::query()
+        $query = Tag::query()
             ->with('posts')
             ->withCount('posts')
             ->when($search, function ($q) use ($search) {
@@ -44,8 +46,16 @@ class TagService
                           ->orWhere('slug', 'like', '%' . $search . '%');
                 });
             })
-            ->orderBy($sortField, $sortDirection)
-            ->paginate(10);
+            ->orderBy($sortField, $sortDirection);
+
+        if ($perPage === null) {
+            $items = $query->get();
+            $total = $items->count();
+
+            return new LengthAwarePaginatorConcrete($items, $total, max(1, $total), 1);
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**
@@ -97,9 +107,9 @@ class TagService
     /**
      * Get enhanced tags data for index page
      */
-    public function getEnhancedTagsForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
+    public function getEnhancedTagsForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = 10): LengthAwarePaginator
     {
-        $tags = $this->getTagsForIndex($search, $sortField, $sortDirection);
+        $tags = $this->getTagsForIndex($search, $sortField, $sortDirection, $perPage);
 
         // Add additional data to each tag
         $tags->getCollection()->transform(function ($tag) {

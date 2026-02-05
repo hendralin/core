@@ -4,8 +4,8 @@ namespace App\Livewire\Blog\Tags;
 
 use App\Models\Tag;
 use Livewire\Component;
-use Livewire\WithPagination;
 use App\Services\TagService;
+use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
@@ -107,10 +107,13 @@ class TagsIndex extends Component
 
     public function render()
     {
+        $perPage = (strtolower((string) $this->perPage) === 'all') ? null : (max(1, (int) $this->perPage) ?: 10);
+
         $tags = $this->tagService->getEnhancedTagsForIndex(
             $this->search,
             $this->sortField,
-            $this->sortDirection
+            $this->sortDirection,
+            $perPage
         );
 
         return view('livewire.blog.tags.tags-index', compact('tags'));
@@ -118,6 +121,6 @@ class TagsIndex extends Component
 
     public function getPerPageOptionsProperty()
     {
-        return [5, 10, 25, 50];
+        return [5, 10, 25, 50, 'all'];
     }
 }

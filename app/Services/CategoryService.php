@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Category;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator as LengthAwarePaginatorConcrete;
 
 class CategoryService
 {
@@ -28,14 +29,15 @@ class CategoryService
 
     /**
      * Get categories with post counts for index page
+     * When $perPage is null, returns all results in a single page (no pagination limit).
      */
-    public function getCategoriesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
+    public function getCategoriesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = 10): LengthAwarePaginator
     {
         // Validate sort field
         $validSortFields = ['name', 'posts_count', 'created_at', 'updated_at'];
         $sortField = in_array($sortField, $validSortFields) ? $sortField : 'name';
 
-        return Category::query()
+        $query = Category::query()
             ->with('posts')
             ->withCount('posts')
             ->when($search, function ($q) use ($search) {
@@ -45,8 +47,16 @@ class CategoryService
                           ->orWhere('slug', 'like', '%' . $search . '%');
                 });
             })
-            ->orderBy($sortField, $sortDirection)
-            ->paginate(10);
+            ->orderBy($sortField, $sortDirection);
+
+        if ($perPage === null) {
+            $items = $query->get();
+            $total = $items->count();
+
+            return new LengthAwarePaginatorConcrete($items, $total, max(1, $total), 1);
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**
@@ -98,9 +108,9 @@ class CategoryService
     /**
      * Get enhanced categories data for index page
      */
-    public function getEnhancedCategoriesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc'): LengthAwarePaginator
+    public function getEnhancedCategoriesForIndex(?string $search = null, string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = 10): LengthAwarePaginator
     {
-        $categories = $this->getCategoriesForIndex($search, $sortField, $sortDirection);
+        $categories = $this->getCategoriesForIndex($search, $sortField, $sortDirection, $perPage);
 
         // Add additional data to each category
         $categories->getCollection()->transform(function ($category) {

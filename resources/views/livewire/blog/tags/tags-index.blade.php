@@ -92,7 +92,7 @@
                 <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">Show:</label>
                 <flux:select id="per-page" wire:model.live="perPage">
                     @foreach ($this->perPageOptions as $option)
-                    <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
+                    <flux:select.option value="{{ $option }}">{{ is_string($option) ? __('All') : $option }}</flux:select.option>
                     @endforeach
                 </flux:select>
                 <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">entries</label>

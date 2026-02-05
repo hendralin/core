@@ -96,15 +96,14 @@
                             <flux:sidebar.item icon="tag" :href="route('blog.tags.index')" :current="request()->routeIs('blog.tags.*')" wire:navigate>{{ __('Tags') }}</flux:sidebar.item>
                         @endif
 
-                        {{-- @if (auth()->user()->can('blog.post.view') ||
+                        @if (auth()->user()->can('blog.post.view') ||
                         auth()->user()->can('blog.post.create') ||
                         auth()->user()->can('blog.post.edit.own') ||
                         auth()->user()->can('blog.post.edit.all') ||
                         auth()->user()->can('blog.post.delete.own') ||
-                        auth()->user()->can('blog.post.delete.all') ||
-                        auth()->user()->can('blog.post.publish'))
+                        auth()->user()->can('blog.post.delete.all'))
                             <flux:sidebar.item icon="book-open-text" :href="route('blog.posts.index')" :current="request()->routeIs('blog.posts.*')" wire:navigate>{{ __('Posts') }}</flux:sidebar.item>
-                        @endif --}}
+                        @endif
                     </flux:sidebar.group>
                 @endif
 
@@ -254,15 +253,14 @@
                             <flux:navlist.item icon="tag" :href="route('blog.tags.index')" :current="request()->routeIs('blog.tags.*')" wire:navigate>{{ __('Tags') }}</flux:navlist.item>
                         @endif
 
-                        {{-- @if (auth()->user()->can('blog.post.view') ||
+                        @if (auth()->user()->can('blog.post.view') ||
                         auth()->user()->can('blog.post.create') ||
                         auth()->user()->can('blog.post.edit.own') ||
                         auth()->user()->can('blog.post.edit.all') ||
                         auth()->user()->can('blog.post.delete.own') ||
-                        auth()->user()->can('blog.post.delete.all') ||
-                        auth()->user()->can('blog.post.publish'))
+                        auth()->user()->can('blog.post.delete.all'))
                             <flux:navlist.item icon="book-open-text" :href="route('blog.posts.index')" :current="request()->routeIs('blog.posts.*')" wire:navigate>{{ __('Posts') }}</flux:navlist.item>
-                        @endif --}}
+                        @endif
                     </flux:navlist.group>
                 @endif
 
@@ -296,7 +294,7 @@
                     icon:trailing="chevrons-up-down"
                 />
 
-                <flux:menu class="w-[220px]">
+                <flux:menu class="w-55">
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
