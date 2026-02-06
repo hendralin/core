@@ -33,11 +33,13 @@ class CashReportExport implements FromView
             ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->where('big_cash', '!=', 1) // Exclude big cash payments from Excel export
+            ->where(fn($q) => $q->where('cost_type', 'cash')->orWhereHas('payments'))
             ->orderBy('cost_date', 'asc')
             ->get();
 
         // Calculate opening balance for export
         $openingBalanceExcel = Cost::query()
+            ->with('payments')
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
             ->get()->sum(function ($item) {
                 if ($item->cost_type === 'cash') {
@@ -45,7 +47,7 @@ class CashReportExport implements FromView
                 } elseif ($item->big_cash == 1) {
                     return 0; // Big cash payments don't affect balance
                 } else {
-                    return -$item->total_price;
+                    return $item->payments->isNotEmpty() ? -$item->total_price : 0;
                 }
             }) ?? 0;
 

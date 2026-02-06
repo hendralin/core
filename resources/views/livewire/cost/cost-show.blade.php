@@ -46,22 +46,51 @@
                             </div>
                         </div>
 
-                        @if($cost->description)
-                        <div>
-                            <flux:heading size="sm">Deskripsi</flux:heading>
-                            <flux:text class="mt-1">{!! nl2br(e($cost->description)) !!}</flux:text>
+                        <div class="grid grid-cols-2 gap-4">
+                            @if($cost->description)
+                            <div>
+                                <flux:heading size="sm">Deskripsi</flux:heading>
+                                <flux:text class="mt-1">{!! nl2br(e($cost->description)) !!}</flux:text>
+                            </div>
+                            @endif
+                            <div>
+                                <flux:heading size="sm">Pembayaran Kas Besar</flux:heading>
+                                <flux:text class="mt-1">
+                                    @if($cost->big_cash)
+                                        <flux:badge size="sm" color="green" icon="check">Ya</flux:badge>
+                                    @else
+                                        <flux:badge size="sm" color="gray" icon="x-circle">Tidak</flux:badge>
+                                    @endif
+                                </flux:text>
+                            </div>
                         </div>
-                        @endif
 
-                        <div>
-                            <flux:heading size="sm">Pembayaran Kas Besar</flux:heading>
-                            <flux:text class="mt-1">
-                                @if($cost->big_cash)
-                                    <flux:badge size="sm" color="green" icon="check">Ya</flux:badge>
-                                @else
-                                    <flux:badge size="sm" color="gray" icon="x-circle">Tidak</flux:badge>
-                                @endif
-                            </flux:text>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <flux:heading size="sm">Tanggal Pembayaran</flux:heading>
+                                <flux:text class="mt-1">
+                                    @if($cost->payments->count() > 0)
+                                        {{ $cost->payments->last()->payment_date ? Carbon\Carbon::parse($cost->payments->last()->payment_date)->format('d-M-Y') : '-' }}
+                                    @else
+                                        -
+                                    @endif
+                                </flux:text>
+                            </div>
+                            <div>
+                                <flux:heading size="sm">Pembayaran</flux:heading>
+                                <div class="flex items-start">
+                                    <flux:text class="mt-1">
+                                        @if($cost->payments->count() > 0)
+                                            Rp {{ number_format($cost->payments->sum('amount'), 0, ',', '.') }}
+                                        @else
+                                            <flux:badge size="sm" color="yellow" icon="exclamation-circle">Belum Lunas</flux:badge>
+                                        @endif
+                                    </flux:text>
+                                    @if($cost->payments->sum('amount') == $cost->total_price)
+                                        <flux:badge size="sm" color="green" icon="check" class="ml-2">Lunas</flux:badge>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-zinc-700">

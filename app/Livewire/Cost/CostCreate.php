@@ -3,6 +3,7 @@
 namespace App\Livewire\Cost;
 
 use App\Models\Cost;
+use App\Models\Payment;
 use App\Models\Vendor;
 use App\Models\Vehicle;
 use Livewire\Component;
@@ -24,6 +25,7 @@ class CostCreate extends Component
     public $total_price;
     public $document;
     public $big_cash;
+    public $payment_date;
 
     public function mount()
     {
@@ -43,6 +45,7 @@ class CostCreate extends Component
             'total_price' => 'required|string',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
             'big_cash' => 'nullable|boolean',
+            'payment_date' => 'nullable|date',
         ];
 
         $messages = [
@@ -60,6 +63,7 @@ class CostCreate extends Component
             'document.file' => 'Dokumen harus berupa file.',
             'document.mimes' => 'Dokumen harus berupa PDF, JPG, JPEG, atau PNG.',
             'document.max' => 'Dokumen maksimal ukuran 5MB.',
+            'payment_date.date' => 'Tanggal pembayaran harus berupa tanggal.',
         ];
 
         if ($this->cost_type === 'service_parts') {
@@ -89,6 +93,14 @@ class CostCreate extends Component
             'big_cash' => $this->big_cash ?? false,
             'created_by' => Auth::id(),
         ]);
+
+        if ($this->payment_date) {
+            $cost->payments()->create([
+                'payment_date' => $this->payment_date,
+                'amount' => $totalPrice,
+                'note' => null,
+            ]);
+        }
 
         // Log the creation activity
         activity()

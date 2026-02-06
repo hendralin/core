@@ -181,7 +181,20 @@
                             <td class="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</td>
                             <td class="px-4 py-2 whitespace-nowrap"><div class="font-medium text-gray-900 dark:text-white">{{ $cost->vehicle->police_number ?? 'N/A' }}</div></td>
                             <td class="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white">{{ $cost->vendor->name ?? 'N/A' }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs truncate" title="{{ $cost->description }}">{{ $cost->description }}</td>
+                            <td class="px-4 py-2 lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs">
+                                <div class="flex items-center gap-1">
+                                    <span class="truncate" title="{{ $cost->description }}">{{ $cost->description }}</span>
+                                    @php
+                                        $totalPaid = $cost->payments->sum('amount');
+                                        $isLunas = $totalPaid >= $cost->total_price;
+                                    @endphp
+                                    @if($isLunas)
+                                        <flux:badge size="sm" color="green">Lunas</flux:badge>
+                                    @else
+                                        <flux:badge size="sm" color="amber">Belum Lunas</flux:badge>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-gray-900 dark:text-white">Rp {{ number_format($cost->total_price, 0) }}</td>
                             {{-- <td class="px-4 py-2 whitespace-nowrap text-center">
                                 @if($cost->status === 'approved')

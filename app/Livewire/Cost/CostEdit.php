@@ -4,6 +4,7 @@ namespace App\Livewire\Cost;
 
 use Carbon\Carbon;
 use App\Models\Cost;
+use App\Models\Payment;
 use App\Models\Vendor;
 use App\Models\Vehicle;
 use Livewire\Component;
@@ -29,6 +30,7 @@ class CostEdit extends Component
     public $document;
     public $existing_document;
     public $big_cash;
+    public $payment_date;
 
     public function mount(Cost $cost)
     {
@@ -47,6 +49,10 @@ class CostEdit extends Component
         $this->total_price = number_format($cost->total_price, 0);
         $this->existing_document = $cost->document;
         $this->big_cash = $cost->big_cash;
+        $firstPayment = $cost->payments()->first();
+        $this->payment_date = $firstPayment
+            ? Carbon::parse($firstPayment->payment_date)->format('Y-m-d')
+            : null;
     }
 
     public function submit()
@@ -59,6 +65,7 @@ class CostEdit extends Component
             'total_price' => 'required|string',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
             'big_cash' => 'nullable|boolean',
+            'payment_date' => 'nullable|date',
         ];
 
         $messages = [
@@ -76,6 +83,7 @@ class CostEdit extends Component
             'document.file' => 'Dokumen harus berupa file.',
             'document.mimes' => 'Dokumen harus berupa PDF, JPG, JPEG, atau PNG.',
             'document.max' => 'Dokumen maksimal ukuran 5MB.',
+            'payment_date.date' => 'Tanggal pembayaran harus berupa tanggal.',
         ];
 
         if ($this->cost_type === 'service_parts') {
@@ -122,6 +130,22 @@ class CostEdit extends Component
             'document' => $documentPath,
             'big_cash' => $this->big_cash ?? false,
         ]);
+
+        if ($this->payment_date) {
+            $firstPayment = $this->cost->payments()->first();
+            if ($firstPayment) {
+                $firstPayment->update([
+                    'payment_date' => $this->payment_date,
+                    'amount' => $totalPrice,
+                ]);
+            } else {
+                $this->cost->payments()->create([
+                    'payment_date' => $this->payment_date,
+                    'amount' => $totalPrice,
+                    'note' => null,
+                ]);
+            }
+        }
 
         // Log the update activity
         activity()

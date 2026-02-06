@@ -81,7 +81,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         @if($cost_type !== 'other_cost')
                         <div class="space-y-1">
                             <flux:select wire:model="vendor_id" label="Vendor" class="w-full">
@@ -117,6 +117,11 @@
                                 helper="Masukkan jumlah biaya yang dikeluarkan"
                             />
                             <p class="text-xs text-slate-500 dark:text-zinc-400">Total biaya yang dikeluarkan</p>
+                        </div>
+
+                        <div class="space-y-1">
+                            <flux:input wire:model="payment_date" type="date" label="Tanggal Pembayaran" class="w-full" />
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Kapan pembayaran dilakukan?</p>
                         </div>
                     </div>
 

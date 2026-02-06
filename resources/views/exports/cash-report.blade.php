@@ -25,7 +25,7 @@
         @foreach($costsWithBalance as $i => $cost)
             <tr>
                 <td>{{ $i + 1 }}</td>
-                <td>{{ $cost->cost_date ? \Carbon\Carbon::parse($cost->cost_date)->format('d/m/Y') : '-' }}</td>
+                <td>{{ ($cost->report_date ?? $cost->cost_date) ? \Carbon\Carbon::parse($cost->report_date ?? $cost->cost_date)->format('d/m/Y') : '-' }}</td>
                 <td>
                     {{ $cost->description }}
                     @if($cost->vehicle)

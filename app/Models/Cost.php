@@ -5,6 +5,7 @@ namespace App\Models;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cost extends Model
@@ -95,5 +96,15 @@ class Cost extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the payments for the cost
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 }

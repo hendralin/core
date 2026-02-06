@@ -39,13 +39,16 @@ class DashboardIndex extends Component
 
     public function getFinalCashBalanceProperty()
     {
-        // Calculate all cash inflows (cost_type = 'cash')
+        // Cash in: all cost_type = 'cash'
         $totalCashIn = Cost::where('cost_type', 'cash')->sum('total_price');
 
-        // Calculate all other costs (cost_type != 'cash')
-        $totalCosts = Cost::where('cost_type', '!=', 'cash')->where('big_cash', 0)->sum('total_price');
+        // Other costs: only recognized when they have payment (payment_date)
+        $totalCosts = Cost::query()
+            ->where('cost_type', '!=', 'cash')
+            ->where('big_cash', 0)
+            ->whereHas('payments')
+            ->sum('total_price');
 
-        // Final balance = Cash In - All Other Costs
         return $totalCashIn - $totalCosts;
     }
 

@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\CashReportExport;
 use Livewire\WithoutUrlPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 #[Title('Laporan Kas')]
 class CashReportIndex extends Component
@@ -72,22 +73,15 @@ class CashReportIndex extends Component
 
     public function render()
     {
-        $costs = Cost::query()
-            ->with(['createdBy', 'vehicle', 'vendor'])
-            ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-            ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
-            ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
-            ->where('big_cash', '!=', 1) // Exclude big cash payments from display
-            ->orderBy('cost_date', 'asc')
-            ->paginate($this->perPage);
-
-        // Calculate totals for current filters
+        // Total debet = non-cash recognized in period (by payment_date in range)
         $totalDebet = Cost::query()
-            ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-            ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->where('cost_type', '!=', 'cash')
-            ->where('big_cash', '!=', 1) // Exclude big cash payments from expense calculation
+            ->where('big_cash', '!=', 1)
+            ->whereHas('payments', function ($q) {
+                $q->whereDate('payment_date', '>=', $this->dateFrom)
+                    ->whereDate('payment_date', '<=', $this->dateTo);
+            })
             ->sum('total_price');
 
         $totalKredit = Cost::query()
@@ -98,39 +92,53 @@ class CashReportIndex extends Component
             ->sum('total_price');
 
 
-            // Calculate opening balance (balance before the selected period)
-        $openingBalance = Cost::query()
+            // Opening balance before the period: cash in (cost_date < dateFrom) minus non-cash out (payment_date < dateFrom)
+        $cashInBefore = Cost::query()
+            ->where('cost_type', 'cash')
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
-            ->get()->sum(function ($item) {
-                if ($item->cost_type === 'cash') {
-                    return $item->total_price;
-                } elseif ($item->big_cash == 1) {
-                    return 0; // Big cash payments don't affect balance
-                } else {
-                    return -$item->total_price;
-                }
-            }) ?? 0;
+            ->sum('total_price');
+        $cashOutBefore = Cost::query()
+            ->where('cost_type', '!=', 'cash')
+            ->where('big_cash', '!=', 1)
+            ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '<', $this->dateFrom))
+            ->sum('total_price');
+        $openingBalance = $cashInBefore - $cashOutBefore;
 
         $netBalance = $totalKredit - $totalDebet + $openingBalance;
 
-        // Get all costs in the period for accurate running balance calculation
+        // Same period filter: cash by cost_date, non-cash by payment_date in range
         $allCostsInPeriod = Cost::query()
-            ->with(['vehicle', 'vendor'])
-            ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-            ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+            ->with(['createdBy', 'vehicle', 'vendor', 'payments'])
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
-            ->where('big_cash', '!=', 1) // Exclude big cash payments from running balance calculation
-            ->orderBy('cost_date', 'asc')
+            ->where('big_cash', '!=', 1)
+            ->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->where('cost_type', 'cash')
+                        ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
+                        ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo));
+                })->orWhere(function ($q) {
+                    $q->where('cost_type', '!=', 'cash')
+                        ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '>=', $this->dateFrom)->whereDate('payment_date', '<=', $this->dateTo));
+                });
+            })
             ->get();
 
-        // Calculate running balance for all costs in period
+        // Sort by effective date: cash by cost_date, non-cash by first payment_date (when money actually moves)
+        $sortedCosts = $allCostsInPeriod->sortBy(function ($cost) {
+            if ($cost->cost_type === 'cash') {
+                return $cost->cost_date;
+            }
+            $first = $cost->payments->sortBy('payment_date')->first();
+            return $first ? $first->payment_date : $cost->cost_date;
+        })->values();
+
+        // Calculate running balance in effective date order
         $runningBalance = $openingBalance;
-        $allCostsWithBalance = $allCostsInPeriod->map(function ($cost) use (&$runningBalance) {
+        $allCostsWithBalance = $sortedCosts->map(function ($cost) use (&$runningBalance) {
             if ($cost->cost_type === 'cash') {
                 $runningBalance += $cost->total_price;
             } elseif ($cost->big_cash == 1) {
-                // Big cash payments don't affect running balance
-                $runningBalance += 0;
+                // no change
             } else {
                 $runningBalance -= $cost->total_price;
             }
@@ -138,28 +146,32 @@ class CashReportIndex extends Component
             return $cost;
         });
 
-        // Map running balance to paginated costs
-        $costsWithBalance = $costs->map(function ($cost) use ($allCostsWithBalance) {
-            $matchedCost = $allCostsWithBalance->firstWhere('id', $cost->id);
-            $cost->running_balance = $matchedCost ? $matchedCost->running_balance : 0;
-            return $cost;
-        });
+        // Paginate the sorted list (so table order matches running balance order)
+        $total = $allCostsWithBalance->count();
+        $page = \Illuminate\Pagination\Paginator::resolveCurrentPage('page');
+        $costs = new LengthAwarePaginator(
+            $allCostsWithBalance->forPage($page, $this->perPage)->values(),
+            $total,
+            $this->perPage,
+            $page,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'pageName' => 'page']
+        );
+        $costsWithBalance = $costs->getCollection(); // same items, already have running_balance
 
-        // Calculate stats for each cost type
+        // Stats: non-cash by payment_date in period, cash by cost_date in period (same as report totals)
+        $paymentInPeriod = fn($q) => $q->whereDate('payment_date', '>=', $this->dateFrom)->whereDate('payment_date', '<=', $this->dateTo);
         $stats = [
             'service_parts' => [
                 'label' => 'Service Parts',
                 'total' => Cost::query()
                     ->where('cost_type', 'service_parts')
-                    ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-                    ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
-                    ->where('big_cash', '!=', 1) // Exclude big cash payments
+                    ->where('big_cash', '!=', 1)
+                    ->whereHas('payments', $paymentInPeriod)
                     ->sum('total_price'),
                 'count' => Cost::query()
                     ->where('cost_type', 'service_parts')
-                    ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-                    ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
-                    ->where('big_cash', '!=', 1) // Exclude big cash payments
+                    ->where('big_cash', '!=', 1)
+                    ->whereHas('payments', $paymentInPeriod)
                     ->count(),
                 'icon' => 'beaker',
                 'color' => 'blue'
@@ -168,15 +180,13 @@ class CashReportIndex extends Component
                 'label' => 'Other Cost',
                 'total' => Cost::query()
                     ->where('cost_type', 'other_cost')
-                    ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-                    ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
-                    ->where('big_cash', '!=', 1) // Exclude big cash payments
+                    ->where('big_cash', '!=', 1)
+                    ->whereHas('payments', $paymentInPeriod)
                     ->sum('total_price'),
                 'count' => Cost::query()
                     ->where('cost_type', 'other_cost')
-                    ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-                    ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
-                    ->where('big_cash', '!=', 1) // Exclude big cash payments
+                    ->where('big_cash', '!=', 1)
+                    ->whereHas('payments', $paymentInPeriod)
                     ->count(),
                 'icon' => 'wrench',
                 'color' => 'orange'
@@ -185,13 +195,11 @@ class CashReportIndex extends Component
                 'label' => 'Showroom',
                 'total' => Cost::query()
                     ->where('cost_type', 'showroom')
-                    ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-                    ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+                    ->whereHas('payments', $paymentInPeriod)
                     ->sum('total_price'),
                 'count' => Cost::query()
                     ->where('cost_type', 'showroom')
-                    ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-                    ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+                    ->whereHas('payments', $paymentInPeriod)
                     ->count(),
                 'icon' => 'building-storefront',
                 'color' => 'green'
@@ -226,35 +234,50 @@ class CashReportIndex extends Component
 
     public function exportPdf()
     {
-        $costs = Cost::query()
-            ->with(['createdBy', 'vehicle', 'vendor'])
-            ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-            ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
-            ->where('big_cash', '!=', 1) // Exclude big cash payments from PDF export
-            ->orderBy('cost_date', 'asc')
+        // Same period filter as render: cash by cost_date, non-cash by payment_date in range
+        $allCostsInPeriod = Cost::query()
+            ->with(['createdBy', 'vehicle', 'vendor', 'payments'])
+            ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
+            ->where('big_cash', '!=', 1)
+            ->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->where('cost_type', 'cash')
+                        ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
+                        ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo));
+                })->orWhere(function ($q) {
+                    $q->where('cost_type', '!=', 'cash')
+                        ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '>=', $this->dateFrom)->whereDate('payment_date', '<=', $this->dateTo));
+                });
+            })
             ->get();
 
-        // Calculate opening balance for export
-        $openingBalancePdf = Cost::query()
+        // Opening balance: cash in before dateFrom, minus non-cash paid before dateFrom
+        $cashInBefore = Cost::query()
+            ->where('cost_type', 'cash')
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
-            ->get()->sum(function ($item) {
-                if ($item->cost_type === 'cash') {
-                    return $item->total_price;
-                } elseif ($item->big_cash == 1) {
-                    return 0; // Big cash payments don't affect balance
-                } else {
-                    return -$item->total_price;
-                }
-            }) ?? 0;
+            ->sum('total_price');
+        $cashOutBefore = Cost::query()
+            ->where('cost_type', '!=', 'cash')
+            ->where('big_cash', '!=', 1)
+            ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '<', $this->dateFrom))
+            ->sum('total_price');
+        $openingBalancePdf = $cashInBefore - $cashOutBefore;
 
-        // Calculate running balance for export (using all data)
+        // Sort by effective date (cash = cost_date, non-cash = first payment_date)
+        $sortedCosts = $allCostsInPeriod->sortBy(function ($cost) {
+            if ($cost->cost_type === 'cash') {
+                return $cost->cost_date;
+            }
+            $first = $cost->payments->sortBy('payment_date')->first();
+            return $first ? $first->payment_date : $cost->cost_date;
+        })->values();
+
         $runningBalance = $openingBalancePdf;
-        $costsWithBalance = $costs->map(function ($cost) use (&$runningBalance) {
+        $costsWithBalance = $sortedCosts->map(function ($cost) use (&$runningBalance) {
             if ($cost->cost_type === 'cash') {
                 $runningBalance += $cost->total_price;
             } elseif ($cost->big_cash == 1) {
-                // Big cash payments don't affect running balance
-                $runningBalance += 0;
+                // no change
             } else {
                 $runningBalance -= $cost->total_price;
             }
@@ -262,7 +285,8 @@ class CashReportIndex extends Component
             return $cost;
         });
 
-        // Calculate totals for PDF export
+        $costs = $costsWithBalance; // PDF shows same ordered list with running balance
+
         $totalDebetPdf = $costs->where('cost_type', '!=', 'cash')->where('big_cash', '!=', 1)->sum('total_price') ?? 0;
         $totalKreditPdf = $costs->where('cost_type', 'cash')->sum('total_price') ?? 0;
         $netBalancePdf = $totalKreditPdf - $totalDebetPdf + $openingBalancePdf;

@@ -185,7 +185,7 @@ class CostIndex extends Component
     public function render()
     {
         $costs = Cost::query()
-            ->with(['vehicle', 'vendor', 'createdBy'])
+            ->with(['vehicle', 'vendor', 'createdBy', 'payments'])
             ->whereNotNull('vehicle_id') // Exclude cash disbursements (vehicle_id NULL)
             ->when(
                 $this->search,

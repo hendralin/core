@@ -1,7 +1,8 @@
 <div>
     <div class="relative mb-6 w-full">
         <flux:heading size="xl" level="1">{{ __('Laporan Kas') }}</flux:heading>
-        <flux:subheading size="lg" class="mb-6">{{ __('Laporan pengeluaran kas perusahaan') }}</flux:subheading>
+        <flux:subheading size="lg" class="mb-2">{{ __('Laporan pengeluaran kas perusahaan') }}</flux:subheading>
+        <p class="text-sm text-gray-500 dark:text-zinc-400 mb-6">Biaya selain Cash hanya diakui dan tampil setelah ada tanggal pembayaran.</p>
         <flux:separator variant="subtle" />
     </div>
 
@@ -168,14 +169,19 @@
                         <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
                             <td class="px-4 py-2 text-center text-gray-900 dark:text-white">{{ $costs->firstItem() + $index }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs truncate" title="{{ $cost->description }}">
-                                {{ $cost->description }}
-                                @if($cost->vehicle)
-                                    {{ $cost->vehicle->police_number }}
-                                @endif
-                                @if($cost->vendor)
-                                    - {{ $cost->vendor->name }}
-                                @endif
+                            <td class="px-4 py-2 lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs">
+                                <div class="flex flex-col gap-0.5">
+                                    <span class="truncate" title="{{ $cost->description }}">{{ $cost->description }}</span>
+                                    @if($cost->vehicle)
+                                        <span class="text-xs">{{ $cost->vehicle->police_number }}</span>
+                                    @endif
+                                    @if($cost->vendor)
+                                        <span class="text-xs">- {{ $cost->vendor->name }}</span>
+                                    @endif
+                                    @if($cost->cost_type !== 'cash' && $cost->payments->isNotEmpty())
+                                        <span class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">Pembayaran: {{ \Carbon\Carbon::parse($cost->payments->first()->payment_date)->format('d-m-Y') }}</span>
+                                    @endif
+                                </div>
                             </td>
                             @if($cost->cost_type === 'cash')
                                 <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-gray-900 dark:text-white">-</td>
@@ -199,7 +205,7 @@
                             Tidak ada data laporan kas yang ditemukan.
                         </td>
                     </tr>
-                @endforelse
+                @endif
 
                 <!-- Total Footer - Always show for current period/filters -->
                 @if($totalDebet > 0 || $totalKredit > 0)
