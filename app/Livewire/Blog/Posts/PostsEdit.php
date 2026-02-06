@@ -88,9 +88,10 @@ class PostsEdit extends Component
 
             if ($this->featured_image) {
                 if ($this->existing_image) {
-                    Storage::disk('public')->delete($this->existing_image);
+                    Storage::disk('media')->delete($this->existing_image);
                 }
-                $this->post->featured_image = $this->featured_image->store('posts', 'public');
+                $storedPath = $this->featured_image->store('media', 'public');
+                $this->post->featured_image = basename($storedPath);
                 $this->existing_image = $this->post->featured_image;
             }
 

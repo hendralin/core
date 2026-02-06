@@ -53,7 +53,8 @@ class PostsCreate extends Component
             $post->status = $this->status;
 
             if ($this->featured_image) {
-                $post->featured_image = $this->featured_image->store('posts', 'public');
+                $storedPath = $this->featured_image->store('media', 'public');
+                $post->featured_image = basename($storedPath);
             }
 
             if ($this->status === 'published') {

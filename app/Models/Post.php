@@ -97,8 +97,8 @@ class Post extends Model
      */
     public function getFeaturedImageUrlAttribute(): string
     {
-        if ($this->featured_image && Storage::disk('posts')->exists($this->featured_image)) {
-            return Storage::disk('posts')->url($this->featured_image);
+        if ($this->featured_image && Storage::disk('media')->exists($this->featured_image)) {
+            return Storage::disk('media')->url($this->featured_image);
         }
 
         return "";
