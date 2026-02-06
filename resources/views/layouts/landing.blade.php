@@ -3,6 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        (function () {
+            var theme = localStorage.theme;
+            var isDark = theme === 'dark' || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+        })();
+    </script>
     <title>{{ $title ?? config('app.name') }} - Analisis Kuantitatif Trading Saham</title>
     <link rel="icon" href="{{ asset('favicon_.ico') }}" sizes="any">
     <link rel="icon" href="{{ asset('favicon_.svg') }}" type="image/svg+xml">
@@ -20,5 +28,15 @@
     </main>
 
     @include('partials.landing-footer')
+
+    @fluxScripts
+    <script>
+        document.addEventListener('livewire:navigated', function () {
+            var theme = localStorage.theme;
+            var isDark = theme === 'dark' || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+        });
+    </script>
 </body>
 </html>

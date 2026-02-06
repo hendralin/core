@@ -1,4 +1,23 @@
-<header class="sticky top-0 z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
+<header
+    class="sticky top-0 z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur border-b border-zinc-200 dark:border-zinc-800"
+    x-data="{
+        dark: (function() {
+            var t = localStorage.theme;
+            return t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        })(),
+        toggle() {
+            this.dark = !this.dark;
+            if (this.dark) {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            }
+        }
+    }"
+    @keydown.window="if ($event.shiftKey && ($event.key === 'd' || $event.key === 'D')) toggle()"
+>
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <a href="{{ route('home') }}" wire:navigate class="text-xl font-semibold text-zinc-900 dark:text-white">
@@ -19,6 +38,25 @@
                         <a href="{{ route('register') }}" wire:navigate class="inline-flex items-center px-4 py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition">Daftar</a>
                     @endif
                 @endauth
+                <flux:separator vertical class="my-2" />
+                <div class="flex items-center">
+                    <flux:tooltip content="Toggle light mode">
+                        <flux:button
+                            icon="sun"
+                            variant="ghost"
+                            x-show="dark"
+                            @click="toggle()"
+                        />
+                    </flux:tooltip>
+                    <flux:tooltip content="Toggle dark mode">
+                        <flux:button
+                            icon="moon"
+                            variant="ghost"
+                            x-show="!dark"
+                            @click="toggle()"
+                        />
+                    </flux:tooltip>
+                </div>
             </div>
             {{-- Mobile menu button --}}
             <button type="button" class="md:hidden p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" aria-label="Menu">
