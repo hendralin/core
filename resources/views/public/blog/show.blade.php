@@ -48,6 +48,34 @@
                     @endif
                 </footer>
             @endif
+
+            {{-- Komentar --}}
+            <section class="mt-12 pt-10 border-t border-zinc-200 dark:border-zinc-800" wire:key="comments-section">
+                <h2 class="text-xl font-semibold text-zinc-900 dark:text-white mb-6">Komentar ({{ $this->comments->count() }})</h2>
+
+                @auth
+                    @if($replyingToId === null)
+                        <form wire:submit="addComment" class="mb-8">
+                            <flux:textarea wire:model="commentContent" label="Tulis komentar" rows="3" placeholder="Komentar Anda..." />
+                            <button type="submit" class="mt-3 inline-flex items-center px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition">
+                                Kirim Komentar
+                            </button>
+                        </form>
+                    @endif
+                @else
+                    <p class="mb-6 text-zinc-600 dark:text-zinc-400 text-sm">
+                        <a href="{{ route('login') }}" wire:navigate class="text-emerald-600 dark:text-emerald-400 hover:underline">Login</a> untuk menulis komentar.
+                    </p>
+                @endauth
+
+                <div class="space-y-6">
+                    @forelse($this->comments as $comment)
+                        @include('public.blog._comment', ['comment' => $comment, 'depth' => 0])
+                    @empty
+                        <p class="text-zinc-500 dark:text-zinc-400 text-sm">Belum ada komentar.</p>
+                    @endforelse
+                </div>
+            </section>
         </div>
     </article>
 </div>

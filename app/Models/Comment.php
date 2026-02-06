@@ -75,6 +75,17 @@ class Comment extends Model
     }
 
     /**
+     * Get only approved replies (for public display)
+     */
+    public function approvedReplies(): HasMany
+    {
+        return $this->hasMany(Comment::class, 'parent_id')
+            ->approved()
+            ->with(['user', 'approvedReplies'])
+            ->orderBy('created_at');
+    }
+
+    /**
      * Scope to filter by approved comments
      */
     public function scopeApproved($query)
