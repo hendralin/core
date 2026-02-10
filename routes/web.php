@@ -80,6 +80,7 @@ use App\Livewire\CashInject\CashInjectAudit;
 use App\Livewire\CashInject\CashInjectIndex;
 use App\Livewire\Commission\CommissionAudit;
 use App\Livewire\CashInject\CashInjectCreate;
+use App\Http\Controllers\SalarySlipController;
 use App\Livewire\VehicleFile\VehicleFileAudit;
 use App\Livewire\VehicleModel\VehicleModelEdit;
 use App\Livewire\VehicleModel\VehicleModelShow;
@@ -245,6 +246,7 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('salaries', SalaryIndex::class)->name('salaries.index')->middleware(['permission:salary.view|salary.create|salary.edit|salary.delete']);
     Route::livewire('salaries/audit', SalaryAudit::class)->name('salaries.audit')->middleware(['permission:salary.audit']);
     Route::livewire('salaries/create', SalaryCreate::class)->name('salaries.create')->middleware(['permission:salary.create']);
+    Route::get('salaries/{salary}/print', [SalarySlipController::class, 'show'])->name('salaries.print')->middleware(['permission:salary.print']);
     Route::livewire('salaries/{salary}/edit', SalaryEdit::class)->name('salaries.edit')->middleware(['permission:salary.edit']);
     Route::livewire('salaries/{salary}', SalaryShow::class)->name('salaries.show')->middleware(['permission:salary.view']);
 

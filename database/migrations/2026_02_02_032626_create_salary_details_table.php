@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('salary_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('salary_id')->constrained();
-            $table->foreignId('employee_salary_component_id')->constrained();
+            $table->foreignId('salary_component_id')->constrained();
+            // nullable: hanya terisi untuk detail terkait kendaraan (mis. Insentif per mobil)
+            $table->foreignId('vehicle_id')->nullable()->constrained();
             $table->integer('quantity')->unsigned()->nullable();
             $table->decimal('amount', 15, 2)->unsigned();
             $table->decimal('total_amount', 15, 2)->unsigned();

@@ -80,8 +80,8 @@
                                 $startYear = $currentYear - 15;
                                 $endYear = $currentYear + 1;
                             @endphp
-                            @for($year = $endYear; $year >= $startYear; $year--)
-                                <flux:select.option value="{{ $year }}">{{ $year }}</flux:select.option>
+                            @for($y = $endYear; $y >= $startYear; $y--)
+                                <flux:select.option value="{{ (string) $y }}">{{ $y }}</flux:select.option>
                             @endfor
                         </flux:select>
                         <flux:input wire:model.live.debounce.1500ms="kilometer" label="Kilometer *" icon="ticket" placeholder="15.000" />

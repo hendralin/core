@@ -270,7 +270,8 @@ class VehicleEdit extends Component
         $this->type_id = $vehicle->type_id;
         $this->category_id = $vehicle->category_id;
         $this->vehicle_model_id = $vehicle->vehicle_model_id;
-        $this->year = $vehicle->year;
+        // Cast to string so it matches <option value="..."> in select
+        $this->year = $vehicle->year !== null ? (string) $vehicle->year : null;
         $this->cylinder_capacity = $vehicle->cylinder_capacity ? number_format($vehicle->cylinder_capacity, 0, ',', '.') : null ;
         $this->chassis_number = $vehicle->chassis_number;
         $this->engine_number = $vehicle->engine_number;

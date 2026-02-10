@@ -23,6 +23,15 @@ class Salary extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'salary_date' => 'date',
+    ];
+
+    /**
      * Get the options for activity logging
      */
     public function getActivitylogOptions(): LogOptions

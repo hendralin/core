@@ -18,10 +18,18 @@ class SalaryDetail extends Model
      */
     protected $fillable = [
         'salary_id',
-        'employee_salary_component_id',
+        'salary_component_id',
+        'vehicle_id',
         'quantity',
         'amount',
         'total_amount',
+    ];
+
+    protected $casts = [
+        'vehicle_id' => 'integer',
+        'quantity' => 'integer',
+        'amount' => 'decimal:2',
+        'total_amount' => 'decimal:2',
     ];
 
     /**
@@ -32,7 +40,8 @@ class SalaryDetail extends Model
         return LogOptions::defaults()
             ->logOnly([
                 'salary_id',
-                'employee_salary_component_id',
+                'salary_component_id',
+                'vehicle_id',
                 'quantity',
                 'amount',
                 'total_amount',
@@ -52,12 +61,22 @@ class SalaryDetail extends Model
     }
 
     /**
-     * Get the employee salary component that owns the salary detail
+     * Get the salary component that owns the salary detail
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function employeeSalaryComponent(): BelongsTo
+    public function salaryComponent(): BelongsTo
     {
-        return $this->belongsTo(EmployeeSalaryComponent::class);
+        return $this->belongsTo(SalaryComponent::class);
+    }
+
+    /**
+     * Get the vehicle that owns the salary detail (optional)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function vehicle(): BelongsTo
+    {
+        return $this->belongsTo(Vehicle::class);
     }
 }

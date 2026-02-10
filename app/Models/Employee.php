@@ -102,4 +102,40 @@ class Employee extends Model
     {
         return $this->hasMany(Salary::class);
     }
+
+    /**
+     * Get count of vehicles sold by this employee in the given month/year.
+     * Used for Sales Executive Officer: employee is linked to salesman via user_id.
+     *
+     * @param int $month
+     * @param int $year
+     * @return int
+     */
+    public function getVehiclesSoldCount(int $month, int $year): int
+    {
+        if (!$this->user_id) {
+            return 0;
+        }
+        $salesman = \App\Models\Salesman::where('user_id', $this->user_id)->first();
+        if (!$salesman) {
+            return 0;
+        }
+        return \App\Models\Vehicle::where('salesman_id', $salesman->id)
+            ->where('status', 0)
+            ->whereMonth('selling_date', $month)
+            ->whereYear('selling_date', $year)
+            ->whereNotNull('selling_date')
+            ->count();
+    }
+
+    /**
+     * Check if employee position is Sales Executive Officer (for commission by vehicles sold).
+     *
+     * @return bool
+     */
+    public function isSalesExecutiveOfficer(): bool
+    {
+        $name = $this->position?->name ?? '';
+        return stripos($name, 'Sales Executive') !== false || stripos($name, 'SEO') !== false;
+    }
 }
