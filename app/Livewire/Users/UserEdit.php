@@ -38,7 +38,16 @@ class UserEdit extends Component
         $this->timezone = $user->timezone;
         $this->status = $user->status;
 
-        $this->allRoles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
+        if (auth()->user()->hasRole('superadmin')) {
+            if ($this->user->hasRole('salesman')) {
+                $this->allRoles = Role::whereNotIn('name', ['employee', 'customer', 'supplier'])->orderBy('name')->get();
+            } else {
+                $this->allRoles = Role::whereNotIn('name', ['salesman','employee', 'customer', 'supplier'])->orderBy('name')->get();
+            }
+        } else {
+            $this->allRoles = Role::whereNotIn('name', ['superadmin', 'owner', 'salesman', 'employee', 'customer', 'supplier'])->orderBy('name')->get();
+        }
+        
         $this->roles = $user->roles()->pluck('name')->toArray();
 
         $this->allWarehouses = Warehouse::all();

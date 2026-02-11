@@ -12,15 +12,23 @@ class RoleService
 {
     // Permission group constants based on PermissionSeeder
     private const PERMISSION_GROUPS = [
-        'System' => ['company', 'backup-restore'],
+        'Setup' => ['company'],
         'Users & Roles' => ['user', 'role'],
-        'Master Data' => ['brand', 'type', 'category', 'vehiclemodel', 'vendor', 'salesman', 'warehouse'],
-        'Vehicles' => ['vehicle', 'vehicle-modal', 'vehicle-commission', 'vehicle-loan-calculation', 'vehicle-purchase-payment', 'vehicle-payment-receipt', 'vehicle-registration-certificate-receipt', 'vehicle-handover', 'vehicle-file'],
-        'Cost Management' => ['cost'],
-        'Cash Management' => ['cashdisbursement'],
-        'Cash Inject Management' => ['cash-inject'],
+        'Master Data' => ['brand', 'type', 'category', 'vehiclemodel', 'vendor', 'salesman', 'warehouse', 'vehicle'],
+        'Rincian Modal Mobil' => ['vehicle-modal'],
+        'Pembayaran Pembelian Mobil' => ['vehicle-purchase-payment'],
+        'Perhitungan Kredit' => ['vehicle-loan-calculation'],
+        'Penerimaan Pembayaran' => ['vehicle-payment-receipt'],
+        'Tanda Terima BPKB' => ['vehicle-registration-certificate-receipt'],
+        'Berita Acara Serah Terima Kendaraan' => ['vehicle-handover'],
+        'Komisi Penjualan & Pembelian' => ['vehicle-commission'],
+        'Management File Kendaraan' => ['vehicle-file'],
+        'Pembukuan Modal' => ['cost'],
+        'Biaya Showroom' => ['cashdisbursement'],
+        'Inject Kas' => ['cash-inject'],
         'Payroll' => ['position', 'salary-component', 'employee', 'salary'],
         'Reports' => ['cash-report', 'sales-report'],
+        'Tools' => ['backup-restore'],
     ];
     /**
      * Check if a role can be deleted

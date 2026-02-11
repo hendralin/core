@@ -16,6 +16,7 @@
                 <flux:input wire:model="birth_date" label="Birth Date" type="date" />
                 <flux:textarea wire:model="address" label="Address" placeholder="Address..." />
                 <flux:select wire:model="timezone" label="Timezone">
+                    <option value="">Select Timezone</option>
                     <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
                     <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
                     <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
@@ -24,16 +25,20 @@
                 <flux:input wire:model="password" label="Password" type="password" viewable placeholder="Password..." />
                 <flux:input wire:model="confirm_password" label="Confirm Password" type="password" viewable placeholder="Confirm Password..." />
                 <div class="grid grid-cols-2 gap-6">
-                    <flux:checkbox.group wire:model="roles" label="Roles">
-                        @foreach ($allRoles as $role)
-                            <flux:checkbox label="{{ $role->name }}" value="{{ $role->name }}" />
-                        @endforeach
-                    </flux:checkbox.group>
-                    <flux:checkbox.group wire:model="warehouses" label="Warehouses">
-                        @foreach ($allWarehouses as $warehouse)
-                            <flux:checkbox label="{{ $warehouse->name }}" value="{{ $warehouse->id }}" />
-                        @endforeach
-                    </flux:checkbox.group>
+                    <div>
+                        <flux:checkbox.group wire:model="roles" label="Roles">
+                            @foreach ($allRoles as $role)
+                                <flux:checkbox label="{{ $role->name }}" value="{{ $role->name }}" />
+                            @endforeach
+                        </flux:checkbox.group>
+                    </div>
+                    <div>
+                        <flux:checkbox.group wire:model="warehouses" label="Warehouses">
+                            @foreach ($allWarehouses as $warehouse)
+                                <flux:checkbox label="{{ $warehouse->name }}" value="{{ $warehouse->id }}" />
+                            @endforeach
+                        </flux:checkbox.group>
+                    </div>
                 </div>
                 <flux:button type="submit" variant="primary" class="cursor-pointer">Create User</flux:button>
             </form>

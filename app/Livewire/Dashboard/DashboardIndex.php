@@ -134,7 +134,7 @@ class DashboardIndex extends Component
             return view('livewire.dashboard.dashboard-salesman');
         }
 
-        if (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin')) {
+        if (auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('finance')) {
             return view('livewire.dashboard.dashboard-index');
         }
 

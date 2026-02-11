@@ -120,7 +120,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-4 py-3 w-64">Permissions</th>
+                    <th scope="col" class="px-4 py-3 whitespace-nowrap">Permissions</th>
                     <th scope="col" class="px-4 py-3 w-20">
                         <div class="flex items-center cursor-pointer @if ($sortField == 'users_count') {{ $sortDirection }} @endif" wire:click="sortBy('users_count')">
                             Users
@@ -160,7 +160,7 @@
                         <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
                             <td class="px-4 py-2 text-center text-gray-900 dark:text-white">{{ $roles->firstItem() + $index }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-gray-600 dark:text-zinc-300">{{ \App\Constants\RoleConstants::getDisplayName($role->name) }}</td>
-                            <td class="px-4 py-2 text-gray-600 dark:text-zinc-300">
+                            <td class="px-4 py-2 text-gray-600 dark:text-zinc-300 whitespace-nowrap">
                                 @php
                                     $formattedPermissions = $roleService->formatPermissionsForDisplay($role->permissions, 3);
                                 @endphp

@@ -65,16 +65,22 @@
                     <flux:input wire:model="confirm_password" label="Confirm New Password" type="password" viewable placeholder="Confirm New Password..." />
                 </div>
                 <div class="grid grid-cols-2 gap-6">
-                    <flux:checkbox.group wire:model="roles" label="Roles">
-                        @foreach ($allRoles as $role)
-                            <flux:checkbox label="{{ $role->name }}" value="{{ $role->name }}" />
-                        @endforeach
-                    </flux:checkbox.group>
-                    <flux:checkbox.group wire:model="warehouses" label="Warehouses">
-                        @foreach ($allWarehouses as $warehouse)
-                            <flux:checkbox label="{{ $warehouse->name }}" value="{{ $warehouse->id }}" />
-                        @endforeach
-                    </flux:checkbox.group>
+                    @if (!$user->hasRole('salesman'))
+                        <div>
+                            <flux:checkbox.group wire:model="roles" label="Roles">
+                                @foreach ($allRoles as $role)
+                                    <flux:checkbox label="{{ $role->name }}" value="{{ $role->name }}" />
+                                @endforeach
+                            </flux:checkbox.group>
+                        </div>
+                    @endif
+                    <div>
+                        <flux:checkbox.group wire:model="warehouses" label="Warehouses">
+                            @foreach ($allWarehouses as $warehouse)
+                                <flux:checkbox label="{{ $warehouse->name }}" value="{{ $warehouse->id }}" />
+                            @endforeach
+                        </flux:checkbox.group>
+                    </div>
                 </div>
                 <flux:button type="submit" variant="primary" class="cursor-pointer">Update User</flux:button>
             </form>

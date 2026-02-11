@@ -10,6 +10,9 @@ class RoleConstants
     const SALESMAN = 'salesman';
     const CUSTOMER = 'customer';
     const SUPPLIER = 'supplier';
+    const OWNER = 'owner';
+    const FINANCE = 'finance';
+    const EMPLOYEE = 'employee';
 
     // All system roles that cannot be deleted
     const PROTECTED_ROLES = [
@@ -18,6 +21,9 @@ class RoleConstants
         self::SALESMAN,
         self::CUSTOMER,
         self::SUPPLIER,
+        self::OWNER,
+        self::FINANCE,
+        self::EMPLOYEE,
     ];
 
     // Role display names
@@ -27,6 +33,9 @@ class RoleConstants
         self::SALESMAN => 'Salesman',
         self::CUSTOMER => 'Customer',
         self::SUPPLIER => 'Supplier',
+        self::OWNER => 'Owner',
+        self::FINANCE => 'Finance',
+        self::EMPLOYEE => 'Employee',
     ];
 
     /**
@@ -56,6 +65,9 @@ class RoleConstants
             self::SALESMAN,
             self::CUSTOMER,
             self::SUPPLIER,
+            self::OWNER,
+            self::FINANCE,
+            self::EMPLOYEE,
         ];
     }
 }

@@ -21,7 +21,11 @@ class UserCreate extends Component
 
     public function mount()
     {
-        $this->allRoles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
+        if (auth()->user()->hasRole('superadmin')) {
+            $this->allRoles = Role::whereNotIn('name', ['employee', 'salesman', 'customer', 'supplier'])->orderBy('name')->get();
+        } else {
+            $this->allRoles = Role::whereNotIn('name', ['superadmin', 'owner', 'employee', 'salesman', 'customer', 'supplier'])->orderBy('name')->get();
+        }
 
         $this->allWarehouses = Warehouse::all();
     }
