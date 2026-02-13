@@ -2,47 +2,62 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Vehicles Export</title>
+    <title>Daftar Stock Wahana OTO</title>
     <style>
+        @page {
+            size: A4 landscape;
+            margin: 12mm;
+        }
         body {
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            line-height: 1.3;
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size: 8px;
+            line-height: 1.25;
+            margin: 0;
+            padding: 0;
         }
         .header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .header h1 {
             margin: 0;
-            font-size: 16px;
+            font-size: 14px;
         }
         .header p {
-            margin: 3px 0;
+            margin: 2px 0;
             color: #666;
+            font-size: 8px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 8px;
+            page-break-inside: auto;
+        }
+        thead {
+            display: table-header-group;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 4px;
+            padding: 3px 4px;
             text-align: left;
         }
         th {
             background-color: #f5f5f5;
             font-weight: bold;
-            font-size: 9px;
+            font-size: 7px;
         }
-        tr:nth-child(even) {
+        tbody tr:nth-child(even) {
             background-color: #f9f9f9;
         }
         .footer {
-            margin-top: 20px;
+            margin-top: 12px;
             text-align: center;
-            font-size: 8px;
+            font-size: 7px;
             color: #666;
         }
         .no-wrap {
@@ -52,7 +67,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Vehicles Report</h1>
+        <h1>Daftar Stock Wahana OTO</h1>
         <p>Generated on {{ now()->format('M d, Y H:i:s') }}</p>
     </div>
 
@@ -60,22 +75,22 @@
         <thead>
             <tr>
                 <th>No</th>
-                <th>Police Number</th>
                 <th>Brand</th>
                 <th>Type</th>
                 <th>Model</th>
                 <th>Year</th>
-                <th>Chassis No</th>
-                <th>Engine No</th>
+                <th>Nopol</th>
                 <th>Cylinder</th>
                 <th>Kilometer</th>
                 <th>Warehouse</th>
-                <th>Registration Date</th>
-                <th>Registration Expiry</th>
-                <th>Purchase Date</th>
-                <th>Purchase Price</th>
-                <th>Selling Date</th>
-                <th>Selling Price</th>
+                <th>Tgl. STNK</th>
+                <th>Tgl. Pajak</th>
+                <th>Tgl. Pembelian</th>
+                <th>Harga Beli</th>
+                <th>Harga Tunai</th>
+                <th>Harga Kredit</th>
+                <th>Tgl. Penjualan</th>
+                <th>Harga Penjualan</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -83,21 +98,21 @@
             @foreach($vehicles as $i => $vehicle)
                 <tr>
                     <td>{{ $i + 1 }}</td>
-                    <td class="no-wrap">{{ $vehicle->police_number }}</td>
                     <td>{{ $vehicle->brand?->name ?? '-' }}</td>
                     <td>{{ $vehicle->type?->name ?? '-' }}</td>
                     <td>{{ $vehicle->vehicle_model?->name ?? '-' }}</td>
                     <td>{{ $vehicle->year }}</td>
-                    <td class="no-wrap">{{ $vehicle->chassis_number }}</td>
-                    <td class="no-wrap">{{ $vehicle->engine_number }}</td>
+                    <td class="no-wrap">{{ $vehicle->police_number }}</td>
                     <td>{{ $vehicle->cylinder_capacity ? number_format($vehicle->cylinder_capacity, 0) . 'cc' : '-' }}</td>
                     <td class="no-wrap">{{ number_format($vehicle->kilometer, 0) }}</td>
                     <td>{{ $vehicle->warehouse?->name ?? '-' }}</td>
-                    <td>{{ $vehicle->vehicle_registration_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_date)->format('M d, Y') : '-' }}</td>
-                    <td>{{ $vehicle->vehicle_registration_expiry_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->format('M d, Y') : '-' }}</td>
-                    <td>{{ $vehicle->purchase_date ? \Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') : '-' }}</td>
+                    <td>{{ $vehicle->vehicle_registration_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_date)->format('d-m-Y') : '-' }}</td>
+                    <td>{{ $vehicle->vehicle_registration_expiry_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->format('d-m-Y') : '-' }}</td>
+                    <td>{{ $vehicle->purchase_date ? \Carbon\Carbon::parse($vehicle->purchase_date)->format('d-m-Y') : '-' }}</td>
                     <td class="no-wrap">{{ $vehicle->purchase_price ? 'Rp ' . number_format($vehicle->purchase_price, 0) : '-' }}</td>
-                    <td>{{ $vehicle->selling_date ? \Carbon\Carbon::parse($vehicle->selling_date)->format('M d, Y') : '-' }}</td>
+                    <td class="no-wrap">{{ $vehicle->display_price ? 'Rp ' . number_format($vehicle->display_price, 0) : '-' }}</td>
+                    <td class="no-wrap">{{ $vehicle->loan_price ? 'Rp ' . number_format($vehicle->loan_price, 0) : '-' }}</td>
+                    <td>{{ $vehicle->selling_date ? \Carbon\Carbon::parse($vehicle->selling_date)->format('d-m-Y') : '-' }}</td>
                     <td class="no-wrap">{{ $vehicle->selling_price ? 'Rp ' . number_format($vehicle->selling_price, 0) : '-' }}</td>
                     <td>{{ $vehicle->status == 1 ? 'Available' : 'Sold' }}</td>
                 </tr>

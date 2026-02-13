@@ -169,7 +169,8 @@ class VehicleIndex extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->get();
 
-        $pdf = Pdf::loadView('exports.vehicles-pdf', compact('vehicles'));
+        $pdf = Pdf::loadView('exports.vehicles-pdf', compact('vehicles'))
+            ->setPaper('a4', 'landscape');
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
