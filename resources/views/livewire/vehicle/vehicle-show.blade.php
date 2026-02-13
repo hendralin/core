@@ -2191,8 +2191,25 @@
                     <div class="divide-y divide-gray-200 dark:divide-zinc-700">
                         @foreach($costs as $cost)
                         <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-700/50">
-                            <div class="flex items-center justify-between">
-                                <div class="flex-1">
+                            <div class="flex items-start gap-3">
+                                @if($cost->document)
+                                    @php
+                                        $docUrl = asset('photos/costs/' . $cost->document);
+                                        $docExt = strtolower(pathinfo($cost->document, PATHINFO_EXTENSION));
+                                        $isImage = in_array($docExt, ['jpg', 'jpeg', 'png']);
+                                    @endphp
+                                    <div class="shrink-0">
+                                        @if($isImage)
+                                            <flux:avatar href="{{ $docUrl }}" target="_blank" rel="noopener" size="lg" src="{{ $docUrl }}" alt="Dokumen biaya" tooltip="Lihat dokumen" />
+                                        @else
+                                            <a href="{{ $docUrl }}" target="_blank" rel="noopener" class="flex items-center gap-1.5 rounded border border-gray-200 dark:border-zinc-600 px-2 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-offset-zinc-800" title="Buka dokumen">
+                                                <flux:icon.document class="size-5 shrink-0" />
+                                                <span>Buka file</span>
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endif
+                                <div class="flex-1 min-w-0">
                                     <div class="flex items-center space-x-3">
                                         <flux:text class="font-medium text-gray-900 dark:text-white">{{ $cost->description }}</flux:text>
                                         @if($cost->cost_type == 'service_parts')
@@ -2218,7 +2235,7 @@
                                     </div>
                                 </div>
 
-                                <div class="text-right">
+                                <div class="text-right shrink-0">
                                     <flux:text class="font-bold text-gray-900 dark:text-white">
                                         Rp {{ number_format($cost->total_price, 0, ',', '.') }}
                                     </flux:text>
@@ -3381,7 +3398,7 @@
                         accept=".pdf,.jpg,.jpeg,.png"
                     />
                     <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
-                        Format: PDF, JPG, JPEG, PNG. Maksimal 5 file, ukuran maksimal 2MB per file.
+                        Format: PDF, JPG, JPEG, PNG. Maksimal 5 file, ukuran maksimal 5MB per file.
                     </flux:text>
                     <flux:error name="handover_file" />
                 </flux:field>
@@ -3429,7 +3446,7 @@
                         accept=".pdf,.jpg,.jpeg,.png"
                     />
                     <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
-                        Format: PDF, JPG, JPEG, PNG. Maksimal 5 file, ukuran maksimal 2MB per file.
+                        Format: PDF, JPG, JPEG, PNG. Maksimal 5 file, ukuran maksimal 5MB per file.
                     </flux:text>
                     <flux:error name="certificate_receipt_file" />
                 </flux:field>

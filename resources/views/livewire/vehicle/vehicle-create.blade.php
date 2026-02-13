@@ -77,7 +77,7 @@
                             <flux:select.option value="">{{ __('Pilih Tahun') }}</flux:select.option>
                             @php
                                 $currentYear = date('Y');
-                                $startYear = $currentYear - 15;
+                                $startYear = $currentYear - 18;
                                 $endYear = $currentYear + 1;
                             @endphp
                             @for($year = $endYear; $year >= $startYear; $year--)
@@ -495,7 +495,7 @@
     </div>
 
     <!-- Reset Confirmation Modal -->
-    <flux:modal name="reset-confirmation" wire:model="showResetModal" class="min-w-[28rem]">
+    <flux:modal name="reset-confirmation" wire:model="showResetModal" class="min-w-md">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">Reset Form?</flux:heading>

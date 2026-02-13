@@ -7,22 +7,22 @@ use App\Models\Vehicle;
 use Livewire\Component;
 use App\Models\Activity;
 use App\Models\Commission;
+use App\Models\VehicleFile;
 use Illuminate\Support\Str;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use App\Models\PaymentReceipt;
-use App\Models\VehicleCertificateReceipt;
-use App\Models\VehicleFile;
-use App\Models\VehicleFileTitle;
 use Livewire\Attributes\Title;
 use App\Models\LoanCalculation;
 use App\Models\PurchasePayment;
+use App\Models\VehicleHandover;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\VehicleFileTitle;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Models\VehicleHandover;
+use App\Models\VehicleCertificateReceipt;
 
 #[Title('Show Vehicle')]
 class VehicleShow extends Component
@@ -952,7 +952,7 @@ class VehicleShow extends Component
             'purchase_payment_date' => 'required|date',
             'purchase_payment_description' => 'required|string|max:255',
             'purchase_payment_amount' => 'required|string',
-            'purchase_payment_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'purchase_payment_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             'purchase_payment_date.required' => 'Tanggal pembayaran harus diisi.',
             'purchase_payment_date.date' => 'Tanggal pembayaran tidak valid.',
@@ -963,7 +963,7 @@ class VehicleShow extends Component
             'purchase_payment_amount.string' => 'Jumlah pembayaran harus berupa angka.',
             'purchase_payment_document.file' => 'Dokumen harus berupa file.',
             'purchase_payment_document.mimes' => 'Dokumen harus berupa file PDF, JPG, JPEG, atau PNG.',
-            'purchase_payment_document.max' => 'Ukuran dokumen maksimal 2MB.',
+            'purchase_payment_document.max' => 'Ukuran dokumen maksimal 5MB.',
         ]);
 
         // Handle file upload if provided
@@ -1079,7 +1079,7 @@ class VehicleShow extends Component
             'purchase_payment_date' => 'required|date',
             'purchase_payment_description' => 'required|string|max:255',
             'purchase_payment_amount' => 'required|string',
-            'purchase_payment_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'purchase_payment_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             'purchase_payment_date.required' => 'Tanggal pembayaran harus diisi.',
             'purchase_payment_date.date' => 'Tanggal pembayaran tidak valid.',
@@ -1090,7 +1090,7 @@ class VehicleShow extends Component
             'purchase_payment_amount.string' => 'Jumlah pembayaran harus berupa angka.',
             'purchase_payment_document.file' => 'Dokumen harus berupa file.',
             'purchase_payment_document.mimes' => 'Dokumen harus berupa file PDF, JPG, JPEG, atau PNG.',
-            'purchase_payment_document.max' => 'Ukuran dokumen maksimal 2MB.',
+            'purchase_payment_document.max' => 'Ukuran dokumen maksimal 5MB.',
         ]);
 
         $purchasePayment = PurchasePayment::findOrFail($this->editingPurchasePaymentId);
@@ -1269,7 +1269,7 @@ class VehicleShow extends Component
             'payment_receipt_amount' => 'required|string',
             'payment_receipt_description' => 'nullable|string|max:255',
             'payment_receipt_must_be_settled_date' => 'nullable|date|after:today',
-            'payment_receipt_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'payment_receipt_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         // Additional validation: check total payments against selling price
@@ -1355,7 +1355,7 @@ class VehicleShow extends Component
             'payment_receipt_amount' => 'required|string',
             'payment_receipt_description' => 'nullable|string|max:255',
             'payment_receipt_must_be_settled_date' => 'nullable|date|after:today',
-            'payment_receipt_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'payment_receipt_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         // Additional validation: check total payments against selling price
@@ -1972,7 +1972,7 @@ class VehicleShow extends Component
     {
         $this->validate([
             'handover_file' => 'required|array|max:5',
-            'handover_file.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'handover_file.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             'handover_file.required' => 'File berita acara harus dipilih.',
             'handover_file.array' => 'File berita acara harus berupa array.',
@@ -1980,7 +1980,7 @@ class VehicleShow extends Component
             'handover_file.*.required' => 'File berita acara harus dipilih.',
             'handover_file.*.file' => 'File berita acara harus berupa file.',
             'handover_file.*.mimes' => 'File berita acara harus berupa file PDF, JPG, JPEG, atau PNG.',
-            'handover_file.*.max' => 'Ukuran file maksimal 2MB.',
+            'handover_file.*.max' => 'Ukuran file maksimal 5MB.',
         ]);
 
         $handover = VehicleHandover::findOrFail($this->uploadingHandoverId);
@@ -2068,7 +2068,7 @@ class VehicleShow extends Component
     {
         $this->validate([
             'certificate_receipt_file' => 'required|array|max:5',
-            'certificate_receipt_file.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'certificate_receipt_file.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
             'certificate_receipt_file.required' => 'File tanda terima BPKB harus dipilih.',
             'certificate_receipt_file.array' => 'File tanda terima BPKB harus berupa array.',
@@ -2076,7 +2076,7 @@ class VehicleShow extends Component
             'certificate_receipt_file.*.required' => 'File tanda terima BPKB harus dipilih.',
             'certificate_receipt_file.*.file' => 'File tanda terima BPKB harus berupa file.',
             'certificate_receipt_file.*.mimes' => 'File tanda terima BPKB harus berupa file PDF, JPG, JPEG, atau PNG.',
-            'certificate_receipt_file.*.max' => 'Ukuran file maksimal 2MB.',
+            'certificate_receipt_file.*.max' => 'Ukuran file maksimal 5MB.',
         ]);
 
         $certificateReceipt = VehicleCertificateReceipt::findOrFail($this->uploadingCertificateReceiptId);

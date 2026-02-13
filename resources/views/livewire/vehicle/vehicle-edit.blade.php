@@ -77,7 +77,7 @@
                             <flux:select.option value="">{{ __('Pilih Tahun') }}</flux:select.option>
                             @php
                                 $currentYear = date('Y');
-                                $startYear = $currentYear - 15;
+                                $startYear = $currentYear - 18;
                                 $endYear = $currentYear + 1;
                             @endphp
                             @for($y = $endYear; $y >= $startYear; $y--)
