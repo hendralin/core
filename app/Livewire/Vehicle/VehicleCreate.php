@@ -495,7 +495,7 @@ class VehicleCreate extends Component
 
         // Additional year validation
         $currentYear = date('Y');
-        $minYear = $currentYear - 15;
+        $minYear = $currentYear - 18;
         $maxYear = $currentYear + 1;
 
         if ($this->year < $minYear || $this->year > $maxYear) {
