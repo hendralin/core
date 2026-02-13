@@ -516,7 +516,7 @@ class VehicleShow extends Component
             ])
             ->log('deleted commission');
 
-        $this->modal('delete-commission-{{ $commission->id }}')->close();
+        $this->modal('delete-commission-' . $commission->id)->close();
 
         // Show success message
         session()->flash('message', 'Komisi ' . ($commission->type == 1 ? 'Penjualan' : 'Pembelian') . ' berhasil dihapus.');
@@ -1444,6 +1444,8 @@ class VehicleShow extends Component
                 'old' => $oldPaymentReceipt,
             ])
             ->log('deleted payment receipt');
+
+        $this->modal('delete-payment-receipt-' . $paymentReceipt->id)->close();
 
         // Show success message
         session()->flash('message', 'Penerimaan pembayaran berhasil dihapus.');

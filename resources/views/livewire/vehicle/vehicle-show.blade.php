@@ -2247,7 +2247,7 @@
 
                     <!-- Pagination -->
                     @if($costs->hasPages())
-                    <div class="mt-4 flex justify-center">
+                    <div class="mx-4 mt-4 mb-2">
                         {{ $costs->links(data: ['scrollTo' => false]) }}
                     </div>
                     @endif

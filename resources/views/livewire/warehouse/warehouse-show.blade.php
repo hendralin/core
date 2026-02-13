@@ -122,7 +122,7 @@
                                         @endif
                                         @if($vehicle->description)
                                             <span class="text-xs text-gray-500 dark:text-zinc-500">•</span>
-                                            <flux:text class="text-xs text-gray-500 dark:text-zinc-500 line-clamp-1">{{ Str::limit($vehicle->description, 50) }}</flux:text>
+                                            <flux:text class="text-xs text-gray-500 dark:text-zinc-500 line-clamp-1">{{ Str::limit(strip_tags($vehicle->description), 50) }}</flux:text>
                                         @endif
                                     </div>
                                 </div>

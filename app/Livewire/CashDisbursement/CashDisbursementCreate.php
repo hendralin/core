@@ -70,6 +70,13 @@ class CashDisbursementCreate extends Component
             'created_by' => Auth::id(),
         ]);
 
+        // create payment record
+        $cost->payments()->create([
+            'payment_date' => $this->cost_date,
+            'amount' => $totalPrice,
+            'note' => null,
+        ]);
+
         // Log the creation activity
         activity()
             ->performedOn($cost)

@@ -101,6 +101,24 @@ class CashDisbursementEdit extends Component
             'document' => $documentPath,
         ]);
 
+        // Update payment record if total_price not equals to original total_price
+        if ($totalPrice !== $this->cost->getOriginal('total_price') || $this->cost_date !== $this->cost->getOriginal('cost_date')) {
+            $firstPayment = $this->cost->payments()->first();
+            if ($firstPayment) {
+                $firstPayment->update([
+                    'payment_date' => $this->cost_date,
+                    'amount' => $totalPrice,
+                ]);
+            } else {
+                $this->cost->payments()->create([
+                    'payment_date' => $this->cost_date,
+                    'amount' => $totalPrice,
+                    'note' => null,
+                ]);
+            }
+        }
+
+
         // Log the update activity with changes
         activity()
             ->performedOn($this->cost)
