@@ -160,7 +160,7 @@ class VehicleCreate extends Component
         'kilometer' => 'required|numeric|min:0|max:99999999999999.99',
         'vehicle_registration_date' => 'required|date|after_or_equal:today',
         'vehicle_registration_expiry_date' => 'required|date|after:vehicle_registration_date',
-        'file_stnk' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        'file_stnk' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
         'warehouse_id' => 'required|exists:warehouses,id',
         'purchase_date' => 'required|date|before_or_equal:today',
         'purchase_price' => 'required|numeric|min:0|max:99999999999999.99',
@@ -173,9 +173,9 @@ class VehicleCreate extends Component
         'status' => 'required|in:0,1',
         'description' => 'nullable|string',
         'bpkb_number' => 'required|string|max:255|unique:vehicles,bpkb_number',
-        'bpkb_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        'bpkb_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max
         'images.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB per image
-        'images' => 'nullable|array|max:10', // Max 10 images
+        'images' => 'nullable|array|max:20', // Max 20 images
     ];
 
     protected $messages = [
@@ -206,18 +206,18 @@ class VehicleCreate extends Component
         'salesman_id.required_if' => 'Salesman wajib diisi untuk kendaraan yang terjual.',
         'salesman_id.exists' => 'Salesman yang dipilih tidak valid.',
         'file_stnk.mimes' => 'File STNK harus dalam format PDF, JPG, JPEG, atau PNG.',
-        'file_stnk.max' => 'File STNK tidak boleh lebih dari 2MB.',
+        'file_stnk.max' => 'File STNK tidak boleh lebih dari 5MB.',
         'fuel_type.in' => 'Jenis Bahan Bakar harus diisi dengan Bensin atau Solar.',
         'images.*.image' => 'File harus berupa gambar.',
         'images.*.mimes' => 'Format gambar harus JPEG, JPG, PNG, GIF, atau WebP.',
         'images.*.max' => 'Ukuran gambar tidak boleh lebih dari 5MB.',
         'images.array' => 'Format upload gambar tidak valid.',
-        'images.max' => 'Maksimal 10 gambar yang dapat diupload.',
+        'images.max' => 'Maksimal 20 gambar yang dapat diupload.',
         'bpkb_number.required' => 'Nomor BPKB wajib diisi.',
         'bpkb_number.unique' => 'Nomor BPKB sudah ada.',
         'bpkb_file.required' => 'File BPKB wajib diisi.',
         'bpkb_file.mimes' => 'File BPKB harus dalam format PDF, JPG, JPEG, atau PNG.',
-        'bpkb_file.max' => 'File BPKB tidak boleh lebih dari 2MB.',
+        'bpkb_file.max' => 'File BPKB tidak boleh lebih dari 10MB.',
     ];
 
     public function updatedBrandId()
@@ -304,8 +304,8 @@ class VehicleCreate extends Component
         });
 
         // Check total count limit
-        if (count($currentImages) + count($validFiles) > 10) {
-            $this->addError('images', 'Maksimal 10 gambar yang dapat diupload.');
+        if (count($currentImages) + count($validFiles) > 20) {
+            $this->addError('images', 'Maksimal 20 gambar yang dapat diupload.');
             return;
         }
 

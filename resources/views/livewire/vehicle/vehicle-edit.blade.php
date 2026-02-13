@@ -149,6 +149,8 @@
                         <flux:select wire:model="fuel_type" label="Tipe Bahan Bakar *" icon="bolt">
                             <flux:select.option value="">{{ __('Pilih Tipe Bahan Bakar') }}</flux:select.option>
                             <flux:select.option value="Bensin">Bensin</flux:select.option>
+                            <flux:select.option value="Electric">Electric</flux:select.option>
+                            <flux:select.option value="Hybrid">Hybrid</flux:select.option>
                             <flux:select.option value="Solar">Solar</flux:select.option>
                         </flux:select>
                     </div>
@@ -183,7 +185,7 @@
                             <flux:input type="file" wire:model="file_stnk" label="File STNK *"
                                       accept=".pdf,.jpg,.jpeg,.png"
                                       icon="document"
-                                      description:trailing="Upload file STNK baru jika ingin mengganti (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
+                                      description:trailing="Upload file STNK baru jika ingin mengganti (PDF, JPG, JPEG, PNG - maksimal 5MB)" />
                             @if($existing_file_stnk)
                                 <div class="text-sm text-green-600 flex items-center gap-1">
                                     <flux:icon.check-circle class="w-4 h-4" />
@@ -201,7 +203,7 @@
                             <flux:input type="file" wire:model="bpkb_file" label="File BPKB *"
                                       accept=".pdf,.jpg,.jpeg,.png"
                                       icon="document"
-                                      description:trailing="Upload file BPKB baru jika ingin mengganti (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
+                                      description:trailing="Upload file BPKB baru jika ingin mengganti (PDF, JPG, JPEG, PNG - maksimal 10MB)" />
                             @if($existing_bpkb_file)
                                 <div class="text-sm text-green-600 flex items-center gap-1">
                                     <flux:icon.check-circle class="w-4 h-4" />

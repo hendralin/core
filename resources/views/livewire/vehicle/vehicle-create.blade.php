@@ -149,6 +149,8 @@
                         <flux:select wire:model="fuel_type" label="Tipe Bahan Bakar" icon="bolt">
                             <flux:select.option value="">{{ __('Pilih Tipe Bahan Bakar') }}</flux:select.option>
                             <flux:select.option value="Bensin">Bensin</flux:select.option>
+                            <flux:select.option value="Electric">Electric</flux:select.option>
+                            <flux:select.option value="Hybrid">Hybrid</flux:select.option>
                             <flux:select.option value="Solar">Solar</flux:select.option>
                         </flux:select>
                     </div>
@@ -180,7 +182,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <flux:input type="file" wire:model="file_stnk" label="File STNK *" accept=".pdf,.jpg,.jpeg,.png" icon="document" description:trailing="Upload file STNK (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
+                            <flux:input type="file" wire:model="file_stnk" label="File STNK *" accept=".pdf,.jpg,.jpeg,.png" icon="document" description:trailing="Upload file STNK (PDF, JPG, JPEG, PNG - maksimal 5MB)" />
                             @if($file_stnk)
                                 <div class="text-sm text-green-600 flex items-center gap-1">
                                     <flux:icon.check-circle class="w-4 h-4" />
@@ -190,7 +192,7 @@
                             <flux:error name="file_stnk" />
                         </div>
                         <div class="space-y-2">
-                            <flux:input type="file" wire:model="bpkb_file" accept=".pdf,.jpg,.jpeg,.png" icon="document" label="File BPKB *" description:trailing="Upload file BPKB (PDF, JPG, JPEG, PNG - maksimal 2MB)" />
+                            <flux:input type="file" wire:model="bpkb_file" accept=".pdf,.jpg,.jpeg,.png" icon="document" label="File BPKB *" description:trailing="Upload file BPKB (PDF, JPG, JPEG, PNG - maksimal 10MB)" />
                             @if($bpkb_file)
                                 <div class="text-sm text-green-600 flex items-center gap-1">
                                     <flux:icon.check-circle class="w-4 h-4" />
@@ -265,7 +267,7 @@
                                 Pilih File
                             </flux:button>
                             <p class="text-xs text-gray-500 dark:text-zinc-500 mt-2">
-                                Format: JPG, PNG, GIF, WebP • Maksimal 5MB per gambar • Maksimal 10 gambar
+                                Format: JPG, PNG, GIF, WebP • Maksimal 5MB per gambar • Maksimal 20 gambar
                             </p>
                         </div>
                         <flux:error name="images.*" />
