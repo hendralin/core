@@ -156,7 +156,7 @@ class VehicleCreate extends Component
         'chassis_number' => 'required|string|max:255',
         'engine_number' => 'required|string|max:255',
         'color' => 'nullable|string|max:255',
-        'fuel_type' => 'nullable|in:Bensin,Solar',
+        'fuel_type' => 'nullable|in:Bensin,Electric,Hybrid,Solar',
         'kilometer' => 'required|numeric|min:0|max:99999999999999.99',
         'vehicle_registration_date' => 'required|date',
         'vehicle_registration_expiry_date' => 'required|date',
