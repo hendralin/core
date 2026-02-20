@@ -9,8 +9,13 @@
                     <time datetime="{{ $post->published_at?->toIso8601String() }}">{{ $post->published_at?->format('d F Y') }}</time>
                     @if($post->user)
                         <span>·</span>
+                        <flux:avatar size="xs" src="{{ $post->user->avatar_url }}" />
                         <span>{{ $post->user->name }}</span>
                     @endif
+                    <span>·</span>
+                    <span>{{ ceil(str_word_count(strip_tags($post->content)) / 200) }} min read</span>
+                    <span>·</span>
+                    <span>{{ number_format($post->views_count ?? 0) }} {{ Str::plural('view', $post->views_count ?? 0) }}</span>
                 </div>
             </header>
 

@@ -93,6 +93,14 @@ class Post extends Model
     }
 
     /**
+     * Get the views for the post
+     */
+    public function views(): HasMany
+    {
+        return $this->hasMany(PostView::class);
+    }
+
+    /**
      * Get the featured image URL for the post
      */
     public function getFeaturedImageUrlAttribute(): string

@@ -11,7 +11,11 @@
                 {{-- Sidebar Filter --}}
                 <aside class="lg:w-64 shrink-0">
                     <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 sticky top-6 space-y-8">
-                        @if($selectedCategory || !empty($selectedTags))
+                        <div>
+                            <flux:input icon="magnifying-glass" size="sm" placeholder="Cari artikel..." wire:model.live.debounce.300ms="search" clearable />
+                        </div>
+
+                        @if($search !== '' || $selectedCategory || !empty($selectedTags))
                             <button type="button" wire:click="clearFilters" class="w-full text-sm text-emerald-600 dark:text-emerald-400 hover:underline font-medium">
                                 Hapus filter
                             </button>
@@ -71,10 +75,20 @@
                                         </div>
                                     @endif
                                     <div class="p-6">
-                                        <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">{{ $post->published_at?->format('d M Y') }}</p>
+                                        <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                                            <span>{{ $post->published_at?->format('d M Y') }}</span>
+                                            @if($post->user)
+                                                <span>·</span>
+                                                <span>{{ $post->user->name }}</span>
+                                            @endif
+                                            @if ($post->views_count > 0)
+                                                <span>·</span>
+                                                <span>{{ number_format($post->views_count ?? 0) }} {{ Str::plural('view', $post->views_count ?? 0) }}</span>
+                                            @endif
+                                        </p>
                                         <h2 class="text-lg font-semibold text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition line-clamp-2">{{ $post->title }}</h2>
                                         @if($post->excerpt)
-                                            <p class="text-zinc-600 dark:text-zinc-400 text-sm mt-2 line-clamp-2">{{ Str::limit(strip_tags($post->excerpt), 100) }}</p>
+                                            <p class="text-zinc-600 dark:text-zinc-400 text-sm mt-2 line-clamp-2">{{ Str::limit(strip_tags($post->excerpt), 120) }}</p>
                                         @endif
                                     </div>
                                 </a>

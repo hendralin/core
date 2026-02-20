@@ -4,6 +4,7 @@ namespace App\Livewire\PublicBlog;
 
 use App\Models\Comment;
 use App\Models\Post;
+use App\Models\PostView;
 use Livewire\Component;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -26,6 +27,22 @@ class BlogShow extends Component
         }
 
         $this->post = $post->load(['user', 'categories', 'tags']);
+
+        $this->recordView();
+    }
+
+    protected function recordView(): void
+    {
+        PostView::create([
+            'post_id' => $this->post->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'user_id' => auth()->id(),
+            'viewed_at' => now(),
+        ]);
+
+        $this->post->increment('views_count');
+        $this->post->refresh();
     }
 
     public function addComment(): void

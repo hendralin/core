@@ -16,11 +16,19 @@ class BlogIndex extends Component
 {
     use WithPagination;
 
+    #[Url(as: 'q')]
+    public string $search = '';
+
     #[Url(as: 'category')]
     public ?string $selectedCategory = null;
 
     #[Url(as: 'tags')]
     public array $selectedTags = [];
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
 
     public function updatedSelectedCategory(): void
     {
@@ -50,6 +58,7 @@ class BlogIndex extends Component
 
     public function clearFilters(): void
     {
+        $this->search = '';
         $this->selectedCategory = null;
         $this->selectedTags = [];
         $this->resetPage();
@@ -58,7 +67,7 @@ class BlogIndex extends Component
     public function render(): View
     {
         $query = Post::where('status', 'published')
-            ->with(['categories', 'tags'])
+            ->with(['categories', 'tags', 'user'])
             ->orderByDesc('published_at');
 
         if ($this->selectedCategory) {
@@ -67,6 +76,15 @@ class BlogIndex extends Component
 
         if (! empty($this->selectedTags)) {
             $query->whereHas('tags', fn ($q) => $q->whereIn('tags.slug', $this->selectedTags));
+        }
+
+        $search = trim($this->search);
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('excerpt', 'like', '%' . $search . '%')
+                    ->orWhere('content', 'like', '%' . $search . '%');
+            });
         }
 
         $posts = $query->paginate(9);
