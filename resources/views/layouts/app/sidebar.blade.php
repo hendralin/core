@@ -82,6 +82,10 @@
                 auth()->user()->can('blog.tag.view') ||
                 auth()->user()->can('blog.post.view'))
                     <flux:sidebar.group expandable icon="newspaper" heading="Blogs" class="grid">
+                        @if (auth()->user()->can('blog.dashboard.view'))
+                            <flux:sidebar.item icon="presentation-chart-line" :href="route('blog.dashboard')" :current="request()->routeIs('blog.dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:sidebar.item>
+                        @endif
+
                         @if (auth()->user()->can('blog.category.view') ||
                         auth()->user()->can('blog.category.create') ||
                         auth()->user()->can('blog.category.edit') ||
@@ -244,6 +248,10 @@
                 auth()->user()->can('blog.tag.view') ||
                 auth()->user()->can('blog.post.view'))
                     <flux:navlist.group :heading="__('Blogs')" class="grid">
+                        @if (auth()->user()->can('blog.dashboard.view'))
+                            <flux:navlist.item icon="presentation-chart-line" :href="route('blog.dashboard')" :current="request()->routeIs('blog.dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                        @endif
+
                         @if (auth()->user()->can('blog.category.view') ||
                         auth()->user()->can('blog.category.create') ||
                         auth()->user()->can('blog.category.edit') ||

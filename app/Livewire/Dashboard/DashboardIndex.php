@@ -207,7 +207,9 @@ class DashboardIndex extends Component
         $user = Auth::user();
 
         if (!$user || !$user->default_kode_emiten) {
-            $this->needsSetup = true;
+            session()->flash('error', 'Please set your default stock code in your profile settings.');
+            $this->redirect(route('settings.profile'));
+
             return;
         }
 
@@ -1439,10 +1441,6 @@ class DashboardIndex extends Component
 
     public function render()
     {
-        if ($this->needsSetup) {
-            return redirect()->route('settings.profile')->with('error', 'Please set your default stock code in your profile settings.');
-        }
-
         return view('livewire.dashboard.dashboard-index');
     }
 }

@@ -60,6 +60,7 @@ class PermissionSeeder extends Seeder
             'blog.tag.audit',
 
             // Posts
+            'blog.dashboard.view',
             'blog.post.view',
             'blog.post.create',
             'blog.post.edit.own',

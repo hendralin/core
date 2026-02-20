@@ -20,11 +20,13 @@ use App\Livewire\Blog\Tags\TagsAudit;
 use App\Livewire\Blog\Tags\TagsIndex;
 use App\Livewire\Company\CompanyEdit;
 use App\Livewire\Company\CompanyShow;
+use App\Livewire\PublicBlog\BlogShow;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Blog\Posts\PostsEdit;
 use App\Livewire\Blog\Posts\PostsShow;
 use App\Livewire\Blog\Tags\TagsCreate;
+use App\Livewire\PublicBlog\BlogIndex;
 use App\Livewire\Blog\Posts\PostsAudit;
 use App\Livewire\Blog\Posts\PostsIndex;
 use App\Livewire\Blog\Posts\PostsCreate;
@@ -39,10 +41,9 @@ use App\Livewire\Blog\Categories\CategoryShow;
 use App\Livewire\Blog\Categories\CategoryAudit;
 use App\Livewire\Blog\Categories\CategoryIndex;
 use App\Livewire\Blog\Categories\CategoryCreate;
+use App\Livewire\Blog\Dashboard\DashboardBlog;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
 use App\Livewire\TradingSummary\StockSummaryIndex;
-use App\Livewire\PublicBlog\BlogIndex;
-use App\Livewire\PublicBlog\BlogShow;
 
 // License expired page (accessible even when license is expired)
 Route::get('/license-expired', function () {
@@ -100,6 +101,7 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('admin/signals/{signal}/edit', SignalsEdit::class)->name('admin.signals.edit')->middleware(['permission:admin.signal.edit']);
     Route::livewire('admin/signals/{signal}', SignalsShow::class)->name('admin.signals.show')->middleware(['permission:admin.signal.view']);
 
+    Route::livewire('dashboard/blog', DashboardBlog::class)->name('blog.dashboard')->middleware(['permission:blog.dashboard.view']);
     Route::livewire('categories', CategoryIndex::class)->name('blog.categories.index')->middleware(['permission:blog.category.view|blog.category.create|blog.category.edit|blog.category.delete']);
     Route::livewire('categories/create', CategoryCreate::class)->name('blog.categories.create')->middleware(['permission:blog.category.create']);
     Route::livewire('categories/{category}', CategoryShow::class)->name('blog.categories.show')->middleware(['permission:blog.category.view']);
