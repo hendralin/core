@@ -189,7 +189,6 @@
                                     File dipilih: {{ $file_stnk->getClientOriginalName() }}
                                 </div>
                             @endif
-                            <flux:error name="file_stnk" />
                         </div>
                         <div class="space-y-2">
                             <flux:input type="file" wire:model="bpkb_file" accept=".pdf,.jpg,.jpeg,.png" icon="document" label="File BPKB *" description:trailing="Upload file BPKB (PDF, JPG, JPEG, PNG - maksimal 10MB)" />
@@ -199,7 +198,6 @@
                                     File dipilih: {{ $bpkb_file->getClientOriginalName() }}
                                 </div>
                             @endif
-                            <flux:error name="bpkb_file" />
                         </div>
                     </div>
                 </div>

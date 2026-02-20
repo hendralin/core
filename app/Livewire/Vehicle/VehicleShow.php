@@ -1268,7 +1268,7 @@ class VehicleShow extends Component
             'payment_receipt_date' => 'required|date',
             'payment_receipt_amount' => 'required|string',
             'payment_receipt_description' => 'nullable|string|max:255',
-            'payment_receipt_must_be_settled_date' => 'nullable|date|after:today',
+            'payment_receipt_must_be_settled_date' => 'nullable|date',
             'payment_receipt_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
@@ -1354,7 +1354,7 @@ class VehicleShow extends Component
             'payment_receipt_date' => 'required|date',
             'payment_receipt_amount' => 'required|string',
             'payment_receipt_description' => 'nullable|string|max:255',
-            'payment_receipt_must_be_settled_date' => 'nullable|date|after:today',
+            'payment_receipt_must_be_settled_date' => 'nullable|date',
             'payment_receipt_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
