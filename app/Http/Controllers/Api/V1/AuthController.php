@@ -15,6 +15,9 @@ use App\Http\Requests\Api\V1\RegisterRequest;
 
 final class AuthController extends ApiController
 {
+    /**
+     * Register a new user.
+     */
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::query()->create([
@@ -25,12 +28,17 @@ final class AuthController extends ApiController
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        $user->assignRole('user');
+
         return $this->created([
             'user' => new UserResource($user),
             'token' => $token,
         ], 'User registered successfully');
     }
 
+    /**
+     * Login a user.
+     */
     public function login(LoginRequest $request): JsonResponse
     {
         $user = User::query()->where('email', $request->email)->first();
@@ -47,6 +55,9 @@ final class AuthController extends ApiController
         ], 'Login successful');
     }
 
+    /**
+     * Logout a user.
+     */
     public function logout(Request $request): JsonResponse
     {
         /** @var User $user */
@@ -56,6 +67,9 @@ final class AuthController extends ApiController
         return $this->success(message: 'Logged out successfully');
     }
 
+    /**
+     * Get the authenticated user.
+     */
     public function me(Request $request): JsonResponse
     {
         return $this->success(new UserResource($request->user()));
