@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('costs', function (Blueprint $table) {
-            $table->enum('cost_type', ['service_parts', 'other_cost', 'showroom', 'cash', 'sales_commission', 'tax_cash'])->after('id')->default('service_parts');
+            $table->foreignId('warehouse_id')->nullable()->after('vehicle_id')->constrained();
         });
     }
 
@@ -22,7 +22,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('costs', function (Blueprint $table) {
-            $table->dropColumn('cost_type');
+            $table->dropForeign(['warehouse_id']);
+            $table->dropColumn('warehouse_id');
         });
     }
 };

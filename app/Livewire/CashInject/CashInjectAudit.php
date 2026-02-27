@@ -36,12 +36,12 @@ class CashInjectAudit extends Component
     public function render()
     {
         $activities = Activity::query()
-            ->with(['causer', 'subject'])
+            ->with(['causer', 'subject', 'subject.warehouse'])
             ->where('subject_type', Cost::class)
             ->whereRaw("EXISTS (
                 SELECT 1 FROM costs c
                 WHERE c.id = activity_log.subject_id
-                AND c.cost_type = 'cash'
+                AND c.cost_type IN ('cash', 'tax_cash')
                 AND c.vehicle_id IS NULL
                 AND c.vendor_id IS NULL
             )", [])
@@ -68,10 +68,11 @@ class CashInjectAudit extends Component
             ->orderBy('created_at', 'desc')
             ->paginate($this->perPage);
 
-        // Get cash injects for dropdown
-        $costs = Cost::where('cost_type', 'cash')
+        // Get cash injects for dropdown (Kas Kecil + Kas Pajak)
+        $costs = Cost::whereIn('cost_type', ['cash', 'tax_cash'])
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
+            ->with('warehouse')
             ->orderBy('cost_date', 'desc')
             ->get();
 
@@ -81,7 +82,7 @@ class CashInjectAudit extends Component
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'cash'
+                    AND c.cost_type IN ('cash', 'tax_cash')
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
@@ -90,7 +91,7 @@ class CashInjectAudit extends Component
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'cash'
+                    AND c.cost_type IN ('cash', 'tax_cash')
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
@@ -100,7 +101,7 @@ class CashInjectAudit extends Component
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'cash'
+                    AND c.cost_type IN ('cash', 'tax_cash')
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
@@ -110,7 +111,7 @@ class CashInjectAudit extends Component
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'cash'
+                    AND c.cost_type IN ('cash', 'tax_cash')
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])
@@ -120,7 +121,7 @@ class CashInjectAudit extends Component
                 ->whereRaw("EXISTS (
                     SELECT 1 FROM costs c
                     WHERE c.id = activity_log.subject_id
-                    AND c.cost_type = 'cash'
+                    AND c.cost_type IN ('cash', 'tax_cash')
                     AND c.vehicle_id IS NULL
                     AND c.vendor_id IS NULL
                 )", [])

@@ -3,6 +3,7 @@
 namespace App\Livewire\CashInject;
 
 use App\Models\Cost;
+use App\Models\Warehouse;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -20,6 +21,8 @@ class CashInjectIndex extends Component
 
     public $costIdToDelete = null;
     public $search = '';
+    public $costTypeFilter = ''; // '', 'cash', 'tax_cash'
+    public $warehouseFilter = ''; // '', warehouse_id
     public $sortField = 'cost_date';
     public $sortDirection = 'desc';
     public $perPage = 10;
@@ -35,7 +38,7 @@ class CashInjectIndex extends Component
 
     public function updating($field)
     {
-        if (in_array($field, ['search', 'perPage', 'dateFrom', 'dateTo', 'selectedMonthYear'])) {
+        if (in_array($field, ['search', 'costTypeFilter', 'warehouseFilter', 'perPage', 'dateFrom', 'dateTo', 'selectedMonthYear'])) {
             $this->resetPage();
         }
     }
@@ -71,6 +74,7 @@ class CashInjectIndex extends Component
                 $costData = [
                     'cost_date' => $cost->cost_date,
                     'cost_type' => $cost->cost_type,
+                    'warehouse_id' => $cost->warehouse_id,
                     'description' => $cost->description,
                     'total_price' => $cost->total_price,
                     'document' => $cost->document,
@@ -102,7 +106,7 @@ class CashInjectIndex extends Component
 
     public function clearFilters()
     {
-        $this->reset(['search']);
+        $this->reset(['search', 'costTypeFilter', 'warehouseFilter']);
         $this->selectedMonthYear = null;
         $this->updateDateRange();
         $this->resetPage();
@@ -128,10 +132,12 @@ class CashInjectIndex extends Component
     public function render()
     {
         $costs = Cost::query()
-            ->where('cost_type', 'cash')
+            ->whereIn('cost_type', ['cash', 'tax_cash'])
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
-            ->with(['createdBy'])
+            ->with(['createdBy', 'warehouse'])
+            ->when($this->costTypeFilter, fn($q) => $q->where('cost_type', $this->costTypeFilter))
+            ->when($this->warehouseFilter, fn($q) => $q->where('warehouse_id', $this->warehouseFilter))
             ->when(
                 $this->search,
                 fn($q) =>
@@ -147,9 +153,11 @@ class CashInjectIndex extends Component
 
         // Calculate total for current filters (always show for default period)
         $totalForFilters = Cost::query()
-            ->where('cost_type', 'cash')
+            ->whereIn('cost_type', ['cash', 'tax_cash'])
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
+            ->when($this->costTypeFilter, fn($q) => $q->where('cost_type', $this->costTypeFilter))
+            ->when($this->warehouseFilter, fn($q) => $q->where('warehouse_id', $this->warehouseFilter))
             ->when($this->search, fn($q) => $q->where(function ($query) {
                 $query->where('description', 'like', '%' . $this->search . '%')
                     ->orWhereHas('createdBy', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
@@ -158,13 +166,15 @@ class CashInjectIndex extends Component
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->sum('total_price');
 
-        return view('livewire.cash-inject.cash-inject-index', compact('costs', 'totalForFilters'));
+        $warehouses = Warehouse::orderBy('name')->get();
+
+        return view('livewire.cash-inject.cash-inject-index', compact('costs', 'totalForFilters', 'warehouses'));
     }
 
     public function exportExcel()
     {
         return Excel::download(
-            new CostInjectExport($this->search, $this->sortField, $this->sortDirection, null, $this->dateFrom, $this->dateTo),
+            new CostInjectExport($this->search, $this->sortField, $this->sortDirection, $this->costTypeFilter ?: null, $this->dateFrom, $this->dateTo, $this->warehouseFilter ?: null),
             'cash_injects_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
@@ -172,10 +182,12 @@ class CashInjectIndex extends Component
     public function exportPdf()
     {
         $costs = Cost::query()
-            ->where('cost_type', 'cash')
+            ->whereIn('cost_type', ['cash', 'tax_cash'])
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
-            ->with(['createdBy'])
+            ->with(['createdBy', 'warehouse'])
+            ->when($this->costTypeFilter, fn($q) => $q->where('cost_type', $this->costTypeFilter))
+            ->when($this->warehouseFilter, fn($q) => $q->where('warehouse_id', $this->warehouseFilter))
             ->when(
                 $this->search,
                 fn($q) =>

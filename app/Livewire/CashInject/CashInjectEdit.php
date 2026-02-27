@@ -4,6 +4,7 @@ namespace App\Livewire\CashInject;
 
 use Carbon\Carbon;
 use App\Models\Cost;
+use App\Models\Warehouse;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -20,6 +21,7 @@ class CashInjectEdit extends Component
 
     public $cost_type;
     public $cost_date;
+    public $warehouse_id;
     public $description;
     public $total_price;
     public $document;
@@ -29,13 +31,14 @@ class CashInjectEdit extends Component
     {
         $this->cost = $cost;
 
-        // Check if this is actually a cash inject
-        if (!in_array($cost->cost_type, ['cash'])) {
+        // Check if this is actually a cash inject (Kas Kecil or Kas Pajak)
+        if (!in_array($cost->cost_type, ['cash', 'tax_cash'])) {
             abort(403, 'Record ini bukan merupakan inject kas.');
         }
 
         $this->cost_type = $cost->cost_type;
         $this->cost_date = Carbon::parse($cost->cost_date)->format('Y-m-d');
+        $this->warehouse_id = $cost->warehouse_id;
         $this->description = $cost->description;
         $this->total_price = number_format($cost->total_price, 0);
         $this->existing_document = $cost->document;
@@ -44,16 +47,22 @@ class CashInjectEdit extends Component
     public function submit()
     {
         $rules = [
+            'cost_type' => 'required|in:cash,tax_cash',
             'cost_date' => 'required|date|before_or_equal:today',
+            'warehouse_id' => 'required|exists:warehouses,id',
             'description' => 'required|string',
             'total_price' => 'required|string',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
         ];
 
         $messages = [
+            'cost_type.required' => 'Tipe kas harus dipilih.',
+            'cost_type.in' => 'Tipe kas harus berupa Kas Kecil atau Kas Pajak.',
             'cost_date.required' => 'Tanggal inject kas harus dipilih.',
             'cost_date.date' => 'Tanggal inject kas harus berupa tanggal.',
             'cost_date.before_or_equal' => 'Tanggal inject kas tidak boleh lebih dari hari ini.',
+            'warehouse_id.required' => 'Warehouse harus dipilih.',
+            'warehouse_id.exists' => 'Warehouse yang dipilih tidak valid.',
             'description.required' => 'Deskripsi inject harus diisi.',
             'description.string' => 'Deskripsi inject harus berupa teks.',
             'total_price.required' => 'Total inject harus diisi.',
@@ -83,6 +92,7 @@ class CashInjectEdit extends Component
         // Store old values before update (since update() clears dirty attributes)
         $oldValues = [
             'cost_type' => $this->cost->getOriginal('cost_type'),
+            'warehouse_id' => $this->cost->getOriginal('warehouse_id'),
             'cost_date' => $this->cost->getOriginal('cost_date'),
             'description' => $this->cost->getOriginal('description'),
             'total_price' => $this->cost->getOriginal('total_price'),
@@ -92,6 +102,7 @@ class CashInjectEdit extends Component
         $this->cost->update([
             'cost_type' => $this->cost_type,
             'cost_date' => $this->cost_date,
+            'warehouse_id' => $this->warehouse_id,
             'description' => $this->description,
             'total_price' => $totalPrice,
             'document' => $documentPath,
@@ -106,6 +117,7 @@ class CashInjectEdit extends Component
                 'attributes' => [
                     'cost_type' => $this->cost_type,
                     'cost_date' => $this->cost_date,
+                    'warehouse_id' => $this->warehouse_id,
                     'description' => $this->description,
                     'total_price' => $totalPrice,
                     'document' => $documentPath,
@@ -113,7 +125,11 @@ class CashInjectEdit extends Component
             ])
             ->log('updated cash inject record');
 
-        session()->flash('success', 'Inject kas berhasil diperbarui.');
+        if ($this->cost_type === 'tax_cash') {
+            session()->flash('success', 'Inject kas pajak berhasil diperbarui.');
+        } else {
+            session()->flash('success', 'Inject kas kecil berhasil diperbarui.');
+        }
 
         return $this->redirect('/cash-injects', true);
     }
@@ -130,6 +146,8 @@ class CashInjectEdit extends Component
 
     public function render()
     {
-        return view('livewire.cash-inject.cash-inject-edit');
+        $warehouses = Warehouse::orderBy('name')->get();
+
+        return view('livewire.cash-inject.cash-inject-edit', compact('warehouses'));
     }
 }

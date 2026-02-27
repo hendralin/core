@@ -20,6 +20,7 @@ class Cost extends Model
     protected $fillable = [
         'cost_type',
         'vehicle_id',
+        'warehouse_id',
         'cost_date',
         'vendor_id',
         'commission_id',
@@ -55,6 +56,7 @@ class Cost extends Model
             ->logOnly([
                 'cost_type',
                 'vehicle_id',
+                'warehouse_id',
                 'cost_date',
                 'vendor_id',
                 'commission_id',
@@ -76,6 +78,16 @@ class Cost extends Model
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
+    }
+
+    /**
+     * Get the warehouse that owns the cost
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 
     /**

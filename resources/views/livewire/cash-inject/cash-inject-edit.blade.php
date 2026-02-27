@@ -34,8 +34,26 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
+                            <flux:select wire:model="cost_type" label="Tipe Kas" class="w-full">
+                                <option value="cash">Kas Kecil</option>
+                                <option value="tax_cash">Kas Pajak</option>
+                            </flux:select>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih tipe kas untuk inject ini</p>
+                        </div>
+
+                        <div class="space-y-1">
                             <flux:input wire:model="cost_date" type="date" label="Tanggal Inject Kas" class="w-full" />
                             <p class="text-xs text-slate-500 dark:text-zinc-400">Kapan inject kas dilakukan?</p>
+                        </div>
+
+                        <div class="space-y-1">
+                            <flux:select wire:model="warehouse_id" label="Warehouse *" class="w-full" icon="building-storefront">
+                                <flux:select.option value="">{{ __('Pilih Warehouse') }}</flux:select.option>
+                                @foreach($warehouses as $warehouse)
+                                    <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih warehouse untuk inject kas ini</p>
                         </div>
 
                         <div class="space-y-1">

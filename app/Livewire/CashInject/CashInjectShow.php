@@ -13,10 +13,10 @@ class CashInjectShow extends Component
 
     public function mount(Cost $cost): void
     {
-        $this->cost = $cost->load(['createdBy']);
+        $this->cost = $cost->load(['createdBy', 'warehouse']);
 
-        // Check if this is actually a cash inject
-        if (!in_array($cost->cost_type, ['cash'])) {
+        // Check if this is actually a cash inject (Kas Kecil or Kas Pajak)
+        if (!in_array($cost->cost_type, ['cash', 'tax_cash'])) {
             abort(403, 'Record ini bukan merupakan inject kas.');
         }
     }

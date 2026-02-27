@@ -103,6 +103,8 @@
             <tr>
                 <th class="text-center">No</th>
                 <th>Cost Date</th>
+                <th>Tipe Kas</th>
+                <th>Warehouse</th>
                 <th>Description</th>
                 <th class="text-right">Total Inject</th>
                 <th>Created By</th>
@@ -113,6 +115,10 @@
                 <tr>
                     <td class="text-center">{{ $i + 1 }}</td>
                     <td class="no-wrap">{{ $cost->cost_date ? \Carbon\Carbon::parse($cost->cost_date)->format('d/m/Y') : '-' }}</td>
+                    <td class="no-wrap">
+                        {{ $cost->cost_type === 'tax_cash' ? 'Kas Pajak' : 'Kas Kecil' }}
+                    </td>
+                    <td>{{ $cost->warehouse?->name ?? '-' }}</td>
                     <td style="max-width: 200px; word-wrap: break-word;">{{ Str::limit($cost->description, 100) }}</td>
                     <td class="text-right no-wrap"><strong>{{ 'Rp ' . number_format($cost->total_price, 0) }}</strong></td>
                     <td>{{ $cost->createdBy?->name ?? '-' }}</td>
@@ -120,7 +126,7 @@
             @endforeach
             <!-- Total Row -->
             <tr class="total-row">
-                <td colspan="3" class="text-right"><strong>TOTAL INJECT KAS:</strong></td>
+                <td colspan="5" class="text-right"><strong>TOTAL INJECT KAS:</strong></td>
                 <td class="text-right no-wrap"><strong>{{ 'Rp ' . number_format($costs->sum('total_price'), 0) }}</strong></td>
                 <td colspan="1"></td>
             </tr>

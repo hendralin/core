@@ -3,6 +3,7 @@
 namespace App\Livewire\CashInject;
 
 use App\Models\Cost;
+use App\Models\Warehouse;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -16,6 +17,7 @@ class CashInjectCreate extends Component
 
     public $cost_type = 'cash';
     public $cost_date;
+    public $warehouse_id;
     public $description;
     public $total_price;
     public $document;
@@ -29,16 +31,22 @@ class CashInjectCreate extends Component
     public function submit()
     {
         $rules = [
+            'cost_type' => 'required|in:cash,tax_cash',
             'cost_date' => 'required|date|before_or_equal:today',
+            'warehouse_id' => 'required|exists:warehouses,id',
             'description' => 'required|string',
             'total_price' => 'required|string',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
         ];
 
         $messages = [
+            'cost_type.required' => 'Tipe kas harus dipilih.',
+            'cost_type.in' => 'Tipe kas harus berupa Kas Kecil atau Kas Pajak.',
             'cost_date.required' => 'Tanggal inject kas harus dipilih.',
             'cost_date.date' => 'Tanggal inject kas harus berupa tanggal.',
             'cost_date.before_or_equal' => 'Tanggal inject kas tidak boleh lebih dari hari ini.',
+            'warehouse_id.required' => 'Warehouse harus dipilih.',
+            'warehouse_id.exists' => 'Warehouse yang dipilih tidak valid.',
             'description.required' => 'Deskripsi inject harus diisi.',
             'description.string' => 'Deskripsi inject harus berupa teks.',
             'total_price.required' => 'Total inject harus diisi.',
@@ -62,6 +70,7 @@ class CashInjectCreate extends Component
         $cost = Cost::create([
             'cost_type' => $this->cost_type,
             'vehicle_id' => null, // No vehicle for cash injects
+            'warehouse_id' => $this->warehouse_id,
             'cost_date' => $this->cost_date,
             'vendor_id' => null, // No vendor for cash injects
             'description' => $this->description,
@@ -78,6 +87,7 @@ class CashInjectCreate extends Component
             ->withProperties([
                 'attributes' => [
                     'cost_type' => $this->cost_type,
+                    'warehouse_id' => $this->warehouse_id,
                     'cost_date' => $this->cost_date,
                     'description' => $this->description,
                     'total_price' => $totalPrice,
@@ -87,8 +97,11 @@ class CashInjectCreate extends Component
             ])
             ->log('created cash inject record');
 
-        session()->flash('success', 'Inject kas berhasil ditambahkan.');
-
+        if ($this->cost_type === 'tax_cash') {
+            session()->flash('success', 'Inject kas pajak berhasil ditambahkan.');
+        } else {
+            session()->flash('success', 'Inject kas kecil berhasil ditambahkan.');
+        }
         return $this->redirect('/cash-injects', true);
     }
 
@@ -99,6 +112,8 @@ class CashInjectCreate extends Component
 
     public function render()
     {
-        return view('livewire.cash-inject.cash-inject-create');
+        $warehouses = Warehouse::orderBy('name')->get();
+
+        return view('livewire.cash-inject.cash-inject-create', compact('warehouses'));
     }
 }

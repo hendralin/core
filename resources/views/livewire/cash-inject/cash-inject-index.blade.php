@@ -1,224 +1,269 @@
-<div>
-    <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('Inject Kas') }}</flux:heading>
-        <flux:subheading size="lg" class="mb-6">{{ __('Kelola inject kas perusahaan') }}</flux:subheading>
-        <flux:separator variant="subtle" />
+<div class="min-h-full">
+    {{-- Page header --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <flux:heading size="xl" level="1" class="text-zinc-900 dark:text-white tracking-tight">{{ __('Inject Kas') }}</flux:heading>
+            <flux:subheading size="lg" class="mt-1 text-zinc-500 dark:text-zinc-400">{{ __('Kelola inject kas perusahaan') }}</flux:subheading>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            @can('cash-inject.create')
+                <flux:button variant="primary" size="sm" href="{{ route('cash-injects.create') }}" wire:navigate icon="plus" class="cursor-pointer">
+                    Tambah Inject
+                </flux:button>
+            @endcan
+            @can('cash-inject.audit')
+                <flux:button variant="ghost" size="sm" href="{{ route('cash-injects.audit') }}" wire:navigate icon="document-text" class="cursor-pointer">
+                    Audit
+                </flux:button>
+            @endcan
+            <flux:button variant="ghost" size="sm" wire:click="exportExcel" icon="document-arrow-down" class="cursor-pointer" tooltip="Export Excel">
+                Excel
+            </flux:button>
+            <flux:button variant="ghost" size="sm" wire:click="exportPdf" icon="document-arrow-down" class="cursor-pointer" tooltip="Export PDF">
+                PDF
+            </flux:button>
+            <div wire:loading.delay class="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 text-sm">
+                <flux:icon.loading class="w-4 h-4 text-red-600" />
+            </div>
+        </div>
     </div>
 
     @session('success')
-        <x-alert type="success" class="mb-4">{{ $value }}</x-alert>
+        <flux:callout icon="check-circle" color="green" class="mb-6">{{ $value }}</flux:callout>
     @endsession
 
     @session('error')
-        <x-alert type="error" class="mb-4">{{ $value }}</x-alert>
+        <flux:callout icon="x-circle" color="red" class="mb-6">{{ $value }}</flux:callout>
     @endsession
 
-    <!-- Filter Section -->
-    <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- Month/Year Filter -->
-            <div>
-                <label for="month-year" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Month & Year</label>
-                <input type="month"
-                       id="month-year"
-                       wire:model.live="selectedMonthYear"
-                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
-                       min="2019-01"
-                       max="{{ date('Y') + 1 }}-12">
+    {{-- Filters card --}}
+    <div class="bg-white dark:bg-zinc-800/80 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm mb-6 overflow-hidden">
+        <div class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800/50">
+            <div class="flex items-center gap-2">
+                <flux:icon.funnel class="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Filter</span>
+                @if($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedMonthYear || $costTypeFilter !== '' || $warehouseFilter !== '')
+                    <flux:badge size="sm" color="blue" class="ml-1">Aktif</flux:badge>
+                @endif
             </div>
-
-            <!-- Date Period Filters -->
-            <flux:input type="date" wire:model.live="dateFrom" label="From" size="sm" />
-            <flux:input type="date" wire:model.live="dateTo" label="To" size="sm" />
-
-            <!-- Clear Filters Button -->
-            @if($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedMonthYear)
-            <div class="space-y-2 flex flex-col justify-end">
-                <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full cursor-pointer">
-                    Clear Filter
-                </flux:button>
-            </div>
-            @endif
         </div>
-    </div>
-
-    <div class="space-y-4 mb-2">
-        <!-- Actions Section -->
-        <div class="flex flex-col lg:flex-row gap-3">
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-2">
-                @can('cash-inject.create')
-                    <flux:button variant="primary" size="sm" href="{{ route('cash-injects.create') }}" wire:navigate icon="plus" class="w-full sm:w-auto" tooltip="Tambah Inject Kas">Tambah</flux:button>
-                @endcan
-
-                <!-- Button Actions -->
-                <div class="flex gap-1">
-                    @can('cash-inject.audit')
-                        <flux:button variant="ghost" size="sm" href="{{ route('cash-injects.audit') }}" wire:navigate icon="document-text" class="w-full sm:w-auto" tooltip="Audit Trail">Audit</flux:button>
-                    @endcan
-                    <flux:button variant="ghost" size="sm" wire:click="exportExcel" icon="document-arrow-down" tooltip="Export to Excel" class="flex-1 sm:flex-none cursor-pointer">
-                        <span class="hidden sm:inline">Excel</span>
-                        <span class="sm:hidden">Excel</span>
-                    </flux:button>
-                    <flux:button variant="ghost" size="sm" wire:click="exportPdf" icon="document-arrow-down" tooltip="Export to PDF" class="flex-1 sm:flex-none cursor-pointer">
-                        <span class="hidden sm:inline">PDF</span>
-                        <span class="sm:hidden">PDF</span>
-                    </flux:button>
-
-                    <div wire:loading class="flex items-center justify-center p-2">
-                        <flux:icon.loading class="text-red-600 w-4 h-4" />
+        <div class="p-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+                <flux:input type="month"
+                        label="Bulan & Tahun"
+                        wire:model.live="selectedMonthYear"
+                        size="sm"
+                        min="2019-01"
+                        max="{{ date('Y') + 1 }}-12" />
+                <flux:select label="Tipe Kas" wire:model.live="costTypeFilter" class="w-full" size="sm">
+                    <flux:select.option value="">Semua</flux:select.option>
+                    <flux:select.option value="cash">Kas Kecil</flux:select.option>
+                    <flux:select.option value="tax_cash">Kas Pajak</flux:select.option>
+                </flux:select>
+                <flux:select label="Warehouse" wire:model.live="warehouseFilter" class="w-full" size="sm" icon="building-storefront">
+                    <flux:select.option value="">Semua</flux:select.option>
+                    @foreach($warehouses as $warehouse)
+                        <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:input type="date" wire:model.live="dateFrom" label="Dari" size="sm" />
+                <flux:input type="date" wire:model.live="dateTo" label="Sampai" size="sm" />
+                @if($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedMonthYear || $costTypeFilter !== '' || $warehouseFilter !== '')
+                    <div class="sm:col-span-2 lg:col-span-1">
+                        <flux:button wire:click="clearFilters" variant="ghost" size="sm" icon="x-mark" class="w-full cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400">
+                            Reset Filter
+                        </flux:button>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>
 
-    <!-- Search Section -->
-    <div class="grid grid-cols-1 md:grid-cols-4 mb-3 mt-4">
-        <div class="flex items-center gap-2 w-44 mb-2 md:mb-0">
-            <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">Show:</label>
-            <flux:select id="per-page" wire:model.live="perPage">
-                @foreach ($this->perPageOptions as $option)
-                <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
-                @endforeach
-            </flux:select>
-            <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">entries</label>
+    {{-- Table card --}}
+    <div class="bg-white dark:bg-zinc-800/80 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden">
+        {{-- Toolbar: per page + search --}}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/30">
+            <div class="flex items-center gap-3">
+                <label for="per-page" class="text-sm text-zinc-600 dark:text-zinc-400">Tampilkan</label>
+                <flux:select id="per-page" wire:model.live="perPage" size="sm" class="w-20">
+                    @foreach ($this->perPageOptions as $option)
+                        <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <span class="text-sm text-zinc-600 dark:text-zinc-400">baris</span>
+            </div>
+            <div class="w-full sm:w-64">
+                <flux:input
+                    wire:model.live.debounce.400ms="search"
+                    placeholder="Cari deskripsi..."
+                    clearable
+                    size="sm"
+                    icon="magnifying-glass"
+                />
+            </div>
         </div>
-        <flux:spacer class="hidden md:inline" />
-        <flux:spacer class="hidden md:inline" />
-        <div class="flex items-center">
-            <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300 mr-2">Search:</label>
-            <flux:input wire:model.live.debounce.500ms="search" placeholder="Cari inject kas..." clearable />
-        </div>
-    </div>
 
-    <!-- Table Section -->
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 border dark:border-zinc-700 dark:text-zinc-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b dark:border-b-0 dark:bg-zinc-700 dark:text-zinc-400">
-                <tr>
-                    <th scope="col" class="px-4 py-3 w-10 text-center">No.</th>
-                    <th scope="col" class="px-4 py-3 w-56">
-                        <div class="flex items-center cursor-pointer @if ($sortField == 'cost_date') {{ $sortDirection }} @endif" wire:click="sortBy('cost_date')">
-                            Date
-                            @if ($sortField == 'cost_date' && $sortDirection == 'asc')
-                                <flux:icon.chevron-up class="ml-2 size-4" />
-                            @elseif ($sortField == 'cost_date' && $sortDirection == 'desc')
-                                <flux:icon.chevron-down class="ml-2 size-4" />
-                            @endif
-                        </div>
-                    </th>
-                    <th scope="col" class="px-4 py-3">Description</th>
-                    <th scope="col" class="px-4 py-3 text-right w-32">
-                        <div class="flex items-center justify-end cursor-pointer @if ($sortField == 'total_price') {{ $sortDirection }} @endif" wire:click="sortBy('total_price')">
-                            Total Price
-                            @if ($sortField == 'total_price' && $sortDirection == 'asc')
-                                <flux:icon.chevron-up class="ml-2 size-4" />
-                            @elseif ($sortField == 'total_price' && $sortDirection == 'desc')
-                                <flux:icon.chevron-down class="ml-2 size-4" />
-                            @endif
-                        </div>
-                    </th>
-                    <th scope="col" class="px-4 py-3 w-1/12">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if(isset($costs) && $costs->count() > 0)
-                    @foreach($costs as $index => $cost)
-                        <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
-                            <td class="px-4 py-2 text-center text-gray-900 dark:text-white">{{ $costs->firstItem() + $index }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs truncate" title="{{ $cost->description }}">{{ $cost->description }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-gray-900 dark:text-white">Rp {{ number_format($cost->total_price, 0) }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap">
-                                @can('cash-inject.view')
-                                    <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.show', $cost) }}" wire:navigate tooltip="View Details">
-                                        <flux:icon.eye variant="mini" class="text-green-500 dark:text-green-300" />
-                                    </flux:button>
-                                @endcan
-
-                                @can('cash-inject.edit')
-                                    <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.edit', $cost) }}" wire:navigate tooltip="Edit">
-                                        <flux:icon.pencil-square variant="mini" class="text-indigo-500 dark:text-indigo-300" />
-                                    </flux:button>
-                                @endcan
-
-                                @can('cash-inject.delete')
-                                    <flux:modal.trigger name="delete-cost">
-                                        <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setCostToDelete({{ $cost->id }})" tooltip="Delete">
-                                            <flux:icon.trash variant="mini" class="text-red-500 dark:text-red-300" />
-                                        </flux:button>
-                                    </flux:modal.trigger>
-                                @endcan
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800/50">
+                        <th scope="col" class="px-4 py-3.5 w-12 text-center">#</th>
+                        <th scope="col" class="px-4 py-3.5 w-28">
+                            <button type="button" class="inline-flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer" wire:click="sortBy('cost_date')">
+                                Tanggal
+                                @if ($sortField === 'cost_date')
+                                    @if ($sortDirection === 'asc')
+                                        <flux:icon.chevron-up class="w-4 h-4" />
+                                    @else
+                                        <flux:icon.chevron-down class="w-4 h-4" />
+                                    @endif
+                                @endif
+                            </button>
+                        </th>
+                        <th scope="col" class="px-4 py-3.5 w-24">Tipe Kas</th>
+                        <th scope="col" class="px-4 py-3.5 w-40">Warehouse</th>
+                        <th scope="col" class="px-4 py-3.5 min-w-[200px]">Deskripsi</th>
+                        <th scope="col" class="px-4 py-3.5 w-36 text-right">
+                            <button type="button" class="inline-flex items-center gap-1 ml-auto hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer" wire:click="sortBy('total_price')">
+                                Total
+                                @if ($sortField === 'total_price')
+                                    @if ($sortDirection === 'asc')
+                                        <flux:icon.chevron-up class="w-4 h-4" />
+                                    @else
+                                        <flux:icon.chevron-down class="w-4 h-4" />
+                                    @endif
+                                @endif
+                            </button>
+                        </th>
+                        <th scope="col" class="px-4 py-3.5 w-28 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                    @if(isset($costs) && $costs->count() > 0)
+                        @foreach($costs as $index => $cost)
+                            <tr class="bg-white dark:bg-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-700/30 transition-colors" wire:loading.class="opacity-60">
+                                <td class="px-4 py-3 text-center text-zinc-500 dark:text-zinc-400 tabular-nums">
+                                    {{ $costs->firstItem() + $index }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-zinc-900 dark:text-white font-medium">
+                                    {{ Carbon\Carbon::parse($cost->cost_date)->format('d M Y') }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    @if($cost->cost_type === 'tax_cash')
+                                        <flux:badge size="sm" color="amber">Kas Pajak</flux:badge>
+                                    @else
+                                        <flux:badge size="sm" color="green">Kas Kecil</flux:badge>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-zinc-700 dark:text-zinc-300 max-w-40 truncate" title="{{ $cost->warehouse->name ?? '-' }}">
+                                    {{ $cost->warehouse->name ?? '-' }}
+                                </td>
+                                <td class="px-4 py-3 text-zinc-700 dark:text-zinc-300 max-w-xs truncate" title="{{ $cost->description }}">
+                                    {{ $cost->description }}
+                                </td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap font-semibold text-zinc-900 dark:text-white tabular-nums">
+                                    Rp {{ number_format($cost->total_price, 0) }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center justify-center gap-0.5">
+                                        @can('cash-inject.view')
+                                            <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.show', $cost) }}" wire:navigate tooltip="Lihat" class="text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-400">
+                                                <flux:icon.eye variant="mini" />
+                                            </flux:button>
+                                        @endcan
+                                        @can('cash-inject.edit')
+                                            <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.edit', $cost) }}" wire:navigate tooltip="Edit" class="text-zinc-500 hover:text-amber-600 dark:hover:text-amber-400">
+                                                <flux:icon.pencil-square variant="mini" />
+                                            </flux:button>
+                                        @endcan
+                                        @can('cash-inject.delete')
+                                            <flux:modal.trigger name="delete-cost">
+                                                <flux:button variant="ghost" size="xs" square class="cursor-pointer text-zinc-500 hover:text-red-600 dark:hover:text-red-400" wire:click="setCostToDelete({{ $cost->id }})" tooltip="Hapus">
+                                                    <flux:icon.trash variant="mini" />
+                                                </flux:button>
+                                            </flux:modal.trigger>
+                                        @endcan
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="7" class="px-4 py-16 text-center">
+                                <div class="flex flex-col items-center gap-3 text-zinc-500 dark:text-zinc-400">
+                                    <div class="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center">
+                                        <flux:icon.banknotes class="w-6 h-6" />
+                                    </div>
+                                    <p class="text-sm font-medium">
+                                        @if(isset($search) && $search !== '')
+                                            Tidak ada hasil untuk "{{ $search }}"
+                                        @else
+                                            Belum ada data inject kas
+                                        @endif
+                                    </p>
+                                    <p class="text-xs max-w-sm">Sesuaikan filter atau tambah inject kas baru.</p>
+                                </div>
                             </td>
                         </tr>
-                    @endforeach
-                @else
-                    <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 border-gray-200">
-                        <td class="px-4 py-2 text-gray-600 dark:text-zinc-300 text-center" colspan="5">
-                            @if(isset($search) && !empty($search))
-                                No results found for "{{ $search }}"
-                            @else
-                                Tidak ada Inject Kas yang ditemukan.
-                            @endif
-                        </td>
-                    </tr>
-                @endforelse
-
-                <!-- Total Footer - Always show for current period/filters -->
-                @if($totalForFilters > 0)
-                    <tr class="bg-blue-50 dark:bg-zinc-900/20 border-t-2 border-blue-200 dark:border-zinc-800">
-                        <td colspan="2" class="px-4 py-3">
-                            @php
-                                $activeFilters = [];
-                                if ($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')) {
-                                    $activeFilters[] = 'period (' . \Carbon\Carbon::parse($dateFrom)->format('d/m/Y') . ' - ' . \Carbon\Carbon::parse($dateTo)->format('d/m/Y') . ')';
-                                }
-                                if (empty($activeFilters)) {
-                                    $activeFilters[] = 'current month';
-                                }
-                            @endphp
-                            @if(!empty($activeFilters))
-                                <div class="text-xs text-zinc-700 dark:text-zinc-200 mt-1">
-                                    Filter by {{ implode(', ', $activeFilters) }}
-                                </div>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 font-semibold text-zinc-900 dark:text-zinc-100">
-                            TOTAL:
-                        </td>
-                        <td class="px-4 py-3 text-right font-bold text-zinc-900 dark:text-zinc-100">
-                            Rp {{ number_format($totalForFilters, 0) }}
-                        </td>
-                        <td class="px-4 py-3"></td>
-                    </tr>
+                    @endif
+                </tbody>
+                @if(isset($costs) && $costs->count() > 0 && $totalForFilters > 0)
+                    <tfoot>
+                        <tr class="bg-emerald-50/80 dark:bg-emerald-900/20 border-t-2 border-emerald-200 dark:border-emerald-800/50">
+                            <td colspan="4" class="px-4 py-3">
+                                @php
+                                    $activeFilters = [];
+                                    if ($costTypeFilter === 'cash') {
+                                        $activeFilters[] = 'Tipe: Kas Kecil';
+                                    } elseif ($costTypeFilter === 'tax_cash') {
+                                        $activeFilters[] = 'Tipe: Kas Pajak';
+                                    }
+                                    if ($warehouseFilter) {
+                                        $warehouseName = $warehouses->firstWhere('id', (int) $warehouseFilter)?->name;
+                                        $activeFilters[] = 'Warehouse: ' . ($warehouseName ?: $warehouseFilter);
+                                    }
+                                    if ($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')) {
+                                        $activeFilters[] = \Carbon\Carbon::parse($dateFrom)->format('d/m/Y') . ' – ' . \Carbon\Carbon::parse($dateTo)->format('d/m/Y');
+                                    }
+                                    if (empty($activeFilters)) {
+                                        $activeFilters[] = 'Bulan berjalan';
+                                    }
+                                @endphp
+                                <span class="text-xs text-emerald-700 dark:text-emerald-300">{{ implode(' · ', $activeFilters) }}</span>
+                            </td>
+                            <td class="px-4 py-3 font-semibold text-emerald-900 dark:text-emerald-100">Total</td>
+                            <td class="px-4 py-3 text-right font-bold text-emerald-900 dark:text-emerald-100 tabular-nums">Rp {{ number_format($totalForFilters, 0) }}</td>
+                            <td class="px-4 py-3"></td>
+                        </tr>
+                    </tfoot>
                 @endif
-            </tbody>
-        </table>
+            </table>
+        </div>
+
+        @if(isset($costs) && $costs->hasPages())
+            <div class="px-4 py-3 border-t border-zinc-200 dark:border-zinc-700 bg-zinc-50/30 dark:bg-zinc-800/30">
+                {{ $costs->links(data: ['scrollTo' => false]) }}
+            </div>
+        @endif
     </div>
 
-    <!-- Pagination -->
-    <div class="mt-4 mb-2">
-        {{ $costs->links(data: ['scrollTo' => false]) }}
-    </div>
-
-
-    <!-- Delete Modal -->
-    <flux:modal name="delete-cost" class="min-w-88">
+    {{-- Delete confirmation modal --}}
+    <flux:modal name="delete-cost" class="min-w-96">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">Delete cash inject record?</flux:heading>
-                <flux:text class="mt-2">
-                    <p>You're about to delete this cash inject record.</p>
-                    <p>This action cannot be reversed.</p>
+                <flux:heading size="lg">Hapus inject kas?</flux:heading>
+                <flux:text class="mt-2 text-zinc-600 dark:text-zinc-400">
+                    Data inject kas ini akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
                 </flux:text>
             </div>
-            <div class="flex gap-2">
-                <flux:spacer />
+            <div class="flex gap-2 justify-end">
                 <flux:modal.close>
-                    <flux:button variant="ghost" class="cursor-pointer">Cancel</flux:button>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
                 </flux:modal.close>
-                <flux:button wire:click="delete" variant="danger" class="cursor-pointer">Delete Record</flux:button>
+                <flux:button wire:click="delete" variant="danger" class="cursor-pointer" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="delete">Hapus</span>
+                    <span wire:loading wire:target="delete">Menghapus...</span>
+                </flux:button>
             </div>
         </div>
     </flux:modal>

@@ -38,6 +38,14 @@
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
+                                <flux:heading size="sm">Tipe Kas</flux:heading>
+                                <flux:text class="mt-1">{{ $cost->cost_type === 'tax_cash' ? 'Kas Pajak' : 'Kas Kecil' }}</flux:text>
+                            </div>
+                            <div>
+                                <flux:heading size="sm">Warehouse</flux:heading>
+                                <flux:text class="mt-1">{{ $cost->warehouse->name ?? '-' }}</flux:text>
+                            </div>
+                            <div>
                                 <flux:heading size="md">Tanggal</flux:heading>
                                 <flux:text class="mt-1">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</flux:text>
                             </div>

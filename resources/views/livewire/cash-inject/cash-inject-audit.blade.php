@@ -70,7 +70,11 @@
             <flux:select label="Inject Kas" wire:model.live="selectedCost">
                 <flux:select.option value="">All Records</flux:select.option>
                 @foreach($costs as $cost)
-                    <flux:select.option value="{{ $cost->id }}">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }} - {{ Str::limit($cost->description, 30) }}</flux:select.option>
+                    <flux:select.option value="{{ $cost->id }}">
+                        [{{ $cost->cost_type === 'tax_cash' ? 'Kas Pajak' : 'Kas Kecil' }}]
+                        [{{ $cost->warehouse->name ?? '-' }}]
+                        {{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }} - {{ Str::limit($cost->description, 30) }}
+                    </flux:select.option>
                 @endforeach
             </flux:select>
 
@@ -154,8 +158,22 @@
                                                 <flux:text class="text-sm font-medium text-gray-900 dark:text-zinc-100">
                                                     Inject Kas
                                                 </flux:text>
-                                                <div class="text-xs text-gray-600 dark:text-zinc-400 mt-1">
-                                                    {{ Carbon\Carbon::parse($activity->subject->cost_date)->format('d-m-Y') }}
+                                                <div class="mt-1 space-y-0.5 text-xs text-gray-600 dark:text-zinc-400">
+                                                    <div>
+                                                        {{ Carbon\Carbon::parse($activity->subject->cost_date)->format('d-m-Y') }}
+                                                    </div>
+                                                    <div>
+                                                        Tipe:
+                                                        <span class="font-medium">
+                                                            {{ $activity->subject->cost_type === 'tax_cash' ? 'Kas Pajak' : 'Kas Kecil' }}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        Warehouse:
+                                                        <span class="font-medium">
+                                                            {{ $activity->subject->warehouse->name ?? '-' }}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="text-right">
