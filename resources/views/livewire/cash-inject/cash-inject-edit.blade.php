@@ -47,7 +47,7 @@
                         </div>
 
                         <div class="space-y-1">
-                            <flux:select wire:model="warehouse_id" label="Warehouse *" class="w-full" icon="building-storefront">
+                            <flux:select wire:model="warehouse_id" label="Warehouse" class="w-full" icon="building-storefront">
                                 <flux:select.option value="">{{ __('Pilih Warehouse') }}</flux:select.option>
                                 @foreach($warehouses as $warehouse)
                                     <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
