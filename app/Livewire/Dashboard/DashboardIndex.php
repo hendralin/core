@@ -5,6 +5,7 @@ namespace App\Livewire\Dashboard;
 use Carbon\Carbon;
 use App\Models\Cost;
 use App\Models\Vehicle;
+use App\Models\Warehouse;
 use Livewire\Component;
 
 class DashboardIndex extends Component
@@ -126,6 +127,65 @@ class DashboardIndex extends Component
         }
 
         return $totalSales / $totalVehiclesSold;
+    }
+
+    public function getAvailableStockByWarehouseProperty()
+    {
+        return Warehouse::withCount([
+            'vehicles as available_count' => function ($query) {
+                $query->where('status', '1');
+            },
+        ])
+            ->get()
+            ->filter(function ($warehouse) {
+                return $warehouse->available_count > 0;
+            })
+            ->map(function ($warehouse) {
+                return [
+                    'label' => $warehouse->name,
+                    'value' => $warehouse->available_count,
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
+    public function getCashBalanceByWarehouseProperty()
+    {
+        // Cash in per warehouse (cost_type = cash)
+        $cashInPerWarehouse = Cost::selectRaw('warehouse_id, SUM(total_price) as total_cash_in')
+            ->where('cost_type', 'cash')
+            ->groupBy('warehouse_id')
+            ->pluck('total_cash_in', 'warehouse_id');
+
+        // Other costs per warehouse (same logic as global finalCashBalance, but grouped)
+        $costsPerWarehouse = Cost::selectRaw('warehouse_id, SUM(total_price) as total_costs')
+            ->where('cost_type', '!=', 'cash')
+            ->where('big_cash', 0)
+            ->whereHas('payments')
+            ->groupBy('warehouse_id')
+            ->pluck('total_costs', 'warehouse_id');
+
+        $warehouses = Warehouse::orderBy('name')->get();
+
+        return $warehouses->map(function ($warehouse) use ($cashInPerWarehouse, $costsPerWarehouse) {
+            $cashIn = (float) ($cashInPerWarehouse[$warehouse->id] ?? 0);
+            $costs = (float) ($costsPerWarehouse[$warehouse->id] ?? 0);
+            $balance = $cashIn - $costs;
+
+            return [
+                'label' => $warehouse->name,
+                'cash_in' => $cashIn,
+                'costs' => $costs,
+                'balance' => $balance,
+            ];
+        })
+            // tampilkan hanya gudang yang punya aktivitas keuangan
+            ->filter(function ($item) {
+                return $item['cash_in'] != 0 || $item['costs'] != 0 || $item['balance'] != 0;
+            })
+            ->values()
+            ->toArray();
     }
 
     public function render()

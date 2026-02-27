@@ -74,6 +74,9 @@
         <div class="rounded-xl bg-white p-6 shadow-lg border border-gray-200 dark:bg-zinc-800 dark:border-zinc-700">
             <div class="mb-4">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">Monthly Sales Performance</h2>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                    Grafik performa penjualan bulanan, membantu mengidentifikasi tren dan pola penjualan.
+                </p>
             </div>
             <div class="h-80">
                 <canvas id="salesPerformanceChart"></canvas>
@@ -100,12 +103,128 @@
         </div>
     </div>
 
+    <!-- Stock Vehicle & Cash Balance per Warehouse -->
+    <div class="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <!-- Stock Available per Warehouse -->
+        <div class="rounded-xl bg-white p-6 shadow-lg border border-gray-200 dark:bg-zinc-800 dark:border-zinc-700">
+            <div class="mb-4">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Stock Vehicle per Gudang</h2>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                    Ringkasan stok kendaraan per gudang, memudahkan pemantauan stok kendaraan per lokasi.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                <div>
+                    <ul class="space-y-2">
+                        @forelse ($this->availableStockByWarehouse as $warehouse)
+                            <li class="flex items-center justify-between rounded-lg border border-gray-200 dark:border-zinc-700 px-3 py-2">
+                                <span class="text-sm font-medium text-gray-700 dark:text-zinc-100">
+                                    {{ $warehouse['label'] }}
+                                </span>
+                                <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                                    {{ $warehouse['value'] }} unit
+                                </span>
+                            </li>
+                        @empty
+                            <li class="text-sm text-gray-500 dark:text-zinc-400">
+                                Belum ada stock vehicle yang tersedia.
+                            </li>
+                        @endforelse
+                    </ul>
+                </div>
+                <div class="h-64">
+                    <canvas id="warehouseStockChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cash Balance per Warehouse -->
+        <div class="rounded-xl bg-white p-6 shadow-lg border border-gray-200 dark:bg-zinc-800 dark:border-zinc-700">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Cash Balance per Warehouse</h2>
+                    <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                        Ringkasan saldo kas per gudang, memudahkan pemantauan arus kas per lokasi.
+                    </p>
+                </div>
+                <div class="hidden sm:flex sm:flex-col items-end gap-1 text-xs text-gray-500 dark:text-zinc-400">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                        Positif = surplus
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border border-rose-100 dark:border-rose-800 whitespace-nowrap">
+                        <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+                        Negatif = defisit
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-zinc-700">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
+                    <thead class="bg-gray-50 dark:bg-zinc-900/40">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                Gudang
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                Cash In
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                Cash Out
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                Balance
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-zinc-800 divide-y divide-gray-100 dark:divide-zinc-700">
+                        @forelse ($this->cashBalanceByWarehouse as $item)
+                            @php
+                                $balance = $item['balance'];
+                                $isPositive = $balance >= 0;
+                            @endphp
+                            <tr class="odd:bg-white even:bg-gray-50/60 dark:odd:bg-zinc-800 dark:even:bg-zinc-900/40 hover:bg-gray-100 dark:hover:bg-zinc-800/80 transition-colors">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-zinc-100 whitespace-nowrap">
+                                    {{ $item['label'] }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-right tabular-nums text-gray-700 dark:text-zinc-200 whitespace-nowrap">
+                                    Rp {{ number_format($item['cash_in'], 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-right tabular-nums text-gray-700 dark:text-zinc-200 whitespace-nowrap">
+                                    Rp {{ number_format($item['costs'], 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-right whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-end gap-1 px-2 py-1 rounded-full text-xs font-semibold
+                                        {{ $isPositive
+                                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                            : 'bg-rose-50 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300' }}">
+                                        <span class="h-1.5 w-1.5 rounded-full {{ $isPositive ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>
+                                        Rp {{ number_format($balance, 0, ',', '.') }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500 dark:text-zinc-400">
+                                    Belum ada data cash flow per warehouse.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     @push('scripts')
     <script>
-        // Initialize chart variable safely
+        // Initialize chart variables safely
         if (typeof window.salesChart === 'undefined') {
             window.salesChart = null;
+        }
+        if (typeof window.warehouseStockChart === 'undefined') {
+            window.warehouseStockChart = null;
         }
 
         function initSalesChart() {
@@ -249,12 +368,93 @@
             }
         }
 
-        // Function to safely initialize chart with delay
+        function initWarehouseStockChart() {
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js is not loaded');
+                return;
+            }
+
+            const canvas = document.getElementById('warehouseStockChart');
+            if (!canvas) {
+                return;
+            }
+
+            if (window.warehouseStockChart && window.warehouseStockChart.canvas === canvas) {
+                window.warehouseStockChart.destroy();
+                window.warehouseStockChart = null;
+            }
+
+            const stockData = @json($this->availableStockByWarehouse);
+
+            if (!stockData || stockData.length === 0) {
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            const labels = stockData.map(item => item.label);
+            const values = stockData.map(item => item.value);
+
+            const baseColors = [
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(249, 115, 22, 0.8)',
+                'rgba(236, 72, 153, 0.8)',
+                'rgba(139, 92, 246, 0.8)',
+                'rgba(34, 197, 94, 0.8)',
+                'rgba(234, 179, 8, 0.8)',
+                'rgba(248, 113, 113, 0.8)',
+            ];
+
+            const backgroundColors = labels.map((_, index) => baseColors[index % baseColors.length]);
+
+            try {
+                window.warehouseStockChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: backgroundColors,
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        return `${label}: ${value} unit`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating warehouse stock chart:', error);
+            }
+        }
+
+        // Function to safely initialize charts with delay
         function safeInitChart() {
             setTimeout(function() {
                 if (document.getElementById('salesPerformanceChart')) {
-                    console.log('Initializing chart via safeInitChart');
                     initSalesChart();
+                }
+                if (document.getElementById('warehouseStockChart')) {
+                    initWarehouseStockChart();
                 }
             }, 150);
         }
