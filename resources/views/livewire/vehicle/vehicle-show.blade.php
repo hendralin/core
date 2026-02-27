@@ -2188,7 +2188,7 @@
                             <flux:text class="font-medium text-gray-900 dark:text-white">Detail Biaya</flux:text>
                         </div>
 
-                    <div class="divide-y divide-gray-200 dark:divide-zinc-700">
+                    <div class="divide-y divide-gray-200 dark:divide-zinc-700 max-h-80 overflow-x-auto">
                         @foreach($costs as $cost)
                         <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-700/50">
                             <div class="flex items-start gap-3">
@@ -2211,7 +2211,7 @@
                                 @endif
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center space-x-3">
-                                        <flux:text class="font-medium text-gray-900 dark:text-white">{{ $cost->description }}</flux:text>
+                                        <flux:text class="font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ $cost->description }}</flux:text>
                                         @if($cost->cost_type == 'service_parts')
                                             <flux:badge size="sm" color="green">Service & Parts</flux:badge>
                                         @else
@@ -2226,16 +2226,19 @@
                                         @endif --}}
                                     </div>
 
-                                    <div class="mt-1 flex items-center space-x-4 text-sm text-gray-600 dark:text-zinc-400">
+                                    <div class="mt-1 flex items-center space-x-4 text-sm text-gray-600 dark:text-zinc-400 whitespace-nowrap">
                                         <span>{{ Carbon\Carbon::parse($cost->cost_date)->format('M d, Y') }}</span>
                                         @if($cost->vendor)
                                             <span>•</span>
                                             <span>{{ $cost->vendor->name }}</span>
                                         @endif
+                                        <flux:text class="inline-block md:hidden font-bold text-gray-900 dark:text-white">
+                                            Rp {{ number_format($cost->total_price, 0, ',', '.') }}
+                                        </flux:text>
                                     </div>
                                 </div>
 
-                                <div class="text-right shrink-0">
+                                <div class="text-right shrink-0 hidden md:block">
                                     <flux:text class="font-bold text-gray-900 dark:text-white">
                                         Rp {{ number_format($cost->total_price, 0, ',', '.') }}
                                     </flux:text>
