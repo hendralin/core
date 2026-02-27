@@ -70,7 +70,13 @@
             <flux:select label="Biaya Showroom" wire:model.live="selectedCost">
                 <flux:select.option value="">All Records</flux:select.option>
                 @foreach($costs as $cost)
-                    <flux:select.option value="{{ $cost->id }}">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }} - {{ Str::limit($cost->description, 30) }}</flux:select.option>
+                    <flux:select.option value="{{ $cost->id }}">
+                        {{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}
+                        - {{ Str::limit($cost->description, 30) }}
+                        @if($cost->warehouse)
+                            ({{ $cost->warehouse->name }})
+                        @endif
+                    </flux:select.option>
                 @endforeach
             </flux:select>
 
@@ -144,6 +150,9 @@
                                                 </flux:text>
                                                 <div class="text-xs text-gray-600 dark:text-zinc-400 mt-1">
                                                     {{ Carbon\Carbon::parse($activity->subject->cost_date)->format('d-m-Y') }}
+                                                    @if($activity->subject->warehouse)
+                                                        • {{ $activity->subject->warehouse->name }}
+                                                    @endif
                                                 </div>
                                             </div>
                                             <div class="text-right">

@@ -32,10 +32,20 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="space-y-1">
                             <flux:input wire:model="cost_date" type="date" label="Tanggal" class="w-full" />
                             <p class="text-xs text-slate-500 dark:text-zinc-400">Kapan biaya showroom dilakukan?</p>
+                        </div>
+
+                        <div class="space-y-1">
+                            <flux:select wire:model="warehouse_id" label="Warehouse" class="w-full">
+                                <flux:select.option value="">{{ __('Pilih Warehouse') }}</flux:select.option>
+                                @foreach($warehouses as $warehouse)
+                                    <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih warehouse untuk biaya showroom ini</p>
                         </div>
 
                         <div class="space-y-1">

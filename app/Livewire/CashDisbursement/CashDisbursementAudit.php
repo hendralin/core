@@ -36,7 +36,7 @@ class CashDisbursementAudit extends Component
     public function render()
     {
         $activities = Activity::query()
-            ->with(['causer', 'subject'])
+            ->with(['causer', 'subject', 'subject.warehouse'])
             ->where('subject_type', Cost::class)
             ->whereRaw("EXISTS (
                 SELECT 1 FROM costs c
@@ -72,6 +72,7 @@ class CashDisbursementAudit extends Component
         $costs = Cost::where('cost_type', 'showroom')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
+            ->with('warehouse')
             ->orderBy('cost_date', 'desc')
             ->get();
 

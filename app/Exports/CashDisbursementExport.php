@@ -15,8 +15,9 @@ class CashDisbursementExport implements FromView
     protected $typeFilter;
     protected $dateFrom;
     protected $dateTo;
+    protected $warehouseIdFilter;
 
-    public function __construct($search = '', $sortField = 'cost_date', $sortDirection = 'desc', $statusFilter = '', $typeFilter = '', $dateFrom = '', $dateTo = '')
+    public function __construct($search = '', $sortField = 'cost_date', $sortDirection = 'desc', $statusFilter = '', $typeFilter = '', $dateFrom = '', $dateTo = '', $warehouseIdFilter = '')
     {
         $this->search = $search;
         $this->sortField = $sortField;
@@ -25,6 +26,7 @@ class CashDisbursementExport implements FromView
         $this->typeFilter = $typeFilter;
         $this->dateFrom = $dateFrom;
         $this->dateTo = $dateTo;
+        $this->warehouseIdFilter = $warehouseIdFilter;
     }
 
     public function view(): View
@@ -33,7 +35,7 @@ class CashDisbursementExport implements FromView
             ->where('cost_type', 'showroom')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
-            ->with(['createdBy'])
+            ->with(['createdBy', 'warehouse'])
             ->when(
                 $this->search,
                 fn($q) =>
@@ -44,6 +46,7 @@ class CashDisbursementExport implements FromView
             )
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
             ->when($this->typeFilter, fn($q) => $q->where('cost_type', $this->typeFilter))
+            ->when($this->warehouseIdFilter, fn($q) => $q->where('warehouse_id', $this->warehouseIdFilter))
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->orderBy($this->sortField, $this->sortDirection)

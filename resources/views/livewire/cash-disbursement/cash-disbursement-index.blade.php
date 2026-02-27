@@ -15,7 +15,7 @@
 
     <!-- Filter Section -->
     <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <!-- Month/Year Filter -->
             <div>
                 <label for="month-year" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Month & Year</label>
@@ -31,20 +31,21 @@
             <flux:input type="date" wire:model.live="dateFrom" label="From" size="sm" />
             <flux:input type="date" wire:model.live="dateTo" label="To" size="sm" />
 
-            <!-- Status Filter -->
-            {{-- <flux:select wire:model.live="statusFilter" label="Status" size="sm" class="w-full">
-                @foreach($this->statusOptions as $value => $label)
-                    <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
+            <!-- Warehouse Filter -->
+            <flux:select wire:model.live="warehouseFilter" label="Warehouse" size="sm" class="w-full" icon="building-storefront">
+                <flux:select.option value="">{{ __('Semua Warehouse') }}</flux:select.option>
+                @foreach($warehouses as $warehouse)
+                    <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
                 @endforeach
-            </flux:select> --}}
+            </flux:select>
 
             <!-- Clear Filters Button -->
-            @if($statusFilter || $dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedMonthYear)
-            <div class="space-y-2 flex flex-col justify-end">
-                <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full cursor-pointer">
-                    Clear Filter
-                </flux:button>
-            </div>
+            @if($statusFilter || $warehouseFilter || $dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedMonthYear)
+                <div class="space-y-2 flex flex-col justify-end">
+                    <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full cursor-pointer">
+                        Clear Filter
+                    </flux:button>
+                </div>
             @endif
         </div>
     </div>
@@ -115,6 +116,7 @@
                             @endif
                         </div>
                     </th>
+                    <th scope="col" class="px-4 py-3 w-40">Warehouse</th>
                     <th scope="col" class="px-4 py-3">Description</th>
                     <th scope="col" class="px-4 py-3 text-right w-32">
                         <div class="flex items-center justify-end cursor-pointer @if ($sortField == 'total_price') {{ $sortDirection }} @endif" wire:click="sortBy('total_price')">
@@ -145,6 +147,9 @@
                         <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-700/50" wire:loading.class="opacity-50">
                             <td class="px-4 py-2 text-center text-gray-900 dark:text-white">{{ $costs->firstItem() + $index }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-gray-700 dark:text-zinc-300 max-w-[10rem] truncate" title="{{ $cost->warehouse->name ?? '-' }}">
+                                {{ $cost->warehouse->name ?? '-' }}
+                            </td>
                             <td class="px-4 py-2 whitespace-nowrap lg:whitespace-normal text-gray-600 dark:text-zinc-300 max-w-xs truncate" title="{{ $cost->description }}">{{ $cost->description }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-gray-900 dark:text-white">Rp {{ number_format($cost->total_price, 0) }}</td>
                             {{-- <td class="px-4 py-2 whitespace-nowrap text-center w-32">
@@ -214,7 +219,7 @@
                 <!-- Total Footer - Always show for current period/filters -->
                 @if($totalForFilters > 0)
                     <tr class="bg-blue-50 dark:bg-zinc-900/20 border-t-2 border-blue-200 dark:border-zinc-800">
-                        <td colspan="2" class="px-4 py-3">
+                        <td colspan="3" class="px-4 py-3">
                             @php
                                 $activeFilters = [];
                                 if ($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d')) {
@@ -222,6 +227,10 @@
                                 }
                                 if ($statusFilter) {
                                     $activeFilters[] = 'status (' . ucfirst($statusFilter) . ')';
+                                }
+                                if ($warehouseFilter) {
+                                    $warehouseName = $warehouses->firstWhere('id', (int) $warehouseFilter)?->name;
+                                    $activeFilters[] = 'warehouse (' . ($warehouseName ?: $warehouseFilter) . ')';
                                 }
                                 if (empty($activeFilters)) {
                                     $activeFilters[] = 'current month';
@@ -239,7 +248,7 @@
                         <td class="px-4 py-3 text-right font-bold text-zinc-900 dark:text-zinc-100">
                             Rp {{ number_format($totalForFilters, 0) }}
                         </td>
-                        <td colspan="2" class="px-4 py-3"></td>
+                        <td class="px-4 py-3"></td>
                     </tr>
                 @endif
             </tbody>

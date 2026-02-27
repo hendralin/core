@@ -4,6 +4,7 @@ namespace App\Livewire\CashDisbursement;
 
 use Carbon\Carbon;
 use App\Models\Cost;
+use App\Models\Warehouse;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -19,6 +20,7 @@ class CashDisbursementEdit extends Component
     public Cost $cost;
 
     public $cost_type;
+    public $warehouse_id;
     public $cost_date;
     public $description;
     public $total_price;
@@ -39,6 +41,7 @@ class CashDisbursementEdit extends Component
         }
 
         $this->cost_type = $cost->cost_type;
+        $this->warehouse_id = $cost->warehouse_id;
         $this->cost_date = Carbon::parse($cost->cost_date)->format('Y-m-d');
         $this->description = $cost->description;
         $this->total_price = number_format($cost->total_price, 0);
@@ -48,6 +51,7 @@ class CashDisbursementEdit extends Component
     public function submit()
     {
         $rules = [
+            'warehouse_id' => 'required|exists:warehouses,id',
             'cost_date' => 'required|date|before_or_equal:today',
             'description' => 'required|string',
             'total_price' => 'required|string',
@@ -58,6 +62,8 @@ class CashDisbursementEdit extends Component
             'cost_date.required' => 'Tanggal biaya showroom harus dipilih.',
             'cost_date.date' => 'Tanggal biaya showroom harus berupa tanggal.',
             'cost_date.before_or_equal' => 'Tanggal biaya showroom tidak boleh lebih dari hari ini.',
+            'warehouse_id.required' => 'Warehouse harus dipilih.',
+            'warehouse_id.exists' => 'Warehouse yang dipilih tidak valid.',
             'description.required' => 'Deskripsi biaya showroom harus diisi.',
             'description.string' => 'Deskripsi biaya showroom harus berupa teks.',
             'total_price.required' => 'Total biaya showroom harus diisi.',
@@ -87,6 +93,7 @@ class CashDisbursementEdit extends Component
         // Store old values before update (since update() clears dirty attributes)
         $oldValues = [
             'cost_type' => $this->cost->getOriginal('cost_type'),
+            'warehouse_id' => $this->cost->getOriginal('warehouse_id'),
             'cost_date' => $this->cost->getOriginal('cost_date'),
             'description' => $this->cost->getOriginal('description'),
             'total_price' => $this->cost->getOriginal('total_price'),
@@ -95,6 +102,7 @@ class CashDisbursementEdit extends Component
 
         $this->cost->update([
             'cost_type' => $this->cost_type,
+            'warehouse_id' => $this->warehouse_id,
             'cost_date' => $this->cost_date,
             'description' => $this->description,
             'total_price' => $totalPrice,
@@ -127,6 +135,7 @@ class CashDisbursementEdit extends Component
                 'old' => $oldValues,
                 'attributes' => [
                     'cost_type' => $this->cost_type,
+                    'warehouse_id' => $this->warehouse_id,
                     'cost_date' => $this->cost_date,
                     'description' => $this->description,
                     'total_price' => $totalPrice,
@@ -152,6 +161,8 @@ class CashDisbursementEdit extends Component
 
     public function render()
     {
-        return view('livewire.cash-disbursement.cash-disbursement-edit');
+        $warehouses = Warehouse::orderBy('name')->get();
+
+        return view('livewire.cash-disbursement.cash-disbursement-edit', compact('warehouses'));
     }
 }

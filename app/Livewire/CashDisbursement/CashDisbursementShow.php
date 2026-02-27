@@ -13,7 +13,7 @@ class CashDisbursementShow extends Component
 
     public function mount(Cost $cost): void
     {
-        $this->cost = $cost->load(['createdBy']);
+        $this->cost = $cost->load(['createdBy', 'warehouse']);
 
         // Check if this is actually a cash disbursement
         if (!in_array($cost->cost_type, ['showroom'])) {

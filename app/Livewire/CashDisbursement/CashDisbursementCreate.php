@@ -3,6 +3,7 @@
 namespace App\Livewire\CashDisbursement;
 
 use App\Models\Cost;
+use App\Models\Warehouse;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -16,6 +17,7 @@ class CashDisbursementCreate extends Component
 
     public $cost_type = 'showroom';
     public $cost_date;
+    public $warehouse_id;
     public $description;
     public $total_price;
     public $document;
@@ -30,6 +32,7 @@ class CashDisbursementCreate extends Component
     {
         $rules = [
             'cost_date' => 'required|date|before_or_equal:today',
+            'warehouse_id' => 'required|exists:warehouses,id',
             'description' => 'required|string',
             'total_price' => 'required|string',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
@@ -39,6 +42,8 @@ class CashDisbursementCreate extends Component
             'cost_date.required' => 'Tanggal biaya showroom harus dipilih.',
             'cost_date.date' => 'Tanggal biaya showroom harus berupa tanggal.',
             'cost_date.before_or_equal' => 'Tanggal biaya showroom tidak boleh lebih dari hari ini.',
+            'warehouse_id.required' => 'Warehouse harus dipilih.',
+            'warehouse_id.exists' => 'Warehouse yang dipilih tidak valid.',
             'description.required' => 'Deskripsi biaya showroom harus diisi.',
             'description.string' => 'Deskripsi biaya showroom harus berupa teks.',
             'total_price.required' => 'Total biaya showroom harus diisi.',
@@ -62,6 +67,7 @@ class CashDisbursementCreate extends Component
         $cost = Cost::create([
             'cost_type' => $this->cost_type,
             'vehicle_id' => null, // No vehicle for biaya showroom
+            'warehouse_id' => $this->warehouse_id,
             'cost_date' => $this->cost_date,
             'vendor_id' => null, // No vendor for biaya showroom
             'description' => $this->description,
@@ -84,6 +90,7 @@ class CashDisbursementCreate extends Component
             ->withProperties([
                 'attributes' => [
                     'cost_type' => $this->cost_type,
+                    'warehouse_id' => $this->warehouse_id,
                     'cost_date' => $this->cost_date,
                     'description' => $this->description,
                     'total_price' => $totalPrice,
@@ -104,6 +111,8 @@ class CashDisbursementCreate extends Component
 
     public function render()
     {
-        return view('livewire.cash-disbursement.cash-disbursement-create');
+        $warehouses = Warehouse::orderBy('name')->get();
+
+        return view('livewire.cash-disbursement.cash-disbursement-create', compact('warehouses'));
     }
 }

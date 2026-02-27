@@ -3,6 +3,7 @@
 namespace App\Livewire\CashDisbursement;
 
 use App\Models\Cost;
+use App\Models\Warehouse;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -24,6 +25,7 @@ class CashDisbursementIndex extends Component
     public $sortDirection = 'desc';
     public $perPage = 10;
     public $statusFilter = '';
+    public $warehouseFilter = '';
     public $dateFrom;
     public $dateTo;
     public $selectedMonthYear; // Format: YYYY-MM
@@ -36,7 +38,7 @@ class CashDisbursementIndex extends Component
 
     public function updating($field)
     {
-        if (in_array($field, ['search', 'perPage', 'statusFilter', 'dateFrom', 'dateTo', 'selectedMonthYear'])) {
+        if (in_array($field, ['search', 'perPage', 'statusFilter', 'warehouseFilter', 'dateFrom', 'dateTo', 'selectedMonthYear'])) {
             $this->resetPage();
         }
     }
@@ -116,7 +118,7 @@ class CashDisbursementIndex extends Component
 
     public function clearFilters()
     {
-        $this->reset(['search', 'statusFilter']);
+        $this->reset(['search', 'statusFilter', 'warehouseFilter']);
         $this->selectedMonthYear = null;
         $this->updateDateRange();
         $this->resetPage();
@@ -183,7 +185,7 @@ class CashDisbursementIndex extends Component
             ->where('cost_type', 'showroom')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
-            ->with(['createdBy'])
+            ->with(['createdBy', 'warehouse'])
             ->when(
                 $this->search,
                 fn($q) =>
@@ -193,6 +195,7 @@ class CashDisbursementIndex extends Component
                 })
             )
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->warehouseFilter, fn($q) => $q->where('warehouse_id', $this->warehouseFilter))
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->orderBy($this->sortField, $this->sortDirection)
@@ -208,17 +211,29 @@ class CashDisbursementIndex extends Component
                     ->orWhereHas('createdBy', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'));
             }))
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->warehouseFilter, fn($q) => $q->where('warehouse_id', $this->warehouseFilter))
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->sum('total_price');
 
-        return view('livewire.cash-disbursement.cash-disbursement-index', compact('costs', 'totalForFilters'));
+        $warehouses = Warehouse::orderBy('name')->get();
+
+        return view('livewire.cash-disbursement.cash-disbursement-index', compact('costs', 'totalForFilters', 'warehouses'));
     }
 
     public function exportExcel()
     {
         return Excel::download(
-            new CashDisbursementExport($this->search, $this->sortField, $this->sortDirection, $this->statusFilter, null, $this->dateFrom, $this->dateTo),
+            new CashDisbursementExport(
+                $this->search,
+                $this->sortField,
+                $this->sortDirection,
+                $this->statusFilter,
+                null,
+                $this->dateFrom,
+                $this->dateTo,
+                $this->warehouseFilter ?: null
+            ),
             'biaya_showroom_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
@@ -229,7 +244,7 @@ class CashDisbursementIndex extends Component
             ->where('cost_type', 'showroom')
             ->whereNull('vehicle_id')
             ->whereNull('vendor_id')
-            ->with(['createdBy'])
+            ->with(['createdBy', 'warehouse'])
             ->when(
                 $this->search,
                 fn($q) =>
@@ -239,6 +254,7 @@ class CashDisbursementIndex extends Component
                 })
             )
             ->when($this->statusFilter, fn($q) => $q->where('status', $this->statusFilter))
+            ->when($this->warehouseFilter, fn($q) => $q->where('warehouse_id', $this->warehouseFilter))
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->orderBy($this->sortField, $this->sortDirection)

@@ -44,6 +44,10 @@
                                 <flux:text class="mt-1">{{ Carbon\Carbon::parse($cost->cost_date)->format('d-m-Y') }}</flux:text>
                             </div>
                             <div>
+                                <flux:heading size="sm">Warehouse</flux:heading>
+                                <flux:text class="mt-1">{{ $cost->warehouse->name ?? '-' }}</flux:text>
+                            </div>
+                            <div>
                                 <flux:heading size="sm">Total Biaya</flux:heading>
                                 <flux:text class="mt-1 font-medium text-lg">Rp {{ number_format($cost->total_price) }}</flux:text>
                             </div>
