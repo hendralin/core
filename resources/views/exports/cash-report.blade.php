@@ -34,6 +34,9 @@
                     @if($cost->vendor)
                         - {{ $cost->vendor->name }}
                     @endif
+                    @if($cost->warehouse)
+                        - {{ $cost->warehouse->name }}
+                    @endif
                 </td>
                 @if($cost->cost_type === 'cash')
                     <td>-</td>

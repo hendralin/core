@@ -14,8 +14,9 @@ class CashReportExport implements FromView
     protected $dateFrom;
     protected $dateTo;
     protected $selectedCostType;
+    protected $warehouseId;
 
-    public function __construct($search = '', $sortField = 'cost_date', $sortDirection = 'desc', $dateFrom = '', $dateTo = '', $selectedCostType = '')
+    public function __construct($search = '', $sortField = 'cost_date', $sortDirection = 'desc', $dateFrom = '', $dateTo = '', $selectedCostType = '', $warehouseId = null)
     {
         $this->search = $search;
         $this->sortField = $sortField;
@@ -23,15 +24,17 @@ class CashReportExport implements FromView
         $this->dateFrom = $dateFrom;
         $this->dateTo = $dateTo;
         $this->selectedCostType = $selectedCostType;
+        $this->warehouseId = $warehouseId;
     }
 
     public function view(): View
     {
         $costs = Cost::query()
-            ->with(['createdBy', 'vehicle', 'vendor'])
+            ->with(['createdBy', 'vehicle', 'vendor', 'warehouse'])
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
+            ->when($this->warehouseId, fn($q) => $q->where('warehouse_id', $this->warehouseId))
             ->where('big_cash', '!=', 1) // Exclude big cash payments from Excel export
             ->where(fn($q) => $q->where('cost_type', 'cash')->orWhereHas('payments'))
             ->orderBy('cost_date', 'asc')
@@ -41,6 +44,7 @@ class CashReportExport implements FromView
         $openingBalanceExcel = Cost::query()
             ->with('payments')
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
+            ->when($this->warehouseId, fn($q) => $q->where('warehouse_id', $this->warehouseId))
             ->get()->sum(function ($item) {
                 if ($item->cost_type === 'cash') {
                     return $item->total_price;

@@ -70,7 +70,7 @@
 
     <!-- Filter Section -->
     <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <!-- Month/Year Filter -->
             <div>
                 <label for="month-year" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Month & Year</label>
@@ -86,8 +86,23 @@
             <flux:input type="date" wire:model.live="dateFrom" label="From" size="sm" />
             <flux:input type="date" wire:model.live="dateTo" label="To" size="sm" />
 
+            <!-- Warehouse Filter -->
+            <div>
+                <label for="warehouse" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Warehouse</label>
+                <select
+                    id="warehouse"
+                    wire:model.live="selectedWarehouseId"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                >
+                    <option value="">{{ __('All Warehouses') }}</option>
+                    @foreach($warehouses as $warehouse)
+                        <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <!-- Clear Filters Button -->
-            @if($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedCostType || $selectedMonthYear)
+            @if($dateFrom !== \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') || $dateTo !== \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') || $selectedCostType || $selectedMonthYear || $selectedWarehouseId)
             <div class="space-y-2 flex flex-col justify-end">
                 <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full cursor-pointer">
                     Clear Filter
@@ -178,6 +193,9 @@
                                     @if($cost->vendor)
                                         <span class="text-xs">- {{ $cost->vendor->name }}</span>
                                     @endif
+                                    @if($cost->warehouse)
+                                        <span class="text-xs text-gray-500 dark:text-zinc-400">{{ __('Warehouse') }}: {{ $cost->warehouse->name }}</span>
+                                    @endif
                                     @if($cost->cost_type !== 'cash' && $cost->payments->isNotEmpty())
                                         <span class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">Pembayaran: {{ \Carbon\Carbon::parse($cost->payments->first()->payment_date)->format('d-m-Y') }}</span>
                                     @endif
@@ -222,6 +240,9 @@
                                 if ($selectedMonthYear) {
                                     $date = \Carbon\Carbon::createFromFormat('Y-m', $selectedMonthYear);
                                     $activeFilters[] = 'month/year: ' . $date->format('F Y');
+                                }
+                                if (!empty($selectedWarehouseName)) {
+                                    $activeFilters[] = 'warehouse: ' . $selectedWarehouseName;
                                 }
                                 if (empty($activeFilters)) {
                                     $activeFilters[] = 'current month';

@@ -3,6 +3,7 @@
 namespace App\Livewire\Report\CashReport;
 
 use App\Models\Cost;
+use App\Models\Warehouse;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -22,6 +23,7 @@ class CashReportIndex extends Component
     public $dateTo;
     public $selectedCostType;
     public $selectedMonthYear; // Format: YYYY-MM
+    public $selectedWarehouseId;
 
     public function mount()
     {
@@ -31,7 +33,7 @@ class CashReportIndex extends Component
 
     public function updating($field)
     {
-        if (in_array($field, ['perPage', 'dateFrom', 'dateTo', 'selectedCostType', 'selectedMonthYear'])) {
+        if (in_array($field, ['perPage', 'dateFrom', 'dateTo', 'selectedCostType', 'selectedMonthYear', 'selectedWarehouseId'])) {
             $this->resetPage();
         }
     }
@@ -58,6 +60,7 @@ class CashReportIndex extends Component
     {
         $this->selectedCostType = null;
         $this->selectedMonthYear = null;
+        $this->selectedWarehouseId = null;
         $this->updateDateRange();
         $this->resetPage();
     }
@@ -76,6 +79,7 @@ class CashReportIndex extends Component
         // Total debet = non-cash recognized in period (by payment_date in range)
         $totalDebet = Cost::query()
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
+            ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->where('cost_type', '!=', 'cash')
             ->where('big_cash', '!=', 1)
             ->whereHas('payments', function ($q) {
@@ -88,6 +92,7 @@ class CashReportIndex extends Component
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
+            ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->where('cost_type', 'cash')
             ->sum('total_price');
 
@@ -96,10 +101,12 @@ class CashReportIndex extends Component
         $cashInBefore = Cost::query()
             ->where('cost_type', 'cash')
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
+            ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->sum('total_price');
         $cashOutBefore = Cost::query()
             ->where('cost_type', '!=', 'cash')
             ->where('big_cash', '!=', 1)
+            ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '<', $this->dateFrom))
             ->sum('total_price');
         $openingBalance = $cashInBefore - $cashOutBefore;
@@ -108,8 +115,9 @@ class CashReportIndex extends Component
 
         // Same period filter: cash by cost_date, non-cash by payment_date in range
         $allCostsInPeriod = Cost::query()
-            ->with(['createdBy', 'vehicle', 'vendor', 'payments'])
+            ->with(['createdBy', 'vehicle', 'vendor', 'warehouse', 'payments'])
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
+            ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->where('big_cash', '!=', 1)
             ->where(function ($q) {
                 $q->where(function ($q) {
@@ -166,11 +174,13 @@ class CashReportIndex extends Component
                 'total' => Cost::query()
                     ->where('cost_type', 'service_parts')
                     ->where('big_cash', '!=', 1)
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->whereHas('payments', $paymentInPeriod)
                     ->sum('total_price'),
                 'count' => Cost::query()
                     ->where('cost_type', 'service_parts')
                     ->where('big_cash', '!=', 1)
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->whereHas('payments', $paymentInPeriod)
                     ->count(),
                 'icon' => 'beaker',
@@ -181,11 +191,13 @@ class CashReportIndex extends Component
                 'total' => Cost::query()
                     ->where('cost_type', 'other_cost')
                     ->where('big_cash', '!=', 1)
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->whereHas('payments', $paymentInPeriod)
                     ->sum('total_price'),
                 'count' => Cost::query()
                     ->where('cost_type', 'other_cost')
                     ->where('big_cash', '!=', 1)
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->whereHas('payments', $paymentInPeriod)
                     ->count(),
                 'icon' => 'wrench',
@@ -195,10 +207,12 @@ class CashReportIndex extends Component
                 'label' => 'Showroom',
                 'total' => Cost::query()
                     ->where('cost_type', 'showroom')
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->whereHas('payments', $paymentInPeriod)
                     ->sum('total_price'),
                 'count' => Cost::query()
                     ->where('cost_type', 'showroom')
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->whereHas('payments', $paymentInPeriod)
                     ->count(),
                 'icon' => 'building-storefront',
@@ -210,24 +224,40 @@ class CashReportIndex extends Component
                     ->where('cost_type', 'cash')
                     ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
                     ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->sum('total_price'),
                 'count' => Cost::query()
                     ->where('cost_type', 'cash')
                     ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
                     ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->count(),
                 'icon' => 'currency-dollar',
                 'color' => 'emerald'
             ]
         ];
+        $warehouses = Warehouse::orderBy('name')->get();
+        $selectedWarehouseName = $this->selectedWarehouseId
+            ? optional($warehouses->firstWhere('id', $this->selectedWarehouseId))->name
+            : null;
 
-        return view('livewire.report.cash-report.cash-report-index', compact('costs', 'totalDebet', 'totalKredit', 'netBalance', 'costsWithBalance', 'openingBalance', 'stats'));
+        return view('livewire.report.cash-report.cash-report-index', compact(
+            'costs',
+            'totalDebet',
+            'totalKredit',
+            'netBalance',
+            'costsWithBalance',
+            'openingBalance',
+            'stats',
+            'warehouses',
+            'selectedWarehouseName'
+        ));
     }
 
     public function exportExcel()
     {
         return Excel::download(
-            new CashReportExport(null, 'cost_date', 'asc', $this->dateFrom, $this->dateTo, $this->selectedCostType),
+            new CashReportExport(null, 'cost_date', 'asc', $this->dateFrom, $this->dateTo, $this->selectedCostType, $this->selectedWarehouseId),
             'cash_report_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
@@ -236,8 +266,9 @@ class CashReportIndex extends Component
     {
         // Same period filter as render: cash by cost_date, non-cash by payment_date in range
         $allCostsInPeriod = Cost::query()
-            ->with(['createdBy', 'vehicle', 'vendor', 'payments'])
+            ->with(['createdBy', 'vehicle', 'vendor', 'warehouse', 'payments'])
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
+            ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->where('big_cash', '!=', 1)
             ->where(function ($q) {
                 $q->where(function ($q) {
@@ -255,10 +286,12 @@ class CashReportIndex extends Component
         $cashInBefore = Cost::query()
             ->where('cost_type', 'cash')
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
+            ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->sum('total_price');
         $cashOutBefore = Cost::query()
             ->where('cost_type', '!=', 'cash')
             ->where('big_cash', '!=', 1)
+            ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '<', $this->dateFrom))
             ->sum('total_price');
         $openingBalancePdf = $cashInBefore - $cashOutBefore;
