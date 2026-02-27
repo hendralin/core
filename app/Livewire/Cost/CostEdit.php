@@ -108,10 +108,13 @@ class CostEdit extends Component
         // Parse formatted number back to numeric
         $totalPrice = Str::replace(',', '', $this->total_price);
 
+        $vehicle = Vehicle::findOrFail($this->vehicle_id);
+
         // Store old values before update (since update() clears dirty attributes)
         $oldValues = [
             'cost_type' => $this->cost->getOriginal('cost_type'),
             'vehicle_id' => $this->cost->getOriginal('vehicle_id'),
+            'warehouse_id' => $this->cost->getOriginal('warehouse_id'),
             'cost_date' => $this->cost->getOriginal('cost_date'),
             'vendor_id' => $this->cost->getOriginal('vendor_id'),
             'description' => $this->cost->getOriginal('description'),
@@ -123,6 +126,7 @@ class CostEdit extends Component
         $this->cost->update([
             'cost_type' => $this->cost_type,
             'vehicle_id' => $this->vehicle_id,
+            'warehouse_id' => $vehicle->warehouse_id,
             'cost_date' => $this->cost_date,
             'vendor_id' => $this->cost_type === 'service_parts' ? $this->vendor_id : null,
             'description' => $this->description,
@@ -156,6 +160,7 @@ class CostEdit extends Component
                 'attributes' => [
                     'cost_type' => $this->cost_type,
                     'vehicle_id' => $this->vehicle_id,
+                    'warehouse_id' => $vehicle->warehouse_id,
                     'cost_date' => $this->cost_date,
                     'vendor_id' => $this->cost_type === 'service_parts' ? $this->vendor_id : null,
                     'description' => $this->description,

@@ -48,7 +48,7 @@ class CostAudit extends Component
     public function render()
     {
         $activities = Activity::query()
-            ->with(['causer', 'subject'])
+            ->with(['causer', 'subject', 'subject.vehicle', 'subject.vehicle.warehouse'])
             ->where('subject_type', Cost::class)
             ->whereRaw("EXISTS (
                 SELECT 1 FROM costs c
@@ -95,7 +95,7 @@ class CostAudit extends Component
             ->paginate($this->perPage);
 
         // Get costs for dropdown
-        $costs = Cost::with('vehicle')
+        $costs = Cost::with(['vehicle', 'vehicle.warehouse'])
             ->whereIn('cost_type', ['service_parts', 'other_cost'])
             ->whereNotNull('vehicle_id')
             ->orderBy('cost_date', 'desc')

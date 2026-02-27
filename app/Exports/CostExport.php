@@ -33,7 +33,7 @@ class CostExport implements FromView
     {
         $costs = Cost::query()
             ->with(['vehicle.brand', 'vehicle.vehicle_model', 'vendor', 'createdBy'])
-            ->whereNotNull('vehicle_id') // Exclude cash disbursements (vehicle_id NULL)
+            ->whereIn('cost_type', ['service_parts', 'other_cost']) // Exclude cash disbursements (vehicle_id NULL)
             ->when(
                 $this->search,
                 fn($q) =>

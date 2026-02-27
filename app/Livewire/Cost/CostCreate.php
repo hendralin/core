@@ -82,9 +82,12 @@ class CostCreate extends Component
         // Parse formatted number back to numeric
         $totalPrice = Str::replace(',', '', $this->total_price);
 
+        $vehicle = Vehicle::findOrFail($this->vehicle_id);
+
         $cost = Cost::create([
             'cost_type' => $this->cost_type,
             'vehicle_id' => $this->vehicle_id,
+            'warehouse_id' => $vehicle->warehouse_id,
             'cost_date' => $this->cost_date,
             'vendor_id' => $this->cost_type === 'service_parts' ? $this->vendor_id : null,
             'description' => $this->description,

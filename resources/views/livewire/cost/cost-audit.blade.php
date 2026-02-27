@@ -145,6 +145,9 @@
                                                 <div class="text-xs text-gray-600 dark:text-zinc-400 mt-1">
                                                     {{ Carbon\Carbon::parse($activity->subject->cost_date)->format('d-m-Y') }} •
                                                     {{ $activity->subject->vehicle->police_number ?? 'N/A' }}
+                                                    @if($activity->subject->vehicle?->warehouse)
+                                                        • {{ $activity->subject->vehicle->warehouse->name }}
+                                                    @endif
                                                 </div>
                                             </div>
                                             <div class="text-right">
@@ -178,6 +181,8 @@
                                                                     {{ \Carbon\Carbon::parse($value)->format('M d, Y') }}
                                                                 @elseif($field === 'vehicle_id')
                                                                     Kendaraan diubah
+                                                                @elseif($field === 'warehouse_id')
+                                                                    {{ $activity->subject && $activity->subject->vehicle?->warehouse && $activity->subject->vehicle->warehouse->id == $value ? $activity->subject->vehicle->warehouse->name : ($value ?? 'N/A') }}
                                                                 @else
                                                                     {{ Str::limit($value, 50) }}
                                                                 @endif
@@ -195,6 +200,8 @@
                                                                     {{ \Carbon\Carbon::parse($value)->format('M d, Y') }}
                                                                 @elseif($field === 'vehicle_id')
                                                                     Kendaraan diubah
+                                                                @elseif($field === 'warehouse_id')
+                                                                    {{ $activity->subject && $activity->subject->vehicle?->warehouse && $activity->subject->vehicle->warehouse->id == $value ? $activity->subject->vehicle->warehouse->name : ($value ?? 'N/A') }}
                                                                 @else
                                                                     {{ Str::limit($value, 50) }}
                                                                 @endif
@@ -212,6 +219,8 @@
                                                             {{ \Carbon\Carbon::parse($value)->format('M d, Y') }}
                                                         @elseif($field === 'vehicle_id')
                                                             Vehicle changed
+                                                        @elseif($field === 'warehouse_id')
+                                                            {{ $activity->subject && $activity->subject->vehicle?->warehouse && $activity->subject->vehicle->warehouse->id == $value ? $activity->subject->vehicle->warehouse->name : ($value ?? 'N/A') }}
                                                         @else
                                                             {{ Str::limit($value, 50) }}
                                                         @endif

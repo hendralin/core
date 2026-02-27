@@ -186,7 +186,7 @@ class CostIndex extends Component
     {
         $costs = Cost::query()
             ->with(['vehicle', 'vendor', 'createdBy', 'payments'])
-            ->whereNotNull('vehicle_id') // Exclude cash disbursements (vehicle_id NULL)
+            ->whereIn('cost_type', ['service_parts', 'other_cost']) // Exclude cash disbursements (vehicle_id NULL)
             ->when(
                 $this->search,
                 fn($q) =>
@@ -213,7 +213,7 @@ class CostIndex extends Component
 
         // Calculate total for current filters (always show for default period)
         $totalForFilters = Cost::query()
-            ->whereNotNull('vehicle_id') // Exclude cash disbursements (vehicle_id NULL)
+            ->whereIn('cost_type', ['service_parts', 'other_cost']) // Exclude cash disbursements (vehicle_id NULL)
             ->when($this->search, fn($q) => $q->where(function ($query) {
                 $query->orWhereHas('vendor', fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
                     ->orWhere('description', 'like', '%' . $this->search . '%')
@@ -242,7 +242,7 @@ class CostIndex extends Component
     {
         $costs = Cost::query()
             ->with(['vehicle', 'vendor', 'createdBy'])
-            ->whereNotNull('vehicle_id') // Exclude cash disbursements (vehicle_id NULL)
+            ->whereIn('cost_type', ['service_parts', 'other_cost']) // Exclude cash disbursements (vehicle_id NULL)
             ->when(
                 $this->search,
                 fn($q) =>
