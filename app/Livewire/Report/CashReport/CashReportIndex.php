@@ -207,11 +207,13 @@ class CashReportIndex extends Component
                 'label' => 'Showroom',
                 'total' => Cost::query()
                     ->where('cost_type', 'showroom')
+                    ->where('big_cash', '!=', 1)
                     ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->whereHas('payments', $paymentInPeriod)
                     ->sum('total_price'),
                 'count' => Cost::query()
                     ->where('cost_type', 'showroom')
+                    ->where('big_cash', '!=', 1)
                     ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->whereHas('payments', $paymentInPeriod)
                     ->count(),
