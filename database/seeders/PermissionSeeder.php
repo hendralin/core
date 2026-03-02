@@ -89,6 +89,7 @@ class PermissionSeeder extends Seeder
             'vehicle.edit',
             'vehicle.delete',
             'vehicle.audit',
+            'vehicle.print',
             'vehicle-modal.view',
 
             // KOMISI PENJUALAN KENDARAAN

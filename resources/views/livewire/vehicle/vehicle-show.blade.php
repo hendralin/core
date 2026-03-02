@@ -385,6 +385,7 @@
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <flux:heading size="lg">Informasi Keuangan</flux:heading>
+                    @if(auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
                     <div class="flex items-center gap-2">
                         @if($vehicle->purchasePayments->sum('amount') == 0)
                             <flux:badge icon="x-circle" color="red">Belum Lunas</flux:badge>
@@ -404,9 +405,11 @@
                             @endif
                         @endcan
                     </div>
+                    @endif
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @if(auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
                     <div>
                         <flux:heading size="md">Tanggal Pembelian</flux:heading>
                         <flux:text class="mt-1">{{ $vehicle->purchase_date ? Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') : '-' }}</flux:text>
@@ -416,7 +419,7 @@
                         <flux:heading size="md">Harga Beli</flux:heading>
                         <flux:text class="mt-1">{{ $vehicle->purchase_price ? 'Rp ' . number_format($vehicle->purchase_price, 0, ',', '.') : '-' }}</flux:text>
                     </div>
-
+                    @endif
                     <div>
                         <flux:heading size="md">Harga Tunai</flux:heading>
                         <flux:text class="mt-1">{{ $vehicle->display_price ? 'Rp ' . number_format($vehicle->display_price, 0, ',', '.') : '-' }}</flux:text>

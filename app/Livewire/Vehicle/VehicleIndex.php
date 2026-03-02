@@ -146,6 +146,7 @@ class VehicleIndex extends Component
 
     public function exportPdf()
     {
+        $statusFilter = $this->statusFilter;
         $vehicles = Vehicle::query()
             ->with(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'images', 'costs', 'commissions'])
             ->when(
@@ -169,7 +170,7 @@ class VehicleIndex extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->get();
 
-        $pdf = Pdf::loadView('exports.vehicles-pdf', compact('vehicles'))
+        $pdf = Pdf::loadView('exports.vehicles-pdf', compact('vehicles', 'statusFilter'))
             ->setPaper('a4', 'landscape');
 
         return response()->streamDownload(function () use ($pdf) {

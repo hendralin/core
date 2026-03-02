@@ -24,7 +24,7 @@ class VehicleExport implements FromView
     public function view(): View
     {
         $vehicles = Vehicle::query()
-            ->with(['brand', 'type', 'category', 'vehicle_model', 'warehouse'])
+            ->with(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'costs', 'commissions'])
             ->when(
                 $this->search,
                 fn($q) =>
@@ -48,6 +48,7 @@ class VehicleExport implements FromView
 
         return view('exports.vehicles', [
             'vehicles' => $vehicles,
+            'statusFilter' => $this->statusFilter,
         ]);
     }
 }

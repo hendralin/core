@@ -15,15 +15,14 @@
             <th>Warehouse</th>
             <th>Tgl. STNK</th>
             <th>Tgl. Pajak</th>
-            <th>Tgl. Pembelian</th>
-            <th>Harga Beli</th>
+            <th>Modal</th>
             <th>Harga Tunai</th>
             <th>Harga Kredit</th>
-            <th>Tgl. Penjualan</th>
-            <th>Harga Penjualan</th>
+            @if(($statusFilter ?? '') !== '1')
+                <th>Tgl. Penjualan</th>
+                <th>Harga Penjualan</th>
+            @endif
             <th>Status</th>
-            <th>Description</th>
-            <th>Created At</th>
         </tr>
     </thead>
     <tbody>
@@ -36,22 +35,24 @@
                 <td>{{ $vehicle->category?->name ?? '-' }}</td>
                 <td>{{ $vehicle->year }}</td>
                 <td>{{ $vehicle->police_number }}</td>
-                <td>{{ $vehicle->cylinder_capacity ? number_format($vehicle->cylinder_capacity, 2) : '-' }}</td>
+                <td>{{ $vehicle->cylinder_capacity ?? '-' }}</td>
                 <td>{{ $vehicle->color ?? '-' }}</td>
                 <td>{{ $vehicle->fuel_type ?? '-' }}</td>
-                <td>{{ number_format($vehicle->kilometer, 2) }}</td>
+                <td>{{ $vehicle->kilometer }}</td>
                 <td>{{ $vehicle->warehouse?->name ?? '-' }}</td>
                 <td>{{ $vehicle->vehicle_registration_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_date)->format('M d, Y') : '-' }}</td>
                 <td>{{ $vehicle->vehicle_registration_expiry_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->format('M d, Y') : '-' }}</td>
-                <td>{{ $vehicle->purchase_date ? \Carbon\Carbon::parse($vehicle->purchase_date)->format('M d, Y') : '-' }}</td>
-                <td>{{ $vehicle->purchase_price ? number_format($vehicle->purchase_price, 2) : '-' }}</td>
-                <td>{{ $vehicle->display_price ? number_format($vehicle->display_price, 2) : '-' }}</td>
-                <td>{{ $vehicle->loan_price ? number_format($vehicle->loan_price, 2) : '-' }}</td>
-                <td>{{ $vehicle->selling_date ? \Carbon\Carbon::parse($vehicle->selling_date)->format('M d, Y') : '-' }}</td>
-                <td>{{ $vehicle->selling_price ? number_format($vehicle->selling_price, 2) : '-' }}</td>
+                @php
+                    $totalModal = ($vehicle->purchase_price ?? 0) + ($vehicle->costs->sum('total_price') ?? 0) + ($vehicle->commissions->where('type', 2)->sum('amount') ?? 0) + ($vehicle->roadside_allowance ?? 0);
+                @endphp
+                <td>{{ $totalModal > 0 ? $totalModal : '-' }}</td>
+                <td>{{ $vehicle->display_price ? $vehicle->display_price : '-' }}</td>
+                <td>{{ $vehicle->loan_price ? $vehicle->loan_price : '-' }}</td>
+                @if(($statusFilter ?? '') !== '1')
+                    <td>{{ $vehicle->selling_date ? \Carbon\Carbon::parse($vehicle->selling_date)->format('M d, Y') : '-' }}</td>
+                    <td>{{ $vehicle->selling_price ? $vehicle->selling_price : '-' }}</td>
+                @endif
                 <td>{{ $vehicle->status == 1 ? 'Available' : 'Sold' }}</td>
-                <td>{{ $vehicle->description ?? '-' }}</td>
-                <td>{{ $vehicle->created_at ? \Carbon\Carbon::parse($vehicle->created_at)->format('M d, Y H:i') : '-' }}</td>
             </tr>
         @endforeach
     </tbody>
