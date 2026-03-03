@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Report\CashReport;
+namespace App\Livewire\Report\TaxCashReport;
 
 use App\Models\Cost;
 use App\Models\Warehouse;
@@ -8,13 +8,13 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Exports\CashReportExport;
+use App\Exports\TaxCashReportExport;
 use Livewire\WithoutUrlPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-#[Title('Laporan Kas')]
-class CashReportIndex extends Component
+#[Title('Laporan Kas Pajak')]
+class TaxCashReportIndex extends Component
 {
     use WithPagination, WithoutUrlPagination;
 
@@ -22,7 +22,7 @@ class CashReportIndex extends Component
     public $dateFrom;
     public $dateTo;
     public $selectedCostType;
-    public $selectedMonthYear; // Format: YYYY-MM
+    public $selectedMonthYear;
     public $selectedWarehouseId;
 
     public function mount()
@@ -55,7 +55,6 @@ class CashReportIndex extends Component
         }
     }
 
-
     public function clearFilters()
     {
         $this->selectedCostType = null;
@@ -71,43 +70,41 @@ class CashReportIndex extends Component
         $this->resetPage();
     }
 
-
-
+    private function baseCostQuery()
+    {
+        return Cost::query()->whereIn('cost_type', ['tax_cash', 'vehicle_tax']);
+    }
 
     public function render()
     {
-        // Total debet = non-cash recognized in period (by payment_date in range). Exclude vehicle_tax (Laporan Kas Pajak).
-        $totalDebet = Cost::query()
+        // Debet = vehicle_tax (pengeluaran PKB) dengan payment_date dalam periode
+        $totalDebet = $this->baseCostQuery()
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-            ->where('cost_type', '!=', 'cash')
-            ->where('cost_type', '!=', 'vehicle_tax')
-            ->where('big_cash', '!=', 1)
+            ->where('cost_type', 'vehicle_tax')
             ->whereHas('payments', function ($q) {
                 $q->whereDate('payment_date', '>=', $this->dateFrom)
                     ->whereDate('payment_date', '<=', $this->dateTo);
             })
             ->sum('total_price');
 
-        $totalKredit = Cost::query()
+        // Kredit = tax_cash (inject kas pajak) dengan cost_date dalam periode
+        $totalKredit = $this->baseCostQuery()
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-            ->where('cost_type', 'cash')
+            ->where('cost_type', 'tax_cash')
             ->sum('total_price');
 
-
-            // Opening balance before the period: cash in (cost_date < dateFrom) minus non-cash out (payment_date < dateFrom). Exclude vehicle_tax.
-        $cashInBefore = Cost::query()
-            ->where('cost_type', 'cash')
+        // Opening balance: tax_cash in before dateFrom - vehicle_tax paid before dateFrom
+        $cashInBefore = $this->baseCostQuery()
+            ->where('cost_type', 'tax_cash')
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
             ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->sum('total_price');
-        $cashOutBefore = Cost::query()
-            ->where('cost_type', '!=', 'cash')
-            ->where('cost_type', '!=', 'vehicle_tax')
-            ->where('big_cash', '!=', 1)
+        $cashOutBefore = $this->baseCostQuery()
+            ->where('cost_type', 'vehicle_tax')
             ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '<', $this->dateFrom))
             ->sum('total_price');
@@ -115,49 +112,45 @@ class CashReportIndex extends Component
 
         $netBalance = $totalKredit - $totalDebet + $openingBalance;
 
-        // Same period filter: cash by cost_date, non-cash by payment_date in range. Exclude vehicle_tax (Laporan Kas Pajak).
-        $allCostsInPeriod = Cost::query()
+        // Costs in period: tax_cash by cost_date, vehicle_tax by payment_date in range
+        $allCostsInPeriod = $this->baseCostQuery()
             ->with(['createdBy', 'vehicle', 'vendor', 'warehouse', 'payments'])
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-            ->where('big_cash', '!=', 1)
             ->where(function ($q) {
                 $q->where(function ($q) {
-                    $q->where('cost_type', 'cash')
+                    $q->where('cost_type', 'tax_cash')
                         ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
                         ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo));
                 })->orWhere(function ($q) {
-                    $q->where('cost_type', '!=', 'cash')
-                        ->where('cost_type', '!=', 'vehicle_tax')
+                    $q->where('cost_type', 'vehicle_tax')
                         ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '>=', $this->dateFrom)->whereDate('payment_date', '<=', $this->dateTo));
                 });
             })
             ->get();
 
-        // Sort by effective date: cash by cost_date, non-cash by first payment_date (when money actually moves)
         $sortedCosts = $allCostsInPeriod->sortBy(function ($cost) {
-            if ($cost->cost_type === 'cash') {
+            if ($cost->cost_type === 'tax_cash') {
                 return $cost->cost_date;
             }
             $first = $cost->payments->sortBy('payment_date')->first();
             return $first ? $first->payment_date : $cost->cost_date;
         })->values();
 
-        // Calculate running balance in effective date order
         $runningBalance = $openingBalance;
         $allCostsWithBalance = $sortedCosts->map(function ($cost) use (&$runningBalance) {
-            if ($cost->cost_type === 'cash') {
+            if ($cost->cost_type === 'tax_cash') {
                 $runningBalance += $cost->total_price;
-            } elseif ($cost->big_cash == 1) {
-                // no change
+                $cost->report_date = $cost->cost_date;
             } else {
                 $runningBalance -= $cost->total_price;
+                $first = $cost->payments->sortBy('payment_date')->first();
+                $cost->report_date = $first ? $first->payment_date : $cost->cost_date;
             }
             $cost->running_balance = $runningBalance;
             return $cost;
         });
 
-        // Paginate the sorted list (so table order matches running balance order)
         $total = $allCostsWithBalance->count();
         $page = \Illuminate\Pagination\Paginator::resolveCurrentPage('page');
         $costs = new LengthAwarePaginator(
@@ -167,86 +160,50 @@ class CashReportIndex extends Component
             $page,
             ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'pageName' => 'page']
         );
-        $costsWithBalance = $costs->getCollection(); // same items, already have running_balance
+        $costsWithBalance = $costs->getCollection();
 
-        // Stats: non-cash by payment_date in period, cash by cost_date in period (same as report totals)
         $paymentInPeriod = fn($q) => $q->whereDate('payment_date', '>=', $this->dateFrom)->whereDate('payment_date', '<=', $this->dateTo);
         $stats = [
-            'service_parts' => [
-                'label' => 'Service Parts',
-                'total' => Cost::query()
-                    ->where('cost_type', 'service_parts')
-                    ->where('big_cash', '!=', 1)
+            'tax_cash' => [
+                'label' => 'Kas Pajak (In)',
+                'total' => $this->baseCostQuery()
+                    ->where('cost_type', 'tax_cash')
                     ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-                    ->whereHas('payments', $paymentInPeriod)
-                    ->sum('total_price'),
-                'count' => Cost::query()
-                    ->where('cost_type', 'service_parts')
-                    ->where('big_cash', '!=', 1)
-                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-                    ->whereHas('payments', $paymentInPeriod)
-                    ->count(),
-                'icon' => 'beaker',
-                'color' => 'blue'
-            ],
-            'other_cost' => [
-                'label' => 'Other Cost',
-                'total' => Cost::query()
-                    ->where('cost_type', 'other_cost')
-                    ->where('big_cash', '!=', 1)
-                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-                    ->whereHas('payments', $paymentInPeriod)
-                    ->sum('total_price'),
-                'count' => Cost::query()
-                    ->where('cost_type', 'other_cost')
-                    ->where('big_cash', '!=', 1)
-                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-                    ->whereHas('payments', $paymentInPeriod)
-                    ->count(),
-                'icon' => 'wrench',
-                'color' => 'orange'
-            ],
-            'showroom' => [
-                'label' => 'Showroom',
-                'total' => Cost::query()
-                    ->where('cost_type', 'showroom')
-                    ->where('big_cash', '!=', 1)
-                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-                    ->whereHas('payments', $paymentInPeriod)
-                    ->sum('total_price'),
-                'count' => Cost::query()
-                    ->where('cost_type', 'showroom')
-                    ->where('big_cash', '!=', 1)
-                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-                    ->whereHas('payments', $paymentInPeriod)
-                    ->count(),
-                'icon' => 'building-storefront',
-                'color' => 'green'
-            ],
-            'cash' => [
-                'label' => 'Cash In',
-                'total' => Cost::query()
-                    ->where('cost_type', 'cash')
                     ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
                     ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
-                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->sum('total_price'),
-                'count' => Cost::query()
-                    ->where('cost_type', 'cash')
+                'count' => $this->baseCostQuery()
+                    ->where('cost_type', 'tax_cash')
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
                     ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
-                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
                     ->count(),
                 'icon' => 'currency-dollar',
                 'color' => 'emerald'
+            ],
+            'vehicle_tax' => [
+                'label' => 'Pembayaran PKB (Out)',
+                'total' => $this->baseCostQuery()
+                    ->where('cost_type', 'vehicle_tax')
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
+                    ->whereHas('payments', $paymentInPeriod)
+                    ->sum('total_price'),
+                'count' => $this->baseCostQuery()
+                    ->where('cost_type', 'vehicle_tax')
+                    ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
+                    ->whereHas('payments', $paymentInPeriod)
+                    ->count(),
+                'icon' => 'banknotes',
+                'color' => 'blue'
             ]
         ];
+
         $warehouses = Warehouse::orderBy('name')->get();
         $selectedWarehouseName = $this->selectedWarehouseId
             ? optional($warehouses->firstWhere('id', $this->selectedWarehouseId))->name
             : null;
 
-        return view('livewire.report.cash-report.cash-report-index', compact(
+        return view('livewire.report.tax-cash-report.tax-cash-report-index', compact(
             'costs',
             'totalDebet',
             'totalKredit',
@@ -262,50 +219,43 @@ class CashReportIndex extends Component
     public function exportExcel()
     {
         return Excel::download(
-            new CashReportExport(null, 'cost_date', 'asc', $this->dateFrom, $this->dateTo, $this->selectedCostType, $this->selectedWarehouseId),
-            'cash_report_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
+            new TaxCashReportExport('cost_date', 'asc', $this->dateFrom, $this->dateTo, $this->selectedCostType, $this->selectedWarehouseId),
+            'laporan_kas_pajak_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
 
     public function exportPdf()
     {
-        // Same period filter as render: cash by cost_date, non-cash by payment_date in range. Exclude vehicle_tax.
-        $allCostsInPeriod = Cost::query()
-            ->with(['createdBy', 'vehicle', 'vendor', 'warehouse', 'payments'])
+        $allCostsInPeriod = $this->baseCostQuery()
+            ->with(['createdBy', 'vehicle', 'warehouse', 'payments'])
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
-            ->where('big_cash', '!=', 1)
             ->where(function ($q) {
                 $q->where(function ($q) {
-                    $q->where('cost_type', 'cash')
+                    $q->where('cost_type', 'tax_cash')
                         ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
                         ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo));
                 })->orWhere(function ($q) {
-                    $q->where('cost_type', '!=', 'cash')
-                        ->where('cost_type', '!=', 'vehicle_tax')
+                    $q->where('cost_type', 'vehicle_tax')
                         ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '>=', $this->dateFrom)->whereDate('payment_date', '<=', $this->dateTo));
                 });
             })
             ->get();
 
-        // Opening balance: cash in before dateFrom, minus non-cash paid before dateFrom. Exclude vehicle_tax.
-        $cashInBefore = Cost::query()
-            ->where('cost_type', 'cash')
+        $cashInBefore = $this->baseCostQuery()
+            ->where('cost_type', 'tax_cash')
             ->when($this->dateFrom, fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
             ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->sum('total_price');
-        $cashOutBefore = Cost::query()
-            ->where('cost_type', '!=', 'cash')
-            ->where('cost_type', '!=', 'vehicle_tax')
-            ->where('big_cash', '!=', 1)
+        $cashOutBefore = $this->baseCostQuery()
+            ->where('cost_type', 'vehicle_tax')
             ->when($this->selectedWarehouseId, fn($q) => $q->where('warehouse_id', $this->selectedWarehouseId))
             ->whereHas('payments', fn($q) => $q->whereDate('payment_date', '<', $this->dateFrom))
             ->sum('total_price');
         $openingBalancePdf = $cashInBefore - $cashOutBefore;
 
-        // Sort by effective date (cash = cost_date, non-cash = first payment_date)
         $sortedCosts = $allCostsInPeriod->sortBy(function ($cost) {
-            if ($cost->cost_type === 'cash') {
+            if ($cost->cost_type === 'tax_cash') {
                 return $cost->cost_date;
             }
             $first = $cost->payments->sortBy('payment_date')->first();
@@ -314,28 +264,28 @@ class CashReportIndex extends Component
 
         $runningBalance = $openingBalancePdf;
         $costsWithBalance = $sortedCosts->map(function ($cost) use (&$runningBalance) {
-            if ($cost->cost_type === 'cash') {
+            if ($cost->cost_type === 'tax_cash') {
                 $runningBalance += $cost->total_price;
-            } elseif ($cost->big_cash == 1) {
-                // no change
+                $cost->report_date = $cost->cost_date;
             } else {
                 $runningBalance -= $cost->total_price;
+                $first = $cost->payments->sortBy('payment_date')->first();
+                $cost->report_date = $first ? $first->payment_date : $cost->cost_date;
             }
             $cost->running_balance = $runningBalance;
             return $cost;
         });
 
-        $costs = $costsWithBalance; // PDF shows same ordered list with running balance
-
-        $totalDebetPdf = $costs->where('cost_type', '!=', 'cash')->where('big_cash', '!=', 1)->sum('total_price') ?? 0;
-        $totalKreditPdf = $costs->where('cost_type', 'cash')->sum('total_price') ?? 0;
+        $costs = $costsWithBalance;
+        $totalDebetPdf = $costs->where('cost_type', 'vehicle_tax')->sum('total_price') ?? 0;
+        $totalKreditPdf = $costs->where('cost_type', 'tax_cash')->sum('total_price') ?? 0;
         $netBalancePdf = $totalKreditPdf - $totalDebetPdf + $openingBalancePdf;
 
-        $pdf = Pdf::loadView('exports.cash-report-pdf', compact('costs', 'costsWithBalance', 'totalDebetPdf', 'totalKreditPdf', 'netBalancePdf', 'openingBalancePdf'));
+        $pdf = Pdf::loadView('exports.tax-cash-report-pdf', compact('costs', 'costsWithBalance', 'totalDebetPdf', 'totalKreditPdf', 'netBalancePdf', 'openingBalancePdf'));
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
-        }, 'cash_report_' . now()->format('Y-m-d_H-i-s') . '.pdf');
+        }, 'laporan_kas_pajak_' . now()->format('Y-m-d_H-i-s') . '.pdf');
     }
 
     public function getPerPageOptionsProperty()

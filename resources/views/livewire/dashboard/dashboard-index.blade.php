@@ -214,6 +214,83 @@
                 </table>
             </div>
         </div>
+
+        <!-- Saldo Kas Pajak per Warehouse -->
+        <div class="rounded-xl bg-white p-6 shadow-lg border border-gray-200 dark:bg-zinc-800 dark:border-zinc-700">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Saldo Kas Pajak per Gudang</h2>
+                    <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">
+                        Ringkasan saldo kas pajak per gudang: Kas Pajak minus Pembayaran PKB.
+                    </p>
+                </div>
+                <div class="hidden sm:flex sm:flex-col items-end gap-1 text-xs text-gray-500 dark:text-zinc-400">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800 whitespace-nowrap">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                        Positif = surplus
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border border-rose-100 dark:border-rose-800 whitespace-nowrap">
+                        <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+                        Negatif = defisit
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-zinc-700">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
+                    <thead class="bg-gray-50 dark:bg-zinc-900/40">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                Gudang
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                Cash In
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                Cash Out
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                                Balance
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-zinc-800 divide-y divide-gray-100 dark:divide-zinc-700">
+                        @forelse ($this->taxCashBalanceByWarehouse as $item)
+                            @php
+                                $balance = $item['balance'];
+                                $isPositive = $balance >= 0;
+                            @endphp
+                            <tr class="odd:bg-white even:bg-gray-50/60 dark:odd:bg-zinc-800 dark:even:bg-zinc-900/40 hover:bg-gray-100 dark:hover:bg-zinc-800/80 transition-colors">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-zinc-100 whitespace-nowrap">
+                                    {{ $item['label'] }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-right tabular-nums text-gray-700 dark:text-zinc-200 whitespace-nowrap">
+                                    Rp {{ number_format($item['cash_in'], 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-right tabular-nums text-gray-700 dark:text-zinc-200 whitespace-nowrap">
+                                    Rp {{ number_format($item['costs'], 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-right whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-end gap-1 px-2 py-1 rounded-full text-xs font-semibold
+                                        {{ $isPositive
+                                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                            : 'bg-rose-50 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300' }}">
+                                        <span class="h-1.5 w-1.5 rounded-full {{ $isPositive ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>
+                                        Rp {{ number_format($balance, 0, ',', '.') }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500 dark:text-zinc-400">
+                                    Belum ada data kas pajak per warehouse.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
 

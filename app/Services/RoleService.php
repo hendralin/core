@@ -25,9 +25,10 @@ class RoleService
         'Management File Kendaraan' => ['vehicle-file'],
         'Pembukuan Modal' => ['cost'],
         'Biaya Showroom' => ['cashdisbursement'],
+        'Pembayaran PKB' => ['vehicle-tax-payment'],
         'Inject Kas' => ['cash-inject'],
         'Payroll' => ['position', 'salary-component', 'employee', 'salary'],
-        'Reports' => ['cash-report', 'sales-report'],
+        'Reports' => ['cash-report', 'sales-report', 'tax-cash-report'],
         'Tools' => ['backup-restore'],
     ];
     /**

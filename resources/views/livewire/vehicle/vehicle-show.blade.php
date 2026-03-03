@@ -2217,6 +2217,8 @@
                                         <flux:text class="font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ $cost->description }}</flux:text>
                                         @if($cost->cost_type == 'service_parts')
                                             <flux:badge size="sm" color="green">Service & Parts</flux:badge>
+                                        @elseif($cost->cost_type == 'vehicle_tax')
+                                            <flux:badge size="sm" color="blue">Pembayaran PKB</flux:badge>
                                         @else
                                             <flux:badge size="sm" color="orange">Other Cost</flux:badge>
                                         @endif

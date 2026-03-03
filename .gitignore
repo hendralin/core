@@ -26,3 +26,5 @@ yarn-error.log
 /public/logos
 /public/avatars
 /public/documents
+
+/.cursor

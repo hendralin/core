@@ -142,6 +142,13 @@
                             <flux:navlist.item icon="credit-card" :href="route('cash-disbursements.index')" :current="request()->routeIs('cash-disbursements.*')" wire:navigate>{{ __('Biaya Showroom') }}</flux:navlist.item>
                         @endif
 
+                        @if (auth()->user()->can('vehicle-tax-payment.view') ||
+                        auth()->user()->can('vehicle-tax-payment.create') ||
+                        auth()->user()->can('vehicle-tax-payment.edit') ||
+                        auth()->user()->can('vehicle-tax-payment.delete'))
+                            <flux:navlist.item icon="banknotes" :href="route('vehicle-tax-payments.index')" :current="request()->routeIs('vehicle-tax-payments.*')" wire:navigate>{{ __('Pembayaran PKB') }}</flux:navlist.item>
+                        @endif
+
                         @if (auth()->user()->can('cash-inject.view') ||
                         auth()->user()->can('cash-inject.create') ||
                         auth()->user()->can('cash-inject.edit') ||
@@ -192,6 +199,10 @@
                     <flux:sidebar.group expandable icon="presentation-chart-line" heading="Report" class="grid">
                         @if (auth()->user()->can('cash-report.view'))
                             <flux:navlist.item icon="document-chart-bar" :href="route('cash-reports.index')" :current="request()->routeIs('cash-reports.*')" wire:navigate>{{ __('Laporan Kas') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('tax-cash-report.view'))
+                            <flux:navlist.item icon="chart-pie" :href="route('tax-cash-reports.index')" :current="request()->routeIs('tax-cash-reports.*')" wire:navigate>{{ __('Laporan Kas Pajak') }}</flux:navlist.item>
                         @endif
 
                         @if (auth()->user()->can('sales-report.view'))
@@ -394,6 +405,13 @@
                             <flux:navlist.item icon="credit-card" :href="route('cash-disbursements.index')" :current="request()->routeIs('cash-disbursements.*')" wire:navigate>{{ __('Biaya Showroom') }}</flux:navlist.item>
                         @endif
 
+                        @if (auth()->user()->can('vehicle-tax-payment.view') ||
+                        auth()->user()->can('vehicle-tax-payment.create') ||
+                        auth()->user()->can('vehicle-tax-payment.edit') ||
+                        auth()->user()->can('vehicle-tax-payment.delete'))
+                            <flux:navlist.item icon="banknotes" :href="route('vehicle-tax-payments.index')" :current="request()->routeIs('vehicle-tax-payments.*')" wire:navigate>{{ __('Pembayaran PKB') }}</flux:navlist.item>
+                        @endif
+
                         @if (auth()->user()->can('cash-inject.view') ||
                         auth()->user()->can('cash-inject.create') ||
                         auth()->user()->can('cash-inject.edit') ||
@@ -445,6 +463,10 @@
                     <flux:navlist.group :heading="__('Report')" class="grid">
                         @if (auth()->user()->can('cash-report.view'))
                             <flux:navlist.item icon="document-chart-bar" :href="route('cash-reports.index')" :current="request()->routeIs('cash-reports.*')" wire:navigate>{{ __('Laporan Kas') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('tax-cash-report.view'))
+                            <flux:navlist.item icon="chart-pie" :href="route('tax-cash-reports.index')" :current="request()->routeIs('tax-cash-reports.*')" wire:navigate>{{ __('Laporan Kas Pajak') }}</flux:navlist.item>
                         @endif
 
                         @if (auth()->user()->can('sales-report.view'))

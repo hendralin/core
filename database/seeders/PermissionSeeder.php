@@ -153,7 +153,7 @@ class PermissionSeeder extends Seeder
             'cost.approve',
             'cost.reject',
 
-            // PENGELUARAN KAS
+            // BIAYA SHOWROOM
             'cashdisbursement.view',
             'cashdisbursement.create',
             'cashdisbursement.edit',
@@ -161,6 +161,13 @@ class PermissionSeeder extends Seeder
             'cashdisbursement.audit',
             'cashdisbursement.approve',
             'cashdisbursement.reject',
+
+            // PEMBAYARAN PKB
+            'vehicle-tax-payment.view',
+            'vehicle-tax-payment.create',
+            'vehicle-tax-payment.edit',
+            'vehicle-tax-payment.delete',
+            'vehicle-tax-payment.audit',
 
             // CASH INJECT
             'cash-inject.view',
@@ -203,6 +210,9 @@ class PermissionSeeder extends Seeder
 
             // CASH REPORT
             'cash-report.view',
+
+            // TAX CASH REPORT
+            'tax-cash-report.view',
 
             // SALES REPORT
             'sales-report.view',

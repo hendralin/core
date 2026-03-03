@@ -46,6 +46,7 @@ class DashboardIndex extends Component
         // Other costs: only recognized when they have payment (payment_date)
         $totalCosts = Cost::query()
             ->where('cost_type', '!=', 'cash')
+            ->where('cost_type', '!=', 'vehicle_tax')
             ->where('big_cash', 0)
             ->whereHas('payments')
             ->sum('total_price');
@@ -161,6 +162,7 @@ class DashboardIndex extends Component
         // Other costs per warehouse (same logic as global finalCashBalance, but grouped)
         $costsPerWarehouse = Cost::selectRaw('warehouse_id, SUM(total_price) as total_costs')
             ->where('cost_type', '!=', 'cash')
+            ->where('cost_type', '!=', 'vehicle_tax')
             ->where('big_cash', 0)
             ->whereHas('payments')
             ->groupBy('warehouse_id')
@@ -181,6 +183,43 @@ class DashboardIndex extends Component
             ];
         })
             // tampilkan hanya gudang yang punya aktivitas keuangan
+            ->filter(function ($item) {
+                return $item['cash_in'] != 0 || $item['costs'] != 0 || $item['balance'] != 0;
+            })
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Saldo kas pajak per gudang: tax_cash (Kas Pajak In) - vehicle_tax dengan payment (Pembayaran PKB Out).
+     */
+    public function getTaxCashBalanceByWarehouseProperty()
+    {
+        $taxCashInPerWarehouse = Cost::selectRaw('warehouse_id, SUM(total_price) as total')
+            ->where('cost_type', 'tax_cash')
+            ->groupBy('warehouse_id')
+            ->pluck('total', 'warehouse_id');
+
+        $vehicleTaxOutPerWarehouse = Cost::selectRaw('warehouse_id, SUM(total_price) as total')
+            ->where('cost_type', 'vehicle_tax')
+            ->whereHas('payments')
+            ->groupBy('warehouse_id')
+            ->pluck('total', 'warehouse_id');
+
+        $warehouses = Warehouse::orderBy('name')->get();
+
+        return $warehouses->map(function ($warehouse) use ($taxCashInPerWarehouse, $vehicleTaxOutPerWarehouse) {
+            $cashIn = (float) ($taxCashInPerWarehouse[$warehouse->id] ?? 0);
+            $costs = (float) ($vehicleTaxOutPerWarehouse[$warehouse->id] ?? 0);
+            $balance = $cashIn - $costs;
+
+            return [
+                'label' => $warehouse->name,
+                'cash_in' => $cashIn,
+                'costs' => $costs,
+                'balance' => $balance,
+            ];
+        })
             ->filter(function ($item) {
                 return $item['cash_in'] != 0 || $item['costs'] != 0 || $item['balance'] != 0;
             })

@@ -29,6 +29,7 @@ class CashReportExport implements FromView
 
     public function view(): View
     {
+        // Exclude vehicle_tax (belongs to Laporan Kas Pajak)
         $costs = Cost::query()
             ->with(['createdBy', 'vehicle', 'vendor', 'warehouse'])
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
@@ -36,15 +37,23 @@ class CashReportExport implements FromView
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->when($this->warehouseId, fn($q) => $q->where('warehouse_id', $this->warehouseId))
             ->where('big_cash', '!=', 1) // Exclude big cash payments from Excel export
-            ->where(fn($q) => $q->where('cost_type', 'cash')->orWhereHas('payments'))
+            ->where(function ($q) {
+                $q->where('cost_type', 'cash')
+                    ->orWhere(function ($q) {
+                        $q->where('cost_type', '!=', 'cash')
+                            ->where('cost_type', '!=', 'vehicle_tax')
+                            ->whereHas('payments');
+                    });
+            })
             ->orderBy('cost_date', 'asc')
             ->get();
 
-        // Calculate opening balance for export
+        // Calculate opening balance for export. Exclude vehicle_tax (Laporan Kas Pajak).
         $openingBalanceExcel = Cost::query()
             ->with('payments')
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
             ->when($this->warehouseId, fn($q) => $q->where('warehouse_id', $this->warehouseId))
+            ->where('cost_type', '!=', 'vehicle_tax')
             ->get()->sum(function ($item) {
                 if ($item->cost_type === 'cash') {
                     return $item->total_price;
