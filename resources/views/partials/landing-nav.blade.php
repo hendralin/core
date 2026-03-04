@@ -20,7 +20,8 @@
 >
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-            <a href="{{ route('home') }}" wire:navigate class="text-xl font-semibold text-zinc-900 dark:text-white">
+            <a href="{{ route('home') }}" wire:navigate class="flex items-center gap-2 text-xl font-semibold text-zinc-900 dark:text-white">
+                <img src="{{ asset('photos/logo/favicon-1080x1080.png') }}" alt="{{ config('app.name') }}" class="h-12 w-12 object-contain">
                 {{ config('app.name') }}
             </a>
             <div class="hidden md:flex items-center gap-8">
