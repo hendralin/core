@@ -9,16 +9,19 @@
         <!-- System Information -->
         <div class="space-y-6">
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                <div class="flex flex-col items-center mb-6">
+                    <img src="{{ asset('photos/logo/favicon-1080x1080.png') }}" alt="{{ env('APP_NAME', 'Laravel Starter Kit') }}" class="h-32 w-32 object-contain rounded-lg">
+                </div>
                 <flux:heading size="lg" class="mb-4 flex items-center gap-2">
                     <flux:icon.information-circle class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    Bandar Saham Information
+                    {{ env('APP_NAME', 'Laravel Starter Kit') }} Information
                 </flux:heading>
 
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <flux:heading size="sm" level="3">Application Name</flux:heading>
-                            <flux:text class="text-lg font-semibold">Bandar Saham</flux:text>
+                            <flux:text class="text-lg font-semibold">{{ env('APP_NAME', 'Laravel Starter Kit') }}</flux:text>
                         </div>
                         <div>
                             <flux:heading size="sm" level="3">Version</flux:heading>
