@@ -20,6 +20,16 @@ class Warehouse extends Model
     protected $fillable = [
         'name',
         'address',
+        'has_cash',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'has_cash' => 'boolean',
     ];
 
     /**
@@ -31,6 +41,7 @@ class Warehouse extends Model
             ->logOnly([
                 'name',
                 'address',
+                'has_cash',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

@@ -146,7 +146,7 @@ class CashInjectEdit extends Component
 
     public function render()
     {
-        $warehouses = Warehouse::orderBy('name')->get();
+        $warehouses = Warehouse::where('has_cash', true)->orderBy('name')->get();
 
         return view('livewire.cash-inject.cash-inject-edit', compact('warehouses'));
     }

@@ -17,6 +17,7 @@ class WarehouseSeeder extends Seeder
         Warehouse::create([
             'name' => 'Central',
             'address' => 'Central Warehouse',
+            'has_cash' => true,
         ]);
 
         UserHasWarehouse::create([

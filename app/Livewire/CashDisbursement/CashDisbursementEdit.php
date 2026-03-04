@@ -161,7 +161,7 @@ class CashDisbursementEdit extends Component
 
     public function render()
     {
-        $warehouses = Warehouse::orderBy('name')->get();
+        $warehouses = Warehouse::where('has_cash', true)->orderBy('name')->get();
 
         return view('livewire.cash-disbursement.cash-disbursement-edit', compact('warehouses'));
     }

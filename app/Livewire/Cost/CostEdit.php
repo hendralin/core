@@ -110,6 +110,10 @@ class CostEdit extends Component
 
         $vehicle = Vehicle::findOrFail($this->vehicle_id);
 
+        $warehouseId = in_array($vehicle->warehouse_id, [1, 3, 4, 5, 6], true)
+            ? 4
+            : $vehicle->warehouse_id;
+
         // Store old values before update (since update() clears dirty attributes)
         $oldValues = [
             'cost_type' => $this->cost->getOriginal('cost_type'),
@@ -126,7 +130,7 @@ class CostEdit extends Component
         $this->cost->update([
             'cost_type' => $this->cost_type,
             'vehicle_id' => $this->vehicle_id,
-            'warehouse_id' => $vehicle->warehouse_id,
+            'warehouse_id' => $warehouseId,
             'cost_date' => $this->cost_date,
             'vendor_id' => $this->cost_type === 'service_parts' ? $this->vendor_id : null,
             'description' => $this->description,
@@ -160,7 +164,7 @@ class CostEdit extends Component
                 'attributes' => [
                     'cost_type' => $this->cost_type,
                     'vehicle_id' => $this->vehicle_id,
-                    'warehouse_id' => $vehicle->warehouse_id,
+                    'warehouse_id' => $warehouseId,
                     'cost_date' => $this->cost_date,
                     'vendor_id' => $this->cost_type === 'service_parts' ? $this->vendor_id : null,
                     'description' => $this->description,

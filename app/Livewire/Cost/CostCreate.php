@@ -84,10 +84,14 @@ class CostCreate extends Component
 
         $vehicle = Vehicle::findOrFail($this->vehicle_id);
 
+        $warehouseId = in_array($vehicle->warehouse_id, [1, 3, 4, 5, 6], true)
+            ? 4
+            : $vehicle->warehouse_id;
+
         $cost = Cost::create([
             'cost_type' => $this->cost_type,
             'vehicle_id' => $this->vehicle_id,
-            'warehouse_id' => $vehicle->warehouse_id,
+            'warehouse_id' => $warehouseId,
             'cost_date' => $this->cost_date,
             'vendor_id' => $this->cost_type === 'service_parts' ? $this->vendor_id : null,
             'description' => $this->description,
