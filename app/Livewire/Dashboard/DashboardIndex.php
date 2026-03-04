@@ -46,8 +46,19 @@ class DashboardIndex extends Component
     public bool $hasMoreStocks = true;
     public int $stocksPerPage = 30;
 
-    // Technical Indicators
-    public array $technicalIndicators;
+    // Technical Indicators (default structure so view never hits undefined keys)
+    public array $technicalIndicators = [
+        'sma_20' => null,
+        'sma_50' => null,
+        'ema_20' => null,
+        'ema_50' => null,
+        'rsi' => null,
+        'macd' => ['macd' => null, 'signal' => null, 'histogram' => null],
+        'bollinger_bands' => ['upper' => null, 'middle' => null, 'lower' => null],
+        'stochastic' => ['k' => null, 'd' => null],
+        'volume_sma' => null,
+        'chart_data' => [],
+    ];
 
     // Stock Price Snapshot
     public ?array $stockPriceSnapshot = null;
@@ -1061,7 +1072,18 @@ class DashboardIndex extends Component
     {
         $combinedHistory = $this->combinedTradingHistory;
         if ($combinedHistory->isEmpty()) {
-            $this->technicalIndicators = [];
+            $this->technicalIndicators = [
+                'sma_20' => null,
+                'sma_50' => null,
+                'ema_20' => null,
+                'ema_50' => null,
+                'rsi' => null,
+                'macd' => ['macd' => null, 'signal' => null, 'histogram' => null],
+                'bollinger_bands' => ['upper' => null, 'middle' => null, 'lower' => null],
+                'stochastic' => ['k' => null, 'd' => null],
+                'volume_sma' => null,
+                'chart_data' => [],
+            ];
             return;
         }
 
