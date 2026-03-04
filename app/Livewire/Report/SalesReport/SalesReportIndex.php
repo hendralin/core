@@ -3,6 +3,7 @@
 namespace App\Livewire\Report\SalesReport;
 
 use App\Models\Vehicle;
+use App\Models\Salesman;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -20,16 +21,20 @@ class SalesReportIndex extends Component
     public $dateFrom;
     public $dateTo;
     public $selectedMonthYear; // Format: YYYY-MM
+    public $paymentType;
+    public $salesmanId;
 
     public function mount()
     {
         $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
         $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+        $this->paymentType = null;
+        $this->salesmanId = null;
     }
 
     public function updating($field)
     {
-        if (in_array($field, ['perPage', 'dateFrom', 'dateTo', 'selectedMonthYear'])) {
+        if (in_array($field, ['perPage', 'dateFrom', 'dateTo', 'selectedMonthYear', 'paymentType', 'salesmanId'])) {
             $this->resetPage();
         }
     }
@@ -37,6 +42,8 @@ class SalesReportIndex extends Component
     public function clearFilters()
     {
         $this->selectedMonthYear = null;
+        $this->paymentType = null;
+        $this->salesmanId = null;
         $this->updateDateRange();
         $this->resetPage();
     }
@@ -65,6 +72,8 @@ class SalesReportIndex extends Component
             ->whereNotNull('selling_date')
             ->when($this->dateFrom, fn($q) => $q->whereDate('selling_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
+            ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
+            ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
             ->orderBy('selling_date', 'desc')
             ->paginate($this->perPage);
 
@@ -73,12 +82,16 @@ class SalesReportIndex extends Component
             ->whereNotNull('selling_date')
             ->when($this->dateFrom, fn($q) => $q->whereDate('selling_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
+            ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
+            ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
             ->sum('selling_price');
 
         $totalVehicles = Vehicle::query()
             ->whereNotNull('selling_date')
             ->when($this->dateFrom, fn($q) => $q->whereDate('selling_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
+            ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
+            ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
             ->count();
 
         $averagePrice = $totalVehicles > 0 ? $totalSales / $totalVehicles : 0;
@@ -89,6 +102,8 @@ class SalesReportIndex extends Component
             ->whereNotNull('selling_date')
             ->when($this->dateFrom, fn($q) => $q->whereDate('selling_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
+            ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
+            ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
             ->get();
 
         $totalCost = $soldVehicles->sum(function ($vehicle) {
@@ -138,13 +153,15 @@ class SalesReportIndex extends Component
             ]
         ];
 
-        return view('livewire.report.sales-report.sales-report-index', compact('vehicles', 'stats'));
+        $salesmen = Salesman::orderBy('name')->get();
+
+        return view('livewire.report.sales-report.sales-report-index', compact('vehicles', 'stats', 'salesmen'));
     }
 
     public function exportExcel()
     {
         return Excel::download(
-            new SalesReportExport(null, 'selling_date', 'desc', $this->dateFrom, $this->dateTo),
+            new SalesReportExport(null, 'selling_date', 'desc', $this->dateFrom, $this->dateTo, $this->paymentType, $this->salesmanId),
             'sales_report_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
@@ -156,6 +173,8 @@ class SalesReportIndex extends Component
             ->whereNotNull('selling_date')
             ->when($this->dateFrom, fn($q) => $q->whereDate('selling_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
+            ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
+            ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
             ->orderBy('selling_date', 'desc')
             ->get();
 

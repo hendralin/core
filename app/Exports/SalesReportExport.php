@@ -13,14 +13,18 @@ class SalesReportExport implements FromView
     protected $sortDirection;
     protected $dateFrom;
     protected $dateTo;
+    protected $paymentType;
+    protected $salesmanId;
 
-    public function __construct($search = '', $sortField = 'selling_date', $sortDirection = 'desc', $dateFrom = '', $dateTo = '')
+    public function __construct($search = '', $sortField = 'selling_date', $sortDirection = 'desc', $dateFrom = '', $dateTo = '', $paymentType = null, $salesmanId = null)
     {
         $this->search = $search;
         $this->sortField = $sortField;
         $this->sortDirection = $sortDirection;
         $this->dateFrom = $dateFrom;
         $this->dateTo = $dateTo;
+        $this->paymentType = $paymentType;
+        $this->salesmanId = $salesmanId;
     }
 
     public function view(): View
@@ -30,6 +34,8 @@ class SalesReportExport implements FromView
             ->whereNotNull('selling_date')
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('selling_date', '>=', $this->dateFrom))
             ->when(!empty($this->dateTo), fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
+            ->when(!empty($this->paymentType), fn($q) => $q->where('payment_type', $this->paymentType))
+            ->when(!empty($this->salesmanId), fn($q) => $q->where('salesman_id', $this->salesmanId))
             ->orderBy($this->sortField, $this->sortDirection)
             ->get();
 
