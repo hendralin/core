@@ -241,7 +241,7 @@ class CashReportIndex extends Component
                 'color' => 'emerald'
             ]
         ];
-        $warehouses = Warehouse::orderBy('name')->get();
+        $warehouses = Warehouse::where('has_cash', true)->orderBy('name')->get();
         $selectedWarehouseName = $this->selectedWarehouseId
             ? optional($warehouses->firstWhere('id', $this->selectedWarehouseId))->name
             : null;
