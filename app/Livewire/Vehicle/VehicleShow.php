@@ -48,6 +48,7 @@ class VehicleShow extends Component
     public $commission_description = '';
     public $commission_amount = '';
     public $commission_type = 2; // Default to purchase commission
+    public $warehouse_id = '';
 
     // Edit commission properties
     public $editingCommissionId = null;
@@ -170,6 +171,8 @@ class VehicleShow extends Component
     {
         $allCosts = Cost::query()
             ->where('vehicle_id', $this->vehicle->id)
+            ->where('cost_type', '!=', 'sales_commission')
+            ->where('cost_type', '!=', 'purchase_commission')
             ->get();
 
         $this->costSummary = [
@@ -243,6 +246,7 @@ class VehicleShow extends Component
     {
         return Cost::query()
             ->with(['vendor'])
+            ->where('cost_type', '!=', 'sales_commission')
             ->where('vehicle_id', $this->vehicle->id)
             ->orderBy('cost_date', 'desc')
             ->paginate(10);
@@ -327,6 +331,7 @@ class VehicleShow extends Component
             'commission_description' => 'required|string|max:255',
             'commission_amount' => 'required|string',
             'commission_type' => 'required|in:1,2',
+            'warehouse_id' => 'required',
         ], [
             'commission_date.required' => 'Tanggal komisi harus diisi.',
             'commission_date.date' => 'Format tanggal tidak valid.',
@@ -336,9 +341,26 @@ class VehicleShow extends Component
             'commission_amount.string' => 'Jumlah komisi harus berupa angka.',
             'commission_type.required' => 'Tipe komisi harus dipilih.',
             'commission_type.in' => 'Tipe komisi tidak valid.',
+            'warehouse_id.required' => 'Pembayaran via kas harus dipilih.',
         ]);
 
         $commissionAmount = Str::replace(',', '', $this->commission_amount);
+
+        // Determine cash source for cost (warehouse cash or big cash)
+        $warehouseId = null;
+        $bigCash = false;
+
+        if ($this->warehouse_id) {
+            if ($this->warehouse_id === 'big_cash') {
+                $bigCash = true;
+
+                $warehouseId = in_array($this->vehicle->warehouse_id, [1, 3, 4, 5], true)
+                    ? 4
+                    : $this->vehicle->warehouse_id;
+            } else {
+                $warehouseId = $this->warehouse_id;
+            }
+        }
 
         $commission = Commission::create([
             'commission_date' => $this->commission_date,
@@ -348,16 +370,29 @@ class VehicleShow extends Component
             'description' => $this->commission_description,
         ]);
 
-        // Sales Commission Cost paid from Cash Disbursement
-        if ($this->commission_type == 1) {
-            Cost::create([
-                'cost_type' => 'sales_commission',
-                'vehicle_id' => $this->vehicle->id,
-                'cost_date' => $this->commission_date,
-                'commission_id' => $commission->id,
-                'description' => $this->commission_description,
-                'total_price' => $commissionAmount,
-                'created_by' => Auth::id(),
+        // Commission Cost paid from Cash Disbursement
+        $costType = $this->commission_type == 1 ? 'sales_commission' : 'purchase_commission';
+
+        $cost = Cost::create([
+            'cost_type' => $costType,
+            'vehicle_id' => $this->vehicle->id,
+            'warehouse_id' => $warehouseId,
+            'cost_date' => $this->commission_date,
+            'commission_id' => $commission->id,
+            'description' => $this->commission_description,
+            'total_price' => $commissionAmount,
+            'big_cash' => $bigCash,
+            'created_by' => Auth::id(),
+        ]);
+
+        // Payment record for commission:
+        // - If big_cash = true, no payment record (excluded from cash report)
+        // - If big_cash = false, create payment on the selected warehouse cash
+        if (!$bigCash) {
+            $cost->payments()->create([
+                'payment_date' => $this->commission_date,
+                'amount' => $commissionAmount,
+                'note' => null,
             ]);
         }
 
@@ -387,7 +422,7 @@ class VehicleShow extends Component
 
     private function resetCommissionForm()
     {
-        $this->reset('commission_date', 'commission_description', 'commission_amount', 'commission_type');
+        $this->reset('commission_date', 'commission_description', 'commission_amount', 'commission_type', 'warehouse_id');
     }
 
     public function openEditCommissionModal($commissionId)
@@ -404,6 +439,18 @@ class VehicleShow extends Component
         $this->commission_description = $commission->description;
         $this->commission_amount = number_format($commission->amount, 0);
         $this->commission_type = $commission->type;
+
+        // Prefill warehouse / big cash from existing cost record (if any)
+        $cost = Cost::where('commission_id', $commissionId)->first();
+        if ($cost) {
+            if ($cost->big_cash) {
+                $this->warehouse_id = 'big_cash';
+            } else {
+                $this->warehouse_id = $cost->warehouse_id;
+            }
+        } else {
+            $this->warehouse_id = '';
+        }
 
         $this->showEditCommissionModal = true;
         $this->resetValidation();
@@ -426,6 +473,7 @@ class VehicleShow extends Component
             'commission_description' => 'required|string|max:255',
             'commission_amount' => 'required|string',
             'commission_type' => 'required|in:1,2',
+            'warehouse_id' => 'required',
         ], [
             'commission_date.required' => 'Tanggal komisi harus diisi.',
             'commission_date.date' => 'Format tanggal tidak valid.',
@@ -435,6 +483,7 @@ class VehicleShow extends Component
             'commission_amount.string' => 'Jumlah komisi harus berupa angka.',
             'commission_type.required' => 'Tipe komisi harus dipilih.',
             'commission_type.in' => 'Tipe komisi tidak valid.',
+            'warehouse_id.required' => 'Pembayaran via kas harus dipilih.',
         ]);
 
         $commission = Commission::findOrFail($this->editingCommissionId);
@@ -445,6 +494,22 @@ class VehicleShow extends Component
         }
 
         $commissionAmount = Str::replace(',', '', $this->commission_amount);
+
+        // Determine cash source for cost (warehouse cash or big cash)
+        $warehouseId = null;
+        $bigCash = false;
+
+        if ($this->warehouse_id) {
+            if ($this->warehouse_id === 'big_cash') {
+                $bigCash = true;
+
+                $warehouseId = in_array($this->vehicle->warehouse_id, [1, 3, 4, 5], true)
+                    ? 4
+                    : $this->vehicle->warehouse_id;
+            } else {
+                $warehouseId = $this->warehouse_id;
+            }
+        }
 
         // Store old commission data for logging
         $oldCommission = [
@@ -461,6 +526,59 @@ class VehicleShow extends Component
             'amount' => $commissionAmount,
             'description' => $this->commission_description,
         ]);
+
+        // Update or create related cost record
+        $costType = $this->commission_type == 1 ? 'sales_commission' : 'purchase_commission';
+
+        $cost = Cost::where('commission_id', $commission->id)->first();
+
+        if ($cost) {
+            $cost->update([
+                'cost_type' => $costType,
+                'vehicle_id' => $this->vehicle->id,
+                'warehouse_id' => $warehouseId,
+                'cost_date' => $this->commission_date,
+                'description' => $this->commission_description,
+                'total_price' => $commissionAmount,
+                'big_cash' => $bigCash,
+            ]);
+        } else {
+            $cost = Cost::create([
+                'cost_type' => $costType,
+                'vehicle_id' => $this->vehicle->id,
+                'warehouse_id' => $warehouseId,
+                'cost_date' => $this->commission_date,
+                'commission_id' => $commission->id,
+                'description' => $this->commission_description,
+                'total_price' => $commissionAmount,
+                'big_cash' => $bigCash,
+                'created_by' => Auth::id(),
+            ]);
+        }
+
+        // Update payment records based on big_cash:
+        // - If big_cash = true and there is a payment, delete it (exclude from cash report)
+        // - If big_cash = false, update/create a payment record for this cost
+        $existingPayment = $cost->payments()->first();
+
+        if ($bigCash) {
+            if ($existingPayment) {
+                $existingPayment->delete();
+            }
+        } else {
+            if ($existingPayment) {
+                $existingPayment->update([
+                    'payment_date' => $this->commission_date,
+                    'amount' => $commissionAmount,
+                ]);
+            } else {
+                $cost->payments()->create([
+                    'payment_date' => $this->commission_date,
+                    'amount' => $commissionAmount,
+                    'note' => null,
+                ]);
+            }
+        }
 
         // Reload vehicle with commissions
         $this->vehicle->load('commissions');
@@ -653,9 +771,18 @@ class VehicleShow extends Component
 
         // Convert month to Roman numerals
         $romanMonths = [
-            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV', '05' => 'V',
-            '06' => 'VI', '07' => 'VII', '08' => 'VIII', '09' => 'IX', '10' => 'X',
-            '11' => 'XI', '12' => 'XII'
+            '01' => 'I',
+            '02' => 'II',
+            '03' => 'III',
+            '04' => 'IV',
+            '05' => 'V',
+            '06' => 'VI',
+            '07' => 'VII',
+            '08' => 'VIII',
+            '09' => 'IX',
+            '10' => 'X',
+            '11' => 'XI',
+            '12' => 'XII'
         ];
 
         $romanMonth = $romanMonths[$currentMonth];
@@ -1718,9 +1845,18 @@ class VehicleShow extends Component
 
         // Convert month to Roman numerals
         $romanMonths = [
-            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV', '05' => 'V',
-            '06' => 'VI', '07' => 'VII', '08' => 'VIII', '09' => 'IX', '10' => 'X',
-            '11' => 'XI', '12' => 'XII'
+            '01' => 'I',
+            '02' => 'II',
+            '03' => 'III',
+            '04' => 'IV',
+            '05' => 'V',
+            '06' => 'VI',
+            '07' => 'VII',
+            '08' => 'VIII',
+            '09' => 'IX',
+            '10' => 'X',
+            '11' => 'XI',
+            '12' => 'XII'
         ];
 
         $romanMonth = $romanMonths[$currentMonth];
@@ -1930,7 +2066,6 @@ class VehicleShow extends Component
             return response()->streamDownload(function () use ($pdf) {
                 echo $pdf->output();
             }, 'Berita_Acara_Serah_Terima_' . str_replace(['/', '\\'], '_', $handover->handover_number) . '.pdf');
-
         } catch (\Exception $e) {
             // Log the error
             Log::error('Failed to print handover', [
@@ -2379,7 +2514,6 @@ class VehicleShow extends Component
             return response()->streamDownload(function () use ($pdf) {
                 echo $pdf->output();
             }, 'Kwitansi_' . str_replace(['/', '\\'], '_', $paymentReceipt->payment_number) . '.pdf');
-
         } catch (\Exception $e) {
             // Log the error
             Log::error('Failed to print payment receipt', [
@@ -2437,7 +2571,6 @@ class VehicleShow extends Component
             return response()->streamDownload(function () use ($pdf) {
                 echo $pdf->output();
             }, 'Tanda_Terima_BPKB_' . str_replace(['/', '\\'], '_', $certificateReceipt->certificate_receipt_number) . '.pdf');
-
         } catch (\Exception $e) {
             // Log the error
             Log::error('Failed to print certificate receipt', [

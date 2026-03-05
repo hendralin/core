@@ -23,6 +23,7 @@ class SalesReportIndex extends Component
     public $selectedMonthYear; // Format: YYYY-MM
     public $paymentType;
     public $salesmanId;
+    public $policeNumberSearch = '';
 
     public function mount()
     {
@@ -34,7 +35,7 @@ class SalesReportIndex extends Component
 
     public function updating($field)
     {
-        if (in_array($field, ['perPage', 'dateFrom', 'dateTo', 'selectedMonthYear', 'paymentType', 'salesmanId'])) {
+        if (in_array($field, ['perPage', 'dateFrom', 'dateTo', 'selectedMonthYear', 'paymentType', 'salesmanId', 'policeNumberSearch'])) {
             $this->resetPage();
         }
     }
@@ -44,6 +45,7 @@ class SalesReportIndex extends Component
         $this->selectedMonthYear = null;
         $this->paymentType = null;
         $this->salesmanId = null;
+        $this->policeNumberSearch = '';
         $this->updateDateRange();
         $this->resetPage();
     }
@@ -74,6 +76,7 @@ class SalesReportIndex extends Component
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
             ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
             ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
+            ->when($this->policeNumberSearch !== '', fn($q) => $q->where('police_number', 'like', '%' . $this->policeNumberSearch . '%'))
             ->orderBy('selling_date', 'desc')
             ->paginate($this->perPage);
 
@@ -84,6 +87,7 @@ class SalesReportIndex extends Component
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
             ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
             ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
+            ->when($this->policeNumberSearch !== '', fn($q) => $q->where('police_number', 'like', '%' . $this->policeNumberSearch . '%'))
             ->sum('selling_price');
 
         $totalVehicles = Vehicle::query()
@@ -92,6 +96,7 @@ class SalesReportIndex extends Component
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
             ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
             ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
+            ->when($this->policeNumberSearch !== '', fn($q) => $q->where('police_number', 'like', '%' . $this->policeNumberSearch . '%'))
             ->count();
 
         $averagePrice = $totalVehicles > 0 ? $totalSales / $totalVehicles : 0;
@@ -104,13 +109,15 @@ class SalesReportIndex extends Component
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
             ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
             ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
+            ->when($this->policeNumberSearch !== '', fn($q) => $q->where('police_number', 'like', '%' . $this->policeNumberSearch . '%'))
             ->get();
 
         $totalCost = $soldVehicles->sum(function ($vehicle) {
             $purchasePrice = $vehicle->purchase_price ?? 0;
-            $totalCosts = $vehicle->costs->sum('total_price');
+            $totalCosts = $vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price');
             $purchaseCommissions = $vehicle->commissions->where('type', 2)->sum('amount');
-            return $purchasePrice + $totalCosts + $purchaseCommissions;
+            $roadsideAllowance = $vehicle->roadside_allowance ?? 0;
+            return $purchasePrice + $totalCosts + $purchaseCommissions + $roadsideAllowance;
         });
 
         $totalSellingCommissions = $soldVehicles->sum(function ($vehicle) {
@@ -161,7 +168,7 @@ class SalesReportIndex extends Component
     public function exportExcel()
     {
         return Excel::download(
-            new SalesReportExport(null, 'selling_date', 'desc', $this->dateFrom, $this->dateTo, $this->paymentType, $this->salesmanId),
+            new SalesReportExport(null, 'selling_date', 'desc', $this->dateFrom, $this->dateTo, $this->paymentType, $this->salesmanId, $this->policeNumberSearch),
             'sales_report_' . now()->format('Y-m-d_H-i-s') . '.xlsx'
         );
     }
@@ -175,6 +182,7 @@ class SalesReportIndex extends Component
             ->when($this->dateTo, fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
             ->when($this->paymentType, fn($q) => $q->where('payment_type', $this->paymentType))
             ->when($this->salesmanId, fn($q) => $q->where('salesman_id', $this->salesmanId))
+            ->when($this->policeNumberSearch !== '', fn($q) => $q->where('police_number', 'like', '%' . $this->policeNumberSearch . '%'))
             ->orderBy('selling_date', 'desc')
             ->get();
 
@@ -184,9 +192,10 @@ class SalesReportIndex extends Component
 
         $totalCost = $vehicles->sum(function ($vehicle) {
             $purchasePrice = $vehicle->purchase_price ?? 0;
-            $totalCosts = $vehicle->costs->sum('total_price');
+            $totalCosts = $vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price');
             $purchaseCommissions = $vehicle->commissions->where('type', 2)->sum('amount');
-            return $purchasePrice + $totalCosts + $purchaseCommissions;
+            $roadsideAllowance = $vehicle->roadside_allowance ?? 0;
+            return $purchasePrice + $totalCosts + $purchaseCommissions + $roadsideAllowance;
         });
 
         $totalSellingCommissions = $vehicles->sum(function ($vehicle) {

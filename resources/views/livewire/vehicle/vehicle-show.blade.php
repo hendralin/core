@@ -2736,6 +2736,15 @@
                 label="Jumlah Komisi"
                 placeholder="188,000"
             />
+
+            <flux:select wire:model="warehouse_id" label="Pembayaran via Kas">
+                <flux:select.option value="">Pilih Kas</flux:select.option>
+                @foreach(\App\Models\Warehouse::where('has_cash', true)->orderBy('name')->get() as $warehouse)
+                    <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
+                @endforeach
+                <flux:select.option value="big_cash">Kas Besar</flux:select.option>
+            </flux:select>
+
             <flux:textarea
                 wire:model="commission_description"
                 label="Deskripsi"
@@ -2782,6 +2791,15 @@
                 label="Jumlah Komisi"
                 placeholder="188,000"
             />
+
+            <flux:select wire:model="warehouse_id" label="Pembayaran via Kas">
+                <flux:select.option value="">Pilih Kas</flux:select.option>
+                @foreach(\App\Models\Warehouse::where('has_cash', true)->orderBy('name')->get() as $warehouse)
+                    <flux:select.option value="{{ $warehouse->id }}">{{ $warehouse->name }}</flux:select.option>
+                @endforeach
+                <flux:select.option value="big_cash">Kas Besar</flux:select.option>
+            </flux:select>
+
             <flux:textarea
                 wire:model="commission_description"
                 label="Deskripsi"

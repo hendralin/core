@@ -50,7 +50,19 @@
 
     <!-- Filter Section -->
     <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+            <!-- Search by Police Number -->
+            <div>
+                <label for="police-number-search" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">No. Polisi</label>
+                <flux:input
+                    id="police-number-search"
+                    type="text"
+                    wire:model.live.debounce.300ms="policeNumberSearch"
+                    placeholder="Cari no. polisi..."
+                    size="sm"
+                />
+            </div>
+
             <!-- Month/Year Filter -->
             <div>
                 <label for="month-year" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Bulan & Tahun</label>
@@ -98,8 +110,9 @@
                 || $selectedMonthYear
                 || $paymentType
                 || $salesmanId
+                || $policeNumberSearch !== ''
             )
-            <div class="space-y-2 flex flex-col justify-end">
+            <div class="mt-0 md:mt-6">
                 <flux:button wire:click="clearFilters" variant="filled" size="sm" icon="x-mark" class="w-full cursor-pointer">
                     Hapus Filter
                 </flux:button>
@@ -274,6 +287,14 @@
                                     @endif
                                 </span>
                             </div>
+                            @if($vehicle->roadside_allowance)
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600 dark:text-zinc-400">Biaya Uang Jalan:</span>
+                                <span class="text-sm text-gray-900 dark:text-white">
+                                    Rp {{ number_format($vehicle->roadside_allowance, 0) }}
+                                </span>
+                            </div>
+                            @endif
                             @if($vehicle->commissions->where('type', 2)->count() > 0)
                             <div class="flex justify-between">
                                 <span class="text-sm text-gray-600 dark:text-zinc-400">Komisi Pembelian ({{ $vehicle->commissions->where('type', 2)->count() }}x):</span>
@@ -285,7 +306,7 @@
                             <div class="flex justify-between">
                                 <span class="text-sm text-gray-600 dark:text-zinc-400">Modal Awal:</span>
                                 <span class="text-sm text-gray-900 dark:text-white">
-                                    Rp {{ number_format($vehicle->purchase_price + $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount'), 0) }}
+                                    Rp {{ number_format($vehicle->purchase_price + $vehicle->roadside_allowance + $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount'), 0) }}
                                 </span>
                             </div>
                         </div>
@@ -296,7 +317,7 @@
                     <div class="border-t border-gray-100 dark:border-zinc-700 pt-4 mt-4">
                         <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Pembukuan Modal</h4>
                         <div class="space-y-2">
-                            @foreach($vehicle->costs as $cost)
+                            @foreach($vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission') as $cost)
                                 <div class="flex justify-between">
                                     <span class="text-sm text-gray-600 dark:text-zinc-400">{{ $cost->description }} {{ $cost->vendor->name ?? '-' }} ({{ \Carbon\Carbon::parse($cost->cost_date)->format('d/m/Y') }}):</span>
                                     <span class="text-sm text-gray-900 dark:text-white">
@@ -313,13 +334,13 @@
                         <div class="flex justify-between">
                             <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Total Biaya (Pembukuan Modal)</h4>
                             <div class="text-sm text-gray-900 dark:text-white">
-                                Rp {{ number_format($vehicle->costs->sum('total_price'), 0) }}
+                                Rp {{ number_format($vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price'), 0) }}
                             </div>
                         </div>
                         <div class="flex justify-between">
                             <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Total Modal Keseluruhan</h4>
                             <div class="text-sm text-gray-900 dark:text-white">
-                                Rp {{ number_format($vehicle->purchase_price + $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') + $vehicle->costs->sum('total_price'), 0) }}
+                                Rp {{ number_format($vehicle->purchase_price + $vehicle->roadside_allowance + $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') + $vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price'), 0) }}
                             </div>
                         </div>
                         <div class="flex justify-between">
@@ -339,13 +360,13 @@
                         <div class="flex justify-between">
                             <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Keuntungan</h4>
                             <div class="text-sm text-gray-900 dark:text-white">
-                                Rp {{ number_format($vehicle->selling_price - $vehicle->commissions->where('type', 1)->sum('amount') - $vehicle->purchase_price - $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') - $vehicle->costs->sum('total_price'), 0) }}
+                                Rp {{ number_format($vehicle->selling_price - $vehicle->commissions->where('type', 1)->sum('amount') - $vehicle->purchase_price - $vehicle->roadside_allowance - $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') - $vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price'), 0) }}
                             </div>
                         </div>
                         <div class="flex justify-between">
                             <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Margin Keuntungan</h4>
                             <div class="text-sm text-gray-900 dark:text-white">
-                                {{ number_format(($vehicle->selling_price - $vehicle->commissions->where('type', 1)->sum('amount') - $vehicle->purchase_price - $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') - $vehicle->costs->sum('total_price')) / $vehicle->selling_price * 100, 1, ',', '.') }}%
+                                {{ number_format(($vehicle->selling_price - $vehicle->commissions->where('type', 1)->sum('amount') - $vehicle->purchase_price - $vehicle->roadside_allowance - $vehicle->commissions->where('type', 2)->where('type', 2)->sum('amount') - $vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price')) / $vehicle->selling_price * 100, 1, ',', '.') }}%
                             </div>
                         </div>
                     </div>

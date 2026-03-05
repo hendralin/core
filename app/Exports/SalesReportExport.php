@@ -15,8 +15,9 @@ class SalesReportExport implements FromView
     protected $dateTo;
     protected $paymentType;
     protected $salesmanId;
+    protected $policeNumberSearch;
 
-    public function __construct($search = '', $sortField = 'selling_date', $sortDirection = 'desc', $dateFrom = '', $dateTo = '', $paymentType = null, $salesmanId = null)
+    public function __construct($search = '', $sortField = 'selling_date', $sortDirection = 'desc', $dateFrom = '', $dateTo = '', $paymentType = null, $salesmanId = null, $policeNumberSearch = '')
     {
         $this->search = $search;
         $this->sortField = $sortField;
@@ -25,6 +26,7 @@ class SalesReportExport implements FromView
         $this->dateTo = $dateTo;
         $this->paymentType = $paymentType;
         $this->salesmanId = $salesmanId;
+        $this->policeNumberSearch = $policeNumberSearch;
     }
 
     public function view(): View
@@ -36,6 +38,7 @@ class SalesReportExport implements FromView
             ->when(!empty($this->dateTo), fn($q) => $q->whereDate('selling_date', '<=', $this->dateTo))
             ->when(!empty($this->paymentType), fn($q) => $q->where('payment_type', $this->paymentType))
             ->when(!empty($this->salesmanId), fn($q) => $q->where('salesman_id', $this->salesmanId))
+            ->when($this->policeNumberSearch !== '', fn($q) => $q->where('police_number', 'like', '%' . $this->policeNumberSearch . '%'))
             ->orderBy($this->sortField, $this->sortDirection)
             ->get();
 
@@ -45,9 +48,10 @@ class SalesReportExport implements FromView
 
         $totalCost = $vehicles->sum(function ($vehicle) {
             $purchasePrice = $vehicle->purchase_price ?? 0;
-            $totalCosts = $vehicle->costs->sum('total_price');
+            $totalCosts = $vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price');
             $purchaseCommissions = $vehicle->commissions->where('type', 2)->sum('amount');
-            return $purchasePrice + $totalCosts + $purchaseCommissions;
+            $roadsideAllowance = $vehicle->roadside_allowance ?? 0;
+            return $purchasePrice + $totalCosts + $purchaseCommissions + $roadsideAllowance;
         });
 
         $totalProfit = $totalSales - $totalCost;
