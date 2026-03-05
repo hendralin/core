@@ -43,7 +43,7 @@
                 <td>{{ $vehicle->vehicle_registration_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_date)->format('M d, Y') : '-' }}</td>
                 <td>{{ $vehicle->vehicle_registration_expiry_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->format('M d, Y') : '-' }}</td>
                 @php
-                    $totalModal = ($vehicle->purchase_price ?? 0) + ($vehicle->costs->sum('total_price') ?? 0) + ($vehicle->commissions->where('type', 2)->sum('amount') ?? 0) + ($vehicle->roadside_allowance ?? 0);
+                    $totalModal = ($vehicle->purchase_price ?? 0) + ($vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price') ?? 0) + ($vehicle->commissions->where('type', 2)->sum('amount') ?? 0) + ($vehicle->roadside_allowance ?? 0);
                 @endphp
                 <td>{{ $totalModal > 0 ? $totalModal : '-' }}</td>
                 <td>{{ $vehicle->display_price ? $vehicle->display_price : '-' }}</td>

@@ -23,7 +23,7 @@ class VehicleExport implements FromView
 
     public function view(): View
     {
-        $vehicles = Vehicle::query()
+        $query = Vehicle::query()
             ->with(['brand', 'type', 'category', 'vehicle_model', 'warehouse', 'costs', 'commissions'])
             ->when(
                 $this->search,
@@ -42,14 +42,39 @@ class VehicleExport implements FromView
             ->when(
                 $this->statusFilter !== '',
                 fn($q) => $q->where('status', $this->statusFilter)
-            )
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->get();
+            );
+
+        // Apply sorting including related name fields (brand/type/model)
+        $query = $this->applySorting($query);
+
+        $vehicles = $query->get();
 
         return view('exports.vehicles', [
             'vehicles' => $vehicles,
             'statusFilter' => $this->statusFilter,
         ]);
+    }
+
+    /**
+     * Apply sorting to the query, including related name fields.
+     */
+    private function applySorting($query)
+    {
+        return match ($this->sortField) {
+            'brand_name' => $query
+                ->join('brands', 'vehicles.brand_id', '=', 'brands.id')
+                ->orderBy('brands.name', $this->sortDirection)
+                ->select('vehicles.*'),
+            'type_name' => $query
+                ->join('types', 'vehicles.type_id', '=', 'types.id')
+                ->orderBy('types.name', $this->sortDirection)
+                ->select('vehicles.*'),
+            'vehicle_model_name' => $query
+                ->join('vehicle_models', 'vehicles.vehicle_model_id', '=', 'vehicle_models.id')
+                ->orderBy('vehicle_models.name', $this->sortDirection)
+                ->select('vehicles.*'),
+            default => $query->orderBy($this->sortField, $this->sortDirection),
+        };
     }
 }
 

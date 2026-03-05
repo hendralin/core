@@ -81,7 +81,7 @@
                 <tr>
                     <th scope="col" class="px-4 py-3 w-10 text-center">No.</th>
                     <th scope="col" class="px-4 py-3 w-16 text-center">Foto</th>
-                    <th scope="col" class="px-4 py-3 w-32">
+                    <th scope="col" class="px-4 py-3 w-32 whitespace-nowrap">
                         <div class="flex items-center cursor-pointer @if ($sortField == 'police_number') {{ $sortDirection }} @endif" wire:click="sortBy('police_number')">
                             Nomor Polisi
                             @if ($sortField == 'police_number' && $sortDirection == 'asc')
@@ -91,9 +91,36 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-4 py-3 w-32">Brand</th>
-                    <th scope="col" class="px-4 py-3 w-32">Type</th>
-                    <th scope="col" class="px-4 py-3 w-32">Model</th>
+                    <th scope="col" class="px-4 py-3 w-32">
+                        <div class="flex items-center cursor-pointer @if ($sortField == 'brand_name') {{ $sortDirection }} @endif" wire:click="sortBy('brand_name')">
+                            Brand
+                            @if ($sortField == 'brand_name' && $sortDirection == 'asc')
+                                <flux:icon.chevron-up class="ml-2 size-4" />
+                            @elseif ($sortField == 'brand_name' && $sortDirection == 'desc')
+                                <flux:icon.chevron-down class="ml-2 size-4" />
+                            @endif
+                        </div>
+                    </th>
+                    <th scope="col" class="px-4 py-3 w-32">
+                        <div class="flex items-center cursor-pointer @if ($sortField == 'type_name') {{ $sortDirection }} @endif" wire:click="sortBy('type_name')">
+                            Type
+                            @if ($sortField == 'type_name' && $sortDirection == 'asc')
+                                <flux:icon.chevron-up class="ml-2 size-4" />
+                            @elseif ($sortField == 'type_name' && $sortDirection == 'desc')
+                                <flux:icon.chevron-down class="ml-2 size-4" />
+                            @endif
+                        </div>
+                    </th>
+                    <th scope="col" class="px-4 py-3 w-32">
+                        <div class="flex items-center cursor-pointer @if ($sortField == 'vehicle_model_name') {{ $sortDirection }} @endif" wire:click="sortBy('vehicle_model_name')">
+                            Model
+                            @if ($sortField == 'vehicle_model_name' && $sortDirection == 'asc')
+                                <flux:icon.chevron-up class="ml-2 size-4" />
+                            @elseif ($sortField == 'vehicle_model_name' && $sortDirection == 'desc')
+                                <flux:icon.chevron-down class="ml-2 size-4" />
+                            @endif
+                        </div>
+                    </th>
                     <th scope="col" class="px-4 py-3 w-24">
                         <div class="flex items-center cursor-pointer @if ($sortField == 'year') {{ $sortDirection }} @endif" wire:click="sortBy('year')">
                             Tahun
@@ -104,7 +131,7 @@
                             @endif
                         </div>
                     </th>
-                    <th scope="col" class="px-4 py-3 w-32">
+                    <th scope="col" class="px-4 py-3 w-56">
                         <div class="flex justify-center cursor-pointer @if ($sortField == 'status') {{ $sortDirection }} @endif" wire:click="sortBy('status')">
                             Status
                             @if ($sortField == 'status' && $sortDirection == 'asc')
