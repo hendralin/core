@@ -111,9 +111,10 @@
                     <td class="price">
                         @php
                             $purchasePrice = $vehicle->purchase_price ?? 0;
-                            $totalCosts = $vehicle->costs->sum('total_price');
+                            $totalCosts = $vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price');
                             $purchaseCommissions = $vehicle->commissions->where('type', 2)->sum('amount');
-                            $totalModal = $purchasePrice + $totalCosts + $purchaseCommissions;
+                            $roadsideAllowance = $vehicle->roadside_allowance ?? 0;
+                            $totalModal = $purchasePrice + $totalCosts + $purchaseCommissions + $roadsideAllowance;
                         @endphp
                         Rp {{ number_format($totalModal, 0) }}
                     </td>

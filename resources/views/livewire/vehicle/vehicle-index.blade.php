@@ -208,7 +208,7 @@
                                             @if(auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
                                                 @php
                                                     $totalModal = ($vehicle->purchase_price ?? 0) +
-                                                                ($vehicle->costs->sum('total_price') ?? 0) +
+                                                                ($vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price') ?? 0) +
                                                                 ($vehicle->commissions->where('type', 2)->sum('amount') ?? 0) +
                                                                 ($vehicle->roadside_allowance ?? 0);
                                                 @endphp

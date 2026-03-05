@@ -203,9 +203,10 @@
                     <div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid #eee; font-size: 6px;">
                         @php
                             $purchasePrice = $vehicle->purchase_price ?? 0;
-                            $totalCosts = $vehicle->costs->sum('total_price');
+                            $totalCosts = $vehicle->costs->where('cost_type', '!=', 'sales_commission')->where('cost_type', '!=', 'purchase_commission')->sum('total_price');
+                            $roadsideAllowance = $vehicle->roadside_allowance ?? 0;
                             $purchaseCommissions = $vehicle->commissions->where('type', 2)->sum('amount');
-                            $totalModal = $purchasePrice + $totalCosts + $purchaseCommissions;
+                            $totalModal = $purchasePrice + $totalCosts + $purchaseCommissions + $roadsideAllowance;
                             $profit = ($vehicle->selling_price ?? 0) - $totalModal;
                         @endphp
                         <div style="margin-bottom: 3px;">
