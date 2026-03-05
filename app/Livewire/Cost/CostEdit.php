@@ -110,9 +110,10 @@ class CostEdit extends Component
 
         $vehicle = Vehicle::findOrFail($this->vehicle_id);
 
-        $warehouseId = in_array($vehicle->warehouse_id, [1, 3, 4, 5, 6], true)
+        // Compare as string so it works when DB returns int or string (e.g. different PHP/PDO)
+        $warehouseId = in_array((string) $vehicle->warehouse_id, ['1', '3', '4', '5'], true)
             ? 4
-            : $vehicle->warehouse_id;
+            : (int) $vehicle->warehouse_id;
 
         // Store old values before update (since update() clears dirty attributes)
         $oldValues = [
