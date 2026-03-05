@@ -27,7 +27,9 @@ class CostIndex extends Component
     public $perPage = 10;
     public $statusFilter = '';
     public $vehicleFilter = '';
+    public $vehicle_search = '';
     public $vendorFilter = '';
+    public $vendor_search = '';
     public $dateFrom;
     public $dateTo;
     public $selectedMonthYear; // Format: YYYY-MM
@@ -119,9 +121,33 @@ class CostIndex extends Component
         $this->costIdToReject = $costId;
     }
 
+    public function setVehicleFilter($id)
+    {
+        $this->vehicleFilter = $id;
+        $this->vehicle_search = '';
+    }
+
+    public function clearVehicleFilter()
+    {
+        $this->vehicleFilter = '';
+        $this->vehicle_search = '';
+    }
+
+    public function setVendorFilter($id)
+    {
+        $this->vendorFilter = $id;
+        $this->vendor_search = '';
+    }
+
+    public function clearVendorFilter()
+    {
+        $this->vendorFilter = '';
+        $this->vendor_search = '';
+    }
+
     public function clearFilters()
     {
-        $this->reset(['search', 'statusFilter', 'vehicleFilter', 'vendorFilter']);
+        $this->reset(['search', 'statusFilter', 'vehicleFilter', 'vehicle_search', 'vendorFilter', 'vendor_search']);
         $this->selectedMonthYear = null;
         $this->updateDateRange();
         $this->resetPage();
@@ -227,7 +253,32 @@ class CostIndex extends Component
             ->when($this->dateTo, fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
             ->sum('total_price');
 
-        return view('livewire.cost.cost-index', compact('costs', 'totalForFilters'));
+        $vehicles = Vehicle::with(['brand', 'type'])
+            ->when($this->vehicle_search !== '', function ($query) {
+                $term = '%' . trim($this->vehicle_search) . '%';
+                $query->where(function ($q) use ($term) {
+                    $q->where('police_number', 'like', $term)
+                        ->orWhereHas('brand', fn ($b) => $b->where('name', 'like', $term))
+                        ->orWhereHas('type', fn ($t) => $t->where('name', 'like', $term));
+                });
+            })
+            ->orderBy('police_number')
+            ->limit(50)
+            ->get();
+
+        $selectedVehicle = $this->vehicleFilter
+            ? Vehicle::with(['brand', 'type'])->find($this->vehicleFilter)
+            : null;
+
+        $vendors = Vendor::query()
+            ->when($this->vendor_search !== '', fn ($q) => $q->where('name', 'like', '%' . trim($this->vendor_search) . '%'))
+            ->orderBy('name')
+            ->limit(50)
+            ->get();
+
+        $selectedVendor = $this->vendorFilter ? Vendor::find($this->vendorFilter) : null;
+
+        return view('livewire.cost.cost-index', compact('costs', 'totalForFilters', 'vehicles', 'vendors', 'selectedVehicle', 'selectedVendor'));
     }
 
     public function exportExcel()
@@ -281,21 +332,5 @@ class CostIndex extends Component
             'approved' => 'Approved',
             'rejected' => 'Rejected',
         ];
-    }
-
-    public function getVehicleOptionsProperty()
-    {
-        return Vehicle::query()
-            ->orderBy('police_number')
-            ->pluck('police_number', 'id')
-            ->prepend('Pilih Kendaraan', '');
-    }
-
-    public function getVendorOptionsProperty()
-    {
-        return Vendor::query()
-            ->orderBy('name')
-            ->pluck('name', 'id')
-            ->prepend('Pilih Vendor', '');
     }
 }

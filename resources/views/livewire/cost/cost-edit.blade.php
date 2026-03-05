@@ -48,25 +48,45 @@
                         </div>
 
                         <div class="space-y-1">
-                            <flux:select wire:model="vehicle_id" label="Kendaraan" class="w-full">
-                            <flux:select.option value="">Pilih Kendaraan</flux:select.option>
-                                @foreach($vehicles as $vehicle)
-                                    <flux:select.option value="{{ $vehicle->id }}">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                                                ></path>
-                                            </svg>
-                                            {{ $vehicle->police_number }} - {{ $vehicle->brand->name ?? '' }} {{ $vehicle->type->name ?? '' }}
+                            <div class="space-y-1" x-data="{ open: false }" @click.away="open = false">
+                                <label class="flux-label block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Kendaraan</label>
+                                @if($selectedVehicle)
+                                    <div class="flex items-center gap-2 min-h-10 px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-800">
+                                        <span class="flex-1 min-w-0 text-zinc-900 dark:text-white whitespace-nowrap overflow-hidden text-ellipsis">{{ $selectedVehicle->police_number }} - {{ $selectedVehicle->brand->name ?? '' }} {{ $selectedVehicle->type->name ?? '' }}</span>
+                                        <flux:button type="button" variant="ghost" size="xs" wire:click="clearVehicle" class="shrink-0">Ubah</flux:button>
+                                    </div>
+                                @else
+                                    <div class="relative">
+                                        <flux:input
+                                            type="text"
+                                            wire:model.live.debounce.300ms="vehicle_search"
+                                            placeholder="Cari plat nomor, merek, atau tipe..."
+                                            class="w-full"
+                                            @focus="open = true"
+                                        />
+                                        <div x-show="open"
+                                             x-transition
+                                             class="absolute z-20 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                            @forelse($vehicles as $vehicle)
+                                                <button type="button"
+                                                        wire:click="setVehicleId({{ $vehicle->id }})"
+                                                        wire:key="vehicle-{{ $vehicle->id }}"
+                                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-left text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors border-b border-zinc-100 dark:border-zinc-700 last:border-b-0 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
+                                                    {{ $vehicle->police_number }} - {{ $vehicle->brand->name ?? '' }} {{ $vehicle->type->name ?? '' }}
+                                                </button>
+                                            @empty
+                                                <div class="px-3 py-4 text-sm text-zinc-500 dark:text-zinc-400 text-center">
+                                                    {{ strlen(trim($vehicle_search ?? '')) > 0 ? 'Tidak ada kendaraan yang cocok. Coba kata kunci lain.' : 'Ketik untuk mencari kendaraan.' }}
+                                                </div>
+                                            @endforelse
                                         </div>
-                                    </flux:select.option>
-                                @endforeach
-                            </flux:select>
-                            <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih kendaraan untuk pembukuan modal ini</p>
+                                    </div>
+                                @endif
+                                <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih kendaraan untuk pembukuan modal ini</p>
+                                @error('vehicle_id')
+                                    <p class="text-xs text-red-600 dark:text-red-400 mt-0.5">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -83,26 +103,44 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         @if($cost_type !== 'other_cost')
-                        <div class="space-y-1">
-                            <flux:select wire:model="vendor_id" label="Vendor" class="w-full">
-                            <flux:select.option value="">Select Vendor</flux:select.option>
-                                @foreach($vendors as $vendor)
-                                    <flux:select.option value="{{ $vendor->id }}">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M16 11V7a4 4 0 00-8 0v4M8 11h8l.64 5.12a2 2 0 01-1.96 2.38H9.32a2 2 0 01-1.96-2.38L8 11z"
-                                                ></path>
-                                            </svg>
-                                            {{ $vendor->name }}
-                                        </div>
-                                    </flux:select.option>
-                                @endforeach
-                            </flux:select>
+                        <div class="space-y-1" x-data="{ open: false }" @click.away="open = false">
+                            <label class="flux-label block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Vendor</label>
+                            @if($selectedVendor)
+                                <div class="flex items-center gap-2 min-h-10 px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-800">
+                                    <span class="flex-1 min-w-0 text-zinc-900 dark:text-white whitespace-nowrap overflow-hidden text-ellipsis">{{ $selectedVendor->name }}</span>
+                                    <flux:button type="button" variant="ghost" size="xs" wire:click="clearVendor" class="shrink-0">Ubah</flux:button>
+                                </div>
+                            @else
+                                <div class="relative">
+                                    <flux:input
+                                        type="text"
+                                        wire:model.live.debounce.300ms="vendor_search"
+                                        placeholder="Cari nama vendor..."
+                                        class="w-full"
+                                        @focus="open = true"
+                                    />
+                                    <div x-show="open"
+                                         x-transition
+                                         class="absolute z-20 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        @forelse($vendors as $vendor)
+                                            <button type="button"
+                                                    wire:click="setVendorId({{ $vendor->id }})"
+                                                    wire:key="vendor-{{ $vendor->id }}"
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-left text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors border-b border-zinc-100 dark:border-zinc-700 last:border-b-0 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
+                                                {{ $vendor->name }}
+                                            </button>
+                                        @empty
+                                            <div class="px-3 py-4 text-sm text-zinc-500 dark:text-zinc-400 text-center">
+                                                {{ strlen(trim($vendor_search ?? '')) > 0 ? 'Tidak ada vendor yang cocok. Coba kata kunci lain.' : 'Ketik untuk mencari vendor.' }}
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            @endif
                             <p class="text-xs text-slate-500 dark:text-zinc-400">Vendor mana yang menyediakan jasa/barang?</p>
+                            @error('vendor_id')
+                                <p class="text-xs text-red-600 dark:text-red-400 mt-0.5">{{ $message }}</p>
+                            @enderror
                         </div>
                         @endif
 

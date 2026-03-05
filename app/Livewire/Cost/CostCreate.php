@@ -19,8 +19,10 @@ class CostCreate extends Component
 
     public $cost_type;
     public $vehicle_id;
+    public $vehicle_search = '';
     public $cost_date;
     public $vendor_id;
+    public $vendor_search = '';
     public $description;
     public $total_price;
     public $document;
@@ -138,15 +140,59 @@ class CostCreate extends Component
         $this->document = null;
     }
 
+    public function setVehicleId($id)
+    {
+        $this->vehicle_id = $id;
+        $this->vehicle_search = '';
+    }
+
+    public function clearVehicle()
+    {
+        $this->vehicle_id = null;
+        $this->vehicle_search = '';
+    }
+
+    public function setVendorId($id)
+    {
+        $this->vendor_id = $id;
+        $this->vendor_search = '';
+    }
+
+    public function clearVendor()
+    {
+        $this->vendor_id = null;
+        $this->vendor_search = '';
+    }
+
     public function render()
     {
-        $vehicles = Vehicle::with(['brand', 'vehicle_model'])
+        $vehicles = Vehicle::with(['brand', 'type', 'vehicle_model'])
             ->where('status', '1')
+            ->when($this->vehicle_search !== '', function ($query) {
+                $term = '%' . trim($this->vehicle_search) . '%';
+                $query->where(function ($q) use ($term) {
+                    $q->where('police_number', 'like', $term)
+                        ->orWhereHas('brand', fn ($b) => $b->where('name', 'like', $term))
+                        ->orWhereHas('type', fn ($t) => $t->where('name', 'like', $term))
+                        ->orWhereHas('vehicle_model', fn ($m) => $m->where('name', 'like', $term));
+                });
+            })
             ->orderBy('police_number')
+            ->limit(50)
             ->get();
 
-        $vendors = Vendor::orderBy('name')->get();
+        $selectedVehicle = $this->vehicle_id
+            ? Vehicle::with(['brand', 'type'])->find($this->vehicle_id)
+            : null;
 
-        return view('livewire.cost.cost-create', compact('vehicles', 'vendors'));
+        $vendors = Vendor::query()
+            ->when($this->vendor_search !== '', fn ($query) => $query->where('name', 'like', '%' . trim($this->vendor_search) . '%'))
+            ->orderBy('name')
+            ->limit(50)
+            ->get();
+
+        $selectedVendor = $this->vendor_id ? Vendor::find($this->vendor_id) : null;
+
+        return view('livewire.cost.cost-create', compact('vehicles', 'vendors', 'selectedVehicle', 'selectedVendor'));
     }
 }

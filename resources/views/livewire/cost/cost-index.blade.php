@@ -22,7 +22,7 @@
                 <input type="month"
                        id="month-year"
                        wire:model.live="selectedMonthYear"
-                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                       class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
                        min="2019-01"
                        max="{{ date('Y') + 1 }}-12">
             </div>
@@ -32,18 +32,80 @@
             <flux:input type="date" wire:model.live="dateTo" label="To" size="sm" />
 
             <!-- Vehicle Filter -->
-            <flux:select wire:model.live="vehicleFilter" label="Vehicle" size="sm" class="w-full">
-                @foreach($this->vehicleOptions as $value => $label)
-                    <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
-                @endforeach>
-            </flux:select>
+            <div class="space-y-1" x-data="{ open: false }" @click.away="open = false">
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Vehicle</label>
+                @if($selectedVehicle)
+                    <div class="flex items-center gap-2 min-h-9 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-sm">
+                        <span class="flex-1 min-w-0 text-zinc-900 dark:text-white whitespace-nowrap overflow-hidden text-ellipsis">{{ $selectedVehicle->police_number }} - {{ $selectedVehicle->brand->name ?? '' }} {{ $selectedVehicle->type->name ?? '' }}</span>
+                        <flux:button type="button" variant="ghost" size="xs" wire:click="clearVehicleFilter" class="shrink-0">Ubah</flux:button>
+                    </div>
+                @else
+                    <div class="relative mt-1.5">
+                        <flux:input
+                            type="text"
+                            wire:model.live.debounce.300ms="vehicle_search"
+                            placeholder="Cari plat, merek, tipe..."
+                            size="sm"
+                            class="w-full"
+                            @focus="open = true"
+                        />
+                        <div x-show="open"
+                             x-transition
+                             class="absolute z-20 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            @forelse($vehicles as $vehicle)
+                                <button type="button"
+                                        wire:click="setVehicleFilter({{ $vehicle->id }})"
+                                        wire:key="vehicle-filter-{{ $vehicle->id }}"
+                                        class="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors border-b border-zinc-100 dark:border-zinc-700 last:border-b-0 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
+                                    {{ $vehicle->police_number }} - {{ $vehicle->brand->name ?? '' }} {{ $vehicle->type->name ?? '' }}
+                                </button>
+                            @empty
+                                <div class="px-3 py-3 text-sm text-zinc-500 dark:text-zinc-400 text-center">
+                                    {{ strlen(trim($vehicle_search ?? '')) > 0 ? 'Tidak ada kendaraan yang cocok.' : 'Ketik untuk mencari.' }}
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                @endif
+            </div>
 
             <!-- Vendor Filter -->
-            <flux:select wire:model.live="vendorFilter" label="Vendor" size="sm" class="w-full">
-                @foreach($this->vendorOptions as $value => $label)
-                    <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
-                @endforeach>
-            </flux:select>
+            <div class="space-y-1" x-data="{ open: false }" @click.away="open = false">
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Vendor</label>
+                @if($selectedVendor)
+                    <div class="flex items-center gap-2 min-h-9 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-sm">
+                        <span class="flex-1 min-w-0 text-zinc-900 dark:text-white whitespace-nowrap overflow-hidden text-ellipsis">{{ $selectedVendor->name }}</span>
+                        <flux:button type="button" variant="ghost" size="xs" wire:click="clearVendorFilter" class="shrink-0">Ubah</flux:button>
+                    </div>
+                @else
+                    <div class="relative mt-1.5">
+                        <flux:input
+                            type="text"
+                            wire:model.live.debounce.300ms="vendor_search"
+                            placeholder="Cari nama vendor..."
+                            size="sm"
+                            class="w-full"
+                            @focus="open = true"
+                        />
+                        <div x-show="open"
+                             x-transition
+                             class="absolute z-20 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            @forelse($vendors as $vendor)
+                                <button type="button"
+                                        wire:click="setVendorFilter({{ $vendor->id }})"
+                                        wire:key="vendor-filter-{{ $vendor->id }}"
+                                        class="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors border-b border-zinc-100 dark:border-zinc-700 last:border-b-0 whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
+                                    {{ $vendor->name }}
+                                </button>
+                            @empty
+                                <div class="px-3 py-3 text-sm text-zinc-500 dark:text-zinc-400 text-center">
+                                    {{ strlen(trim($vendor_search ?? '')) > 0 ? 'Tidak ada vendor yang cocok.' : 'Ketik untuk mencari.' }}
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                @endif
+            </div>
 
             <!-- Status Filter -->
             {{-- <flux:select wire:model.live="statusFilter" label="Status" size="sm" class="w-full">
