@@ -413,6 +413,7 @@
                                     >
                             <flux:select.option value="1">🚗 Tersedia</flux:select.option>
                             <flux:select.option value="0">💰 Terjual</flux:select.option>
+                            <flux:select.option value="2">⏳ Pending</flux:select.option>
                         </flux:select>
                         <div class="relative">
                             <flux:input wire:model.live.debounce.1500ms="roadside_allowance" icon="currency-dollar" label="Biaya Uang Jalan *" placeholder="250.000" />
@@ -582,6 +583,10 @@
                         <div class="flex justify-between">
                             <span class="text-green-800 dark:text-green-200">Terjual:</span>
                             <span class="font-medium text-green-900 dark:text-green-100">{{ \App\Models\Vehicle::where('status', '0')->count() }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-green-800 dark:text-green-200">Pending:</span>
+                            <span class="font-medium text-green-900 dark:text-green-100">{{ \App\Models\Vehicle::where('status', '2')->count() }}</span>
                         </div>
                     </div>
                 </div>

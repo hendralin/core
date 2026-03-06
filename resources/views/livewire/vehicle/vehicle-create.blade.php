@@ -486,6 +486,10 @@
                             <span class="text-green-800 dark:text-green-200">Terjual:</span>
                             <span class="font-medium text-green-900 dark:text-green-100">{{ \App\Models\Vehicle::where('status', '0')->count() }}</span>
                         </div>
+                        <div class="flex justify-between">
+                            <span class="text-green-800 dark:text-green-200">Pending:</span>
+                            <span class="font-medium text-green-900 dark:text-green-100">{{ \App\Models\Vehicle::where('status', '2')->count() }}</span>
+                        </div>
                     </div>
                 </div>
             </div>

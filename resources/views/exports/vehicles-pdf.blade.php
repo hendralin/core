@@ -123,7 +123,7 @@
                         <td>{{ $vehicle->selling_date ? \Carbon\Carbon::parse($vehicle->selling_date)->format('d-m-Y') : '-' }}</td>
                         <td class="no-wrap">{{ $vehicle->selling_price ? number_format($vehicle->selling_price, 0) : '-' }}</td>
                     @endif
-                    <td>{{ $vehicle->status == 1 ? 'Available' : 'Sold' }}</td>
+                    <td>{{ $vehicle->status == 1 ? 'Available' : ($vehicle->status == 2 ? 'Pending' : 'Sold') }}</td>
                 </tr>
             @endforeach
         </tbody>

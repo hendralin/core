@@ -196,7 +196,7 @@ class VehicleEdit extends Component
         'buyer_address' => 'required_if:status,0|nullable|string|max:1000',
         'payment_type' => 'required_if:status,0|nullable|in:1,2',
         'leasing_id' => 'required_if:payment_type,2|nullable|exists:leasings,id',
-        'status' => 'required|in:0,1',
+        'status' => 'required|in:0,1,2',
         'description' => 'nullable|string',
         'tempImages.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB per image
         'tempImages' => 'nullable|array|max:20', // Max 20 images
@@ -242,7 +242,7 @@ class VehicleEdit extends Component
         'selling_date.date' => 'Tanggal Penjualan harus berupa tanggal yang valid.',
         'selling_date.after_or_equal' => 'Tanggal Penjualan harus setelah atau sama dengan tanggal pembelian.',
         'status.required' => 'Status wajib diisi.',
-        'status.in' => 'Status harus Terjual atau Tersedia.',
+        'status.in' => 'Status harus Terjual, Tersedia, atau Pending.',
         'file_stnk.mimes' => 'File STNK harus dalam format PDF, JPG, JPEG, atau PNG.',
         'file_stnk.max' => 'File STNK tidak boleh lebih dari 5MB.',
         'bpkb_number.required' => 'Nomor BPKB wajib diisi.',

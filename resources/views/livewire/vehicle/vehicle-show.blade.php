@@ -65,11 +65,11 @@
             <div class="flex items-center space-x-3">
                 @php
                     $statusClasses = $vehicle->status == 1
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800';
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        : ($vehicle->status == 2 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300');
                 @endphp
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $statusClasses }}">
-                    {{ $vehicle->status == 1 ? 'Available' : 'Sold' }}
+                    {{ $vehicle->status == 1 ? 'Available' : ($vehicle->status == 2 ? 'Pending' : 'Sold') }}
                 </span>
             </div>
         </div>
@@ -198,6 +198,8 @@
                         <flux:heading size="md">Status:</flux:heading>
                         @if($vehicle->status == 1)
                         <flux:badge icon="check-circle" size="sm" color="green">Available</flux:badge>
+                        @elseif($vehicle->status == 2)
+                        <flux:badge icon="clock" size="sm" color="yellow">Pending</flux:badge>
                         @else
                         <flux:badge icon="x-circle" size="sm" color="red">Sold</flux:badge>
                         @endif
@@ -1615,6 +1617,8 @@
                         <flux:text>Current Status</flux:text>
                         @if($vehicle->status == 1)
                         <flux:badge icon="check-circle" size="sm" color="green">Available</flux:badge>
+                        @elseif($vehicle->status == 2)
+                        <flux:badge icon="clock" size="sm" color="yellow">Pending</flux:badge>
                         @else
                         <flux:badge icon="x-circle" size="sm" color="red">Sold</flux:badge>
                         @endif

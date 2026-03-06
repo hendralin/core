@@ -65,6 +65,7 @@
                 <flux:select.option value="">All</flux:select.option>
                 <flux:select.option value="1">Available</flux:select.option>
                 <flux:select.option value="0">Sold</flux:select.option>
+                <flux:select.option value="2">Pending</flux:select.option>
             </flux:select>
         </div>
         <div class="flex items-center gap-2 flex-1">
@@ -215,10 +216,12 @@
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                         @if($vehicle->status == 1)
                                             bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                                        @elseif($vehicle->status == 2)
+                                            bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300
                                         @else
                                             bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
                                         @endif">
-                                        {{ $vehicle->status == 1 ? 'Available' : 'Sold' }}
+                                        {{ $vehicle->status == 1 ? 'Available' : ($vehicle->status == 2 ? 'Pending' : 'Sold') }}
                                     </span>
                                     @if($vehicle->display_price || $vehicle->loan_price)
                                         <div class="space-y-1">
@@ -592,10 +595,12 @@
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
                                         @if($vehicle->status == 1)
                                             bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                                        @elseif($vehicle->status == 2)
+                                            bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300
                                         @else
                                             bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
                                         @endif">
-                                        {{ $vehicle->status == 1 ? 'Available' : 'Sold' }}
+                                        {{ $vehicle->status == 1 ? 'Available' : ($vehicle->status == 2 ? 'Pending' : 'Sold') }}
                                     </span>
                                     @if($vehicle->images && $vehicle->images->count() > 0)
                                         <div class="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-white dark:border-zinc-600 shadow-sm cursor-pointer hover:shadow-lg transition-shadow"

@@ -36,7 +36,7 @@ return new class extends Migration
             $table->decimal('roadside_allowance', 15, 2)->unsigned(); // Biaya Uang Jalan
             $table->date('selling_date')->nullable();
             $table->decimal('selling_price', 15, 2)->unsigned()->nullable();
-            $table->enum('status', [0, 1])->default(1)->comment('0=sold, 1=available');
+            $table->enum('status', [0, 1, 2])->default(1)->comment('0=sold, 1=available, 2=pending');
             $table->text('description')->nullable();
             $table->timestamps();
             $table->index('police_number');
