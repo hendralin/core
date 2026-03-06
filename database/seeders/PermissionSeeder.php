@@ -208,6 +208,21 @@ class PermissionSeeder extends Seeder
             'salary.export',
             'salary.audit',
 
+            // EMPLOYEE LOAN
+            'employee-loan.view',
+            'employee-loan.create',
+            'employee-loan.edit',
+            'employee-loan.delete',
+            'employee-loan.audit',
+
+            // EMPLOYEE LOAN PAYMENT
+            'employee-loan-payment.view',
+            'employee-loan-payment.create',
+            'employee-loan-payment.edit',
+            'employee-loan-payment.delete',
+            'employee-loan-payment.audit',
+
+            // REPORT
             // CASH REPORT
             'cash-report.view',
 

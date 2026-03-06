@@ -161,7 +161,9 @@
                 @if (auth()->user()->can('position.view') ||
                 auth()->user()->can('salary-component.view') ||
                 auth()->user()->can('employee.view') ||
-                auth()->user()->can('salary.view'))
+                auth()->user()->can('salary.view') ||
+                auth()->user()->can('employee-loan.view') ||
+                auth()->user()->can('employee-loan-payment.view'))
                     <flux:sidebar.group expandable icon="wallet" heading="Payroll" class="grid">
                         @if (auth()->user()->can('position.view') ||
                         auth()->user()->can('position.create') ||
@@ -182,6 +184,20 @@
                         auth()->user()->can('employee.edit') ||
                         auth()->user()->can('employee.delete'))
                             <flux:navlist.item icon="user-group" :href="route('employees.index')" :current="request()->routeIs('employees.*')" wire:navigate>{{ __('Pegawai') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('employee-loan.view') ||
+                        auth()->user()->can('employee-loan.create') ||
+                        auth()->user()->can('employee-loan.edit') ||
+                        auth()->user()->can('employee-loan.delete'))
+                            <flux:navlist.item icon="lifebuoy" :href="route('employee-loans.index')" :current="request()->routeIs('employee-loans.*')" wire:navigate>{{ __('Pinjaman') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('employee-loan-payment.view') ||
+                        auth()->user()->can('employee-loan-payment.create') ||
+                        auth()->user()->can('employee-loan-payment.edit') ||
+                        auth()->user()->can('employee-loan-payment.delete'))
+                            <flux:navlist.item icon="receipt-refund" :href="route('employee-loan-payments.index')" :current="request()->routeIs('employee-loan-payments.*')" wire:navigate>{{ __('Pembayaran Pinjaman') }}</flux:navlist.item>
                         @endif
 
                         @if (auth()->user()->can('salary.view') ||
@@ -425,7 +441,9 @@
                 @if (auth()->user()->can('position.view') ||
                 auth()->user()->can('salary-component.view') ||
                 auth()->user()->can('employee.view') ||
-                auth()->user()->can('salary.view'))
+                auth()->user()->can('salary.view') ||
+                auth()->user()->can('employee-loan.view') ||
+                auth()->user()->can('employee-loan-payment.view'))
                     <flux:navlist.group :heading="__('Payroll')" class="grid">
                         @if (auth()->user()->can('position.view') ||
                         auth()->user()->can('position.create') ||
@@ -446,6 +464,20 @@
                         auth()->user()->can('employee.edit') ||
                         auth()->user()->can('employee.delete'))
                             <flux:navlist.item icon="user-group" :href="route('employees.index')" :current="request()->routeIs('employees.*')" wire:navigate>{{ __('Pegawai') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('employee-loan.view') ||
+                        auth()->user()->can('employee-loan.create') ||
+                        auth()->user()->can('employee-loan.edit') ||
+                        auth()->user()->can('employee-loan.delete'))
+                            <flux:navlist.item icon="lifebuoy" :href="route('employee-loans.index')" :current="request()->routeIs('employee-loans.*')" wire:navigate>{{ __('Pinjaman') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('employee-loan-payment.view') ||
+                        auth()->user()->can('employee-loan-payment.create') ||
+                        auth()->user()->can('employee-loan-payment.edit') ||
+                        auth()->user()->can('employee-loan-payment.delete'))
+                            <flux:navlist.item icon="receipt-refund" :href="route('employee-loan-payments.index')" :current="request()->routeIs('employee-loan-payments.*')" wire:navigate>{{ __('Pembayaran Pinjaman') }}</flux:navlist.item>
                         @endif
 
                         @if (auth()->user()->can('salary.view') ||

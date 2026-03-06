@@ -39,6 +39,16 @@ use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeIndex;
 use App\Livewire\Employee\EmployeeShow;
 use App\Livewire\Handover\HandoverAudit;
+use App\Livewire\Loan\Employee\EmployeeLoanAudit;
+use App\Livewire\Loan\Employee\EmployeeLoanCreate;
+use App\Livewire\Loan\Employee\EmployeeLoanEdit;
+use App\Livewire\Loan\Employee\EmployeeLoanIndex;
+use App\Livewire\Loan\Employee\EmployeeLoanShow;
+use App\Livewire\Loan\Employee\Payment\EmployeeLoanPaymentAudit;
+use App\Livewire\Loan\Employee\Payment\EmployeeLoanPaymentCreate;
+use App\Livewire\Loan\Employee\Payment\EmployeeLoanPaymentEdit;
+use App\Livewire\Loan\Employee\Payment\EmployeeLoanPaymentIndex;
+use App\Livewire\Loan\Employee\Payment\EmployeeLoanPaymentShow;
 use App\Livewire\LoanCalculation\LoanCalculationAudit;
 use App\Livewire\PaymentReceipt\PaymentReceiptAudit;
 use App\Livewire\Position\PositionAudit;
@@ -254,6 +264,18 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('employees/create', EmployeeCreate::class)->name('employees.create')->middleware(['permission:employee.create']);
     Route::livewire('employees/{employee}/edit', EmployeeEdit::class)->name('employees.edit')->middleware(['permission:employee.edit']);
     Route::livewire('employees/{employee}', EmployeeShow::class)->name('employees.show')->middleware(['permission:employee.view']);
+
+    Route::livewire('employee-loans', EmployeeLoanIndex::class)->name('employee-loans.index')->middleware(['permission:employee-loan.view|employee-loan.create|employee-loan.edit|employee-loan.delete']);
+    Route::livewire('employee-loans/audit', EmployeeLoanAudit::class)->name('employee-loans.audit')->middleware(['permission:employee-loan.audit']);
+    Route::livewire('employee-loans/create', EmployeeLoanCreate::class)->name('employee-loans.create')->middleware(['permission:employee-loan.create']);
+    Route::livewire('employee-loans/{employeeLoan}/edit', EmployeeLoanEdit::class)->name('employee-loans.edit')->middleware(['permission:employee-loan.edit']);
+    Route::livewire('employee-loans/{employeeLoan}', EmployeeLoanShow::class)->name('employee-loans.show')->middleware(['permission:employee-loan.view']);
+
+    Route::livewire('employee-loan-payments', EmployeeLoanPaymentIndex::class)->name('employee-loan-payments.index')->middleware(['permission:employee-loan-payment.view|employee-loan-payment.create|employee-loan-payment.edit|employee-loan-payment.delete']);
+    Route::livewire('employee-loan-payments/audit', EmployeeLoanPaymentAudit::class)->name('employee-loan-payments.audit')->middleware(['permission:employee-loan-payment.audit']);
+    Route::livewire('employee-loan-payments/create', EmployeeLoanPaymentCreate::class)->name('employee-loan-payments.create')->middleware(['permission:employee-loan-payment.create']);
+    Route::livewire('employee-loan-payments/{employeeLoanPayment}/edit', EmployeeLoanPaymentEdit::class)->name('employee-loan-payments.edit')->middleware(['permission:employee-loan-payment.edit']);
+    Route::livewire('employee-loan-payments/{employeeLoanPayment}', EmployeeLoanPaymentShow::class)->name('employee-loan-payments.show')->middleware(['permission:employee-loan-payment.view']);
 
     Route::livewire('salaries', SalaryIndex::class)->name('salaries.index')->middleware(['permission:salary.view|salary.create|salary.edit|salary.delete']);
     Route::livewire('salaries/audit', SalaryAudit::class)->name('salaries.audit')->middleware(['permission:salary.audit']);

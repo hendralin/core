@@ -27,7 +27,7 @@ class RoleService
         'Biaya Showroom' => ['cashdisbursement'],
         'Pembayaran PKB' => ['vehicle-tax-payment'],
         'Inject Kas' => ['cash-inject'],
-        'Payroll' => ['position', 'salary-component', 'employee', 'salary'],
+        'Payroll' => ['position', 'salary-component', 'employee', 'employee-loan', 'employee-loan-payment', 'salary'],
         'Reports' => ['cash-report', 'sales-report', 'tax-cash-report'],
         'Tools' => ['backup-restore'],
     ];

@@ -1,0 +1,192 @@
+<?php
+
+namespace App\Livewire\Loan\Employee;
+
+use App\Models\Employee;
+use App\Models\EmployeeLoan;
+use App\Models\Warehouse;
+use Livewire\Component;
+use Livewire\WithPagination;
+use Livewire\Attributes\Title;
+use Livewire\WithoutUrlPagination;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+#[Title('Pinjaman Karyawan')]
+class EmployeeLoanIndex extends Component
+{
+    use WithPagination, WithoutUrlPagination;
+
+    public $loanIdToDelete = null;
+    public $search = '';
+    public $sortField = 'paid_at';
+    public $sortDirection = 'desc';
+    public $perPage = 10;
+    public $employeeFilter = '';
+    public $employeeFilterSearch = '';
+    public $warehouseFilter = '';
+    public $dateFrom;
+    public $dateTo;
+    public $selectedMonthYear;
+    public $bigCashFilter = '';
+
+    public function mount()
+    {
+        $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
+        $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+    }
+
+    public function updating($field)
+    {
+        if (in_array($field, ['search', 'perPage', 'employeeFilter', 'employeeFilterSearch', 'warehouseFilter', 'dateFrom', 'dateTo', 'selectedMonthYear', 'bigCashFilter'])) {
+            $this->resetPage();
+        }
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+        $this->sortField = $field;
+    }
+
+    public function setLoanToDelete($loanId)
+    {
+        $this->loanIdToDelete = $loanId;
+    }
+
+    public function delete()
+    {
+        try {
+            if (!$this->loanIdToDelete) {
+                session()->flash('error', 'Tidak ada pinjaman yang dipilih untuk dihapus.');
+                return;
+            }
+
+            $loan = EmployeeLoan::with(['employee', 'cost'])->findOrFail($this->loanIdToDelete);
+
+            if ($loan->loan_type !== 'loan') {
+                session()->flash('error', 'Hanya pinjaman yang dapat dihapus dari halaman ini.');
+                return;
+            }
+
+            DB::transaction(function () use ($loan) {
+                // Kurangi remaining_loan karyawan
+                $employee = $loan->employee;
+                $employee->decrement('remaining_loan', $loan->amount);
+
+                // Hapus cost dan payment jika ada (big_cash = false)
+                if ($loan->cost_id) {
+                    $loan->cost?->delete();
+                }
+
+                $loan->delete();
+
+                activity()
+                    ->performedOn($loan)
+                    ->causedBy(Auth::user())
+                    ->withProperties(['old' => $loan->toArray()])
+                    ->log('deleted employee loan record');
+            });
+
+            $this->reset(['loanIdToDelete']);
+            session()->flash('success', 'Pinjaman berhasil dihapus.');
+        } catch (\Exception $e) {
+            session()->flash('error', $e->getMessage());
+        }
+    }
+
+    public function setEmployeeFilter($id)
+    {
+        $this->employeeFilter = $id ? (string) $id : '';
+        $this->employeeFilterSearch = '';
+    }
+
+    public function clearEmployeeFilter()
+    {
+        $this->employeeFilter = '';
+        $this->employeeFilterSearch = '';
+    }
+
+    public function clearFilters()
+    {
+        $this->reset(['search', 'employeeFilter', 'employeeFilterSearch', 'warehouseFilter', 'bigCashFilter']);
+        $this->selectedMonthYear = null;
+        $this->updateDateRange();
+        $this->resetPage();
+    }
+
+    public function updatedSelectedMonthYear()
+    {
+        $this->updateDateRange();
+    }
+
+    private function updateDateRange()
+    {
+        if ($this->selectedMonthYear) {
+            $date = \Carbon\Carbon::createFromFormat('Y-m', $this->selectedMonthYear);
+            $this->dateFrom = $date->startOfMonth()->format('Y-m-d');
+            $this->dateTo = $date->endOfMonth()->format('Y-m-d');
+        } else {
+            $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
+            $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+        }
+    }
+
+    public function render()
+    {
+        $loans = EmployeeLoan::query()
+            ->where('loan_type', 'loan')
+            ->with(['employee', 'cost.warehouse', 'createdBy'])
+            ->when(
+                $this->search,
+                fn ($q) => $q->where(function ($query) {
+                    $query->where('description', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('employee', fn ($e) => $e->where('name', 'like', '%' . $this->search . '%'))
+                        ->orWhereHas('createdBy', fn ($u) => $u->where('name', 'like', '%' . $this->search . '%'));
+                })
+            )
+            ->when($this->employeeFilter, fn ($q) => $q->where('employee_id', $this->employeeFilter))
+            ->when($this->warehouseFilter, fn ($q) => $q->whereHas('cost', fn ($c) => $c->where('warehouse_id', $this->warehouseFilter)))
+            ->when($this->bigCashFilter !== '', fn ($q) => $q->where('big_cash', $this->bigCashFilter === '1'))
+            ->when($this->dateFrom, fn ($q) => $q->whereDate('paid_at', '>=', $this->dateFrom))
+            ->when($this->dateTo, fn ($q) => $q->whereDate('paid_at', '<=', $this->dateTo))
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
+
+        $totalForFilters = EmployeeLoan::query()
+            ->where('loan_type', 'loan')
+            ->when(
+                $this->search,
+                fn ($q) => $q->where(function ($query) {
+                    $query->where('description', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('employee', fn ($e) => $e->where('name', 'like', '%' . $this->search . '%'))
+                        ->orWhereHas('createdBy', fn ($u) => $u->where('name', 'like', '%' . $this->search . '%'));
+                })
+            )
+            ->when($this->employeeFilter, fn ($q) => $q->where('employee_id', $this->employeeFilter))
+            ->when($this->warehouseFilter, fn ($q) => $q->whereHas('cost', fn ($c) => $c->where('warehouse_id', $this->warehouseFilter)))
+            ->when($this->bigCashFilter !== '', fn ($q) => $q->where('big_cash', $this->bigCashFilter === '1'))
+            ->when($this->dateFrom, fn ($q) => $q->whereDate('paid_at', '>=', $this->dateFrom))
+            ->when($this->dateTo, fn ($q) => $q->whereDate('paid_at', '<=', $this->dateTo))
+            ->sum('amount');
+
+        $employees = Employee::query()
+            ->when($this->employeeFilterSearch !== '', fn ($q) => $q->where('name', 'like', '%' . trim($this->employeeFilterSearch) . '%'))
+            ->orderBy('name')
+            ->limit(50)
+            ->get();
+        $selectedEmployee = $this->employeeFilter ? Employee::find($this->employeeFilter) : null;
+        $warehouses = Warehouse::where('has_cash', true)->orderBy('name')->get();
+
+        return view('livewire.loan.employee.employee-loan-index', compact('loans', 'totalForFilters', 'employees', 'selectedEmployee', 'warehouses'));
+    }
+
+    public function getPerPageOptionsProperty()
+    {
+        return [5, 10, 25, 50];
+    }
+}

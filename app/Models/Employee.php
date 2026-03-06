@@ -23,6 +23,7 @@ class Employee extends Model
         'join_date',
         'position_id',
         'status',
+        'remaining_loan',
     ];
 
     /**
@@ -32,6 +33,7 @@ class Employee extends Model
      */
     protected $casts = [
         'join_date' => 'date',
+        'remaining_loan' => 'decimal:2',
     ];
 
     /**
@@ -58,6 +60,7 @@ class Employee extends Model
                 'join_date',
                 'position_id',
                 'status',
+                'remaining_loan',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
@@ -101,6 +104,16 @@ class Employee extends Model
     public function salaries(): HasMany
     {
         return $this->hasMany(Salary::class);
+    }
+
+    /**
+     * Get all of the employee loans (loan_type = loan, i.e. pinjaman)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function employeeLoans(): HasMany
+    {
+        return $this->hasMany(EmployeeLoan::class)->where('loan_type', 'loan');
     }
 
     /**
