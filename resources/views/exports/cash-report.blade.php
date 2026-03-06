@@ -38,7 +38,7 @@
                         - {{ $cost->warehouse->name }}
                     @endif
                 </td>
-                @if($cost->cost_type === 'cash')
+                @if(in_array($cost->cost_type, ['cash', 'loan_payment'], true))
                     <td>-</td>
                     <td>{{ $cost->total_price }}</td>
                 @else

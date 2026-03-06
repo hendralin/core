@@ -15,7 +15,7 @@
     @endsession
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         @foreach($stats as $key => $stat)
             <div wire:click="filterByCostType('{{ $key }}')" class="cursor-pointer bg-white dark:bg-zinc-800 rounded-lg shadow-sm border @if($selectedCostType === $key) border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/20 dark:ring-blue-400/20 @else border-gray-200 dark:border-zinc-700 @endif p-4 hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
@@ -29,37 +29,61 @@
                         </p>
                     </div>
                     <div class="shrink-0">
-                        @if($stat['color'] === 'blue')
-                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                                <flux:icon.beaker class="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            </div>
-                        @elseif($stat['color'] === 'green')
-                            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                                <flux:icon.building-storefront class="w-5 h-5 text-green-600 dark:text-green-400" />
-                            </div>
-                        @elseif($stat['color'] === 'orange')
-                            <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center">
-                                <flux:icon.wrench class="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                            </div>
-                        @elseif($stat['color'] === 'emerald')
-                            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
-                                <flux:icon.currency-dollar class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                        @endif
+                        @php
+                            $bgClass = match($stat['color']) {
+                                'blue' => 'bg-blue-100 dark:bg-blue-900/20',
+                                'green' => 'bg-green-100 dark:bg-green-900/20',
+                                'orange' => 'bg-orange-100 dark:bg-orange-900/20',
+                                'emerald' => 'bg-emerald-100 dark:bg-emerald-900/20',
+                                'rose' => 'bg-rose-100 dark:bg-rose-900/20',
+                                default => 'bg-zinc-100 dark:bg-zinc-700/30',
+                            };
+                            $iconClass = match($stat['color']) {
+                                'blue' => 'text-blue-600 dark:text-blue-400',
+                                'green' => 'text-green-600 dark:text-green-400',
+                                'orange' => 'text-orange-600 dark:text-orange-400',
+                                'emerald' => 'text-emerald-600 dark:text-emerald-400',
+                                'rose' => 'text-rose-600 dark:text-rose-400',
+                                default => 'text-zinc-600 dark:text-zinc-300',
+                            };
+                        @endphp
+                        <div class="w-10 h-10 {{ $bgClass }} rounded-lg flex items-center justify-center">
+                            @switch($stat['icon'] ?? '')
+                                @case('building-storefront')
+                                    <flux:icon.building-storefront class="w-5 h-5 {{ $iconClass }}" />
+                                    @break
+                                @case('wrench')
+                                    <flux:icon.wrench class="w-5 h-5 {{ $iconClass }}" />
+                                    @break
+                                @case('currency-dollar')
+                                    <flux:icon.currency-dollar class="w-5 h-5 {{ $iconClass }}" />
+                                    @break
+                                @case('lifebuoy')
+                                    <flux:icon.lifebuoy class="w-5 h-5 {{ $iconClass }}" />
+                                    @break
+                                @case('receipt-refund')
+                                    <flux:icon.receipt-refund class="w-5 h-5 {{ $iconClass }}" />
+                                    @break
+                                @default
+                                    <flux:icon.document-text class="w-5 h-5 {{ $iconClass }}" />
+                            @endswitch
+                        </div>
                     </div>
                 </div>
                 @if($stat['total'] > 0)
                     <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-700">
                         <div class="flex items-center text-xs">
-                            @if($stat['color'] === 'blue')
-                                <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                            @elseif($stat['color'] === 'green')
-                                <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                            @elseif($stat['color'] === 'orange')
-                                <div class="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-                            @elseif($stat['color'] === 'emerald')
-                                <div class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                            @endif
+                            @php
+                                $dotClass = match($stat['color']) {
+                                    'blue' => 'bg-blue-500',
+                                    'green' => 'bg-green-500',
+                                    'orange' => 'bg-orange-500',
+                                    'emerald' => 'bg-emerald-500',
+                                    'rose' => 'bg-rose-500',
+                                    default => 'bg-zinc-500',
+                                };
+                            @endphp
+                            <div class="w-2 h-2 {{ $dotClass }} rounded-full mr-2"></div>
                             <span class="text-gray-600 dark:text-zinc-400">Active this period</span>
                         </div>
                     </div>
@@ -201,7 +225,7 @@
                                     @endif
                                 </div>
                             </td>
-                            @if($cost->cost_type === 'cash')
+                            @if(in_array($cost->cost_type, ['cash', 'loan_payment'], true))
                                 <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-gray-900 dark:text-white">-</td>
                                 <td class="px-4 py-2 whitespace-nowrap text-right font-medium text-green-600 dark:text-green-400">Rp {{ number_format($cost->total_price, 0) }}</td>
                             @else

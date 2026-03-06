@@ -1,7 +1,7 @@
 <div>
     <div class="relative mb-6 w-full">
-        <flux:heading size="xl" level="1">{{ __('Tambah Pinjaman Karyawan') }}</flux:heading>
-        <flux:subheading size="lg" class="mb-6">{{ __('Pencatatan pinjaman karyawan dari Kas (Kas Kecil atau Kas Besar)') }}</flux:subheading>
+        <flux:heading size="xl" level="1">{{ __('Tambah Pembayaran Pinjaman') }}</flux:heading>
+        <flux:subheading size="lg" class="mb-6">{{ __('Pencatatan pembayaran pinjaman ke Kas') }}</flux:subheading>
         <flux:separator variant="subtle" />
     </div>
 
@@ -11,10 +11,10 @@
                 <flux:button
                     variant="primary"
                     size="sm"
-                    href="{{ route('employee-loans.index') }}"
+                    href="{{ route('employee-loan-payments.index') }}"
                     wire:navigate
                     icon="arrow-uturn-left"
-                    tooltip="Kembali ke Pinjaman"
+                    tooltip="Kembali ke Pembayaran Pinjaman"
                 >
                     Kembali
                 </flux:button>
@@ -28,13 +28,13 @@
                 <x-alert type="error" class="mb-4">{{ session('error') }}</x-alert>
             @endsession
 
-            <form wire:submit="submit" id="employee-loan-form" class="mt-6 space-y-6">
+            <form wire:submit="submit" id="employee-loan-payment-form" class="mt-6 space-y-6">
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6 mb-6">
                     <div class="flex items-center gap-3 mb-4">
                         <flux:icon.identification class="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         <div>
                             <flux:heading size="md">Informasi Dasar</flux:heading>
-                            <flux:subheading size="sm">Pilih karyawan dan sumber dana pinjaman</flux:subheading>
+                            <flux:subheading size="sm">Pilih karyawan yang membayar dan tujuan (Kas Kecil / Kas Besar)</flux:subheading>
                         </div>
                     </div>
 
@@ -46,6 +46,7 @@
                                     <span class="flex-1 min-w-0 text-zinc-900 dark:text-white whitespace-nowrap overflow-hidden text-ellipsis">{{ $selectedEmployee->name }}</span>
                                     <flux:button type="button" variant="ghost" size="xs" wire:click="clearEmployee" class="shrink-0">Ubah</flux:button>
                                 </div>
+                                <p class="text-xs text-amber-600 dark:text-amber-400 font-medium">Sisa pinjaman: Rp {{ number_format($selectedEmployee->remaining_loan ?? 0, 0, ',', '.') }}</p>
                             @else
                                 <div class="relative">
                                     <flux:input
@@ -73,15 +74,15 @@
                                     </div>
                                 </div>
                             @endif
-                            <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih karyawan yang menerima pinjaman</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih karyawan yang melakukan pembayaran</p>
                             @error('employee_id')
                                 <p class="text-xs text-red-600 dark:text-red-400 mt-0.5">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="space-y-1">
-                            <flux:input wire:model="paid_at" type="date" label="Tanggal Pinjaman" class="w-full" />
-                            <p class="text-xs text-slate-500 dark:text-zinc-400">Kapan pinjaman diberikan?</p>
+                            <flux:input wire:model="paid_at" type="date" label="Tanggal Pembayaran" class="w-full" />
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Kapan pembayaran dilakukan?</p>
                         </div>
 
                         <div class="space-y-1">
@@ -89,28 +90,28 @@
                                 wire:model="amount"
                                 mask:dynamic="$money($input)"
                                 icon="currency-dollar"
-                                label="Jumlah Pinjaman (Rp)"
+                                label="Jumlah Pembayaran (Rp)"
                                 placeholder="500,000"
                                 class="w-full"
                             />
-                            <p class="text-xs text-slate-500 dark:text-zinc-400">Nominal pinjaman</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400">Tidak boleh melebihi sisa pinjaman karyawan</p>
                         </div>
 
                         @if(!$big_cash)
                             <div class="md:col-span-2 space-y-1">
-                                <flux:select wire:model="warehouse_id" label="Kas" class="w-full">
+                                <flux:select wire:model="warehouse_id" label="Kas (Tujuan)" class="w-full">
                                     <flux:select.option value="">{{ __('Pilih Kas') }}</flux:select.option>
                                     @foreach($warehouses as $wh)
                                         <flux:select.option value="{{ $wh->id }}">{{ $wh->name }}</flux:select.option>
                                     @endforeach
                                 </flux:select>
-                                <p class="text-xs text-slate-500 dark:text-zinc-400">Pinjaman dari Kas Kecil akan mengurangi saldo Kas Kecil</p>
+                                <p class="text-xs text-slate-500 dark:text-zinc-400">Pembayaran ke Kas Kecil akan menambah saldo kas dan mencatat ke costs (loan_payment) & payments</p>
                             </div>
                         @endif
 
                         <div class="md:col-span-2">
                             <flux:checkbox wire:model.live="big_cash" label="Kas Besar" />
-                            <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Centang jika pinjaman dari Kas Besar</p>
+                            <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Centang jika pembayaran ke Kas Besar</p>
                         </div>
                     </div>
                 </div>
@@ -120,19 +121,19 @@
                         <flux:icon.document-text class="w-5 h-5 text-green-600 dark:text-green-400" />
                         <div>
                             <flux:heading size="md">Keterangan</flux:heading>
-                            <flux:subheading size="sm">Deskripsi pinjaman</flux:subheading>
+                            <flux:subheading size="sm">Deskripsi pembayaran</flux:subheading>
                         </div>
                     </div>
                     <flux:textarea
                         wire:model="description"
                         label="Deskripsi"
-                        placeholder="Misal: Pinjaman untuk keperluan keluarga..."
+                        placeholder="Misal: Angsuran ke-2..."
                         rows="3"
                     />
                 </div>
 
                 <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-zinc-700">
-                    <flux:button variant="ghost" href="{{ route('employee-loans.index') }}" wire:navigate>
+                    <flux:button variant="ghost" href="{{ route('employee-loan-payments.index') }}" wire:navigate>
                         <flux:icon.arrow-left class="w-4 h-4 mr-2" />
                         Batal
                     </flux:button>
@@ -146,18 +147,18 @@
         </div>
 
         <div class="xl:col-span-1">
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 sticky top-6">
+            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 sticky top-6">
                 <div class="flex items-center gap-3 mb-4">
-                    <flux:icon.light-bulb class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <flux:icon.light-bulb class="w-5 h-5 text-green-600 dark:text-green-400" />
                     <div>
                         <flux:heading size="sm">Info</flux:heading>
-                        <flux:subheading size="xs">Pinjaman dari Kas Kecil akan otomatis mengurangi saldo Kas Kecil.</flux:subheading>
+                        <flux:subheading size="xs">Pembayaran ke Kas Kecil akan menambah saldo kas dan mengurangi sisa pinjaman karyawan.</flux:subheading>
                     </div>
                 </div>
                 <ul class="text-sm text-gray-700 dark:text-zinc-300 space-y-2">
-                    <li>• Pilih Kas jika pinjaman dari Kas Kecil</li>
-                    <li>• Centang Kas Besar jika dari Kas Besar</li>
-                    <li>• Sisa pinjaman karyawan akan ditambah otomatis</li>
+                    <li>• Pilih Kas jika pembayaran ke Kas Kecil</li>
+                    <li>• Centang Kas Besar jika ke Kas Besar</li>
+                    <li>• Jumlah tidak boleh melebihi sisa pinjaman</li>
                 </ul>
             </div>
         </div>

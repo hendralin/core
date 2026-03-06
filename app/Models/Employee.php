@@ -117,6 +117,16 @@ class Employee extends Model
     }
 
     /**
+     * Get all of the employee loan payments (loan_type = payment, i.e. pembayaran pinjaman)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function employeeLoanPayments(): HasMany
+    {
+        return $this->hasMany(EmployeeLoan::class)->where('loan_type', 'payment');
+    }
+
+    /**
      * Get count of vehicles sold by this employee in the given month/year.
      * Used for Sales Executive Officer: employee is linked to salesman via user_id.
      *

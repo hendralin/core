@@ -104,7 +104,7 @@
                             <br><small style="color: #16a34a;">{{ $cost->vendor->name }}</small>
                         @endif
                     </td>
-                    @if($cost->cost_type === 'cash')
+                    @if(in_array($cost->cost_type, ['cash', 'loan_payment'], true))
                         <td class="text-right no-wrap"><strong>-</strong></td>
                         <td class="text-right no-wrap" style="color: #16a34a;"><strong>{{ 'Rp ' . number_format($cost->total_price, 0) }}</strong></td>
                     @else

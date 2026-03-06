@@ -8,6 +8,11 @@ use Maatwebsite\Excel\Concerns\FromView;
 
 class CashReportExport implements FromView
 {
+    /**
+     * Cost types that increase cash balance in this report.
+     */
+    private const CASH_IN_TYPES = ['cash', 'loan_payment'];
+
     protected $search;
     protected $sortField;
     protected $sortDirection;
@@ -29,49 +34,73 @@ class CashReportExport implements FromView
 
     public function view(): View
     {
+        // Same logic as report:
+        // - cash by cost_date
+        // - non-cash (including loan_payment) by payment_date
         // Exclude vehicle_tax (belongs to Laporan Kas Pajak)
         $costs = Cost::query()
-            ->with(['createdBy', 'vehicle', 'vendor', 'warehouse'])
-            ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
-            ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo))
+            ->with(['createdBy', 'vehicle', 'vendor', 'warehouse', 'payments'])
             ->when($this->selectedCostType, fn($q) => $q->where('cost_type', $this->selectedCostType))
             ->when($this->warehouseId, fn($q) => $q->where('warehouse_id', $this->warehouseId))
-            ->where('big_cash', '!=', 1) // Exclude big cash payments from Excel export
+            ->where('big_cash', '!=', 1)
             ->where(function ($q) {
-                $q->where('cost_type', 'cash')
-                    ->orWhere(function ($q) {
-                        $q->where('cost_type', '!=', 'cash')
-                            ->where('cost_type', '!=', 'vehicle_tax')
-                            ->whereHas('payments');
-                    });
+                $q->where(function ($q) {
+                    $q->where('cost_type', 'cash')
+                        ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '>=', $this->dateFrom))
+                        ->when(!empty($this->dateTo), fn($q) => $q->whereDate('cost_date', '<=', $this->dateTo));
+                })->orWhere(function ($q) {
+                    $q->where('cost_type', '!=', 'cash')
+                        ->where('cost_type', '!=', 'vehicle_tax')
+                        ->whereHas('payments', function ($p) {
+                            if (!empty($this->dateFrom)) {
+                                $p->whereDate('payment_date', '>=', $this->dateFrom);
+                            }
+                            if (!empty($this->dateTo)) {
+                                $p->whereDate('payment_date', '<=', $this->dateTo);
+                            }
+                        });
+                });
             })
-            ->orderBy('cost_date', 'asc')
-            ->get();
+            ->get()
+            ->sortBy(function ($cost) {
+                $effectiveDate = $cost->cost_type === 'cash'
+                    ? $cost->cost_date
+                    : ($cost->payments->sortBy('payment_date')->first()?->payment_date ?? $cost->cost_date);
+                $dateKey = \Carbon\Carbon::parse($effectiveDate)->format('Y-m-d');
+                $timeKey = $cost->created_at?->format('Y-m-d H:i:s') ?? $cost->created_at;
+                return [$dateKey, $timeKey];
+            })
+            ->values();
 
-        // Calculate opening balance for export. Exclude vehicle_tax (Laporan Kas Pajak).
-        $openingBalanceExcel = Cost::query()
-            ->with('payments')
+        // Opening balance before dateFrom:
+        // (cash in by cost_date) + (loan_payment in by payment_date) - (cash out by payment_date). Exclude vehicle_tax.
+        $cashInBefore = Cost::query()
+            ->where('cost_type', 'cash')
             ->when(!empty($this->dateFrom), fn($q) => $q->whereDate('cost_date', '<', $this->dateFrom))
             ->when($this->warehouseId, fn($q) => $q->where('warehouse_id', $this->warehouseId))
-            ->where('cost_type', '!=', 'vehicle_tax')
-            ->get()->sum(function ($item) {
-                if ($item->cost_type === 'cash') {
-                    return $item->total_price;
-                } elseif ($item->big_cash == 1) {
-                    return 0; // Big cash payments don't affect balance
-                } else {
-                    return $item->payments->isNotEmpty() ? -$item->total_price : 0;
-                }
-            }) ?? 0;
+            ->sum('total_price');
+
+        $loanPaymentInBefore = Cost::query()
+            ->where('cost_type', 'loan_payment')
+            ->where('big_cash', '!=', 1)
+            ->when($this->warehouseId, fn($q) => $q->where('warehouse_id', $this->warehouseId))
+            ->when(!empty($this->dateFrom), fn($q) => $q->whereHas('payments', fn($p) => $p->whereDate('payment_date', '<', $this->dateFrom)))
+            ->sum('total_price');
+
+        $cashOutBefore = Cost::query()
+            ->whereNotIn('cost_type', array_merge(self::CASH_IN_TYPES, ['vehicle_tax']))
+            ->where('big_cash', '!=', 1)
+            ->when($this->warehouseId, fn($q) => $q->where('warehouse_id', $this->warehouseId))
+            ->when(!empty($this->dateFrom), fn($q) => $q->whereHas('payments', fn($p) => $p->whereDate('payment_date', '<', $this->dateFrom)))
+            ->sum('total_price');
+
+        $openingBalanceExcel = ($cashInBefore + $loanPaymentInBefore - $cashOutBefore) ?? 0;
 
         // Calculate running balance for export (using all data)
         $runningBalance = $openingBalanceExcel;
         $costsWithBalance = $costs->map(function ($cost) use (&$runningBalance) {
-            if ($cost->cost_type === 'cash') {
+            if (in_array($cost->cost_type, self::CASH_IN_TYPES, true)) {
                 $runningBalance += $cost->total_price;
-            } elseif ($cost->big_cash == 1) {
-                // Big cash payments don't affect running balance
-                $runningBalance += 0;
             } else {
                 $runningBalance -= $cost->total_price;
             }
