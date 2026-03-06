@@ -129,12 +129,14 @@ class TaxCashReportIndex extends Component
             })
             ->get();
 
+        // Sort by effective date (cost_date / first payment_date), then by created_at (date + time)
         $sortedCosts = $allCostsInPeriod->sortBy(function ($cost) {
-            if ($cost->cost_type === 'tax_cash') {
-                return $cost->cost_date;
-            }
-            $first = $cost->payments->sortBy('payment_date')->first();
-            return $first ? $first->payment_date : $cost->cost_date;
+            $effectiveDate = $cost->cost_type === 'tax_cash'
+                ? $cost->cost_date
+                : ($cost->payments->sortBy('payment_date')->first()?->payment_date ?? $cost->cost_date);
+            $dateKey = \Carbon\Carbon::parse($effectiveDate)->format('Y-m-d');
+            $timeKey = $cost->created_at?->format('Y-m-d H:i:s') ?? $cost->created_at;
+            return [$dateKey, $timeKey];
         })->values();
 
         $runningBalance = $openingBalance;
@@ -254,12 +256,14 @@ class TaxCashReportIndex extends Component
             ->sum('total_price');
         $openingBalancePdf = $cashInBefore - $cashOutBefore;
 
+        // Sort by effective date (cost_date / first payment_date), then by created_at (date + time)
         $sortedCosts = $allCostsInPeriod->sortBy(function ($cost) {
-            if ($cost->cost_type === 'tax_cash') {
-                return $cost->cost_date;
-            }
-            $first = $cost->payments->sortBy('payment_date')->first();
-            return $first ? $first->payment_date : $cost->cost_date;
+            $effectiveDate = $cost->cost_type === 'tax_cash'
+                ? $cost->cost_date
+                : ($cost->payments->sortBy('payment_date')->first()?->payment_date ?? $cost->cost_date);
+            $dateKey = \Carbon\Carbon::parse($effectiveDate)->format('Y-m-d');
+            $timeKey = $cost->created_at?->format('Y-m-d H:i:s') ?? $cost->created_at;
+            return [$dateKey, $timeKey];
         })->values();
 
         $runningBalance = $openingBalancePdf;
