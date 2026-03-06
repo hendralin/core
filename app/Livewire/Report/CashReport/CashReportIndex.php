@@ -134,13 +134,14 @@ class CashReportIndex extends Component
             })
             ->get();
 
-        // Sort by effective date: cash by cost_date, non-cash by first payment_date (when money actually moves)
+        // Sort by effective date (cost_date / first payment_date), then by created_at (date + time)
         $sortedCosts = $allCostsInPeriod->sortBy(function ($cost) {
-            if ($cost->cost_type === 'cash') {
-                return $cost->cost_date;
-            }
-            $first = $cost->payments->sortBy('payment_date')->first();
-            return $first ? $first->payment_date : $cost->cost_date;
+            $effectiveDate = $cost->cost_type === 'cash'
+                ? $cost->cost_date
+                : ($cost->payments->sortBy('payment_date')->first()?->payment_date ?? $cost->cost_date);
+            $dateKey = \Carbon\Carbon::parse($effectiveDate)->format('Y-m-d');
+            $timeKey = $cost->created_at?->format('Y-m-d H:i:s') ?? $cost->created_at;
+            return [$dateKey, $timeKey];
         })->values();
 
         // Calculate running balance in effective date order
@@ -303,13 +304,14 @@ class CashReportIndex extends Component
             ->sum('total_price');
         $openingBalancePdf = $cashInBefore - $cashOutBefore;
 
-        // Sort by effective date (cash = cost_date, non-cash = first payment_date)
+        // Sort by effective date (cost_date / first payment_date), then by created_at (date + time)
         $sortedCosts = $allCostsInPeriod->sortBy(function ($cost) {
-            if ($cost->cost_type === 'cash') {
-                return $cost->cost_date;
-            }
-            $first = $cost->payments->sortBy('payment_date')->first();
-            return $first ? $first->payment_date : $cost->cost_date;
+            $effectiveDate = $cost->cost_type === 'cash'
+                ? $cost->cost_date
+                : ($cost->payments->sortBy('payment_date')->first()?->payment_date ?? $cost->cost_date);
+            $dateKey = \Carbon\Carbon::parse($effectiveDate)->format('Y-m-d');
+            $timeKey = $cost->created_at?->format('Y-m-d H:i:s') ?? $cost->created_at;
+            return [$dateKey, $timeKey];
         })->values();
 
         $runningBalance = $openingBalancePdf;
