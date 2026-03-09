@@ -5,6 +5,8 @@ namespace App\Livewire\Salary;
 use Livewire\Component;
 use App\Models\Salary;
 use App\Models\Employee;
+use App\Models\EmployeeLoan;
+use App\Models\SalaryComponent;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
@@ -56,11 +58,33 @@ class SalaryIndex extends Component
             }
 
             DB::transaction(function () {
-                $salary = Salary::with('salaryDetails')->findOrFail($this->salaryIdToDelete);
+                $salary = Salary::with(['salaryDetails', 'employee'])->findOrFail($this->salaryIdToDelete);
+                $pkId = SalaryComponent::query()
+                    ->whereRaw('LOWER(name) = ?', ['pinjaman karyawan'])
+                    ->value('id');
+                $pkAbs = 0.0;
+                if ($pkId) {
+                    $pkAbs = (float) $salary->salaryDetails
+                        ->where('salary_component_id', (int) $pkId)
+                        ->sum(fn ($d) => abs((float) $d->total_amount));
+                }
                 $salaryData = [
                     'employee_id' => $salary->employee_id,
                     'salary_date' => $salary->salary_date?->format('Y-m-d'),
                 ];
+
+                // Jika ada potongan pinjaman dari gaji, kembalikan remaining_loan dan hapus record EmployeeLoan terkait
+                if ($pkAbs > 0 && $salary->employee) {
+                    $salary->employee->increment('remaining_loan', $pkAbs);
+                    EmployeeLoan::query()
+                        ->where('employee_id', $salary->employee_id)
+                        ->where('loan_type', 'payment')
+                        ->where('big_cash', true)
+                        ->whereDate('paid_at', $salary->salary_date?->toDateString())
+                        ->where('description', 'like', 'Potongan pinjaman dari gaji periode%')
+                        ->delete();
+                }
+
                 $salary->salaryDetails()->delete();
                 $salary->delete();
                 activity()

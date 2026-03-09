@@ -18,8 +18,8 @@ return new class extends Migration
             // nullable: hanya terisi untuk detail terkait kendaraan (mis. Insentif per mobil)
             $table->foreignId('vehicle_id')->nullable()->constrained();
             $table->integer('quantity')->unsigned()->nullable();
-            $table->decimal('amount', 15, 2)->unsigned();
-            $table->decimal('total_amount', 15, 2)->unsigned();
+            $table->decimal('amount', 15, 2);
+            $table->decimal('total_amount', 15, 2);
             $table->timestamps();
         });
     }

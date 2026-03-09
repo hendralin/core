@@ -58,9 +58,10 @@
                                     foreach ($additionalComponents[$e->id] ?? [] as $add) {
                                         $addComp = $salaryComponents->firstWhere('id', $add['salary_component_id'] ?? null);
                                         $isPk = $addComp && $pinjamanKaryawanComponentId && (int)($add['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
-                                        $amt = $isPk ? (float)($e->remaining_loan ?? 0) : (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
+                                        // Pinjaman Karyawan = potongan (pengurang)
+                                        $amt = $isPk ? (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0)) : (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
                                         $qty = $isPk ? 1 : (int)($add['quantity'] ?? 0);
-                                        $grandTotal += $qty * $amt;
+                                        $grandTotal += $isPk ? (-1 * $qty * $amt) : ($qty * $amt);
                                     }
                                 }
                             }
@@ -85,9 +86,9 @@
                                     foreach ($additionalComponents[$emp->id] ?? [] as $add) {
                                         $addComp = $salaryComponents->firstWhere('id', $add['salary_component_id'] ?? null);
                                         $isPk = $addComp && $pinjamanKaryawanComponentId && (int)($add['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
-                                        $amt = $isPk ? (float)($emp->remaining_loan ?? 0) : (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
+                                        $amt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
                                         $qty = $isPk ? 1 : (int)($add['quantity'] ?? 0);
-                                        $rowTotal += $qty * $amt;
+                                        $rowTotal += $isPk ? (-1 * $qty * $amt) : ($qty * $amt);
                                     }
                                 }
                             @endphp
@@ -127,9 +128,9 @@
                             foreach ($additionalComponents[$emp->id] ?? [] as $add) {
                                 $addComp = $salaryComponents->firstWhere('id', $add['salary_component_id'] ?? null);
                                 $isPk = $addComp && $pinjamanKaryawanComponentId && (int)($add['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
-                                $amt = $isPk ? (float)($emp->remaining_loan ?? 0) : (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
+                                $amt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
                                 $qty = $isPk ? 1 : (int)($add['quantity'] ?? 0);
-                                $empTotal += $qty * $amt;
+                                $empTotal += $isPk ? (-1 * $qty * $amt) : ($qty * $amt);
                             }
                         @endphp
                         <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-4 mb-4 last:mb-0">
@@ -187,7 +188,7 @@
                                                 $isPinjamanKaryawan = $addComp && $pinjamanKaryawanComponentId && (int)$add['salary_component_id'] === (int)$pinjamanKaryawanComponentId;
                                                 if ($isPinjamanKaryawan) {
                                                     $isQuantitative = false;
-                                                    $addAmt = (float) ($emp->remaining_loan ?? 0);
+                                                    $addAmt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
                                                     $addQty = 1;
                                                 } else {
                                                     $addQty = (int) ($add['quantity'] ?? 0);
@@ -195,7 +196,7 @@
                                                     $baseEsc = $emp->employeeSalaryComponents->firstWhere('salary_component_id', $add['salary_component_id'] ?? null);
                                                     $isQuantitative = $baseEsc ? (bool) $baseEsc->is_quantitative : true;
                                                 }
-                                                $addTotal = $addQty * $addAmt;
+                                                $addTotal = $isPinjamanKaryawan ? (-1 * $addQty * $addAmt) : ($addQty * $addAmt);
                                             @endphp
                                             <tr class="bg-gray-50 dark:bg-zinc-700/30">
                                                 <td class="px-3 py-2">

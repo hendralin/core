@@ -360,10 +360,12 @@ class SalaryCreate extends Component
                     $isPinjamanKaryawan = $pkComponentId && $scId === $pkComponentId;
                     $quantity = 1;
                     if ($isPinjamanKaryawan) {
-                        $amount = $this->parseAmount($add['amount'] ?? 0);
-                        if ($amount <= 0) {
+                        $absAmount = abs($this->parseAmount($add['amount'] ?? 0));
+                        if ($absAmount <= 0) {
                             continue;
                         }
+                        // Pinjaman Karyawan adalah potongan (pengurang gaji): simpan nilai negatif di SalaryDetail
+                        $amount = -1 * $absAmount;
                     } else {
                         $quantity = (int) ($add['quantity'] ?? 1);
                         $baseEsc = $employee->employeeSalaryComponents->firstWhere('salary_component_id', $scId);
@@ -381,15 +383,20 @@ class SalaryCreate extends Component
                         'amount' => $amount,
                         'total_amount' => $totalAmount,
                     ]);
-                    if ($isPinjamanKaryawan && $amount > 0) {
-                        $employee->decrement('remaining_loan', $amount);
+                    if ($isPinjamanKaryawan) {
+                        // Kurangi remaining_loan dengan nilai absolut (karena amount salary detail bernilai negatif)
+                        $absAmount = abs((float) $totalAmount);
+                        if ($absAmount <= 0) {
+                            continue;
+                        }
+                        $employee->decrement('remaining_loan', $absAmount);
                         EmployeeLoan::create([
                             'loan_type' => 'payment',
                             'employee_id' => $employee->id,
                             'paid_at' => $salaryDate,
                             'cost_id' => null,
                             'big_cash' => true,
-                            'amount' => $amount,
+                            'amount' => $absAmount,
                             'description' => 'Potongan pinjaman dari gaji periode ' . $salaryDate->format('m/Y'),
                             'created_by' => Auth::id(),
                         ]);

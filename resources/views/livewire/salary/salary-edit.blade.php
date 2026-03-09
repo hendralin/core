@@ -33,12 +33,16 @@
         @php
             $editTotal = 0;
             foreach ($details as $d) {
+                $isPk = isset($pinjamanKaryawanComponentId) && (int)($d['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
                 $amt = (float) preg_replace('/[^0-9.]/', '', (string)($d['amount'] ?? 0));
-                $editTotal += (int)($d['quantity'] ?? 0) * $amt;
+                $qty = (int)($d['quantity'] ?? 0);
+                $editTotal += $isPk ? (-1 * $qty * $amt) : ($qty * $amt);
             }
             foreach ($additionalComponents as $add) {
+                $isPk = isset($pinjamanKaryawanComponentId) && (int)($add['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
                 $amt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
-                $editTotal += (int)($add['quantity'] ?? 0) * $amt;
+                $qty = (int)($add['quantity'] ?? 0);
+                $editTotal += $isPk ? (-1 * $qty * $amt) : ($qty * $amt);
             }
         @endphp
 
@@ -64,15 +68,19 @@
                     <tbody class="divide-y dark:divide-zinc-700">
                         @foreach($details as $index => $d)
                             @php
+                                $isPk = isset($pinjamanKaryawanComponentId) && (int)($d['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
                                 $qty = (int) ($d['quantity'] ?? 0);
                                 $amt = (float) preg_replace('/[^0-9.]/', '', (string)($d['amount'] ?? 0));
-                                $total = $qty * $amt;
+                                $total = $isPk ? (-1 * $qty * $amt) : ($qty * $amt);
                             @endphp
                             <tr>
                                 <td class="px-3 py-2">
                                     <span>{{ $d['component_name'] }}</span>
                                     @if($d['is_quantitative'] ?? false)
                                         <span class="text-xs text-gray-500 dark:text-zinc-400">(kuantitatif)</span>
+                                    @endif
+                                    @if($isPk)
+                                        <span class="text-xs text-amber-600 dark:text-amber-400">(potongan)</span>
                                     @endif
                                 </td>
                                 <td class="px-3 py-2 text-center">
@@ -85,7 +93,7 @@
                                 <td class="px-3 py-2">
                                     <flux:input type="text" wire:model.live="details.{{ $index }}.amount" mask:dynamic="$money($input)" placeholder="0" class="w-full text-right" />
                                 </td>
-                                <td class="px-3 py-2 text-right font-medium">
+                                <td class="px-3 py-2 text-right font-medium @if($isPk) text-amber-700 dark:text-amber-300 @endif">
                                     Rp {{ number_format($total, 0, ',', '.') }}
                                 </td>
                                 <td class="px-3 py-2 w-14">
@@ -95,9 +103,10 @@
                         @endforeach
                         @foreach($additionalComponents as $addIndex => $add)
                             @php
+                                $isPk = isset($pinjamanKaryawanComponentId) && (int)($add['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
                                 $addQty = (int) ($add['quantity'] ?? 0);
                                 $addAmt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
-                                $addTotal = $addQty * $addAmt;
+                                $addTotal = $isPk ? (-1 * $addQty * $addAmt) : ($addQty * $addAmt);
                                 // Cek konfigurasi komponen di karyawan untuk menentukan apakah kuantitatif
                                 $baseEsc = $salary->employee?->employeeSalaryComponents->firstWhere('salary_component_id', $add['salary_component_id'] ?? null);
                                 $isQuantitative = $baseEsc ? (bool) $baseEsc->is_quantitative : true;
@@ -121,7 +130,7 @@
                                 <td class="px-3 py-2">
                                     <flux:input type="text" wire:model.live="additionalComponents.{{ $addIndex }}.amount" mask:dynamic="$money($input)" placeholder="0" class="w-full text-right" />
                                 </td>
-                                <td class="px-3 py-2 text-right font-medium">
+                                <td class="px-3 py-2 text-right font-medium @if($isPk) text-amber-700 dark:text-amber-300 @endif">
                                     Rp {{ number_format($addTotal, 0, ',', '.') }}
                                 </td>
                                 <td class="px-3 py-2 w-14">
