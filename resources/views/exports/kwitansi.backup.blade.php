@@ -249,23 +249,16 @@
         .keterangan-city {
             font-size: 8pt;
             margin-bottom: 3px;
-            margin-right: 50px;
+            margin-right: 135px;
         }
 
         .keterangan-signature {
-            margin-right: 30px;
+            margin-top: 80px;
+            margin-right: 40px;
             display: inline-block;
             min-width: 100px;
             text-align: center;
             font-size: 7pt;
-        }
-
-        .keterangan-signature-img {
-            max-height: 90px;
-            max-width: 180px;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto 5px;
         }
 
         .footer {
@@ -347,13 +340,6 @@
                             $mimeType = mime_content_type($logoPath);
                             $logoData = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
                         }
-                    }
-                    $signatureData = null;
-                    $signaturePath = public_path('logos/signature.png');
-                    if (file_exists($signaturePath)) {
-                        $imageData = file_get_contents($signaturePath);
-                        $mimeType = mime_content_type($signaturePath);
-                        $signatureData = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
                     }
                 @endphp
                 <div class="header">
@@ -476,13 +462,8 @@
                                 </div>
                             </div>
                             <div class="keterangan-right">
-                                <div class="keterangan-city">Palembang, {{ $paymentReceipt->payment_date ? \Carbon\Carbon::parse($paymentReceipt->payment_date)->locale('id')->translatedFormat('j F Y') : '-' }}</div>
-                                <div class="keterangan-signature">
-                                    @if($signatureData)
-                                        <img src="{{ $signatureData }}" alt="Signature" class="keterangan-signature-img" />
-                                    @endif
-                                    <p>FEDI SUDANTO</p>
-                                </div>
+                                <div class="keterangan-city">Palembang</div>
+                                <div class="keterangan-signature">(...................................)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(...................................)</div>
                             </div>
                         </div>
                     </div>
@@ -621,13 +602,8 @@
                                 </div>
                             </div>
                             <div class="keterangan-right">
-                                <div class="keterangan-city">Palembang, {{ $paymentReceipt->payment_date ? \Carbon\Carbon::parse($paymentReceipt->payment_date)->locale('id')->translatedFormat('j F Y') : '-' }}</div>
-                                <div class="keterangan-signature">
-                                    @if($signatureData)
-                                        <img src="{{ $signatureData }}" alt="Signature" class="keterangan-signature-img" />
-                                    @endif
-                                    <p>FEDI SUDANTO</p>
-                                </div>
+                                <div class="keterangan-city">Palembang</div>
+                                <div class="keterangan-signature">(...................................)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(...................................)</div>
                             </div>
                         </div>
                     </div>
