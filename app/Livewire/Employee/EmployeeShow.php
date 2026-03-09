@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee;
 
 use App\Models\Salary;
+use App\Models\EmployeeLoan;
 use Livewire\Component;
 use App\Models\Employee;
 use Livewire\WithPagination;
@@ -66,6 +67,16 @@ class EmployeeShow extends Component
             'is_filtered' => !empty($this->search)
         ];
 
+        // Histori pinjaman: semua record (pinjaman + pembayaran) untuk karyawan ini
+        $loanHistory = EmployeeLoan::where('employee_id', $this->employee->id)
+            ->with(['cost.warehouse'])
+            ->orderBy('paid_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+        $totalLoans = $this->employee->employeeLoans()->sum('amount');
+        $totalPayments = $this->employee->employeeLoanPayments()->sum('amount');
+        $remainingLoan = (float) ($this->employee->remaining_loan ?? 0);
+
         return view('livewire.employee.employee-show', compact(
             'totalEmployeesCount',
             'employeeSalaryComponents',
@@ -73,6 +84,10 @@ class EmployeeShow extends Component
             'paginationInfo',
             'employeeTotalSalaryComponents',
             'employeeTotalSalaries',
+            'loanHistory',
+            'totalLoans',
+            'totalPayments',
+            'remainingLoan',
         ));
     }
 

@@ -24,9 +24,12 @@ class EmployeeIndex extends Component
     public $sortDirection = 'asc';
     public $perPage = 10;
 
+    /** Filter: '' = semua, 'has_loan' = hanya yang punya sisa pinjaman > 0 */
+    public $loanFilter = '';
+
     public function updating($field)
     {
-        if (in_array($field, ['search', 'perPage'])) {
+        if (in_array($field, ['search', 'perPage', 'loanFilter'])) {
             $this->resetPage();
         }
     }
@@ -108,6 +111,7 @@ class EmployeeIndex extends Component
                         });
                 })
             )
+            ->when($this->loanFilter === 'has_loan', fn($q) => $q->where('remaining_loan', '>', 0))
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 

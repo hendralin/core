@@ -2,7 +2,7 @@
     use Illuminate\Support\Str;
 @endphp
 
-<div>
+<div x-data x-init="if (window.location.hash === '#histori-pinjaman') { $nextTick(() => document.getElementById('histori-pinjaman')?.scrollIntoView({ behavior: 'smooth', block: 'start' })) }">
     <div class="relative mb-6 w-full">
         <flux:heading size="xl" level="1">{{ __('Show Employee') }}</flux:heading>
         <flux:subheading size="lg" class="mb-6">{{ __('Employee details and salary information') }}</flux:subheading>
@@ -81,6 +81,111 @@
                         @endif
                     </div>
                 </div>
+
+                <!-- Histori Pinjaman -->
+                @if(isset($loanHistory) && ($loanHistory->isNotEmpty() || ($remainingLoan ?? 0) > 0))
+                <div id="histori-pinjaman" class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6 scroll-mt-4">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                                <flux:icon.banknotes class="w-5 h-5" />
+                            </div>
+                            <div>
+                                <flux:heading size="lg">Histori Pinjaman</flux:heading>
+                                <flux:subheading size="sm" class="text-gray-500 dark:text-zinc-400">Pinjaman dan pembayaran karyawan</flux:subheading>
+                            </div>
+                        </div>
+                        @can('employee-loan-payment.create')
+                            <flux:button variant="ghost" size="sm" href="{{ route('employee-loan-payments.index') }}" wire:navigate icon="arrow-top-right-on-square">
+                                Kelola Pembayaran
+                            </flux:button>
+                        @endcan
+                    </div>
+
+                    <!-- Ringkasan -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4">
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Pinjaman</p>
+                            <p class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Rp {{ number_format($totalLoans ?? 0, 0, ',', '.') }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Seluruh waktu</p>
+                        </div>
+                        <div class="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4">
+                            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Pembayaran</p>
+                            <p class="mt-1 text-lg font-semibold text-emerald-600 dark:text-emerald-400">Rp {{ number_format($totalPayments ?? 0, 0, ',', '.') }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Yang sudah dibayar</p>
+                        </div>
+                        <div class="rounded-xl border-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/20 p-4">
+                            <p class="text-xs font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wider">Sisa Pinjaman</p>
+                            <p class="mt-1 text-xl font-bold text-amber-700 dark:text-amber-300">Rp {{ number_format($remainingLoan ?? 0, 0, ',', '.') }}</p>
+                            <p class="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">Saat ini</p>
+                        </div>
+                    </div>
+
+                    <!-- Daftar transaksi -->
+                    @if($loanHistory->isNotEmpty())
+                    <div class="border border-gray-200 dark:border-zinc-600 rounded-lg overflow-hidden">
+                        <div class="px-4 py-3 bg-gray-50 dark:bg-zinc-700/50 border-b border-gray-200 dark:border-zinc-600">
+                            <flux:heading size="sm">Riwayat Transaksi</flux:heading>
+                        </div>
+                        <div class="divide-y divide-gray-200 dark:divide-zinc-700 max-h-80 overflow-y-auto">
+                            @foreach($loanHistory as $record)
+                            <div class="flex items-start gap-4 px-4 py-3 hover:bg-gray-50/80 dark:hover:bg-zinc-700/30 transition-colors">
+                                <div class="shrink-0 mt-0.5">
+                                    @if($record->loan_type === 'loan')
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center" title="Pinjaman diterima">
+                                            <flux:icon.arrow-down-tray class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                    @else
+                                        <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center" title="Pembayaran">
+                                            <flux:icon.arrow-up-tray class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="font-medium text-gray-900 dark:text-white">
+                                            @if($record->loan_type === 'loan')
+                                                Pinjaman diterima
+                                            @else
+                                                Pembayaran pinjaman
+                                            @endif
+                                        </span>
+                                        <span class="text-xs text-gray-500 dark:text-zinc-400">{{ $record->paid_at->format('d M Y') }}</span>
+                                    </div>
+                                    @if($record->description)
+                                        <p class="text-sm text-gray-600 dark:text-zinc-400 mt-0.5 line-clamp-2">{{ $record->description }}</p>
+                                    @endif
+                                    <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                                        @if($record->loan_type === 'loan')
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                                @if($record->big_cash) Kas Besar @else {{ $record->cost?->warehouse?->name ?? 'Kas Kecil' }} @endif
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300">
+                                                @if($record->big_cash) Kas Besar @else {{ $record->cost?->warehouse?->name ?? 'Kas' }} @endif
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="shrink-0 text-right">
+                                    @if($record->loan_type === 'loan')
+                                        <span class="font-semibold text-blue-600 dark:text-blue-400">+ Rp {{ number_format($record->amount, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="font-semibold text-emerald-600 dark:text-emerald-400">− Rp {{ number_format($record->amount, 0, ',', '.') }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @else
+                    <div class="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-900/10 p-4 text-center">
+                        <flux:icon.banknotes class="mx-auto w-10 h-10 text-amber-500 dark:text-amber-400" />
+                        <flux:text class="mt-2 text-amber-800 dark:text-amber-200">Belum ada riwayat transaksi. Sisa pinjaman tercatat Rp {{ number_format($remainingLoan ?? 0, 0, ',', '.') }}.</flux:text>
+                    </div>
+                    @endif
+                </div>
+                @endif
 
                 <!-- Employee Salary Components -->
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">

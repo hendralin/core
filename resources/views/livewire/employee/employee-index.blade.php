@@ -41,7 +41,7 @@
     </div>
 
     <!-- Filter Section -->
-    <div class="grid grid-cols-1 md:grid-cols-4 mb-3 mt-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 mt-4 items-end">
         <div class="flex items-center gap-2 w-44 mb-2 md:mb-0">
             <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">Show:</label>
             <flux:select id="per-page" wire:model.live="perPage">
@@ -52,10 +52,16 @@
             <label for="per-page" class="text-sm text-gray-700 dark:text-zinc-300">entries</label>
         </div>
         <flux:spacer class="hidden md:inline" />
-        <flux:spacer class="hidden md:inline" />
-        <div class="flex items-center">
-            <label for="search" class="text-sm text-gray-700 dark:text-zinc-300 mr-2">Search:</label>
-            <flux:input wire:model.live.debounce.500ms="search" placeholder="Employees..." clearable />
+        <div class="flex items-center col-span-1">
+            <label for="loan-filter" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mr-2">Pinjaman</label>
+            <flux:select id="loan-filter" wire:model.live="loanFilter" class="w-full">
+                <flux:select.option value="">Semua</flux:select.option>
+                <flux:select.option value="has_loan">Ada sisa pinjaman</flux:select.option>
+            </flux:select>
+        </div>
+        <div class="flex items-center col-span-1">
+            <label for="search" class="text-sm text-gray-700 dark:text-zinc-300 mr-2 shrink-0">Search:</label>
+            <flux:input wire:model.live.debounce.500ms="search" placeholder="Nama, posisi, email..." clearable class="w-full" />
         </div>
     </div>
 
@@ -96,6 +102,7 @@
                         </div>
                     </th>
                     <th scope="col" class="px-4 py-3 w-20">Status</th>
+                    <th scope="col" class="px-4 py-3 w-36">Sisa Pinjaman</th>
                     <th scope="col" class="px-4 py-3 w-32">
                         <div class="flex items-center cursor-pointer @if ($sortField == 'employee_salary_components_count') {{ $sortDirection }} @endif" wire:click="sortBy('employee_salary_components_count')">
                             Salary Comp.
@@ -164,6 +171,23 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-4 py-2 whitespace-nowrap">
+                                @php
+                                    $remainingLoan = (float) ($employee->remaining_loan ?? 0);
+                                @endphp
+                                @if($remainingLoan > 0)
+                                    <flux:tooltip content="Lihat Histori Pinjaman">
+                                        <a href="{{ route('employees.show', $employee->id) }}#histori-pinjaman" wire:navigate class="inline-flex items-center gap-1.5 group">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                                Rp {{ number_format($remainingLoan, 0, ',', '.') }}
+                                            </span>
+                                            <flux:icon.chevron-right class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </a>
+                                    </flux:tooltip>
+                                @else
+                                    <span class="text-xs text-gray-400 dark:text-zinc-500">—</span>
+                                @endif
+                            </td>
                             <td class="px-4 py-2 text-center">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                     @if($employee->employee_salary_components_count > 0)
@@ -203,7 +227,7 @@
                     @endforeach
                 @else
                     <tr class="odd:bg-white odd:dark:bg-zinc-900 even:bg-gray-50 even:dark:bg-zinc-800 border-b dark:border-zinc-700 border-gray-200">
-                        <td class="px-4 py-2 text-gray-600 dark:text-zinc-300 text-center" colspan="8">
+                        <td class="px-4 py-2 text-gray-600 dark:text-zinc-300 text-center" colspan="9">
                             @if(isset($search) && !empty($search))
                                 No results found for "{{ $search }}"
                             @else
