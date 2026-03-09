@@ -3,6 +3,8 @@
 namespace App\Livewire\Employee;
 
 use App\Models\Salary;
+use App\Models\Vehicle;
+use App\Models\Salesman;
 use App\Models\EmployeeLoan;
 use Livewire\Component;
 use App\Models\Employee;
@@ -77,6 +79,54 @@ class EmployeeShow extends Component
         $totalPayments = $this->employee->employeeLoanPayments()->sum('amount');
         $remainingLoan = (float) ($this->employee->remaining_loan ?? 0);
 
+        // Data penjualan mobil khusus untuk employee Marketing (position_id = 1) yang terhubung dengan salesman via user_id
+        $marketingSalesSummary = null;
+        $marketingSales = collect();
+
+        if ((int) ($this->employee->position_id ?? 0) === 1 && $this->employee->user_id) {
+            $salesman = Salesman::where('user_id', $this->employee->user_id)->first();
+
+            if ($salesman) {
+                $baseSalesQuery = Vehicle::query()
+                    ->where('salesman_id', $salesman->id)
+                    ->whereNotNull('selling_date');
+
+                // Ringkasan total
+                $totalVehiclesSold = (clone $baseSalesQuery)->count();
+                $totalSalesAmount = (clone $baseSalesQuery)->sum('selling_price');
+
+                // Ringkasan bulan berjalan
+                $currentYear = now()->year;
+                $currentMonth = now()->month;
+
+                $monthlySalesQuery = (clone $baseSalesQuery)
+                    ->whereYear('selling_date', $currentYear)
+                    ->whereMonth('selling_date', $currentMonth);
+
+                $vehiclesSoldThisMonth = (clone $monthlySalesQuery)->count();
+                $salesThisMonth = (clone $monthlySalesQuery)->sum('selling_price');
+
+                $averageSellingPrice = $totalVehiclesSold > 0
+                    ? $totalSalesAmount / $totalVehiclesSold
+                    : 0;
+
+                $marketingSalesSummary = [
+                    'total_vehicles_sold' => $totalVehiclesSold,
+                    'total_sales_amount' => $totalSalesAmount,
+                    'vehicles_sold_this_month' => $vehiclesSoldThisMonth,
+                    'sales_this_month' => $salesThisMonth,
+                    'average_selling_price' => $averageSellingPrice,
+                ];
+
+                // Ambil beberapa penjualan terbaru untuk ditampilkan
+                $marketingSales = (clone $baseSalesQuery)
+                    ->with(['brand', 'vehicle_model', 'type'])
+                    ->orderBy('selling_date', 'desc')
+                    ->limit(5)
+                    ->get();
+            }
+        }
+
         return view('livewire.employee.employee-show', compact(
             'totalEmployeesCount',
             'employeeSalaryComponents',
@@ -88,6 +138,8 @@ class EmployeeShow extends Component
             'totalLoans',
             'totalPayments',
             'remainingLoan',
+            'marketingSalesSummary',
+            'marketingSales',
         ));
     }
 

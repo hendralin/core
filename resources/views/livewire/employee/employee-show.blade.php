@@ -329,6 +329,113 @@
 
             <!-- Statistics Sidebar -->
             <div class="space-y-6">
+                @if(isset($marketingSalesSummary) && $marketingSalesSummary && (int) ($employee->position_id ?? 0) === 1)
+                <div class="bg-white dark:bg-zinc-800 rounded-lg border border-blue-200 dark:border-blue-700 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <flux:heading size="lg">Marketing Performance</flux:heading>
+                            <flux:subheading size="sm" class="text-gray-500 dark:text-zinc-400">
+                                Ringkasan penjualan mobil oleh karyawan ini
+                            </flux:subheading>
+                        </div>
+                        <div class="shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                                <flux:icon.currency-dollar class="w-5 h-5 text-blue-600 dark:text-blue-300" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Total Unit Terjual</p>
+                                <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                                    {{ number_format($marketingSalesSummary['total_vehicles_sold'] ?? 0, 0, ',', '.') }} unit
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Total Nilai Penjualan</p>
+                                <p class="mt-1 text-lg font-semibold text-emerald-600 dark:text-emerald-400">
+                                    Rp {{ number_format($marketingSalesSummary['total_sales_amount'] ?? 0, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Unit Terjual Bulan Ini</p>
+                                <p class="mt-1 text-base font-semibold text-gray-900 dark:text-white">
+                                    {{ number_format($marketingSalesSummary['vehicles_sold_this_month'] ?? 0, 0, ',', '.') }} unit
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Rata-rata Harga Jual</p>
+                                <p class="mt-1 text-base font-semibold text-gray-900 dark:text-white">
+                                    Rp {{ number_format($marketingSalesSummary['average_selling_price'] ?? 0, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if(isset($marketingSales) && $marketingSales->isNotEmpty())
+                    <div class="mt-5 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                        <div class="flex items-center justify-between mb-3">
+                            <flux:heading size="sm">Penjualan Terbaru</flux:heading>
+                            <span class="text-xs text-gray-500 dark:text-zinc-400">
+                                {{ $marketingSales->count() }} transaksi terakhir
+                            </span>
+                        </div>
+
+                        <div class="space-y-3">
+                            @foreach($marketingSales as $sale)
+                            <div class="flex items-start justify-between rounded-md border border-gray-100 dark:border-zinc-700 px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-colors">
+                                <div class="min-w-0 mr-2">
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                        <a href="{{ route('vehicles.show', $sale->id) }}" wire:navigate class="hover:underline">
+                                            {{ $sale->police_number ?? 'N/A' }}
+                                        </a>
+                                    </p>
+                                    <p class="text-xs text-gray-600 dark:text-zinc-400 truncate">
+                                        {{ $sale->brand?->name }} {{ $sale->vehicle_model?->name }} {{ $sale->type?->name }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-zinc-500 mt-0.5">
+                                        @if($sale->selling_date)
+                                            {{ \Carbon\Carbon::parse($sale->selling_date)->format('d M Y') }}
+                                        @else
+                                            -
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                                        Rp {{ number_format($sale->selling_price ?? 0, 0, ',', '.') }}
+                                    </p>
+                                    @if($sale->payment_type)
+                                    <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-0.5 uppercase tracking-wide">
+                                        {{ $sale->payment_type == 1 || $sale->payment_type === '1' || $sale->payment_type === 'cash' ? 'Cash' : 'Kredit' }}
+                                    </p>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @else
+                    <div class="mt-4 pt-3 border-t border-gray-200 dark:border-zinc-700">
+                        <p class="text-xs text-gray-500 dark:text-zinc-400">
+                            Belum ada data penjualan mobil yang tercatat untuk karyawan ini.
+                        </p>
+                    </div>
+                    @endif
+                </div>
+                @endif
+
                 <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                     <flux:heading size="lg" class="mb-4">Statistics</flux:heading>
 
