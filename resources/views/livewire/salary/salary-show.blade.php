@@ -97,8 +97,92 @@
             </div>
         </div>
 
-        <!-- Ringkasan Insentif -->
+        <!-- Ringkasan Insentif & Penjualan (Marketing) -->
         <div class="space-y-3">
+            @if(isset($marketingSalesSummaryForPeriod) && $marketingSalesSummaryForPeriod && (int) ($salary->employee?->position_id ?? 0) === 1)
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-blue-200 dark:border-blue-700 p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <flux:heading size="sm">Penjualan Mobil Periode Ini</flux:heading>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400">
+                            {{ $salary->salary_date ? $salary->salary_date->format('F Y') : '-' }}
+                        </p>
+                    </div>
+                    <div class="shrink-0">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                            <flux:icon.currency-dollar class="w-4 h-4 text-blue-600 dark:text-blue-300" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 mb-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Unit Terjual</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                            {{ number_format($marketingSalesSummaryForPeriod['vehicles_sold_in_period'] ?? 0, 0, ',', '.') }} unit
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Total Nilai Penjualan</span>
+                        <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                            Rp {{ number_format($marketingSalesSummaryForPeriod['total_sales_in_period'] ?? 0, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Rata-rata Harga Jual</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                            Rp {{ number_format($marketingSalesSummaryForPeriod['average_selling_price_in_period'] ?? 0, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+
+                @if(isset($marketingSalesForPeriod) && $marketingSalesForPeriod->isNotEmpty())
+                <div class="border-t border-gray-200 dark:border-zinc-700 pt-2 mt-2">
+                    <p class="text-[11px] font-semibold text-gray-500 dark:text-zinc-400 mb-1 uppercase tracking-wide">
+                        Detail Unit Terjual
+                    </p>
+                    <ul class="space-y-1.5 text-xs text-gray-700 dark:text-zinc-300 max-h-40 overflow-y-auto">
+                        @foreach($marketingSalesForPeriod as $sale)
+                            @php
+                                $vehicleLabel = trim(implode(' ', array_filter([
+                                    $sale->brand?->name,
+                                    $sale->vehicle_model?->name,
+                                    $sale->year,
+                                ])));
+                            @endphp
+                            <li class="flex justify-between gap-2">
+                                <div class="min-w-0">
+                                    <p class="truncate font-medium">
+                                        <a href="{{ route('vehicles.show', $sale->id) }}" wire:navigate class="hover:underline">
+                                            {{ $sale->police_number ?? 'N/A' }}
+                                        </a>
+                                    </p>
+                                    <p class="truncate text-[11px] text-gray-500 dark:text-zinc-400">
+                                        {{ $vehicleLabel }}
+                                    </p>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <p class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                        Rp {{ number_format($sale->selling_price ?? 0, 0, ',', '.') }}
+                                    </p>
+                                    @if($sale->selling_date)
+                                        <p class="text-[10px] text-gray-500 dark:text-zinc-400">
+                                            {{ \Carbon\Carbon::parse($sale->selling_date)->format('d M') }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+                @else
+                <p class="text-xs text-gray-500 dark:text-zinc-400">
+                    Tidak ada kendaraan yang terjual oleh karyawan ini pada periode gaji ini.
+                </p>
+                @endif
+            </div>
+            @endif
+
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-4">
                 <div class="flex items-center justify-between mb-2">
                     <flux:heading size="sm">Ringkasan Insentif</flux:heading>
