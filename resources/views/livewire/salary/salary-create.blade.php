@@ -56,8 +56,11 @@
                                         $grandTotal += (int)($in['quantity'] ?? 0) * $amt;
                                     }
                                     foreach ($additionalComponents[$e->id] ?? [] as $add) {
-                                        $amt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
-                                        $grandTotal += (int)($add['quantity'] ?? 0) * $amt;
+                                        $addComp = $salaryComponents->firstWhere('id', $add['salary_component_id'] ?? null);
+                                        $isPk = $addComp && $pinjamanKaryawanComponentId && (int)($add['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
+                                        $amt = $isPk ? (float)($e->remaining_loan ?? 0) : (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
+                                        $qty = $isPk ? 1 : (int)($add['quantity'] ?? 0);
+                                        $grandTotal += $qty * $amt;
                                     }
                                 }
                             }
@@ -80,8 +83,11 @@
                                         $rowTotal += (int)($in['quantity'] ?? 0) * $amt;
                                     }
                                     foreach ($additionalComponents[$emp->id] ?? [] as $add) {
-                                        $amt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
-                                        $rowTotal += (int)($add['quantity'] ?? 0) * $amt;
+                                        $addComp = $salaryComponents->firstWhere('id', $add['salary_component_id'] ?? null);
+                                        $isPk = $addComp && $pinjamanKaryawanComponentId && (int)($add['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
+                                        $amt = $isPk ? (float)($emp->remaining_loan ?? 0) : (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
+                                        $qty = $isPk ? 1 : (int)($add['quantity'] ?? 0);
+                                        $rowTotal += $qty * $amt;
                                     }
                                 }
                             @endphp
@@ -119,8 +125,11 @@
                                 $empTotal += (int)($in['quantity'] ?? 0) * $amt;
                             }
                             foreach ($additionalComponents[$emp->id] ?? [] as $add) {
-                                $amt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
-                                $empTotal += (int)($add['quantity'] ?? 0) * $amt;
+                                $addComp = $salaryComponents->firstWhere('id', $add['salary_component_id'] ?? null);
+                                $isPk = $addComp && $pinjamanKaryawanComponentId && (int)($add['salary_component_id'] ?? 0) === (int)$pinjamanKaryawanComponentId;
+                                $amt = $isPk ? (float)($emp->remaining_loan ?? 0) : (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
+                                $qty = $isPk ? 1 : (int)($add['quantity'] ?? 0);
+                                $empTotal += $qty * $amt;
                             }
                         @endphp
                         <div class="border border-gray-200 dark:border-zinc-600 rounded-lg p-4 mb-4 last:mb-0">
@@ -174,23 +183,34 @@
                                         @endforeach
                                         @foreach($additionalComponents[$emp->id] ?? [] as $addIndex => $add)
                                             @php
-                                                $addQty = (int) ($add['quantity'] ?? 0);
-                                                $addAmt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
-                                                $addTotal = $addQty * $addAmt;
                                                 $addComp = $salaryComponents->firstWhere('id', $add['salary_component_id']);
-                                                // Cek apakah komponen ini punya konfigurasi non-kuantitatif di karyawan
-                                                $baseEsc = $emp->employeeSalaryComponents->firstWhere('salary_component_id', $add['salary_component_id'] ?? null);
-                                                $isQuantitative = $baseEsc ? (bool) $baseEsc->is_quantitative : true;
+                                                $isPinjamanKaryawan = $addComp && $pinjamanKaryawanComponentId && (int)$add['salary_component_id'] === (int)$pinjamanKaryawanComponentId;
+                                                if ($isPinjamanKaryawan) {
+                                                    $isQuantitative = false;
+                                                    $addAmt = (float) ($emp->remaining_loan ?? 0);
+                                                    $addQty = 1;
+                                                } else {
+                                                    $addQty = (int) ($add['quantity'] ?? 0);
+                                                    $addAmt = (float) preg_replace('/[^0-9.]/', '', (string)($add['amount'] ?? 0));
+                                                    $baseEsc = $emp->employeeSalaryComponents->firstWhere('salary_component_id', $add['salary_component_id'] ?? null);
+                                                    $isQuantitative = $baseEsc ? (bool) $baseEsc->is_quantitative : true;
+                                                }
+                                                $addTotal = $addQty * $addAmt;
                                             @endphp
                                             <tr class="bg-gray-50 dark:bg-zinc-700/30">
                                                 <td class="px-3 py-2">
-                                                    @if(($add['is_auto'] ?? false) && !empty($add['vehicle_id']))
+                                                    @if(($add['is_auto_loan'] ?? false))
+                                                        <div class="whitespace-nowrap">
+                                                            <span class="font-medium text-gray-800 dark:text-zinc-100">{{ $addComp?->name ?? 'Pinjaman Karyawan' }}</span>
+                                                            <span class="text-xs text-gray-500 dark:text-zinc-400">(auto, sisa pinjaman)</span>
+                                                        </div>
+                                                    @elseif(($add['is_auto'] ?? false) && !empty($add['vehicle_id']))
                                                         <div class="whitespace-nowrap">
                                                             <span class="font-medium text-gray-800 dark:text-zinc-100">{{ $add['vehicle_label'] ?? ($addComp?->name ?? 'Insentif') }}</span>
                                                             <span class="text-xs text-gray-500 dark:text-zinc-400">(auto)</span>
                                                         </div>
                                                     @else
-                                                        <flux:select wire:model.live="additionalComponents.{{ $emp->id }}.{{ $addIndex }}.salary_component_id" class="w-full text-sm">
+                                                        <flux:select wire:model.live="additionalComponents.{{ $emp->id }}.{{ $addIndex }}.salary_component_id" wire:change="syncPinjamanAmount({{ $emp->id }}, {{ $addIndex }})" class="w-full text-sm">
                                                             <flux:select.option value="">-- Pilih komponen --</flux:select.option>
                                                             @foreach($salaryComponents ?? [] as $sc)
                                                                 <flux:select.option value="{{ $sc->id }}">{{ $sc->name }}</flux:select.option>
@@ -199,7 +219,7 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-3 py-2 text-center">
-                                                    @if($add['is_auto'] ?? false)
+                                                    @if(($add['is_auto'] ?? false) || ($add['is_auto_loan'] ?? false))
                                                         <span class="text-gray-500 dark:text-zinc-400">1</span>
                                                     @elseif(!$isQuantitative)
                                                         <span class="text-gray-500 dark:text-zinc-400">1</span>
@@ -208,13 +228,21 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-3 py-2">
-                                                    <flux:input type="text" wire:model.live="additionalComponents.{{ $emp->id }}.{{ $addIndex }}.amount" mask:dynamic="$money($input)" placeholder="0" class="w-full text-right" />
+                                                    @if($isPinjamanKaryawan)
+                                                        <flux:input type="text" wire:model.live="additionalComponents.{{ $emp->id }}.{{ $addIndex }}.amount" mask:dynamic="$money($input)" placeholder="0" class="w-full text-right" />
+                                                        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Maks. Rp {{ number_format($emp->remaining_loan ?? 0, 0, ',', '.') }} (sisa pinjaman)</p>
+                                                        @error('additionalComponents.'.$emp->id.'.'.$addIndex.'.amount')
+                                                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p>
+                                                        @enderror
+                                                    @else
+                                                        <flux:input type="text" wire:model.live="additionalComponents.{{ $emp->id }}.{{ $addIndex }}.amount" mask:dynamic="$money($input)" placeholder="0" class="w-full text-right" />
+                                                    @endif
                                                 </td>
                                                 <td class="px-3 py-2 text-right font-medium">
                                                     Rp {{ number_format($addTotal, 0, ',', '.') }}
                                                 </td>
                                                 <td class="px-3 py-2 w-14">
-                                                    @if(!($add['is_auto'] ?? false))
+                                                    @if(!(($add['is_auto'] ?? false) && !empty($add['vehicle_id'])))
                                                         <flux:button type="button" variant="ghost" size="xs" wire:click="removeAdditionalComponent({{ $emp->id }}, {{ $addIndex }})" class="text-red-500 hover:text-red-700 cursor-pointer" icon="x-mark" />
                                                     @endif
                                                 </td>

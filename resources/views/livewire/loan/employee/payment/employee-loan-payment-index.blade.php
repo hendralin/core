@@ -189,18 +189,25 @@
                                     </flux:button>
                                 @endcan
 
+                                @php
+                                    $isSalaryDeduction = str_starts_with((string) ($payment->description ?? ''), 'Potongan pinjaman dari gaji periode');
+                                @endphp
                                 @can('employee-loan-payment.edit')
-                                    <flux:button variant="ghost" size="xs" square href="{{ route('employee-loan-payments.edit', $payment) }}" wire:navigate tooltip="Edit">
-                                        <flux:icon.pencil-square variant="mini" class="text-indigo-500 dark:text-indigo-300" />
-                                    </flux:button>
+                                    @if(!$isSalaryDeduction)
+                                        <flux:button variant="ghost" size="xs" square href="{{ route('employee-loan-payments.edit', $payment) }}" wire:navigate tooltip="Edit">
+                                            <flux:icon.pencil-square variant="mini" class="text-indigo-500 dark:text-indigo-300" />
+                                        </flux:button>
+                                    @endif
                                 @endcan
 
                                 @can('employee-loan-payment.delete')
-                                    <flux:modal.trigger name="delete-payment">
-                                        <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setPaymentToDelete({{ $payment->id }})" tooltip="Hapus">
-                                            <flux:icon.trash variant="mini" class="text-red-500 dark:text-red-300" />
-                                        </flux:button>
-                                    </flux:modal.trigger>
+                                    @if(!$isSalaryDeduction)
+                                        <flux:modal.trigger name="delete-payment">
+                                            <flux:button variant="ghost" size="xs" square class="cursor-pointer" wire:click="setPaymentToDelete({{ $payment->id }})" tooltip="Hapus">
+                                                <flux:icon.trash variant="mini" class="text-red-500 dark:text-red-300" />
+                                            </flux:button>
+                                        </flux:modal.trigger>
+                                    @endif
                                 @endcan
                             </td>
                         </tr>

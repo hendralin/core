@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use App\Models\Salary;
 use App\Models\SalaryDetail;
 use App\Models\SalaryComponent;
+use App\Models\EmployeeLoan;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,8 @@ class SalaryCreate extends Component
     public $additionalComponents = [];
 
     protected ?int $insentifComponentId = null;
+
+    protected ?int $pinjamanKaryawanComponentId = null;
 
     public function mount()
     {
@@ -117,6 +120,47 @@ class SalaryCreate extends Component
         return $this->insentifComponentId;
     }
 
+    protected function getPinjamanKaryawanComponentId(): ?int
+    {
+        if ($this->pinjamanKaryawanComponentId !== null) {
+            return $this->pinjamanKaryawanComponentId;
+        }
+        $sc = SalaryComponent::query()
+            ->whereRaw('LOWER(name) = ?', ['pinjaman karyawan'])
+            ->first();
+        $this->pinjamanKaryawanComponentId = $sc?->id ?? null;
+        return $this->pinjamanKaryawanComponentId;
+    }
+
+    /**
+     * Parse amount from form input (supports raw number or Indonesian formatted string e.g. "1.234.567").
+     */
+    protected function parseAmount($raw): float
+    {
+        $s = preg_replace('/[^0-9.]/', '', (string) ($raw ?? 0));
+        $s = str_replace('.', '', $s);
+        return $s !== '' ? (float) $s : 0.0;
+    }
+
+    public function syncPinjamanAmount($employeeId, $addIndex): void
+    {
+        $employeeId = (int) $employeeId;
+        $addIndex = (int) $addIndex;
+        $pkId = $this->getPinjamanKaryawanComponentId();
+        if (!$pkId || !isset($this->additionalComponents[$employeeId][$addIndex])) {
+            return;
+        }
+        $scId = (int) ($this->additionalComponents[$employeeId][$addIndex]['salary_component_id'] ?? 0);
+        if ($scId === $pkId) {
+            $employee = Employee::find($employeeId);
+            if ($employee) {
+                $remainingLoan = (float) $employee->remaining_loan;
+                $this->additionalComponents[$employeeId][$addIndex]['amount'] = number_format($remainingLoan, 0, ',', ',');
+                $this->additionalComponents[$employeeId][$addIndex]['quantity'] = 1;
+            }
+        }
+    }
+
     protected function buildVehicleLabel(Vehicle $v): string
     {
         $parts = array_filter([
@@ -130,17 +174,13 @@ class SalaryCreate extends Component
 
     protected function syncAutoInsentifVehicles(): void
     {
-        $insentifId = $this->getInsentifComponentId();
-        if (!$insentifId) {
-            // Jika komponen Insentif belum ada, tidak ada auto insert
-            return;
-        }
-
         $month = (int) $this->period_month;
         $year = (int) $this->period_year;
+        $selectedIds = collect($this->employee_ids)->map(fn ($id) => (int) $id)->all();
+        $pkId = $this->getPinjamanKaryawanComponentId();
+        $insentifId = $this->getInsentifComponentId();
 
         // Bersihkan data karyawan yang tidak lagi dipilih
-        $selectedIds = collect($this->employee_ids)->map(fn ($id) => (int) $id)->all();
         foreach (array_keys($this->additionalComponents) as $empId) {
             if (!in_array((int) $empId, $selectedIds, true)) {
                 unset($this->additionalComponents[$empId]);
@@ -149,51 +189,70 @@ class SalaryCreate extends Component
 
         foreach ($selectedIds as $empId) {
             $employee = Employee::with(['employeeSalaryComponents', 'user'])->find($empId);
-            if (!$employee || !$employee->user_id) {
+            if (!$employee) {
                 continue;
             }
-            $salesman = Salesman::where('user_id', $employee->user_id)->first();
-            if (!$salesman) {
-                continue;
-            }
-
-            $vehicles = Vehicle::query()
-                ->with(['brand', 'vehicle_model'])
-                ->where('salesman_id', $salesman->id)
-                ->where('status', '0') // 0 = sold
-                ->whereNotNull('selling_date')
-                ->whereYear('selling_date', $year)
-                ->whereMonth('selling_date', $month)
-                ->orderBy('selling_date')
-                ->get();
-
-            // amount default untuk insentif: dari konfigurasi komponen gaji karyawan (EmployeeSalaryComponent)
-            $defaultInsentifAmount = (float) ($employee->employeeSalaryComponents->firstWhere('salary_component_id', $insentifId)?->amount ?? 0);
 
             $existing = $this->additionalComponents[$empId] ?? [];
-            $manualRows = array_values(array_filter($existing, fn ($r) => !($r['is_auto'] ?? false)));
+            $existingPinjaman = null;
             $existingAutoByVehicle = [];
+            $manualRows = [];
             foreach ($existing as $r) {
-                if (($r['is_auto'] ?? false) && !empty($r['vehicle_id'])) {
+                if (($r['is_auto_loan'] ?? false) || ($pkId && (int) ($r['salary_component_id'] ?? 0) === $pkId)) {
+                    $existingPinjaman = $r;
+                } elseif (($r['is_auto'] ?? false) && !empty($r['vehicle_id'])) {
                     $existingAutoByVehicle[(int) $r['vehicle_id']] = $r;
+                } else {
+                    $manualRows[] = $r;
                 }
             }
 
-            $autoRows = [];
-            foreach ($vehicles as $v) {
-                $prev = $existingAutoByVehicle[(int) $v->id] ?? null;
-                $autoRows[] = [
-                    'salary_component_id' => $insentifId,
-                    'vehicle_id' => $v->id,
-                    'vehicle_label' => 'Insentif - ' . $this->buildVehicleLabel($v),
-                    'is_auto' => true,
-                    'quantity' => (int) ($prev['quantity'] ?? 1),
-                    'amount' => $prev['amount'] ?? $defaultInsentifAmount,
+            $rows = [];
+
+            // Auto: Pinjaman Karyawan (jika ada sisa pinjaman)
+            $remainingLoan = (float) ($employee->remaining_loan ?? 0);
+            if ($pkId && $remainingLoan > 0) {
+                $rows[] = [
+                    'salary_component_id' => $pkId,
+                    'vehicle_id' => null,
+                    'vehicle_label' => null,
+                    'is_auto' => false,
+                    'is_auto_loan' => true,
+                    'quantity' => 1,
+                    'amount' => $existingPinjaman['amount'] ?? number_format($remainingLoan, 0, ',', ','),
                 ];
             }
 
-            // Auto rows tampil duluan, manual tetap dipertahankan
-            $this->additionalComponents[$empId] = array_values(array_merge($autoRows, $manualRows));
+            // Auto: Insentif per kendaraan terjual (jika ada komponen Insentif dan karyawan adalah salesman)
+            if ($insentifId && $employee->user_id) {
+                $salesman = Salesman::where('user_id', $employee->user_id)->first();
+                if ($salesman) {
+                    $vehicles = Vehicle::query()
+                        ->with(['brand', 'vehicle_model'])
+                        ->where('salesman_id', $salesman->id)
+                        ->where('status', '0')
+                        ->whereNotNull('selling_date')
+                        ->whereYear('selling_date', $year)
+                        ->whereMonth('selling_date', $month)
+                        ->orderBy('selling_date')
+                        ->get();
+                    $defaultInsentifAmount = (float) ($employee->employeeSalaryComponents->firstWhere('salary_component_id', $insentifId)?->amount ?? 0);
+                    foreach ($vehicles as $v) {
+                        $prev = $existingAutoByVehicle[(int) $v->id] ?? null;
+                        $rows[] = [
+                            'salary_component_id' => $insentifId,
+                            'vehicle_id' => $v->id,
+                            'vehicle_label' => 'Insentif - ' . $this->buildVehicleLabel($v),
+                            'is_auto' => true,
+                            'is_auto_loan' => false,
+                            'quantity' => (int) ($prev['quantity'] ?? 1),
+                            'amount' => $prev['amount'] ?? $defaultInsentifAmount,
+                        ];
+                    }
+                }
+            }
+
+            $this->additionalComponents[$empId] = array_values(array_merge($rows, $manualRows));
         }
     }
 
@@ -222,11 +281,28 @@ class SalaryCreate extends Component
             return;
         }
 
+        $pkComponentId = $this->getPinjamanKaryawanComponentId();
+        foreach ($employees as $employee) {
+            $additionals = $this->additionalComponents[$employee->id] ?? [];
+            foreach ($additionals as $idx => $add) {
+                $scId = (int) ($add['salary_component_id'] ?? 0);
+                if ($pkComponentId && $scId === $pkComponentId) {
+                    $employee->refresh();
+                    $remainingLoan = (float) $employee->remaining_loan;
+                    $amount = $this->parseAmount($add['amount'] ?? 0);
+                    if ($amount > $remainingLoan) {
+                        $this->addError('additionalComponents.' . $employee->id . '.' . $idx . '.amount', 'Jumlah Pinjaman Karyawan tidak boleh melebihi sisa pinjaman (Rp ' . number_format($remainingLoan, 0, ',', '.') . ').');
+                        return;
+                    }
+                }
+            }
+        }
+
         $created = 0;
         $skipped = [];
         $useComponentInputs = !empty($this->componentInputs);
 
-        DB::transaction(function () use ($employees, $salaryDate, $month, $year, $useComponentInputs, &$created, &$skipped) {
+        DB::transaction(function () use ($employees, $salaryDate, $month, $year, $useComponentInputs, $pkComponentId, &$created, &$skipped) {
             foreach ($employees as $employee) {
                 $exists = Salary::where('employee_id', $employee->id)
                     ->whereYear('salary_date', $year)
@@ -252,7 +328,7 @@ class SalaryCreate extends Component
                         if (!$esc->is_quantitative) {
                             $quantity = 1;
                         }
-                        $amount = (float) (preg_replace('/[^0-9.]/', '', (string) ($inputs[$esc->id]['amount'] ?? 0)) ?: 0);
+                        $amount = $this->parseAmount($inputs[$esc->id]['amount'] ?? 0);
                         $totalAmount = $quantity * $amount;
                     } else {
                         // Default tanpa input manual: non-kuantitatif = 1, kuantitatif = 0
@@ -281,13 +357,21 @@ class SalaryCreate extends Component
                     if (!$salaryComponent) {
                         continue;
                     }
-                    $quantity = (int) ($add['quantity'] ?? 1);
-                    // Jika komponen ini non-kuantitatif di konfigurasi karyawan, paksa qty = 1
-                    $baseEsc = $employee->employeeSalaryComponents->firstWhere('salary_component_id', $scId);
-                    if ($baseEsc && !$baseEsc->is_quantitative) {
-                        $quantity = 1;
+                    $isPinjamanKaryawan = $pkComponentId && $scId === $pkComponentId;
+                    $quantity = 1;
+                    if ($isPinjamanKaryawan) {
+                        $amount = $this->parseAmount($add['amount'] ?? 0);
+                        if ($amount <= 0) {
+                            continue;
+                        }
+                    } else {
+                        $quantity = (int) ($add['quantity'] ?? 1);
+                        $baseEsc = $employee->employeeSalaryComponents->firstWhere('salary_component_id', $scId);
+                        if ($baseEsc && !$baseEsc->is_quantitative) {
+                            $quantity = 1;
+                        }
+                        $amount = $this->parseAmount($add['amount'] ?? 0);
                     }
-                    $amount = (float) (preg_replace('/[^0-9.]/', '', (string) ($add['amount'] ?? 0)) ?: 0);
                     $totalAmount = $quantity * $amount;
                     SalaryDetail::create([
                         'salary_id' => $salary->id,
@@ -297,6 +381,19 @@ class SalaryCreate extends Component
                         'amount' => $amount,
                         'total_amount' => $totalAmount,
                     ]);
+                    if ($isPinjamanKaryawan && $amount > 0) {
+                        $employee->decrement('remaining_loan', $amount);
+                        EmployeeLoan::create([
+                            'loan_type' => 'payment',
+                            'employee_id' => $employee->id,
+                            'paid_at' => $salaryDate,
+                            'cost_id' => null,
+                            'big_cash' => true,
+                            'amount' => $amount,
+                            'description' => 'Potongan pinjaman dari gaji periode ' . $salaryDate->format('m/Y'),
+                            'created_by' => Auth::id(),
+                        ]);
+                    }
                 }
 
                 activity()
@@ -343,7 +440,8 @@ class SalaryCreate extends Component
 
         $selectedEmployees = $employees->filter(fn ($e) => in_array($e->id, $this->employee_ids))->values();
         $salaryComponents = SalaryComponent::orderBy('name')->get();
+        $pinjamanKaryawanComponentId = $this->getPinjamanKaryawanComponentId();
 
-        return view('livewire.salary.salary-create', compact('employees', 'monthOptions', 'yearOptions', 'selectedEmployees', 'salaryComponents'));
+        return view('livewire.salary.salary-create', compact('employees', 'monthOptions', 'yearOptions', 'selectedEmployees', 'salaryComponents', 'pinjamanKaryawanComponentId'));
     }
 }
