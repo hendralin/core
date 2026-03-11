@@ -54,6 +54,8 @@ class Vehicle extends Model
         'leasing_id',
         'status',
         'description',
+        'whatsapp_share_count',
+        'link_copy_count',
     ];
 
     public function generateSlugBase(): string

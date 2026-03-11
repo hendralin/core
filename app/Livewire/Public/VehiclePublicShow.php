@@ -30,6 +30,18 @@ class VehiclePublicShow extends Component
         ]);
     }
 
+    public function incrementWhatsAppShare(): void
+    {
+        $this->vehicle->increment('whatsapp_share_count');
+        $this->vehicle->refresh();
+    }
+
+    public function incrementLinkCopy(): void
+    {
+        $this->vehicle->increment('link_copy_count');
+        $this->vehicle->refresh();
+    }
+
     public function render()
     {
         return view('livewire.public.vehicle-show', [

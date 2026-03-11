@@ -12,7 +12,7 @@
         <!-- Header -->
         <div class="mb-6">
             <flux:heading size="xl" level="1" class="mb-1">
-                {{ $vehicle->brand?->name }} {{ $vehicle->vehicle_model?->name }} {{ $vehicle->year }}
+                {{ $vehicle->brand?->name }} {{ $vehicle->type?->name }} {{ $vehicle->vehicle_model?->name }} {{ $vehicle->year }}
             </flux:heading>
             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
                 Nomor polisi: {{ $vehicle->police_number }} • Warna: {{ $vehicle->color ?? '-' }} • KM: {{ $vehicle->kilometer ? number_format($vehicle->kilometer, 0, ',', '.') . ' km' : '-' }}
@@ -48,7 +48,7 @@
                         <template x-if="activeSrc">
                             <img
                                 :src="activeSrc"
-                                alt="{{ $vehicle->brand?->name }} {{ $vehicle->vehicle_model?->name }} {{ $vehicle->year }}"
+                                alt="{{ $vehicle->brand?->name }} {{ $vehicle->type?->name }} {{ $vehicle->vehicle_model?->name }} {{ $vehicle->year }}"
                                 class="w-full h-full object-contain"
                             >
                         </template>
@@ -143,6 +143,7 @@
                             size="sm"
                             icon="paper-airplane"
                             class="cursor-pointer w-full sm:w-auto"
+                            wire:click="incrementWhatsAppShare"
                             onclick="shareVehicleToWhatsApp()"
                         >
                             Share WhatsApp
@@ -152,11 +153,26 @@
                             size="sm"
                             icon="link"
                             class="cursor-pointer w-full sm:w-auto"
+                            wire:click="incrementLinkCopy"
                             onclick="copyVehicleLink()"
                         >
                             Salin Link
                         </flux:button>
                     </div>
+
+                    @if (($vehicle->whatsapp_share_count ?? 0) > 0 || ($vehicle->link_copy_count ?? 0) > 0)
+                        <div class="mt-2 text-[11px] text-gray-500 dark:text-zinc-400">
+                            @if (($vehicle->whatsapp_share_count ?? 0) > 0)
+                                Dibagikan ke WhatsApp {{ number_format($vehicle->whatsapp_share_count) }} kali
+                            @endif
+                            @if (($vehicle->link_copy_count ?? 0) > 0)
+                                @if (($vehicle->whatsapp_share_count ?? 0) > 0)
+                                    ·
+                                @endif
+                                Link disalin {{ number_format($vehicle->link_copy_count) }} kali
+                            @endif
+                        </div>
+                    @endif
 
                     <div class="mt-3 text-[11px] text-gray-500 dark:text-zinc-400">
                         Tips: kirim link ini ke keluarga/teman untuk diskusi, atau chat kami dan sebutkan <span class="font-semibold">{{ $vehicle->police_number }}</span>.

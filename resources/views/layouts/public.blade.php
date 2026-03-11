@@ -170,7 +170,7 @@
                                     </a>
                                 </li>
                             @endif
-                            @if (Route::has('login'))
+                            @if (Route::has('login') && !auth()->check())
                                 <li>
                                     <a href="{{ route('login') }}" class="text-gray-600 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400" wire:navigate>
                                         Login
