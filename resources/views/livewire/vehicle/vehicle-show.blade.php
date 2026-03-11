@@ -1760,6 +1760,74 @@
                 </div>
             @endhasrole
 
+            <!-- Public catalog engagement stats -->
+            @php
+                $chatWa = (int) ($vehicle->chat_whatsapp_count ?? 0);
+                $shareWa = (int) ($vehicle->whatsapp_share_count ?? 0);
+                $linkCopy = (int) ($vehicle->link_copy_count ?? 0);
+                $hasEngagement = $chatWa > 0 || $shareWa > 0 || $linkCopy > 0;
+            @endphp
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                        <flux:icon.chat-bubble-left-right class="w-5 h-5" />
+                    </div>
+                    <flux:heading size="lg">Engagement Katalog Publik</flux:heading>
+                </div>
+                <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mb-4">
+                    Statistik interaksi pengunjung di halaman detail kendaraan (katalog publik).
+                </flux:text>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600/50">
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 rounded-md bg-green-100 dark:bg-green-900/30">
+                                <flux:icon.chat-bubble-left-right class="w-4 h-4 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div>
+                                <flux:text class="text-sm font-medium text-gray-900 dark:text-white">Chat WhatsApp</flux:text>
+                                <flux:text class="text-xs text-gray-500 dark:text-zinc-400">Klik tombol hubungi WA</flux:text>
+                            </div>
+                        </div>
+                        <span class="text-lg font-bold tabular-nums text-gray-900 dark:text-white">{{ number_format($chatWa) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600/50">
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30">
+                                <flux:icon.paper-airplane class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <div>
+                                <flux:text class="text-sm font-medium text-gray-900 dark:text-white">Share ke WhatsApp</flux:text>
+                                <flux:text class="text-xs text-gray-500 dark:text-zinc-400">Bagikan link iklan</flux:text>
+                            </div>
+                        </div>
+                        <span class="text-lg font-bold tabular-nums text-gray-900 dark:text-white">{{ number_format($shareWa) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600/50">
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 rounded-md bg-blue-100 dark:bg-blue-900/30">
+                                <flux:icon.link class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                                <flux:text class="text-sm font-medium text-gray-900 dark:text-white">Link disalin</flux:text>
+                                <flux:text class="text-xs text-gray-500 dark:text-zinc-400">Salin link ke clipboard</flux:text>
+                            </div>
+                        </div>
+                        <span class="text-lg font-bold tabular-nums text-gray-900 dark:text-white">{{ number_format($linkCopy) }}</span>
+                    </div>
+                </div>
+                @if($hasEngagement)
+                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-zinc-700">
+                        <flux:text class="text-xs text-gray-500 dark:text-zinc-400">
+                            Total interaksi: <span class="font-semibold text-gray-700 dark:text-zinc-300">{{ number_format($chatWa + $shareWa + $linkCopy) }}</span>
+                        </flux:text>
+                    </div>
+                @else
+                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-zinc-700">
+                        <flux:text class="text-xs text-gray-500 dark:text-zinc-400 italic">Belum ada interaksi dari katalog publik.</flux:text>
+                    </div>
+                @endif
+            </div>
+
             <!-- Quick Actions -->
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                 <flux:heading size="lg" class="mb-4">Quick Actions</flux:heading>

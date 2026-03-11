@@ -42,6 +42,11 @@ class VehiclePublicShow extends Component
         $this->vehicle->refresh();
     }
 
+    public function incrementChatWhatsApp(): void
+    {
+        $this->vehicle->increment('chat_whatsapp_count');
+    }
+
     public function render()
     {
         return view('livewire.public.vehicle-show', [

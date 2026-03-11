@@ -56,6 +56,7 @@ class Vehicle extends Model
         'description',
         'whatsapp_share_count',
         'link_copy_count',
+        'chat_whatsapp_count',
     ];
 
     public function generateSlugBase(): string

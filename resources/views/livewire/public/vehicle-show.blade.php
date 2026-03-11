@@ -278,6 +278,7 @@
                                 size="sm"
                                 icon="chat-bubble-left-right"
                                 class="cursor-pointer w-full sm:w-auto"
+                                wire:click="incrementChatWhatsApp"
                                 onclick="chatVehicleToWhatsApp('{{ $waNumber }}')"
                             >
                                 Chat WhatsApp
