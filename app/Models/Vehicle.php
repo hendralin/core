@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,6 +20,7 @@ class Vehicle extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'slug',
         'police_number',
         'brand_id',
         'type_id',
@@ -53,6 +55,42 @@ class Vehicle extends Model
         'status',
         'description',
     ];
+
+    public function generateSlugBase(): string
+    {
+        $brand = $this->brand?->name ?? '';
+        $type = $this->type?->name ?? '';
+        $model = $this->vehicle_model?->name ?? '';
+        $year = $this->year ?? '';
+
+        $base = trim($brand . ' ' . $type . ' ' . $model . ' ' . $year);
+        $slug = Str::slug($base);
+
+        if ($slug === '') {
+            $slug = Str::slug(trim((string) $this->police_number)) ?: 'vehicle';
+        }
+
+        return $slug;
+    }
+
+    public function generateUniqueSlug(): string
+    {
+        $base = $this->generateSlugBase();
+        $slug = $base;
+        $i = 2;
+
+        while (
+            static::query()
+                ->where('slug', $slug)
+                ->when($this->exists, fn($q) => $q->where('id', '!=', $this->id))
+                ->exists()
+        ) {
+            $slug = $base . '-' . $i;
+            $i++;
+        }
+
+        return $slug;
+    }
 
     /**
      * The attributes that should be cast.

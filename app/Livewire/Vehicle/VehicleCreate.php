@@ -561,6 +561,13 @@ class VehicleCreate extends Component
                 'description' => $this->description,
             ]);
 
+            // Generate SEO slug (after create)
+            $vehicle->load(['brand', 'type', 'vehicle_model']);
+            if (empty($vehicle->slug)) {
+                $vehicle->slug = $vehicle->generateUniqueSlug();
+                $vehicle->save();
+            }
+
             // Create vehicle image records
             foreach ($vehicleImages as $imagePath) {
                 VehicleImage::create([

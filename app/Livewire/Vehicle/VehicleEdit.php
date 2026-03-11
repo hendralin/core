@@ -643,6 +643,13 @@ class VehicleEdit extends Component
                 'description' => $this->description,
             ]);
 
+            // Ensure SEO slug exists (do not change if already set)
+            $this->vehicle->loadMissing(['brand', 'type', 'vehicle_model']);
+            if (empty($this->vehicle->slug)) {
+                $this->vehicle->slug = $this->vehicle->generateUniqueSlug();
+                $this->vehicle->save();
+            }
+
             // Handle image deletions
             if (!empty($this->imagesToDelete)) {
                 foreach ($this->imagesToDelete as $imageId) {

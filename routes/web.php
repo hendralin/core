@@ -75,6 +75,8 @@ use App\Livewire\SalaryComponent\SalaryComponentCreate;
 use App\Livewire\SalaryComponent\SalaryComponentEdit;
 use App\Livewire\SalaryComponent\SalaryComponentIndex;
 use App\Livewire\SalaryComponent\SalaryComponentShow;
+use App\Livewire\Public\VehicleCatalog;
+use App\Livewire\Public\VehiclePublicShow;
 use App\Livewire\Salesman\SalesmanAudit;
 use App\Livewire\Salesman\SalesmanCreate;
 use App\Livewire\Salesman\SalesmanEdit;
@@ -126,6 +128,12 @@ Route::get('/license-expired', function () {
     return view('license.expired');
 })->name('license.expired');
 
+// Public vehicle catalog (landing page)
+Route::livewire('/', VehicleCatalog::class)->name('home');
+
+// Public vehicle detail (SEO slug)
+Route::livewire('/katalog/{vehicle:slug}', VehiclePublicShow::class)->name('public.vehicles.show');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -133,9 +141,9 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('settings/password', Password::class)->name('settings.password');
     Route::livewire('settings/appearance', Appearance::class)->name('settings.appearance');
 
-    Route::get('/', function () {
-        return view('dashboard');
-    })->name('home');
+    // Route::get('/', function () {
+    //     return redirect()->route('dashboard');
+    // })->name('home');
 
     Route::get('dashboard', function () {
         return view('dashboard');
