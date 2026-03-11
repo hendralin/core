@@ -28,6 +28,9 @@ class VehiclePublicShow extends Component
             'warehouse',
             'images',
         ]);
+
+        // Record public show page visit (once per page load)
+        $this->vehicle->increment('public_page_view_count');
     }
 
     public function incrementWhatsAppShare(): void

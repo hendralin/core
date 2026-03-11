@@ -130,6 +130,19 @@ class DashboardIndex extends Component
         return $totalSales / $totalVehiclesSold;
     }
 
+    /**
+     * Total engagement from public vehicle catalog (all vehicles).
+     */
+    public function getPublicCatalogEngagementProperty()
+    {
+        return [
+            'page_views' => (int) Vehicle::sum('public_page_view_count'),
+            'chat_whatsapp' => (int) Vehicle::sum('chat_whatsapp_count'),
+            'share_whatsapp' => (int) Vehicle::sum('whatsapp_share_count'),
+            'link_copy' => (int) Vehicle::sum('link_copy_count'),
+        ];
+    }
+
     public function getAvailableStockByWarehouseProperty()
     {
         return Warehouse::withCount([

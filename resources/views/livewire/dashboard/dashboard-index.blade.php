@@ -69,6 +69,79 @@
         </div>
     </div>
 
+    <!-- Public catalog engagement stats -->
+    @php
+        $engagement = $this->publicCatalogEngagement;
+        $totalEngagement = $engagement['page_views'] + $engagement['chat_whatsapp'] + $engagement['share_whatsapp'] + $engagement['link_copy'];
+    @endphp
+    <div class="mt-8">
+        <div class="rounded-xl bg-white p-6 shadow-lg border border-gray-200 dark:bg-zinc-800 dark:border-zinc-700">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
+                    <flux:icon.chat-bubble-left-right class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Engagement Katalog</h2>
+                    <p class="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">
+                        Statistik interaksi pengunjung di katalog & halaman detail kendaraan.
+                    </p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-900/30 p-4 hover:shadow-md transition-shadow">
+                    <div class="shrink-0 p-2.5 rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                        <flux:icon.eye class="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Halaman dikunjungi</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums mt-0.5">{{ number_format($engagement['page_views']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Kunjungan halaman detail</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-900/30 p-4 hover:shadow-md transition-shadow">
+                    <div class="shrink-0 p-2.5 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        <img src="//upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="h-8 w-8" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Chat WhatsApp</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums mt-0.5">{{ number_format($engagement['chat_whatsapp']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Klik tombol hubungi WA</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-900/30 p-4 hover:shadow-md transition-shadow">
+                    <div class="shrink-0 p-2.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                        <flux:icon.paper-airplane class="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Share ke WhatsApp</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums mt-0.5">{{ number_format($engagement['share_whatsapp']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Bagikan link iklan</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-900/30 p-4 hover:shadow-md transition-shadow">
+                    <div class="shrink-0 p-2.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                        <flux:icon.link class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Link disalin</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums mt-0.5">{{ number_format($engagement['link_copy']) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Salin link ke clipboard</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-700 flex items-center justify-between flex-wrap gap-2">
+                <p class="text-sm text-gray-500 dark:text-zinc-400">
+                    Total kunjungan & interaksi: <span class="font-semibold text-gray-700 dark:text-zinc-200">{{ number_format($totalEngagement) }}</span>
+                </p>
+                @if($totalEngagement > 0 && $this->vehiclesReadyForSale > 0)
+                    <p class="text-xs text-gray-500 dark:text-zinc-400">
+                        Rata-rata per kendaraan tersedia: <span class="font-medium text-gray-700 dark:text-zinc-300">{{ number_format(round($totalEngagement / $this->vehiclesReadyForSale, 1)) }}</span>
+                    </p>
+                @endif
+            </div>
+        </div>
+    </div>
+
     <!-- Monthly Sales Performance Chart -->
     <div class="mt-8">
         <div class="rounded-xl bg-white p-6 shadow-lg border border-gray-200 dark:bg-zinc-800 dark:border-zinc-700">

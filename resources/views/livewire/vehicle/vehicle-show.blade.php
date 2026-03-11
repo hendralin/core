@@ -1762,10 +1762,11 @@
 
             <!-- Public catalog engagement stats -->
             @php
+                $pageViews = (int) ($vehicle->public_page_view_count ?? 0);
                 $chatWa = (int) ($vehicle->chat_whatsapp_count ?? 0);
                 $shareWa = (int) ($vehicle->whatsapp_share_count ?? 0);
                 $linkCopy = (int) ($vehicle->link_copy_count ?? 0);
-                $hasEngagement = $chatWa > 0 || $shareWa > 0 || $linkCopy > 0;
+                $hasEngagement = $pageViews > 0 || $chatWa > 0 || $shareWa > 0 || $linkCopy > 0;
             @endphp
             <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 p-6">
                 <div class="flex items-center gap-2 mb-4">
@@ -1778,6 +1779,18 @@
                     Statistik interaksi pengunjung di halaman detail kendaraan (katalog publik).
                 </flux:text>
                 <div class="space-y-3">
+                    <div class="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600/50">
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 rounded-md bg-violet-100 dark:bg-violet-900/30">
+                                <flux:icon.eye class="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                            </div>
+                            <div>
+                                <flux:text class="text-sm font-medium text-gray-900 dark:text-white">Halaman dikunjungi</flux:text>
+                                <flux:text class="text-xs text-gray-500 dark:text-zinc-400">Kunjungan halaman detail</flux:text>
+                            </div>
+                        </div>
+                        <span class="text-lg font-bold tabular-nums text-gray-900 dark:text-white">{{ number_format($pageViews) }}</span>
+                    </div>
                     <div class="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600/50">
                         <div class="flex items-center gap-3">
                             <div class="p-1.5 rounded-md bg-green-100 dark:bg-green-900/30">
@@ -1818,7 +1831,7 @@
                 @if($hasEngagement)
                     <div class="mt-3 pt-3 border-t border-gray-200 dark:border-zinc-700">
                         <flux:text class="text-xs text-gray-500 dark:text-zinc-400">
-                            Total interaksi: <span class="font-semibold text-gray-700 dark:text-zinc-300">{{ number_format($chatWa + $shareWa + $linkCopy) }}</span>
+                            Total kunjungan & interaksi: <span class="font-semibold text-gray-700 dark:text-zinc-300">{{ number_format($pageViews + $chatWa + $shareWa + $linkCopy) }}</span>
                         </flux:text>
                     </div>
                 @else
