@@ -157,15 +157,15 @@
 
                             <div class="mt-1">
                                 <div class="text-lg font-bold text-green-600 dark:text-green-400">
-                                    @if ($vehicle->display_price)
-                                        Rp {{ number_format($vehicle->display_price, 0, ',', '.') }}
+                                    @if ($vehicle->loan_price)
+                                        Rp {{ number_format($vehicle->loan_price, 0, ',', '.') }}
                                     @else
                                         Hubungi kami
                                     @endif
                                 </div>
-                                @if ($vehicle->loan_price)
+                                @if ($vehicle->display_price)
                                     <div class="text-xs text-blue-600 dark:text-blue-400">
-                                        Kredit mulai Rp {{ number_format($vehicle->loan_price, 0, ',', '.') }}
+                                        Cash mulai Rp {{ number_format($vehicle->display_price, 0, ',', '.') }}
                                     </div>
                                 @endif
                             </div>

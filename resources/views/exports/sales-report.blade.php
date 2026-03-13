@@ -102,6 +102,9 @@
                         @if($vehicle->vehicle_model)
                             {{ $vehicle->vehicle_model->name }}
                         @endif
+                        @if($vehicle->type)
+                            {{ $vehicle->type->name }}
+                        @endif
                         @if($vehicle->year)
                             ({{ $vehicle->year }})
                         @endif

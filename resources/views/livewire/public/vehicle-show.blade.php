@@ -119,17 +119,17 @@
             <div class="space-y-4">
                 <!-- Price card -->
                 <div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl p-5 space-y-3">
-                    <flux:heading size="lg" class="mb-1">
-                        @if ($vehicle->display_price)
-                            Rp {{ number_format($vehicle->display_price, 0, ',', '.') }}
+                    <flux:heading size="xl" class="mb-1 text-green-600 dark:text-green-400 font-bold">
+                        @if ($vehicle->loan_price)
+                            Rp {{ number_format($vehicle->loan_price, 0, ',', '.') }}
                         @else
                             Harga belum tersedia
                         @endif
                     </flux:heading>
 
-                    @if ($vehicle->loan_price)
+                    @if ($vehicle->display_price)
                         <flux:text class="text-sm text-blue-600 dark:text-blue-400">
-                            Estimasi harga kredit: Rp {{ number_format($vehicle->loan_price, 0, ',', '.') }}
+                            Estimasi harga cash: Rp {{ number_format($vehicle->display_price, 0, ',', '.') }}
                         </flux:text>
                     @endif
 

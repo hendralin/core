@@ -1773,10 +1773,10 @@
                     <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
                         <flux:icon.chat-bubble-left-right class="w-5 h-5" />
                     </div>
-                    <flux:heading size="lg">Engagement Katalog Publik</flux:heading>
+                    <flux:heading size="lg">Engagement Katalog</flux:heading>
                 </div>
                 <flux:text class="text-sm text-gray-600 dark:text-zinc-400 mb-4">
-                    Statistik interaksi pengunjung di halaman detail kendaraan (katalog publik).
+                    Statistik interaksi pengunjung di halaman detail kendaraan.
                 </flux:text>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600/50">

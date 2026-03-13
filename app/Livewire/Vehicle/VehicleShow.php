@@ -1439,6 +1439,22 @@ class VehicleShow extends Component
             'status' => 'approved',
         ]);
 
+        // If payments are fully settled, update vehicle selling_date
+        if ($totalPaymentsIncludingCurrent == (float) $this->vehicle->selling_price) {
+            $this->vehicle->update([
+                'selling_date' => $this->payment_receipt_date,
+            ]);
+
+            // Log info when vehicle is fully paid
+            Log::info('Vehicle selling_date set after full payment', [
+                'vehicle_id' => $this->vehicle->id,
+                'selling_date' => $this->payment_receipt_date,
+                'total_payments' => $totalPaymentsIncludingCurrent,
+                'selling_price' => (float) $this->vehicle->selling_price,
+                'user_id' => Auth::id(),
+            ]);
+        }
+
         $this->closePaymentReceiptModal();
 
         // Reload vehicle with payment receipts
@@ -1524,6 +1540,23 @@ class VehicleShow extends Component
             'must_be_settled_date' => $this->payment_receipt_must_be_settled_date ?: null,
             'document' => $documentPaths ? implode(',', $documentPaths) : null,
         ]);
+
+        // If payments are fully settled after update, update vehicle selling_date
+        if ($totalPaymentsIncludingUpdated == (float) $this->vehicle->selling_price) {
+            $this->vehicle->update([
+                'selling_date' => $this->payment_receipt_date,
+            ]);
+
+            // Log info when vehicle is fully paid via update
+            Log::info('Vehicle selling_date updated after full payment (edit)', [
+                'vehicle_id' => $this->vehicle->id,
+                'selling_date' => $this->payment_receipt_date,
+                'total_payments' => $totalPaymentsIncludingUpdated,
+                'selling_price' => (float) $this->vehicle->selling_price,
+                'payment_receipt_id' => $this->editingPaymentReceiptId,
+                'user_id' => Auth::id(),
+            ]);
+        }
 
         $this->closeEditPaymentReceiptModal();
 

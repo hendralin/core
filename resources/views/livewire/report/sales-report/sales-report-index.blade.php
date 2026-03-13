@@ -50,7 +50,7 @@
 
     <!-- Filter Section -->
     <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-zinc-700">
-        <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <!-- Search by Police Number -->
             <div>
                 <label for="police-number-search" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">No. Polisi</label>
@@ -66,12 +66,13 @@
             <!-- Month/Year Filter -->
             <div>
                 <label for="month-year" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Bulan & Tahun</label>
-                <input type="month"
+                <flux:input type="month"
                        id="month-year"
                        wire:model.live="selectedMonthYear"
-                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
                        min="2019-01"
-                       max="{{ date('Y') + 1 }}-12">
+                       max="{{ date('Y') + 1 }}-12"
+                       size="sm"
+                    />
             </div>
 
             <!-- Date Period Filters -->
@@ -80,21 +81,17 @@
 
             <!-- Payment Type Filter -->
             <div>
-                <label for="payment-type" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Jenis Pembayaran</label>
-                <select
-                    id="payment-type"
-                    wire:model.live="paymentType"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
-                >
-                    <option value="">Semua</option>
-                    <option value="1">Cash/Tunai</option>
-                    <option value="2">Kredit/Leasing</option>
-                </select>
+                <label for="payment-type" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1.5">Jenis Pembayaran</label>
+                <flux:select id="payment-type" wire:model.live="paymentType" size="sm">
+                    <flux:select.option value="">Semua</flux:select.option>
+                    <flux:select.option value="1">Cash/Tunai</flux:select.option>
+                    <flux:select.option value="2">Kredit/Leasing</flux:select.option>
+                </flux:select>
             </div>
 
             <!-- Salesman Filter -->
             <div>
-                <label for="salesman-id" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Salesman</label>
+                <label for="salesman-id" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1.5">Salesman</label>
                 <flux:select id="salesman-id" wire:model.live="salesmanId" size="sm">
                     <flux:select.option value="">Semua</flux:select.option>
                     @foreach($salesmen as $salesman)

@@ -87,7 +87,7 @@
                     </p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 <div class="flex items-center gap-4 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-900/30 p-4 hover:shadow-md transition-shadow">
                     <div class="shrink-0 p-2.5 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                         <flux:icon.eye class="h-5 w-5 text-violet-600 dark:text-violet-400" />
