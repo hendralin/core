@@ -59,6 +59,7 @@
                 <x-table-column sortable="true" field="email">Email</x-table-column>
                 <x-table-column field="role">Role</x-table-column>
                 <x-table-column field="status">Status</x-table-column>
+                <x-table-column field="subscription" class="whitespace-nowrap">Subscription</x-table-column>
                 <x-table-column field="email_verified" class="whitespace-nowrap">Email Verified</x-table-column>
                 <x-table-column field="created_at">Joined</x-table-column>
                 <x-table-column field="last_login_at" class="whitespace-nowrap">Last Login</x-table-column>
@@ -96,6 +97,37 @@
                                     <flux:badge color="green">Active</flux:badge>
                                 @else
                                     <flux:badge color="yellow">Pending</flux:badge>
+                                @endif
+                            </x-table-cell>
+                            <x-table-cell>
+                                @php
+                                    $sub = $user->subscription;
+                                    $isActiveSub = $sub && $sub->status === 'active' && $sub->end_date && $sub->end_date->isFuture();
+                                @endphp
+                                @if($isActiveSub)
+                                    <div class="flex flex-col gap-0.5">
+                                        <flux:badge size="sm" color="emerald">
+                                            Subscribed
+                                        </flux:badge>
+                                        <span class="text-[11px] text-zinc-500 dark:text-zinc-400">
+                                            s/d {{ $sub->end_date->format('d M Y') }}
+                                        </span>
+                                    </div>
+                                @elseif($sub)
+                                    <div class="flex flex-col gap-0.5">
+                                        <flux:badge size="sm" color="zinc">
+                                            Expired
+                                        </flux:badge>
+                                        @if($sub->end_date)
+                                            <span class="text-[11px] text-zinc-500 dark:text-zinc-400">
+                                                berakhir {{ $sub->end_date->format('d M Y') }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <flux:badge size="sm" color="zinc">
+                                        Not Subscribed
+                                    </flux:badge>
                                 @endif
                             </x-table-cell>
                             <x-table-cell>
@@ -146,4 +178,54 @@
         });
     });
     </script>
+
+    <flux:modal wire:model.self="isSubscriptionModalOpen" class="max-w-2xl">
+        <div class="space-y-6">
+            <div class="space-y-1">
+                <flux:heading size="lg">Kelola Subscription</flux:heading>
+                @if($subscriptionUserName)
+                    <flux:text class="text-sm text-zinc-600 dark:text-zinc-300">
+                        {{ $subscriptionUserName }} <span class="text-zinc-400">({{ $subscriptionUserEmail }})</span>
+                    </flux:text>
+                @endif
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <flux:select wire:model.live="sub_status" label="Status">
+                    <flux:select.option value="active">Active</flux:select.option>
+                    <flux:select.option value="inactive">Inactive</flux:select.option>
+                    <flux:select.option value="expired">Expired</flux:select.option>
+                    <flux:select.option value="cancelled">Cancelled</flux:select.option>
+                </flux:select>
+
+                <flux:input wire:model.live="sub_price" label="Harga (IDR)" type="number" min="0" step="1" />
+
+                <flux:input wire:model.live="sub_start_date" label="Start Date" type="date" />
+                <flux:input wire:model.live="sub_end_date" label="End Date" type="date" />
+
+                <flux:select wire:model.live="sub_payment_method" label="Payment Method">
+                    <flux:select.option value="bank_transfer">Bank Transfer</flux:select.option>
+                    <flux:select.option value="e-wallet">E-Wallet</flux:select.option>
+                </flux:select>
+
+                <flux:select wire:model.live="sub_payment_status" label="Payment Status">
+                    <flux:select.option value="paid">Paid</flux:select.option>
+                    <flux:select.option value="failed">Failed</flux:select.option>
+                    <flux:select.option value="refunded">Refunded</flux:select.option>
+                </flux:select>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                <flux:modal.close>
+                    <flux:button variant="ghost" icon="x-mark" wire:click="closeSubscriptionModal">
+                        Tutup
+                    </flux:button>
+                </flux:modal.close>
+
+                <flux:button variant="primary" wire:click="saveSubscription" icon="check">
+                    Simpan
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>

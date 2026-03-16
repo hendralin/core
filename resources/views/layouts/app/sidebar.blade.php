@@ -78,6 +78,14 @@
                     </flux:sidebar.group>
                 @endif
 
+                @if (auth()->user()->can('signal.view'))
+                    <flux:sidebar.group expandable icon="sparkles" heading="Featuring" class="grid">
+                        @if (auth()->user()->can('signal.view'))
+                            <flux:sidebar.item icon="signal" :href="route('signals.index')" :current="request()->routeIs('signals.*')" wire:navigate>{{ __('Signals') }}</flux:sidebar.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endif
+
                 @if (auth()->user()->can('blog.category.view') ||
                 auth()->user()->can('blog.tag.view') ||
                 auth()->user()->can('blog.post.view'))
@@ -240,6 +248,14 @@
                         auth()->user()->can('admin.signal.publish') ||
                         auth()->user()->can('admin.signal.unpublish'))
                             <flux:navlist.item icon="signal" :href="route('admin.signals.index')" :current="request()->routeIs('admin.signals.*')" wire:navigate>{{ __('Signals') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
+
+                @if (auth()->user()->can('signal.view'))
+                    <flux:navlist.group :heading="__('Featuring')" class="grid">
+                        @if (auth()->user()->can('signal.view'))
+                            <flux:navlist.item icon="signal" :href="route('signals.index')" :current="request()->routeIs('signals.*')" wire:navigate>{{ __('Signals') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

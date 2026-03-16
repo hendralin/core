@@ -2,6 +2,19 @@
 @props(['user'])
 
 <div class="flex justify-end space-x-2">
+    @can('user.edit')
+        <flux:button
+            variant="ghost"
+            size="xs"
+            square
+            href="#"
+            wire:click="openSubscriptionModal({{ $user->id }})"
+            tooltip="Subscription"
+        >
+            <flux:icon.credit-card variant="mini" class="text-emerald-600 dark:text-emerald-300" />
+        </flux:button>
+    @endcan
+
     @can('user.view')
         <flux:button variant="ghost" size="xs" square href="{{ route('users.show', $user->id) }}" wire:navigate tooltip="Show">
             <flux:icon.eye variant="mini" class="text-green-500 dark:text-green-300" />

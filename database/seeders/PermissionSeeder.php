@@ -44,6 +44,9 @@ class PermissionSeeder extends Seeder
             'admin.signal.unpublish',
             'admin.signal.audit',
 
+            // Signal for Subscriptions only
+            'signal.view',
+
             // Blogs
             // Categories
             'blog.category.view',

@@ -13,6 +13,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 
 #[Title('Users')]
 class UserIndex extends Component
@@ -50,6 +51,18 @@ class UserIndex extends Component
 
     public $selected = [];
     public $selectAll = false;
+
+    public bool $isSubscriptionModalOpen = false;
+    public ?int $subscriptionUserId = null;
+    public ?string $subscriptionUserName = null;
+    public ?string $subscriptionUserEmail = null;
+
+    public ?string $sub_status = 'active';
+    public ?string $sub_start_date = null;
+    public ?string $sub_end_date = null;
+    public $sub_price = 0;
+    public ?string $sub_payment_method = 'bank_transfer';
+    public ?string $sub_payment_status = 'paid';
 
     public function updatedSelected()
     {
@@ -201,6 +214,66 @@ class UserIndex extends Component
     public function mount()
     {
         $this->roles = Role::orderBy('name')->get();
+    }
+
+    public function openSubscriptionModal(int $userId): void
+    {
+        $user = User::with('subscription')->findOrFail($userId);
+
+        $this->subscriptionUserId = $user->id;
+        $this->subscriptionUserName = $user->name;
+        $this->subscriptionUserEmail = $user->email;
+
+        $subscription = $user->subscription;
+
+        $this->sub_status = $subscription?->status ?? 'active';
+        $this->sub_start_date = $subscription?->start_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+        $this->sub_end_date = $subscription?->end_date?->format('Y-m-d') ?? now()->addYear()->format('Y-m-d');
+        $this->sub_price = $subscription?->price ?? 1200000;
+        $this->sub_payment_method = $subscription?->payment_method ?? 'bank_transfer';
+        $this->sub_payment_status = $subscription?->payment_status ?? 'paid';
+
+        $this->resetValidation();
+        $this->isSubscriptionModalOpen = true;
+    }
+
+    public function closeSubscriptionModal(): void
+    {
+        $this->isSubscriptionModalOpen = false;
+        $this->resetValidation();
+    }
+
+    public function saveSubscription(): void
+    {
+        if (!$this->subscriptionUserId) {
+            return;
+        }
+
+        $validated = $this->validate([
+            'sub_status' => ['required', Rule::in(['active', 'inactive', 'expired', 'cancelled'])],
+            'sub_start_date' => ['required', 'date'],
+            'sub_end_date' => ['required', 'date', 'after_or_equal:sub_start_date'],
+            'sub_price' => ['required', 'numeric', 'min:0'],
+            'sub_payment_method' => ['required', Rule::in(['bank_transfer', 'e-wallet'])],
+            'sub_payment_status' => ['required', Rule::in(['paid', 'failed', 'refunded'])],
+        ]);
+
+        $user = User::findOrFail($this->subscriptionUserId);
+
+        $user->subscription()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'status' => $validated['sub_status'],
+                'start_date' => $validated['sub_start_date'],
+                'end_date' => $validated['sub_end_date'],
+                'price' => $validated['sub_price'],
+                'payment_method' => $validated['sub_payment_method'],
+                'payment_status' => $validated['sub_payment_status'],
+            ]
+        );
+
+        session()->flash('success', 'Subscription berhasil disimpan.');
+        $this->isSubscriptionModalOpen = false;
     }
 
     public function delete($id)
@@ -418,7 +491,7 @@ class UserIndex extends Component
 
     public function render()
     {
-        $users = User::with(['roles']) // Eager load relationships
+        $users = User::with(['roles', 'subscription']) // Eager load relationships
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')

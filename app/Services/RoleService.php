@@ -17,6 +17,7 @@ class RoleService
         'Stock Summary' => ['stock-summary'],
         'Signal Management' => ['admin.signal'],
         'Blog Management' => ['blog.dashboard', 'blog.category', 'blog.tag', 'blog.post', 'blog.comment'],
+        'Signal (Subscriptions)' => ['signal'],
     ];
     /**
      * Check if a role can be deleted
