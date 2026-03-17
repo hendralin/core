@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BlogController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\SignalController;
+use App\Http\Controllers\Api\V1\SubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +39,10 @@ Route::get('tags/{slug}', [TagController::class, 'show'])->name('api.v1.tags.sho
 Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function (): void {
     Route::post('logout', [AuthController::class, 'logout'])->name('api.v1.logout');
     Route::get('me', [AuthController::class, 'me'])->name('api.v1.me');
+
+    // Subscription & Signals (authenticated, subscription required for signals)
+    Route::get('subscription', [SubscriptionController::class, 'show'])->name('api.v1.subscription.show');
+    Route::get('signals', [SignalController::class, 'index'])->name('api.v1.signals.index');
 
     // Blog: add comment (authenticated only)
     Route::post('posts/{slug}/comments', [BlogController::class, 'storeComment'])->name('api.v1.posts.comments.store');
