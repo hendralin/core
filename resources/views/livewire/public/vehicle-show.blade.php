@@ -244,10 +244,10 @@
                                 {{ $vehicle->vehicle_registration_expiry_date ? \Carbon\Carbon::parse($vehicle->vehicle_registration_expiry_date)->format('d-m-Y') : '-' }}
                             </dd>
                         </div>
-                        <div class="flex justify-between">
+                        {{-- <div class="flex justify-between">
                             <dt class="text-gray-500 dark:text-zinc-400">Lokasi Gudang</dt>
                             <dd class="text-gray-900 dark:text-white font-medium">{{ $vehicle->warehouse?->name ?? '-' }}</dd>
-                        </div>
+                        </div> --}}
                     </dl>
                 </div>
 
