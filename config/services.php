@@ -35,4 +35,28 @@ return [
         ],
     ],
 
+    'neuron' => [
+        'provider' => env('NEURON_PROVIDER', 'openai'),
+
+        'openai' => [
+            'key' => env('OPENAI_API_KEY'),
+            'model' => env('OPENAI_MODEL', 'gpt-4.1-mini'),
+        ],
+
+        'anthropic' => [
+            'key' => env('ANTHROPIC_API_KEY'),
+            'model' => env('ANTHROPIC_MODEL', 'claude-3-5-sonnet-latest'),
+        ],
+
+        'gemini' => [
+            'key' => env('GEMINI_API_KEY'),
+            'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+        ],
+
+        'ollama' => [
+            'url' => env('OLLAMA_URL', 'http://localhost:11434'),
+            'model' => env('OLLAMA_MODEL', 'llama3.1'),
+        ],
+    ],
+
 ];

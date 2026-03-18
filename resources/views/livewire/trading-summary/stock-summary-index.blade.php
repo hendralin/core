@@ -104,10 +104,11 @@
         </div>
     </div>
 
-    <!-- Data Table -->
-    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden mb-6">
-        <!-- Table -->
-        <div class="overflow-x-auto">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- Data Table -->
+        <div class="xl:col-span-2 bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 overflow-hidden mb-6">
+            <!-- Table -->
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:border-zinc-700 dark:bg-zinc-800/80">
                     <tr>
@@ -337,6 +338,12 @@
             </table>
         </div>
 
+        </div>
+
+        <!-- Screening Assistant Panel -->
+        <div class="mb-6">
+            @livewire(\App\Livewire\Screening\ScreeningAssistantPanel::class)
+        </div>
     </div>
     <!-- Pagination -->
     @if(!$isAllData)

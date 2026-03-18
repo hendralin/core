@@ -1042,6 +1042,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Fundamental Analyst Panel -->
+        <div>
+            @livewire(\App\Livewire\Analysis\SqlAnalystPanel::class)
+        </div>
     @else
         <!-- No Data State -->
         <div class="flex items-center justify-center min-h-[60vh]">
