@@ -2,72 +2,103 @@
 
 namespace App\Livewire\Analysis;
 
+use App\Models\ChatMessage;
 use App\Neuron\Agents\SqlAnalystAgent;
-use Livewire\Attributes\Locked;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use NeuronAI\Chat\Messages\Stream\Chunks\TextChunk;
 use NeuronAI\Chat\Messages\UserMessage;
 
 class SqlAnalystPanel extends Component
 {
     public string $input = '';
 
-    /**
-     * @var array<int, array{role:string, content:string}>
-     */
-    #[Locked]
-    public array $messages = [];
+    private string $greeting = 'Halo, saya analis fundamental Bandar Saham. Tanyakan perbandingan rasio (PER, PBV, ROE, DER, dsb.) untuk sektor atau emiten tertentu.';
 
-    public bool $isThinking = false;
-
-    public function mount(): void
+    protected function threadId(): string
     {
-        if ($this->messages === []) {
-            $this->messages[] = [
-                'role' => 'assistant',
-                'content' => 'Halo, saya analis fundamental Bandar Saham. Tanyakan perbandingan rasio (PER, PBV, ROE, DER, dsb.) untuk sektor atau emiten tertentu.',
-            ];
-        }
+        return 'sql-analyst-' . Auth::id();
     }
 
     public function ask(): void
     {
         $content = trim($this->input);
-        if ($content === '' || $this->isThinking) {
+        if ($content === '') {
             return;
         }
 
-        $this->messages[] = [
-            'role' => 'user',
-            'content' => $content,
-        ];
         $this->input = '';
-        $this->isThinking = true;
 
         try {
-            $agent = SqlAnalystAgent::make();
+            $handler = SqlAnalystAgent::make()
+                ->withThread($this->threadId())
+                ->stream(new UserMessage($content));
 
-            $response = $agent
-                ->chat(new UserMessage($content))
-                ->getMessage()
-                ->getContent();
+            foreach ($handler->events() as $chunk) {
+                if ($chunk instanceof TextChunk) {
+                    $this->stream(content: $chunk->content, name: 'streamResponse');
+                }
+            }
 
-            $this->messages[] = [
-                'role' => 'assistant',
-                'content' => $response,
-            ];
+            $handler->getMessage();
         } catch (\Throwable $e) {
-            $this->messages[] = [
+            ChatMessage::create([
+                'thread_id' => $this->threadId(),
                 'role' => 'assistant',
-                'content' => 'Maaf, terjadi kesalahan saat menjalankan analis SQL: ' . $e->getMessage(),
-            ];
-        } finally {
-            $this->isThinking = false;
+                'content' => json_encode([['type' => 'text', 'text' => 'Maaf, terjadi kesalahan saat menjalankan analis SQL: ' . $e->getMessage()]]),
+            ]);
         }
+    }
+
+    public function clearHistory(): void
+    {
+        ChatMessage::where('thread_id', $this->threadId())->delete();
+        $this->modal('clear-analyst-history')->close();
     }
 
     public function render()
     {
-        return view('livewire.analysis.sql-analyst-panel');
+        $messages = collect([
+            ['role' => 'assistant', 'content' => $this->greeting],
+        ]);
+
+        $history = ChatMessage::where('thread_id', $this->threadId())
+            ->orderBy('id')
+            ->get()
+            ->map(fn (ChatMessage $msg) => [
+                'role' => $msg->role,
+                'content' => $this->extractText($msg->content),
+            ]);
+
+        $messages = $messages->concat($history);
+
+        return view('livewire.analysis.sql-analyst-panel', [
+            'messages' => $messages,
+        ]);
+    }
+
+    private function extractText(mixed $content): string
+    {
+        if (is_string($content)) {
+            $decoded = json_decode($content, true);
+            if (is_array($decoded)) {
+                $content = $decoded;
+            } else {
+                return $content;
+            }
+        }
+
+        if (is_array($content)) {
+            $texts = [];
+            foreach ($content as $block) {
+                if (is_array($block) && ($block['type'] ?? '') === 'text') {
+                    $texts[] = $block['content'] ?? $block['text'] ?? '';
+                }
+            }
+
+            return implode("\n", array_filter($texts)) ?: (string) collect($content)->pluck('content')->filter()->implode("\n");
+        }
+
+        return (string) $content;
     }
 }
-

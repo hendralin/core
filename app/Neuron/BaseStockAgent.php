@@ -2,7 +2,9 @@
 
 namespace App\Neuron;
 
+use App\Models\ChatMessage;
 use NeuronAI\Agent\Agent;
+use NeuronAI\Chat\History\EloquentChatHistory;
 use NeuronAI\Providers\AIProviderInterface;
 use NeuronAI\Providers\Anthropic\Anthropic;
 use NeuronAI\Providers\Gemini\Gemini;
@@ -11,9 +13,17 @@ use NeuronAI\Providers\OpenAI\OpenAI;
 
 abstract class BaseStockAgent extends Agent
 {
-    /**
-     * Resolve the AI provider based on configuration / environment.
-     */
+    public function withThread(string $threadId): static
+    {
+        $this->setChatHistory(new EloquentChatHistory(
+            threadId: $threadId,
+            modelClass: ChatMessage::class,
+            contextWindow: 50000,
+        ));
+
+        return $this;
+    }
+
     protected function provider(): AIProviderInterface
     {
         $provider = config('services.neuron.provider', env('NEURON_PROVIDER', 'openai'));
@@ -38,4 +48,3 @@ abstract class BaseStockAgent extends Agent
         };
     }
 }
-

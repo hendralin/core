@@ -3,7 +3,7 @@
 @endassets
 
 <div class="flex flex-col h-110 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg"
-    x-data="{ query: @entangle('input').defer, pendingMsg: null }">
+    x-data="{ query: @entangle('input').defer, pendingMsg: null, streaming: false }">
     <div class="px-4 py-3 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
         <div>
             <p class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -13,7 +13,36 @@
                 Tanyakan ide screening bullish/bearish, saya bantu pilih kandidat.
             </p>
         </div>
+        <flux:modal.trigger name="clear-screening-history">
+            <flux:tooltip content="Hapus riwayat chat">
+                <button
+                    class="text-xs text-gray-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 transition-colors"
+                    title="Hapus Riwayat"
+                >
+                    <flux:icon.trash class="size-4" />
+                </button>
+            </flux:tooltip>
+        </flux:modal.trigger>
     </div>
+
+    <flux:modal name="clear-screening-history" class="min-w-[22rem]">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Hapus riwayat chat?</flux:heading>
+                <flux:text class="mt-2">
+                    Seluruh riwayat percakapan dengan asisten screening akan dihapus.<br>
+                    Tindakan ini tidak dapat dibatalkan.
+                </flux:text>
+            </div>
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button variant="danger" wire:click="clearHistory">Hapus Riwayat</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 
     <div class="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 text-sm" x-ref="chatScroll">
         @foreach($messages as $message)
@@ -21,26 +50,6 @@
                 @if($message['role'] === 'user')
                     <div class="max-w-[80%] rounded-lg px-3 py-2 bg-emerald-600 text-white">
                         <p class="whitespace-pre-line">{{ $message['content'] }}</p>
-                    </div>
-                @elseif($loop->last && count($messages) > 1)
-                    <div class="max-w-[80%] rounded-lg px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100">
-                        <div class="chat-prose"
-                            x-data="{
-                                text: '',
-                                words: @js($message['content']).split(/(?<=\s)/),
-                                i: 0,
-                                type() {
-                                    if (this.i < this.words.length) {
-                                        this.text += this.words[this.i++];
-                                        this.$el.innerHTML = marked.parse(this.text);
-                                        let c = this.$el.closest('.overflow-y-auto');
-                                        if (c) c.scrollTop = c.scrollHeight;
-                                        setTimeout(() => this.type(), Math.max(8, Math.min(25, 3500 / this.words.length)));
-                                    }
-                                }
-                            }"
-                            x-init="type()"
-                        ></div>
                     </div>
                 @else
                     <div class="max-w-[80%] rounded-lg px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100">
@@ -59,10 +68,27 @@
             </div>
         </div>
 
-        {{-- Loading indicator --}}
+        {{-- Loading indicator (hidden once streaming starts) --}}
+        <div wire:loading wire:target="ask">
+            <div x-show="!streaming" class="flex justify-start">
+                <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-zinc-800 text-xs text-gray-500 dark:text-zinc-400">
+                    <flux:icon.loading class="text-green-600 size-4" /> <span>Asisten sedang menganalisis...</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Streaming response --}}
         <div wire:loading wire:target="ask" class="flex justify-start">
-            <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-zinc-800 text-xs text-gray-500 dark:text-zinc-400">
-                <flux:icon.loading class="text-green-600 size-4" /> <span>Asisten sedang menganalisis...</span>
+            <div class="max-w-[80%] rounded-lg px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100">
+                <div class="chat-prose" wire:stream="streamResponse"
+                    x-init="
+                        new MutationObserver(() => {
+                            if ($el.textContent.trim()) streaming = true;
+                            let c = $el.closest('.overflow-y-auto');
+                            if (c) c.scrollTop = c.scrollHeight;
+                        }).observe($el, { childList: true, characterData: true, subtree: true });
+                    "
+                ></div>
             </div>
         </div>
     </div>
@@ -73,6 +99,7 @@
                 if (query && query.trim().length >= 20) {
                     pendingMsg = query.trim();
                     query = '';
+                    streaming = false;
                     $nextTick(() => { $refs.chatScroll.scrollTop = $refs.chatScroll.scrollHeight; });
                 }
             ">
