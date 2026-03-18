@@ -33,7 +33,14 @@ class CashInjectEdit extends Component
 
         // Check if this is actually a cash inject (Kas Kecil or Kas Pajak)
         if (!in_array($cost->cost_type, ['cash', 'tax_cash'])) {
-            abort(403, 'Record ini bukan merupakan inject kas.');
+            abort(403, 'Record ini bukan merupakan inject kas.' . auth()->id());
+        }
+
+        // Check if user has permission to edit inject kas
+        if ($cost->cost_type === 'cash' && auth()->id() == 8) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit inject kas kecil.');
+        } elseif ($cost->cost_type === 'tax_cash' && auth()->id() == 2) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit inject kas pajak.');
         }
 
         $this->cost_type = $cost->cost_type;

@@ -172,16 +172,40 @@
                                             </flux:button>
                                         @endcan
                                         @can('cash-inject.edit')
-                                            <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.edit', $cost) }}" wire:navigate tooltip="Edit" class="text-zinc-500 hover:text-amber-600 dark:hover:text-amber-400">
-                                                <flux:icon.pencil-square variant="mini" />
-                                            </flux:button>
+                                            @if($cost->cost_type === 'cash' && auth()->id() == 2)
+                                                <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.edit', $cost) }}" wire:navigate tooltip="Edit" class="text-zinc-500 hover:text-amber-600 dark:hover:text-amber-400">
+                                                    <flux:icon.pencil-square variant="mini" />
+                                                </flux:button>
+                                            @elseif($cost->cost_type === 'tax_cash' && auth()->id() == 8)
+                                                <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.edit', $cost) }}" wire:navigate tooltip="Edit" class="text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    <flux:icon.pencil-square variant="mini" />
+                                                </flux:button>
+                                            @elseif(!in_array(auth()->id(), [2, 8]))
+                                                <flux:button variant="ghost" size="xs" square href="{{ route('cash-injects.edit', $cost) }}" wire:navigate tooltip="Edit" class="text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-400">
+                                                    <flux:icon.pencil-square variant="mini" />
+                                                </flux:button>
+                                            @endif
                                         @endcan
                                         @can('cash-inject.delete')
-                                            <flux:modal.trigger name="delete-cost">
-                                                <flux:button variant="ghost" size="xs" square class="cursor-pointer text-zinc-500 hover:text-red-600 dark:hover:text-red-400" wire:click="setCostToDelete({{ $cost->id }})" tooltip="Hapus">
-                                                    <flux:icon.trash variant="mini" />
-                                                </flux:button>
-                                            </flux:modal.trigger>
+                                            @if($cost->cost_type === 'cash' && auth()->id() == 2)
+                                                <flux:modal.trigger name="delete-cost">
+                                                    <flux:button variant="ghost" size="xs" square class="cursor-pointer text-zinc-500 hover:text-red-600 dark:hover:text-red-400" wire:click="setCostToDelete({{ $cost->id }})" tooltip="Hapus">
+                                                        <flux:icon.trash variant="mini" />
+                                                    </flux:button>
+                                                </flux:modal.trigger>
+                                            @elseif($cost->cost_type === 'tax_cash' && auth()->id() == 8)
+                                                <flux:modal.trigger name="delete-cost">
+                                                    <flux:button variant="ghost" size="xs" square class="cursor-pointer text-zinc-500 hover:text-red-600 dark:hover:text-red-400" wire:click="setCostToDelete({{ $cost->id }})" tooltip="Hapus">
+                                                        <flux:icon.trash variant="mini" />
+                                                    </flux:button>
+                                                </flux:modal.trigger>
+                                            @elseif(!in_array(auth()->id(), [2, 8]))
+                                                <flux:modal.trigger name="delete-cost">
+                                                    <flux:button variant="ghost" size="xs" square class="cursor-pointer text-zinc-500 hover:text-red-600 dark:hover:text-red-400" wire:click="setCostToDelete({{ $cost->id }})" tooltip="Hapus">
+                                                        <flux:icon.trash variant="mini" />
+                                                    </flux:button>
+                                                </flux:modal.trigger>
+                                            @endif
                                         @endcan
                                     </div>
                                 </td>

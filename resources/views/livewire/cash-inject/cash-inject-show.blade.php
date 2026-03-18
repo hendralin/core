@@ -12,7 +12,13 @@
     <div>
         <flux:button variant="primary" size="sm" href="{{ route('cash-injects.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Inject Kas">Back</flux:button>
         @can('cash-inject.edit')
-            <flux:button variant="filled" size="sm" href="{{ route('cash-injects.edit', $cost) }}" wire:navigate icon="pencil-square" class="ml-1">Edit</flux:button>
+            @if($cost->cost_type === 'cash' && auth()->id() == 2)
+                <flux:button variant="filled" size="sm" href="{{ route('cash-injects.edit', $cost) }}" wire:navigate icon="pencil-square" class="ml-1">Edit</flux:button>
+            @elseif($cost->cost_type === 'tax_cash' && auth()->id() == 8)
+                <flux:button variant="filled" size="sm" href="{{ route('cash-injects.edit', $cost) }}" wire:navigate icon="pencil-square" class="ml-1">Edit</flux:button>
+            @elseif(!in_array(auth()->id(), [2, 8]))
+                <flux:button variant="filled" size="sm" href="{{ route('cash-injects.edit', $cost) }}" wire:navigate icon="pencil-square" class="ml-1">Edit</flux:button>
+            @endif
         @endcan
 
         <div class="mt-3">
