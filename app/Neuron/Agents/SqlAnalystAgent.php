@@ -22,6 +22,7 @@ class SqlAnalystAgent extends BaseStockAgent
             ],
             steps: [
                 'Pahami pertanyaan user tentang perbandingan rasio (PER, PBV, ROE, DER, NPM, dsb.).',
+                'Jika user menyebut kode emiten spesifik (mis. BBCA, PADI), gunakan filter code agar hasil tepat sasaran.',
                 'Terjemahkan kebutuhan user menjadi filter terstruktur (sektor, industri, batas rasio, status syariah, periode laporan).',
                 'Gunakan tool eksekusi query untuk mengambil sampel data, lalu jelaskan insight-nya dengan bahasa yang mudah dimengerti.',
             ],
@@ -103,6 +104,12 @@ class SqlAnalystAgent extends BaseStockAgent
                 'Eksekusi pencarian fundamental terstruktur di tabel financial_ratios dan stock_companies.'
             )
                 ->addProperty(new ToolProperty(
+                    name: 'code',
+                    type: PropertyType::STRING,
+                    description: 'Filter kode emiten (opsional, mis. BBCA).',
+                    required: false
+                ))
+                ->addProperty(new ToolProperty(
                     name: 'sector',
                     type: PropertyType::STRING,
                     description: 'Filter sektor IDX (opsional).',
@@ -175,6 +182,7 @@ class SqlAnalystAgent extends BaseStockAgent
                     required: false
                 ))
                 ->setCallable(function (
+                    ?string $code = null,
                     ?string $sector = null,
                     ?string $industry = null,
                     ?bool $sharia_only = false,
@@ -190,9 +198,15 @@ class SqlAnalystAgent extends BaseStockAgent
                 ): array {
                     $limit = $limit && $limit > 0 ? min($limit, 50) : 20;
 
-                    $query = FinancialRatio::query()
-                        ->with('stockCompany')
-                        ->audited();
+                    $code = $code !== null ? strtoupper(trim($code)) : null;
+
+                    $query = FinancialRatio::query()->with('stockCompany');
+
+                    if ($code) {
+                        $query->where('code', $code);
+                    } else {
+                        $query->audited();
+                    }
 
                     if ($sector) {
                         $query->whereHas('stockCompany', function ($q) use ($sector) {
@@ -249,6 +263,7 @@ class SqlAnalystAgent extends BaseStockAgent
                     $query->orderBy($order_by, $order_direction);
 
                     logger()->info('SqlAnalystAgent execute_query_spec', [
+                        'code' => $code,
                         'sector' => $sector,
                         'industry' => $industry,
                         'sharia_only' => $sharia_only,
