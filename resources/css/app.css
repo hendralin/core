@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
+@plugin '@tailwindcss/typography';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -96,4 +97,66 @@ select:focus[data-flux-control] {
 
 .ql-toolbar button.ql-active {
     @apply bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300;
+}
+
+/* Chat AI markdown response */
+.chat-prose {
+    @apply text-sm leading-relaxed;
+
+    & > *:first-child { @apply !mt-0; }
+    & > *:last-child  { @apply !mb-0; }
+
+    p       { @apply my-1.5; }
+    strong  { @apply font-semibold; }
+
+    h1, h2, h3, h4 {
+        @apply font-semibold mt-3 mb-1.5;
+    }
+    h1 { @apply text-base; }
+    h2 { @apply text-sm; }
+    h3, h4 { @apply text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400; }
+
+    ul, ol {
+        @apply my-1.5 pl-4 space-y-0.5;
+    }
+    ul { @apply list-disc; }
+    ol { @apply list-decimal; }
+    li::marker {
+        @apply text-gray-400 dark:text-zinc-500;
+    }
+
+    code {
+        @apply text-xs bg-gray-200 dark:bg-zinc-700 px-1 py-0.5 rounded font-mono;
+    }
+    pre {
+        @apply my-2 p-2.5 rounded-md bg-gray-200 dark:bg-zinc-700 overflow-x-auto;
+    }
+    pre code {
+        @apply bg-transparent p-0;
+    }
+
+    blockquote {
+        @apply my-2 pl-3 border-l-2 border-gray-300 dark:border-zinc-600 italic text-gray-600 dark:text-zinc-400;
+    }
+
+    table {
+        @apply my-2 w-full text-xs border-collapse;
+    }
+    th {
+        @apply text-left font-semibold px-2 py-1 border-b border-gray-300 dark:border-zinc-600 bg-gray-50 dark:bg-zinc-700/50;
+    }
+    td {
+        @apply px-2 py-1 border-b border-gray-200 dark:border-zinc-700;
+    }
+    tr:last-child td {
+        @apply border-b-0;
+    }
+
+    hr {
+        @apply my-3 border-gray-200 dark:border-zinc-700;
+    }
+
+    a {
+        @apply text-blue-600 dark:text-blue-400 underline underline-offset-2;
+    }
 }
