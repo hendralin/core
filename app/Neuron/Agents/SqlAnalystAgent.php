@@ -32,6 +32,7 @@ class SqlAnalystAgent extends BaseStockAgent
             ],
             toolsUsage: [
                 'Selalu gunakan tool schema bila butuh tahu tabel/kolom yang tersedia.',
+                'Jika user menyebut sektor/industri namun tidak yakin penamaan persisnya, panggil tool daftar sektor/industri (distinct) terlebih dulu lalu pilih yang paling cocok.',
                 'Saat menggunakan tool eksekusi query, isikan properti filter dengan eksplisit dan batasi limit hasil (maksimal 50).',
             ],
         );
@@ -46,6 +47,56 @@ class SqlAnalystAgent extends BaseStockAgent
             )->setCallable(function (): array {
                 return config('stock_schema.tables', []);
             }),
+
+            Tool::make(
+                'list_available_sectors',
+                'Mengembalikan daftar sektor yang tersedia (distinct) dari tabel stock_companies.'
+            )
+                ->addProperty(new ToolProperty(
+                    name: 'limit',
+                    type: PropertyType::INTEGER,
+                    description: 'Jumlah maksimal sektor yang dikembalikan (maksimal 200, default 50).',
+                    required: false
+                ))
+                ->setCallable(function (?int $limit = null): array {
+                    $limit = $limit && $limit > 0 ? min($limit, 200) : 50;
+
+                    return StockCompany::query()
+                        ->select('sektor')
+                        ->whereNotNull('sektor')
+                        ->where('sektor', '!=', '')
+                        ->distinct()
+                        ->orderBy('sektor')
+                        ->limit($limit)
+                        ->pluck('sektor')
+                        ->values()
+                        ->all();
+                }),
+
+            Tool::make(
+                'list_available_industries',
+                'Mengembalikan daftar industri yang tersedia (distinct) dari tabel stock_companies.'
+            )
+                ->addProperty(new ToolProperty(
+                    name: 'limit',
+                    type: PropertyType::INTEGER,
+                    description: 'Jumlah maksimal industri yang dikembalikan (maksimal 200, default 50).',
+                    required: false
+                ))
+                ->setCallable(function (?int $limit = null): array {
+                    $limit = $limit && $limit > 0 ? min($limit, 200) : 50;
+
+                    return StockCompany::query()
+                        ->select('industri')
+                        ->whereNotNull('industri')
+                        ->where('industri', '!=', '')
+                        ->distinct()
+                        ->orderBy('industri')
+                        ->limit($limit)
+                        ->pluck('industri')
+                        ->values()
+                        ->all();
+                }),
 
             Tool::make(
                 'execute_query_spec',
@@ -144,11 +195,15 @@ class SqlAnalystAgent extends BaseStockAgent
                         ->audited();
 
                     if ($sector) {
-                        $query->where('sector', $sector);
+                        $query->whereHas('stockCompany', function ($q) use ($sector) {
+                            $q->where('sektor', $sector);
+                        });
                     }
 
                     if ($industry) {
-                        $query->where('industry', $industry);
+                        $query->whereHas('stockCompany', function ($q) use ($industry) {
+                            $q->where('industri', $industry);
+                        });
                     }
 
                     if ($sharia_only) {
@@ -217,8 +272,8 @@ class SqlAnalystAgent extends BaseStockAgent
                         return [
                             'code' => $row->code,
                             'company_name' => $company?->nama_emiten,
-                            'sector' => $row->sector,
-                            'industry' => $row->industry,
+                            'sector' => $company?->sektor ?? $row->sector,
+                            'industry' => $company?->industri ?? $row->industry,
                             'fs_date' => optional($row->fs_date)->format('Y-m-d'),
                             'per' => $row->per !== null ? (float) $row->per : null,
                             'price_bv' => $row->price_bv !== null ? (float) $row->price_bv : null,

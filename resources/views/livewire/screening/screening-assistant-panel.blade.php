@@ -46,6 +46,8 @@
 
     <div class="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 text-sm" x-ref="chatScroll">
         @foreach($messages as $message)
+            @php($content = is_string($message['content'] ?? null) ? trim($message['content']) : '')
+            @continue($content === '' || $content === '[]')
             <div class="flex {{ $message['role'] === 'user' ? 'justify-end' : 'justify-start' }}" wire:key="msg-{{ $loop->index }}">
                 @if($message['role'] === 'user')
                     <div class="max-w-[80%] rounded-lg px-3 py-2 bg-emerald-600 text-white">
