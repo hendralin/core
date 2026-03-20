@@ -8,6 +8,9 @@
     <body class="min-h-screen bg-gray-50 dark:bg-zinc-900 text-gray-900 dark:text-zinc-100">
         @php
             $company = \App\Models\Company::first();
+            $marketingWhatsApp = config('marketing.whatsapp_contacts', []);
+            $waMeNumber = static fn (string $local): string => '62' . ltrim(preg_replace('/\D/', '', $local), '0');
+            $waDefaultText = urlencode((string) config('marketing.whatsapp_default_message', ''));
         @endphp
 
         <!-- Public Navbar -->
@@ -132,23 +135,28 @@
                         <div class="font-semibold text-gray-900 dark:text-zinc-100 mb-2">
                             Hubungi Kami
                         </div>
-                        <ul class="space-y-1 text-xs text-gray-600 dark:text-zinc-400">
-                            @if ($company)
-                            <li>
-                                WhatsApp
-                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $company->phone) }}?text={{ urlencode('Halo, saya ingin menanyakan tentang kendaraan yang tersedia.') }}"
-                                   target="_blank"
-                                   class="text-green-600 hover:text-green-800 underline"
-                                   rel="noopener">
-                                    {{ $company->phone }}
-                                </a>
-                            </li>
-                            <li>
-                                Email:
-                                <a href="mailto:{{ $company->email }}" class="text-blue-600 hover:underline">
-                                    {{ $company->email }}
-                                </a>
-                            </li>
+                        <p class="text-xs text-gray-600 dark:text-zinc-400 mb-2">
+                            Marketing (WhatsApp)
+                        </p>
+                        <ul class="space-y-2 text-xs text-gray-600 dark:text-zinc-400">
+                            @foreach ($marketingWhatsApp as $contact)
+                                <li>
+                                    <a href="https://wa.me/{{ $waMeNumber($contact['phone']) }}?text={{ $waDefaultText }}"
+                                       target="_blank"
+                                       class="inline-flex items-center gap-1.5 text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 underline underline-offset-2"
+                                       rel="noopener noreferrer">
+                                        <span class="font-medium">{{ $contact['phone'] }}</span>
+                                        <span class="text-gray-500 dark:text-zinc-500 no-underline">({{ $contact['name'] }})</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                            @if ($company?->email)
+                                <li class="pt-1 border-t border-gray-200 dark:border-zinc-700">
+                                    Email:
+                                    <a href="mailto:{{ $company->email }}" class="text-blue-600 dark:text-blue-400 hover:underline">
+                                        {{ $company->email }}
+                                    </a>
+                                </li>
                             @endif
                         </ul>
                     </div>

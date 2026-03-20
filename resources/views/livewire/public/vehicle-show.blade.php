@@ -1,4 +1,16 @@
 <div>
+@php
+    $vehicleShareContext = [
+        'title' => trim(($vehicle->brand?->name ?? '-') . ' ' . ($vehicle->type?->name ?? '-') . ' ' . ($vehicle->year ?? '')),
+        'price' => $vehicle->display_price ? ('Rp ' . number_format($vehicle->display_price, 0, ',', '.')) : null,
+        'loan_price' => $vehicle->loan_price ? ('Rp ' . number_format($vehicle->loan_price, 0, ',', '.')) : null,
+        'km' => $vehicle->kilometer ? (number_format($vehicle->kilometer, 0, ',', '.') . ' km') : null,
+        'color' => $vehicle->color ?: null,
+    ];
+@endphp
+<script type="application/json" id="woto-vehicle-share-context">
+@json($vehicleShareContext)
+</script>
 <div class="min-h-screen bg-gray-50 dark:bg-zinc-900">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Back link -->
@@ -15,7 +27,7 @@
                 {{ $vehicle->brand?->name }} {{ $vehicle->type?->name }} {{ $vehicle->vehicle_model?->name }} {{ $vehicle->year }}
             </flux:heading>
             <flux:text class="text-sm text-gray-600 dark:text-zinc-400">
-                Nomor polisi: {{ $vehicle->police_number }} • Warna: {{ $vehicle->color ?? '-' }} • KM: {{ $vehicle->kilometer ? number_format($vehicle->kilometer, 0, ',', '.') . ' km' : '-' }}
+                Warna: {{ $vehicle->color ?? '-' }} • KM: {{ $vehicle->kilometer ? number_format($vehicle->kilometer, 0, ',', '.') . ' km' : '-' }}
             </flux:text>
         </div>
 
@@ -175,7 +187,7 @@
                     @endif
 
                     <div class="mt-3 text-[11px] text-gray-500 dark:text-zinc-400">
-                        Tips: kirim link ini ke keluarga/teman untuk diskusi, atau chat kami dan sebutkan <span class="font-semibold">{{ $vehicle->police_number }}</span>.
+                        Tips: kirim link ini ke keluarga/teman untuk diskusi, atau chat kami untuk info lebih lanjut.
                     </div>
                 </div>
 
@@ -253,8 +265,8 @@
 
                 <!-- Contact box -->
                 @php
-                    $company = \App\Models\Company::first();
-                    $waNumber = $company?->phone ? preg_replace('/[^0-9]/', '', $company->phone) : null;
+                    $marketingWhatsApp = config('marketing.whatsapp_contacts', []);
+                    $waMeNumber = static fn (string $local): string => '62' . ltrim(preg_replace('/\D/', '', $local), '0');
                     $vehicleTitle = trim(($vehicle->brand?->name ?? '') . ' ' . ($vehicle->type?->name ?? '') . ' ' . ($vehicle->year ?? ''));
                 @endphp
 
@@ -265,36 +277,31 @@
                                 Hubungi Kami
                             </flux:heading>
                             <flux:text class="mt-1 text-sm text-gray-600 dark:text-zinc-300">
-                                <span class="font-semibold text-gray-900 dark:text-white">{{ $vehicleTitle ?: '-' }} {{ $vehicle->police_number }}</span>
+                                <span class="font-semibold text-gray-900 dark:text-white">{{ $vehicleTitle ?: '-' }}</span>
                             </flux:text>
                         </div>
                         <flux:badge icon="bolt" size="sm" color="teal">Fast response</flux:badge>
                     </div>
 
-                    <div class="mt-4 flex flex-col sm:flex-row gap-2">
-                        @if ($waNumber)
-                            <flux:button
-                                variant="primary"
-                                size="sm"
-                                icon="chat-bubble-left-right"
-                                class="cursor-pointer w-full sm:w-auto"
-                                wire:click="incrementChatWhatsApp"
-                                onclick="chatVehicleToWhatsApp('{{ $waNumber }}')"
-                            >
-                                Chat WhatsApp
-                            </flux:button>
-                        @else
-                            <flux:button
-                                variant="primary"
-                                size="sm"
-                                icon="chat-bubble-left-right"
-                                class="w-full sm:w-auto opacity-60 cursor-not-allowed"
-                                disabled
-                            >
-                                Chat WhatsApp
-                            </flux:button>
-                        @endif
-
+                    <div class="mt-4 space-y-2">
+                        <flux:text class="text-xs text-gray-500 dark:text-zinc-400">
+                            Marketing (WhatsApp)
+                        </flux:text>
+                        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+                            @foreach ($marketingWhatsApp as $contact)
+                                <flux:button
+                                    variant="primary"
+                                    size="sm"
+                                    icon="chat-bubble-left-right"
+                                    class="cursor-pointer w-full sm:w-auto justify-center sm:justify-start"
+                                    title="{{ $contact['phone'] }}"
+                                    wire:click="incrementChatWhatsApp"
+                                    onclick="chatVehicleToWhatsApp('{{ $waMeNumber($contact['phone']) }}')"
+                                >
+                                    {{ $contact['name'] }}
+                                </flux:button>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
@@ -499,9 +506,19 @@
 
 <script>
     (() => {
-        if (window.__wotoPublicShare) return;
-
         window.__wotoPublicShare = {
+            readContext() {
+                const el = document.getElementById('woto-vehicle-share-context');
+                if (!el) {
+                    return {};
+                }
+                try {
+                    return JSON.parse(el.textContent.trim() || '{}') || {};
+                } catch (e) {
+                    return {};
+                }
+            },
+
             async copyLink() {
                 const url = window.location.href;
                 try {
@@ -518,17 +535,19 @@
                 }
             },
 
-            toWhatsApp(payload) {
+            toWhatsApp() {
+                const ctx = this.readContext();
                 const url = window.location.href;
                 const lines = [];
-                lines.push('Halo, saya tertarik dengan kendaraan berikut:');
-                lines.push(payload.title);
-                lines.push(`Nomor Polisi: ${@js($vehicle->police_number)}`);
-                if (payload.price) lines.push(`Harga: ${payload.price}`);
-                if (payload.km) lines.push(`KM: ${payload.km}`);
-                if (payload.color) lines.push(`Warna: ${payload.color}`);
+                lines.push('Halo kak, cek dulu nih mobil kece yang lagi kami jual!');
                 lines.push('');
-                lines.push('Link:');
+                lines.push(ctx.title || '');
+                if (ctx.loan_price) lines.push(`Harga Kredit: ${ctx.loan_price}`);
+                if (ctx.price) lines.push(`Harga Tunai: ${ctx.price}`);
+                if (ctx.km) lines.push(`KM: ${ctx.km}`);
+                if (ctx.color) lines.push(`Warna: ${ctx.color}`);
+                lines.push('');
+                lines.push('Klik linknya di bawah, jangan sampe kehabisan!');
                 lines.push(url);
 
                 const message = lines.join('\n');
@@ -543,24 +562,20 @@
         };
 
         window.shareVehicleToWhatsApp = () => {
-            window.__wotoPublicShare.toWhatsApp({
-                title: @js(($vehicle->brand?->name ?? '-') . ' ' . ($vehicle->type?->name ?? '-') . ' ' . ($vehicle->year ?? '')),
-                price: @js($vehicle->display_price ? ('Rp ' . number_format($vehicle->display_price, 0, ',', '.')) : null),
-                km: @js($vehicle->kilometer ? (number_format($vehicle->kilometer, 0, ',', '.') . ' km') : null),
-                color: @js($vehicle->color ?: null),
-            });
+            window.__wotoPublicShare.toWhatsApp();
         };
 
         window.chatVehicleToWhatsApp = (phoneNumber) => {
+            const ctx = window.__wotoPublicShare.readContext();
             const url = window.location.href;
-            const message = [
-                'Halo admin, saya ingin cek ketersediaan unit:',
-                @js(($vehicle->brand?->name ?? '-') . ' ' . ($vehicle->type?->name ?? '-') . ' ' . ($vehicle->year ?? '')),
-                `Nomor Polisi: ${@js($vehicle->police_number)}`,
-                '',
-                'Link:',
-                url,
-            ].join('\n');
+            const lines = [
+                'Halo kak, saya ingin menanyakan tentang kendaraan yang tersedia:',
+                ctx.title || '',
+            ];
+            if (ctx.loan_price) lines.push(`Harga Kredit: ${ctx.loan_price}`);
+            if (ctx.price) lines.push(`Harga Tunai: ${ctx.price}`);
+            lines.push('', 'Link:', url);
+            const message = lines.join('\n');
 
             const waUrl = `https://wa.me/${encodeURIComponent(phoneNumber)}?text=${encodeURIComponent(message)}`;
             window.open(waUrl, '_blank', 'noopener');
