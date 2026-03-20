@@ -16,7 +16,7 @@
                 <div class="md:col-span-2">
                     <flux:input
                         wire:model.live.debounce.500ms="search"
-                        placeholder="Cari merek, tipe, model, atau nomor polisi..."
+                        placeholder="Cari merek, tipe, atau model..."
                         leading-icon="magnifying-glass"
                         clearable
                     />

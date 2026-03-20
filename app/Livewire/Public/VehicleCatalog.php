@@ -67,8 +67,7 @@ class VehicleCatalog extends Component
         if ($this->search !== '') {
             $search = $this->search;
             $query->where(function ($q) use ($search) {
-                $q->where('police_number', 'like', '%' . $search . '%')
-                    ->orWhereHas('brand', fn($q) => $q->where('name', 'like', '%' . $search . '%'))
+                $q->whereHas('brand', fn($q) => $q->where('name', 'like', '%' . $search . '%'))
                     ->orWhereHas('type', fn($q) => $q->where('name', 'like', '%' . $search . '%'))
                     ->orWhereHas('vehicle_model', fn($q) => $q->where('name', 'like', '%' . $search . '%'));
             });
