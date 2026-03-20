@@ -425,6 +425,13 @@
                         <flux:input wire:model.live.debounce.1500ms="loan_price" icon="currency-dollar" label="Harga Kredit *" placeholder="198.000.000" />
                     </div>
 
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="relative">
+                            <flux:input wire:model.live.debounce.1500ms="minimun_credit_down_payment" icon="currency-dollar" label="DP Minimal Kredit" placeholder="20.000.000" />
+                        </div>
+                        <div></div>
+                    </div>
+
                     <!-- Selling Information (only shown when status is Sold) -->
                     @if($status == '0')
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

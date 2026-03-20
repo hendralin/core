@@ -98,7 +98,7 @@
 
         <!-- Catalog Grid -->
         @if ($vehicles->count())
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
                 @foreach ($vehicles as $vehicle)
                     @php
                         $thumbnail = $vehicle->images->first();
@@ -106,7 +106,7 @@
                     <a
                         href="{{ route('public.vehicles.show', $vehicle->slug) }}"
                         wire:navigate
-                        class="group bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-150 flex flex-col"
+                        class="group bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-150 flex flex-col"
                     >
                         <div class="relative aspect-video bg-gray-100 dark:bg-zinc-900 overflow-hidden">
                             @if ($thumbnail)
@@ -118,66 +118,100 @@
                                 >
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
-                                    <flux:icon.photo class="w-10 h-10 text-gray-300 dark:text-zinc-600" />
+                                    <flux:icon.photo class="w-7 h-7 sm:w-10 sm:h-10 text-gray-300 dark:text-zinc-600" />
                                 </div>
                             @endif
 
                             @if ($vehicle->created_at && $vehicle->created_at->diffInDays() <= 7)
-                                <span class="absolute top-3 left-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-600 text-white shadow">
+                                <span class="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 inline-flex items-center px-1.5 py-px sm:px-2.5 sm:py-0.5 rounded-full text-[9px] sm:text-xs font-medium bg-blue-600 text-white shadow">
                                     Baru
                                 </span>
                             @endif
 
                             @if ($vehicle->images->count() > 1)
-                                <span class="absolute bottom-2 right-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-black/60 text-white backdrop-blur">
+                                <span class="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 inline-flex items-center px-1.5 py-px sm:px-2 sm:py-0.5 rounded-full text-[9px] sm:text-xs font-medium bg-black/60 text-white backdrop-blur">
                                     {{ $vehicle->images->count() }} foto
                                 </span>
                             @endif
                         </div>
 
-                        <div class="flex-1 flex flex-col p-4 space-y-2">
-                            <div class="flex items-center justify-between gap-2">
-                                <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-zinc-400">
-                                    {{ $vehicle->brand?->name ?? '-' }} • {{ $vehicle->type?->name ?? '-' }}
-                                </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                    Available
+                        <div class="flex-1 flex flex-col p-2 sm:p-3 lg:p-4 min-h-0 sm:min-h-[11rem]">
+                            <div class="flex items-start justify-between gap-1 sm:gap-2 mb-0.5 sm:mb-1 min-w-0">
+                                <p class="min-w-0 text-[8px] sm:text-[10px] font-semibold uppercase tracking-wide sm:tracking-wider text-emerald-600 dark:text-emerald-400 leading-tight line-clamp-2 sm:line-clamp-none">
+                                    {{ $vehicle->brand?->name ?? '-' }}
+                                    <span class="text-gray-400 dark:text-zinc-500 font-normal">·</span>
+                                    {{ $vehicle->type?->name ?? '-' }}
+                                </p>
+                                <span class="shrink-0 inline-flex items-center px-1 py-px sm:px-2 sm:py-0.5 rounded-full text-[8px] sm:text-[10px] font-semibold uppercase tracking-wide
+                                    bg-emerald-100 text-emerald-800 dark:bg-emerald-900/80 dark:text-emerald-200 ring-1 ring-inset ring-emerald-200/60 dark:ring-emerald-700/50">
+                                    <span class="sm:hidden">Ada</span>
+                                    <span class="hidden sm:inline">Tersedia</span>
                                 </span>
                             </div>
 
-                            <div>
-                                <div class="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                                    {{ $vehicle->vehicle_model?->name ?? '-' }} {{ $vehicle->year }}
-                                </div>
-                                <div class="text-xs text-gray-500 dark:text-zinc-400">
-                                    {{ $vehicle->police_number }}
-                                </div>
-                            </div>
+                            <h3 class="text-xs sm:text-sm lg:text-[15px] font-bold text-gray-900 dark:text-white leading-tight sm:leading-snug line-clamp-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                {{ $vehicle->vehicle_model?->name ?? '-' }}
+                                <span class="text-gray-500 dark:text-zinc-400 font-semibold">{{ $vehicle->year }}</span>
+                            </h3>
 
-                            <div class="mt-1">
-                                <div class="text-lg font-bold text-green-600 dark:text-green-400">
-                                    @if ($vehicle->loan_price)
-                                        Rp {{ number_format($vehicle->loan_price, 0, ',', '.') }}
-                                    @else
-                                        Hubungi kami
-                                    @endif
+                            <div class="mt-2 sm:mt-3 rounded-lg sm:rounded-xl border border-emerald-200/90 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-50 via-white to-white dark:from-emerald-950/35 dark:via-zinc-800/90 dark:to-zinc-800 p-2 sm:p-3 shadow-sm shadow-emerald-900/5 dark:shadow-none space-y-1 sm:space-y-2">
+                                <div>
+                                    <p class="text-[8px] sm:text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-zinc-400 mb-0.5">
+                                        <span class="sm:hidden">Kredit</span>
+                                        <span class="hidden sm:inline">Angsuran / kredit</span>
+                                    </p>
+                                    <p class="text-sm sm:text-base lg:text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-400 leading-tight break-words">
+                                        @if ($vehicle->loan_price)
+                                            <span class="sm:hidden">{{ format_idr_jt_mobile($vehicle->loan_price) }}</span>
+                                            <span class="hidden sm:inline">Rp {{ number_format($vehicle->loan_price, 0, ',', '.') }}</span>
+                                        @else
+                                            <span class="text-[11px] sm:text-sm font-semibold text-gray-500 dark:text-zinc-400 leading-tight">Hubungi kami</span>
+                                        @endif
+                                    </p>
                                 </div>
                                 @if ($vehicle->display_price)
-                                    <div class="text-xs text-blue-600 dark:text-blue-400">
-                                        Cash mulai Rp {{ number_format($vehicle->display_price, 0, ',', '.') }}
+                                    <div class="flex flex-wrap items-center gap-1 sm:gap-2 pt-1 border-t border-emerald-100/80 dark:border-emerald-900/40">
+                                        <span class="shrink-0 inline-flex items-center rounded bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200 px-1 py-px sm:rounded-md sm:px-2 sm:py-0.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wide">
+                                            Tunai
+                                        </span>
+                                        <span class="text-[10px] sm:text-xs font-semibold text-blue-700 dark:text-blue-300 tabular-nums min-w-0 leading-tight">
+                                            <span class="sm:hidden">{{ format_idr_jt_mobile($vehicle->display_price) }}</span>
+                                            <span class="hidden sm:inline">Rp {{ number_format($vehicle->display_price, 0, ',', '.') }}</span>
+                                        </span>
+                                    </div>
+                                @endif
+                                @if ($vehicle->minimun_credit_down_payment)
+                                    <div class="flex flex-wrap items-center gap-1 sm:gap-2 pt-1 sm:pt-2 border-t border-emerald-100/80 dark:border-emerald-900/40">
+                                        <span class="shrink-0 inline-flex items-center rounded bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 px-1 py-px sm:rounded-md sm:px-2 sm:py-0.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wide">
+                                            <span class="sm:hidden">DP</span>
+                                            <span class="hidden sm:inline">DP mulai</span>
+                                        </span>
+                                        <span class="text-[10px] sm:text-xs font-semibold text-amber-800 dark:text-amber-300 tabular-nums min-w-0 leading-tight">
+                                            <span class="sm:hidden">{{ format_idr_jt_mobile($vehicle->minimun_credit_down_payment) }}</span>
+                                            <span class="hidden sm:inline">Rp {{ number_format($vehicle->minimun_credit_down_payment, 0, ',', '.') }}</span>
+                                        </span>
                                     </div>
                                 @endif
                             </div>
 
-                            <div class="flex items-center justify-between pt-2 text-xs text-gray-500 dark:text-zinc-400">
-                                <div class="flex items-center gap-3">
+                            <div class="mt-auto pt-2 sm:pt-3 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-1 text-[9px] sm:text-[11px] text-gray-500 dark:text-zinc-400 border-t border-gray-100 dark:border-zinc-700/80">
+                                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 sm:gap-x-2.5 min-w-0">
                                     @if ($vehicle->kilometer)
-                                        <span>{{ number_format($vehicle->kilometer, 0, ',', '.') }} km</span>
+                                        <span class="inline-flex items-center gap-0.5 sm:gap-1 min-w-0">
+                                            <span class="text-gray-400 dark:text-zinc-500 shrink-0" aria-hidden="true">◦</span>
+                                            <span class="tabular-nums truncate">{{ number_format($vehicle->kilometer, 0, ',', '.') }} km</span>
+                                        </span>
                                     @endif
-                                    <span>{{ $vehicle->color ?? '-' }}</span>
+                                    @if ($vehicle->color)
+                                        <span class="inline-flex items-center gap-0.5 sm:gap-1 min-w-0 max-w-full sm:max-w-[10rem] truncate" title="{{ $vehicle->color }}">
+                                            <span class="text-gray-400 dark:text-zinc-500 shrink-0" aria-hidden="true">◦</span>
+                                            <span class="truncate">{{ $vehicle->color }}</span>
+                                        </span>
+                                    @endif
                                 </div>
-                                <span>{{ $vehicle->created_at?->diffForHumans() }}</span>
+                                <time class="shrink-0 text-gray-400 dark:text-zinc-500 tabular-nums max-sm:text-[8px]" datetime="{{ $vehicle->created_at?->toIso8601String() }}">
+                                    {{ $vehicle->created_at?->diffForHumans() }}
+                                </time>
                             </div>
                         </div>
                     </a>

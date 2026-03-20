@@ -38,7 +38,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/TerbilangHelper.php"
+            "app/Helpers/TerbilangHelper.php",
+            "app/Helpers/IdrFormatHelper.php"
         ]
     },
     "autoload-dev": {

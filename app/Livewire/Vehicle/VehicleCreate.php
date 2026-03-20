@@ -42,6 +42,7 @@ class VehicleCreate extends Component
     public $purchase_date;
     public $purchase_price;
     public $loan_price;
+    public $minimun_credit_down_payment;
     public $roadside_allowance;
     public $selling_date;
     public $selling_price;
@@ -168,6 +169,7 @@ class VehicleCreate extends Component
         'selling_price' => 'required_if:status,0|nullable|numeric|min:0|max:99999999999999.99',
         'display_price' => 'required|numeric|min:0|max:99999999999999.99',
         'loan_price' => 'required|numeric|min:0|max:99999999999999.99',
+        'minimun_credit_down_payment' => 'nullable|numeric|min:0|max:99999999999999.99',
         'roadside_allowance' => 'required|numeric|min:0|max:99999999999999.99',
         'salesman_id' => 'required_if:status,0|nullable|exists:salesmen,id',
         'status' => 'required|in:0,1',
@@ -260,6 +262,12 @@ class VehicleCreate extends Component
     public function updatedLoanPrice()
     {
         $this->loan_price = $this->formatNumber($this->loan_price);
+        $this->updateProgress();
+    }
+
+    public function updatedMinimunCreditDownPayment()
+    {
+        $this->minimun_credit_down_payment = $this->formatNumber($this->minimun_credit_down_payment);
         $this->updateProgress();
     }
 
@@ -367,7 +375,7 @@ class VehicleCreate extends Component
             'chassis_number', 'engine_number', 'cylinder_capacity', 'color', 'fuel_type',
             'kilometer', 'warehouse_id', 'vehicle_registration_date', 'vehicle_registration_expiry_date',
             'file_stnk', 'bpkb_number', 'bpkb_file', 'purchase_date', 'purchase_price', 'selling_date', 'selling_price',
-            'display_price', 'loan_price', 'roadside_allowance', 'salesman_id', 'status', 'description', 'images', 'tempImages',
+            'display_price', 'loan_price', 'minimun_credit_down_payment', 'roadside_allowance', 'salesman_id', 'status', 'description', 'images', 'tempImages',
             'stnk_asli', 'kunci_roda', 'ban_serep', 'kunci_serep', 'dongkrak'
         ]);
 
@@ -481,6 +489,9 @@ class VehicleCreate extends Component
         if ($this->loan_price) {
             $this->loan_price = $this->parseFormatted($this->loan_price);
         }
+        if ($this->minimun_credit_down_payment) {
+            $this->minimun_credit_down_payment = $this->parseFormatted($this->minimun_credit_down_payment);
+        }
         if ($this->roadside_allowance) {
             $this->roadside_allowance = $this->parseFormatted($this->roadside_allowance);
         }
@@ -489,6 +500,9 @@ class VehicleCreate extends Component
         }
         if ($this->display_price) {
             $this->display_price = $this->parseFormatted($this->display_price);
+        }
+        if (blank($this->minimun_credit_down_payment)) {
+            $this->minimun_credit_down_payment = null;
         }
 
         $this->validate();
@@ -554,6 +568,7 @@ class VehicleCreate extends Component
                 'purchase_price' => $this->purchase_price,
                 'display_price' => $this->display_price,
                 'loan_price' => $this->loan_price,
+                'minimun_credit_down_payment' => $this->minimun_credit_down_payment,
                 'roadside_allowance' => $this->roadside_allowance,
                 'selling_date' => $this->selling_date,
                 'selling_price' => $this->selling_price,
@@ -617,6 +632,7 @@ class VehicleCreate extends Component
                         'selling_date' => $this->selling_date,
                         'selling_price' => $this->selling_price,
                         'display_price' => $this->display_price,
+                        'minimun_credit_down_payment' => $this->minimun_credit_down_payment,
                         'status' => $this->status,
                         'description' => $this->description,
                     ]

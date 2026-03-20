@@ -49,6 +49,7 @@ class VehicleEdit extends Component
     public $selling_price;
     public $display_price;
     public $loan_price;
+    public $minimun_credit_down_payment;
     public $roadside_allowance;
     public $salesman_id;
     public $buyer_name;
@@ -189,6 +190,7 @@ class VehicleEdit extends Component
         'selling_price' => 'required_if:status,0|nullable|numeric|min:0|max:99999999999999.99',
         'display_price' => 'required|numeric|min:0|max:99999999999999.99',
         'loan_price' => 'required|numeric|min:0|max:99999999999999.99',
+        'minimun_credit_down_payment' => 'nullable|numeric|min:0|max:99999999999999.99',
         'roadside_allowance' => 'required|numeric|min:0|max:99999999999999.99',
         'salesman_id' => 'required_if:status,0|nullable|exists:salesmen,id',
         'buyer_name' => 'required_if:status,0|nullable|string|max:255',
@@ -279,6 +281,7 @@ class VehicleEdit extends Component
         $this->purchase_price = number_format($vehicle->purchase_price, 0, ',', '.');
         $this->display_price = number_format($vehicle->display_price, 0, ',', '.');
         $this->loan_price = $vehicle->loan_price ? number_format($vehicle->loan_price, 0, ',', '.') : null;
+        $this->minimun_credit_down_payment = $vehicle->minimun_credit_down_payment ? number_format($vehicle->minimun_credit_down_payment, 0, ',', '.') : null;
         $this->roadside_allowance = $vehicle->roadside_allowance ? number_format($vehicle->roadside_allowance, 0, ',', '.') : null;
         $this->vehicle_registration_date = $vehicle->vehicle_registration_date;
         $this->vehicle_registration_expiry_date = $vehicle->vehicle_registration_expiry_date;
@@ -361,6 +364,12 @@ class VehicleEdit extends Component
     public function updatedLoanPrice()
     {
         $this->loan_price = $this->formatNumber($this->loan_price);
+        $this->updateProgress();
+    }
+
+    public function updatedMinimunCreditDownPayment()
+    {
+        $this->minimun_credit_down_payment = $this->formatNumber($this->minimun_credit_down_payment);
         $this->updateProgress();
     }
 
@@ -509,6 +518,11 @@ class VehicleEdit extends Component
         $this->purchase_price = $this->parseFormatted($this->purchase_price);
         $this->display_price = $this->parseFormatted($this->display_price);
         $this->loan_price = $this->parseFormatted($this->loan_price);
+        if (filled($this->minimun_credit_down_payment)) {
+            $this->minimun_credit_down_payment = $this->parseFormatted($this->minimun_credit_down_payment);
+        } else {
+            $this->minimun_credit_down_payment = null;
+        }
         $this->roadside_allowance = $this->parseFormatted($this->roadside_allowance);
         if ($this->selling_price) {
             $this->selling_price = $this->parseFormatted($this->selling_price);
@@ -599,6 +613,7 @@ class VehicleEdit extends Component
                 'purchase_price' => $this->vehicle->purchase_price,
                 'display_price' => $this->vehicle->display_price,
                 'loan_price' => $this->vehicle->loan_price,
+                'minimun_credit_down_payment' => $this->vehicle->minimun_credit_down_payment,
                 'roadside_allowance' => $this->vehicle->roadside_allowance,
                 'selling_date' => $this->vehicle->selling_date,
                 'selling_price' => $this->vehicle->selling_price,
@@ -636,6 +651,7 @@ class VehicleEdit extends Component
                 'purchase_price' => $this->purchase_price,
                 'display_price' => $this->display_price,
                 'loan_price' => $this->loan_price,
+                'minimun_credit_down_payment' => $this->minimun_credit_down_payment,
                 'roadside_allowance' => $this->roadside_allowance,
                 'selling_date' => $this->status == '0' ? $this->selling_date : null,
                 'selling_price' => $this->status == '0' ? $this->selling_price : null,
@@ -723,6 +739,7 @@ class VehicleEdit extends Component
                         'purchase_price' => $this->purchase_price,
                         'display_price' => $this->display_price,
                         'loan_price' => $this->loan_price,
+                        'minimun_credit_down_payment' => $this->minimun_credit_down_payment,
                         'roadside_allowance' => $this->roadside_allowance,
                         'selling_date' => $this->status == '0' ? $this->selling_date : null,
                         'selling_price' => $this->status == '0' ? $this->selling_price : null,
@@ -800,6 +817,7 @@ class VehicleEdit extends Component
         $this->purchase_price = $this->formatNumber($this->vehicle->purchase_price);
         $this->display_price = $this->formatNumber($this->vehicle->display_price);
         $this->loan_price = $this->formatNumber($this->vehicle->loan_price);
+        $this->minimun_credit_down_payment = $this->vehicle->minimun_credit_down_payment ? $this->formatNumber($this->vehicle->minimun_credit_down_payment) : null;
         $this->roadside_allowance = $this->formatNumber($this->vehicle->roadside_allowance);
         $this->selling_price = $this->vehicle->selling_price ? $this->formatNumber($this->vehicle->selling_price) : null;
         $this->cylinder_capacity = $this->formatNumber($this->vehicle->cylinder_capacity);

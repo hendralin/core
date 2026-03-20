@@ -133,7 +133,8 @@
                 <div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl p-5 space-y-3">
                     <flux:heading size="xl" class="mb-1 text-green-600 dark:text-green-400 font-bold">
                         @if ($vehicle->loan_price)
-                            Rp {{ number_format($vehicle->loan_price, 0, ',', '.') }}
+                            <span class="sm:hidden">{{ format_idr_jt_mobile($vehicle->loan_price) }}</span>
+                            <span class="hidden sm:inline">Rp {{ number_format($vehicle->loan_price, 0, ',', '.') }}</span>
                         @else
                             Harga belum tersedia
                         @endif
@@ -141,7 +142,15 @@
 
                     @if ($vehicle->display_price)
                         <flux:text class="text-sm text-blue-600 dark:text-blue-400">
-                            Estimasi harga cash: Rp {{ number_format($vehicle->display_price, 0, ',', '.') }}
+                            <span class="sm:hidden">Estimasi harga cash: {{ format_idr_jt_mobile($vehicle->display_price) }}</span>
+                            <span class="hidden sm:inline">Estimasi harga cash: Rp {{ number_format($vehicle->display_price, 0, ',', '.') }}</span>
+                        </flux:text>
+                    @endif
+
+                    @if ($vehicle->minimun_credit_down_payment)
+                        <flux:text class="text-sm text-amber-700 dark:text-amber-400">
+                            <span class="sm:hidden">DP minimal kredit: {{ format_idr_jt_mobile($vehicle->minimun_credit_down_payment) }}</span>
+                            <span class="hidden sm:inline">DP minimal kredit: Rp {{ number_format($vehicle->minimun_credit_down_payment, 0, ',', '.') }}</span>
                         </flux:text>
                     @endif
 

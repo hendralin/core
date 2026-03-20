@@ -438,6 +438,13 @@
                         <flux:text class="mt-1">{{ $vehicle->roadside_allowance ? 'Rp ' . number_format($vehicle->roadside_allowance, 0, ',', '.') : '-' }}</flux:text>
                     </div>
                     @endif
+
+                    @if($vehicle->minimun_credit_down_payment)
+                    <div>
+                        <flux:heading size="md">DP Minimal Kredit</flux:heading>
+                        <flux:text class="mt-1">{{ $vehicle->minimun_credit_down_payment ? 'Rp ' . number_format($vehicle->minimun_credit_down_payment, 0, ',', '.') : '-' }}</flux:text>
+                    </div>
+                    @endif
                 </div>
 
                 <!-- Purchase Payments -->

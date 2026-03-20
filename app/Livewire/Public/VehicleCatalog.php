@@ -61,6 +61,7 @@ class VehicleCatalog extends Component
     {
         $query = Vehicle::query()
             ->with(['brand', 'type', 'vehicle_model', 'images'])
+            ->where('display_price', '>', 0)
             ->where('status', '1'); // hanya kendaraan Available
 
         if ($this->search !== '') {
