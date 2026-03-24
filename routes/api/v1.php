@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BlogController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\NewsController;
 use App\Http\Controllers\Api\V1\SignalController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 
@@ -28,6 +29,11 @@ Route::middleware('throttle:auth')->group(function (): void {
 // Blog: public list and show
 Route::get('posts', [BlogController::class, 'index'])->name('api.v1.posts.index');
 Route::get('posts/{slug}', [BlogController::class, 'show'])->name('api.v1.posts.show');
+
+// News headlines (public, throttled)
+Route::middleware('throttle:60,1')->group(function (): void {
+    Route::get('news/headlines', [NewsController::class, 'headlines'])->name('api.v1.news.headlines');
+});
 
 // Categories and tags (for blog filters)
 Route::get('categories', [CategoryController::class, 'index'])->name('api.v1.categories.index');
