@@ -66,6 +66,20 @@
                     </flux:sidebar.group>
                 @endif
 
+                @if (auth()->user()->can('ai-screener.view') || auth()->user()->can('ai-valuation.view') || auth()->user()->can('ai-risk.view'))
+                    <flux:sidebar.group expandable icon="document-text" heading="Research" class="grid">
+                        @if (auth()->user()->can('ai-screener.view'))
+                            <flux:sidebar.item icon="document-text" :href="route('ai-screener.index')" :current="request()->routeIs('ai-screener.index')" wire:navigate>{{ __('AI Screener') }}</flux:sidebar.item>
+                        @endif
+                        @if (auth()->user()->can('ai-valuation.view'))
+                            <flux:sidebar.item icon="calculator" :href="route('ai-valuation.index')" :current="request()->routeIs('ai-valuation.index')" wire:navigate>{{ __('AI Valuation') }}</flux:sidebar.item>
+                        @endif
+                        @if (auth()->user()->can('ai-risk.view'))
+                            <flux:sidebar.item icon="shield-exclamation" :href="route('ai-risk.index')" :current="request()->routeIs('ai-risk.index')" wire:navigate>{{ __('AI Risk') }}</flux:sidebar.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endif
+
                 @if (auth()->user()->can('admin.signal.view'))
                     <flux:sidebar.group expandable icon="sparkles" heading="Featuring" class="grid">
                         @if (auth()->user()->can('admin.signal.view') ||
@@ -236,6 +250,20 @@
                     <flux:navlist.group :heading="__('Trading Summary')" class="grid">
                         @if (auth()->user()->can('stock-summary.view'))
                             <flux:navlist.item icon="chart-bar" :href="route('stock-summary.index')" :current="request()->routeIs('stock-summary.index')" wire:navigate>{{ __('Stock Summary') }}</flux:navlist.item>
+                        @endif
+                    </flux:navlist.group>
+                @endif
+
+                @if (auth()->user()->can('ai-screener.view') || auth()->user()->can('ai-valuation.view') || auth()->user()->can('ai-risk.view'))
+                    <flux:navlist.group :heading="__('Research')" class="grid">
+                        @if (auth()->user()->can('ai-screener.view'))
+                            <flux:navlist.item icon="document-text" :href="route('ai-screener.index')" :current="request()->routeIs('ai-screener.index')" wire:navigate>{{ __('AI Screener') }}</flux:navlist.item>
+                        @endif
+                        @if (auth()->user()->can('ai-valuation.view'))
+                            <flux:navlist.item icon="calculator" :href="route('ai-valuation.index')" :current="request()->routeIs('ai-valuation.index')" wire:navigate>{{ __('AI Valuation') }}</flux:navlist.item>
+                        @endif
+                        @if (auth()->user()->can('ai-risk.view'))
+                            <flux:navlist.item icon="shield-exclamation" :href="route('ai-risk.index')" :current="request()->routeIs('ai-risk.index')" wire:navigate>{{ __('AI Risk') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Spatie\Permission\Models\Role;
 
 class PermissionSeeder extends Seeder
 {
@@ -35,6 +34,15 @@ class PermissionSeeder extends Seeder
 
             // Trading Summary
             'stock-summary.view',
+
+            // AI Research / Screener
+            'ai-screener.view',
+
+            // AI Valuation (DCF)
+            'ai-valuation.view',
+
+            // AI Risk Assessment
+            'ai-risk.view',
 
             // Featuring
             'admin.signal.view',

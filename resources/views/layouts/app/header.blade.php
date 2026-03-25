@@ -26,6 +26,24 @@
                         {{ __('Stock Summary') }}
                     </flux:navbar.item>
                 @endif
+
+                @if (auth()->user()->can('ai-screener.view'))
+                    <flux:navbar.item icon="document-text" :href="route('ai-screener.index')" :current="request()->routeIs('ai-screener.index')" wire:navigate>
+                        {{ __('AI Screener') }}
+                    </flux:navbar.item>
+                @endif
+
+                @if (auth()->user()->can('ai-valuation.view'))
+                    <flux:navbar.item icon="calculator" :href="route('ai-valuation.index')" :current="request()->routeIs('ai-valuation.index')" wire:navigate>
+                        {{ __('AI Valuation') }}
+                    </flux:navbar.item>
+                @endif
+
+                @if (auth()->user()->can('ai-risk.view'))
+                    <flux:navbar.item icon="shield-exclamation" :href="route('ai-risk.index')" :current="request()->routeIs('ai-risk.index')" wire:navigate>
+                        {{ __('AI Risk') }}
+                    </flux:navbar.item>
+                @endif
             </flux:navbar>
 
             <flux:spacer />

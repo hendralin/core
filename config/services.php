@@ -59,4 +59,11 @@ return [
         ],
     ],
 
+    /*
+    | Optional: Finnhub for IDX quote/metric enrichment ({CODE}.JK). Used by AI Screener hybrid mode.
+    */
+    'finnhub' => [
+        'key' => env('FINNHUB_API_KEY'),
+    ],
+
 ];

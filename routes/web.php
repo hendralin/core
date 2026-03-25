@@ -24,11 +24,13 @@ use App\Livewire\Company\CompanyShow;
 use App\Livewire\Home\HomeIndex;
 use App\Livewire\PublicBlog\BlogIndex;
 use App\Livewire\PublicBlog\BlogShow;
+use App\Livewire\Risk\BridgewaterRiskPanel;
 use App\Livewire\Roles\RoleAudit;
 use App\Livewire\Roles\RoleCreate;
 use App\Livewire\Roles\RoleEdit;
 use App\Livewire\Roles\RoleIndex;
 use App\Livewire\Roles\RoleShow;
+use App\Livewire\Screening\GoldmanScreenerPanel;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -44,6 +46,7 @@ use App\Livewire\Users\UserCreate;
 use App\Livewire\Users\UserEdit;
 use App\Livewire\Users\UserIndex;
 use App\Livewire\Users\UserShow;
+use App\Livewire\Valuation\MorganStanleyDcfPanel;
 use Illuminate\Support\Facades\Route;
 
 // License expired page (accessible even when license is expired)
@@ -77,9 +80,9 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('users/{user}/edit', UserEdit::class)->name('users.edit')->middleware(['permission:user.edit']);
     Route::livewire('users/{user}', UserShow::class)->name('users.show')->middleware(['permission:user.view']);
     Route::livewire('users/download/{filename}', function ($filename) {
-        $path = storage_path('app/temp/' . $filename);
+        $path = storage_path('app/temp/'.$filename);
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             abort(404);
         }
 
@@ -95,6 +98,12 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('roles/{role}', RoleShow::class)->name('roles.show')->middleware(['permission:role.view']);
 
     Route::livewire('stock-summary', StockSummaryIndex::class)->name('stock-summary.index')->middleware(['permission:stock-summary.view']);
+
+    Route::livewire('ai-screener', GoldmanScreenerPanel::class)->name('ai-screener.index')->middleware(['permission:ai-screener.view']);
+
+    Route::livewire('ai-valuation', MorganStanleyDcfPanel::class)->name('ai-valuation.index')->middleware(['permission:ai-valuation.view']);
+
+    Route::livewire('ai-risk', BridgewaterRiskPanel::class)->name('ai-risk.index')->middleware(['permission:ai-risk.view']);
 
     Route::livewire('admin/signals', SignalsIndex::class)->name('admin.signals.index')->middleware(['permission:admin.signal.view']);
     Route::livewire('admin/signals/audit', SignalsAudit::class)->name('admin.signals.audit')->middleware(['permission:admin.signal.audit']);
@@ -132,4 +141,4 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('about', AboutIndex::class)->name('about.index');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
