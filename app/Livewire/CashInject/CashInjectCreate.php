@@ -15,7 +15,7 @@ class CashInjectCreate extends Component
 {
     use WithFileUploads;
 
-    public $cost_type = 'cash';
+    public $cost_type;
     public $cost_date;
     public $warehouse_id;
     public $description;

@@ -222,7 +222,7 @@ class CostEdit extends Component
     public function render()
     {
         $vehicles = Vehicle::with(['brand', 'type', 'vehicle_model'])
-            ->where('status', '1')
+            ->whereIn('status', ['1', '2'])
             ->when($this->vehicle_search !== '', function ($query) {
                 $term = '%' . trim($this->vehicle_search) . '%';
                 $query->where(function ($q) use ($term) {

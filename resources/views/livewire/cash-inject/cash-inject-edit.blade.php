@@ -35,13 +35,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
                             <flux:select wire:model="cost_type" label="Tipe Kas" class="w-full">
+                                <flux:select.option value="">Pilih Tipe Kas</flux:select.option>
                                 @if(auth()->id() == 2)
-                                    <option value="cash">Kas Kecil</option>
+                                    <flux:select.option value="cash">Kas Kecil</flux:select.option>
                                 @elseif(auth()->id() == 8)
-                                    <option value="tax_cash">Kas Pajak</option>
+                                    <flux:select.option value="tax_cash">Kas Pajak</flux:select.option>
                                 @else
-                                    <option value="cash">Kas Kecil</option>
-                                    <option value="tax_cash">Kas Pajak</option>
+                                    <flux:select.option value="cash">Kas Kecil</flux:select.option>
+                                    <flux:select.option value="tax_cash">Kas Pajak</flux:select.option>
                                 @endif
                             </flux:select>
                             <p class="text-xs text-slate-500 dark:text-zinc-400">Pilih tipe kas untuk inject ini</p>

@@ -167,7 +167,7 @@
         .split-row {
             display: table;
             width: 100%;
-            margin-bottom: 5px;
+            /* margin-bottom: 5px; */
         }
 
         .left-section {
@@ -420,12 +420,6 @@
                                 <div class="inner-colon">:</div>
                                 <div class="inner-value">{{ strtoupper($paymentReceipt->vehicle->color) }}</div>
                             </div>
-
-                            <div class="inner-row">
-                                <div class="inner-label">ALAMAT</div>
-                                <div class="inner-colon">:</div>
-                                <div class="inner-value">{{ strtoupper($paymentReceipt->vehicle->buyer_address) }}</div>
-                            </div>
                         </div>
 
                         <div class="right-section">
@@ -455,6 +449,12 @@
                         </div>
                     </div>
 
+                    <div class="row" style="margin-bottom: 5px;">
+                        <div class="label">ALAMAT</div>
+                        <div class="colon">:</div>
+                        <div class="value">&nbsp;&nbsp;&nbsp;{{ strtoupper($paymentReceipt->vehicle->buyer_address) }}</div>
+                    </div>
+
                     @if($paymentReceipt->remaining_balance > 0)
                     <div class="pelunasan">
                         Sisa Pelunasan Senilai Rp. {{ number_format($paymentReceipt->remaining_balance, 0, ',', '.') }},- akan diselesaikan selambat lambatnya pada tanggal {{ \Carbon\Carbon::parse($paymentReceipt->must_be_settled_date)->format('d/m/Y') }}.
@@ -481,7 +481,7 @@
                                     @if($signatureData)
                                         <img src="{{ $signatureData }}" alt="Signature" class="keterangan-signature-img" />
                                     @endif
-                                    <p>FEDI SUDANTO</p>
+                                    <p>{{ strtoupper($paymentReceipt->vehicle->salesman?->name ?? '-') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -565,12 +565,6 @@
                                 <div class="inner-colon">:</div>
                                 <div class="inner-value">{{ strtoupper($paymentReceipt->vehicle->color) }}</div>
                             </div>
-
-                            <div class="inner-row">
-                                <div class="inner-label">ALAMAT</div>
-                                <div class="inner-colon">:</div>
-                                <div class="inner-value">{{ strtoupper($paymentReceipt->vehicle->buyer_address) }}</div>
-                            </div>
                         </div>
 
                         <div class="right-section">
@@ -600,6 +594,12 @@
                         </div>
                     </div>
 
+                    <div class="row" style="margin-bottom: 5px;">
+                        <div class="label">ALAMAT</div>
+                        <div class="colon">:</div>
+                        <div class="value">&nbsp;&nbsp;&nbsp;{{ strtoupper($paymentReceipt->vehicle->buyer_address) }}</div>
+                    </div>
+
                     @if($paymentReceipt->remaining_balance > 0)
                     <div class="pelunasan">
                         Sisa Pelunasan Senilai Rp. {{ number_format($paymentReceipt->remaining_balance, 0, ',', '.') }},- akan diselesaikan selambat lambatnya pada tanggal {{ \Carbon\Carbon::parse($paymentReceipt->must_be_settled_date)->format('d/m/Y') }}.
@@ -626,7 +626,7 @@
                                     @if($signatureData)
                                         <img src="{{ $signatureData }}" alt="Signature" class="keterangan-signature-img" />
                                     @endif
-                                    <p>FEDI SUDANTO</p>
+                                    <p>{{ strtoupper($paymentReceipt->vehicle->salesman?->name ?? '-') }}</p>
                                 </div>
                             </div>
                         </div>
