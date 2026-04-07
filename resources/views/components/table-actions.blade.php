@@ -14,6 +14,22 @@
         </flux:button>
     @endcan
 
+    @if (auth()->user()->hasRole('superadmin') && $user->id !== auth()->id())
+        <form method="POST" action="{{ route('users.impersonate', $user) }}" class="inline">
+            @csrf
+            <flux:button
+                type="submit"
+                variant="ghost"
+                size="xs"
+                square
+                tooltip="{{ __('Impersonate') }}"
+                class="cursor-pointer"
+            >
+                <flux:icon.user-circle variant="mini" class="text-amber-500 dark:text-amber-300" />
+            </flux:button>
+        </form>
+    @endif
+
     @can('user.delete')
         <flux:button variant="ghost" size="xs" square href="#" wire:click="delete({{ $user->id }})" wire:confirm="Are you sure to remove this user?" tooltip="Delete">
             <flux:icon.trash variant="mini" class="text-red-500 dark:text-red-300" />

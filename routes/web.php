@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\SalarySlipController;
 use App\Livewire\About\AboutIndex;
 use App\Livewire\BackupRestore\BackupRestoreIndex;
@@ -56,6 +57,8 @@ use App\Livewire\Position\PositionCreate;
 use App\Livewire\Position\PositionEdit;
 use App\Livewire\Position\PositionIndex;
 use App\Livewire\Position\PositionShow;
+use App\Livewire\Public\VehicleCatalog;
+use App\Livewire\Public\VehiclePublicShow;
 use App\Livewire\PurchasePayment\PurchasePaymentAudit;
 use App\Livewire\Report\CashReport\CashReportIndex;
 use App\Livewire\Report\SalesReport\SalesReportIndex;
@@ -75,8 +78,6 @@ use App\Livewire\SalaryComponent\SalaryComponentCreate;
 use App\Livewire\SalaryComponent\SalaryComponentEdit;
 use App\Livewire\SalaryComponent\SalaryComponentIndex;
 use App\Livewire\SalaryComponent\SalaryComponentShow;
-use App\Livewire\Public\VehicleCatalog;
-use App\Livewire\Public\VehiclePublicShow;
 use App\Livewire\Salesman\SalesmanAudit;
 use App\Livewire\Salesman\SalesmanCreate;
 use App\Livewire\Salesman\SalesmanEdit;
@@ -158,9 +159,9 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('users/{user}/edit', UserEdit::class)->name('users.edit')->middleware(['permission:user.edit']);
     Route::livewire('users/{user}', UserShow::class)->name('users.show')->middleware(['permission:user.view']);
     Route::get('users/download/{filename}', function ($filename) {
-        $path = storage_path('app/temp/' . $filename);
+        $path = storage_path('app/temp/'.$filename);
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             abort(404);
         }
 
@@ -168,6 +169,14 @@ Route::middleware(['auth'])->group(function () {
             'Content-Type' => 'text/csv',
         ])->deleteFileAfterSend(true);
     })->name('users.download')->middleware('auth');
+
+    Route::middleware(['role:superadmin'])->group(function () {
+        Route::post('users/{user}/impersonate', [ImpersonationController::class, 'start'])
+            ->name('users.impersonate');
+    });
+
+    Route::post('impersonate/leave', [ImpersonationController::class, 'leave'])
+        ->name('impersonate.leave');
 
     Route::livewire('roles', RoleIndex::class)->name('roles.index')->middleware(['permission:role.view|role.create|role.edit|role.delete']);
     Route::livewire('roles/audit', RoleAudit::class)->name('roles.audit')->middleware(['permission:role.audit']);
@@ -304,4 +313,4 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('change-log', ChangeLogIndex::class)->name('change-log.index');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
