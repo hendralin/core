@@ -349,11 +349,14 @@
                         }
                     }
                     $signatureData = null;
-                    $signaturePath = public_path('logos/signature.png');
-                    if (file_exists($signaturePath)) {
-                        $imageData = file_get_contents($signaturePath);
-                        $mimeType = mime_content_type($signaturePath);
-                        $signatureData = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+                    $salesmanForSignature = $paymentReceipt->vehicle->salesman ?? null;
+                    if ($salesmanForSignature && filled($salesmanForSignature->signature)) {
+                        $signaturePath = storage_path('app/public/photos/salesmen/signatures/'.$salesmanForSignature->signature);
+                        if (file_exists($signaturePath)) {
+                            $imageData = file_get_contents($signaturePath);
+                            $mimeType = mime_content_type($signaturePath) ?: 'image/png';
+                            $signatureData = 'data:'.$mimeType.';base64,'.base64_encode($imageData);
+                        }
                     }
                 @endphp
                 <div class="header">

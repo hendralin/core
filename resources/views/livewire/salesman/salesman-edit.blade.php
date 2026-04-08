@@ -1,3 +1,6 @@
+@php
+    use Illuminate\Support\Facades\Storage;
+@endphp
 <div>
     <div class="relative mb-6 w-full">
         <flux:heading size="xl" level="1">{{ __('Edit Salesman') }}</flux:heading>
@@ -9,7 +12,7 @@
         <flux:button variant="primary" size="sm" href="{{ route('salesmen.index') }}" wire:navigate icon="arrow-uturn-left" tooltip="Kembali ke Salesman">Back</flux:button>
 
         <div class="w-full max-w-lg">
-            <form wire:submit="submit" class="mt-6 space-y-6">
+            <form wire:submit="submit" class="mt-6 space-y-6" enctype="multipart/form-data">
                 <flux:input wire:model="name" label="Name" placeholder="Name..." />
                 <div class="grid grid-cols-2 gap-6">
                     <flux:input wire:model="phone" label="Phone" placeholder="Phone number..." />
@@ -20,6 +23,41 @@
                     <flux:select.option value="0">Inactive</flux:select.option>
                 </flux:select>
                 <flux:textarea wire:model="address" label="Address" placeholder="Address..." />
+
+                <div class="space-y-3">
+                    <flux:heading size="sm">Tanda tangan @if($existing_signature)<span class="font-normal text-zinc-500">(ganti jika perlu)</span>@else<span class="font-normal text-red-600">(wajib)</span>@endif</flux:heading>
+                    <div class="flex items-start gap-4">
+                        <div class="shrink-0 space-y-2">
+                            @if($signature)
+                                <div class="relative">
+                                    <img src="{{ $signature->temporaryUrl() }}" alt="Preview tanda tangan baru" class="max-h-28 max-w-40 object-contain rounded-lg border-2 border-blue-200 dark:border-blue-700">
+                                    <button type="button" wire:click="removeSignature" class="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600" title="Batalkan file baru">
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            @elseif($existing_signature && Storage::disk('photos')->exists('salesmen/signatures/'.$existing_signature))
+                                <img src="{{ asset('photos/salesmen/signatures/'.$existing_signature) }}" alt="Tanda tangan saat ini" class="max-h-28 max-w-40 object-contain rounded-lg border-2 border-zinc-200 dark:border-zinc-600">
+                            @else
+                                <div class="flex h-24 w-32 items-center justify-center rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-600">
+                                    <flux:icon.photo class="h-8 w-8 text-zinc-400" />
+                                </div>
+                            @endif
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <flux:input
+                                type="file"
+                                wire:model="signature"
+                                label="Upload gambar tanda tangan"
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                            />
+                            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Format: JPEG, PNG, atau WebP. Maks. 2MB.</p>
+                            @error('signature')
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
                 <flux:button type="submit" variant="primary" class="cursor-pointer">Submit</flux:button>
             </form>
         </div>

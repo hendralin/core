@@ -51,6 +51,17 @@
                     </div>
                     @endif
 
+                    <div>
+                        <flux:heading size="md">Tanda tangan</flux:heading>
+                        @if($signatureUrl)
+                            <div class="mt-2">
+                                <img src="{{ $signatureUrl }}" alt="Tanda tangan {{ $salesman->name }}" class="max-h-40 max-w-full rounded-lg border border-gray-200 object-contain dark:border-zinc-600">
+                            </div>
+                        @else
+                            <flux:text class="mt-1">-</flux:text>
+                        @endif
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200 dark:border-zinc-700">
                         <div>
                             <flux:heading size="sm">Created</flux:heading>

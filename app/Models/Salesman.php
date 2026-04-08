@@ -23,6 +23,7 @@ class Salesman extends Model
         'email',
         'address',
         'user_id',
+        'signature',
     ];
 
     /**
@@ -37,6 +38,7 @@ class Salesman extends Model
                 'email',
                 'address',
                 'user_id',
+                'signature',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

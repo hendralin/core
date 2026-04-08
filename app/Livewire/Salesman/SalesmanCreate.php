@@ -6,7 +6,7 @@ use Livewire\Component;
 use App\Models\Salesman;
 use App\Models\User;
 use Livewire\Attributes\Title;
-use Spatie\Permission\Models\Role;
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +14,13 @@ use Illuminate\Support\Facades\DB;
 #[Title('Create Salesman')]
 class SalesmanCreate extends Component
 {
-    public $name, $phone, $email, $address;
+    use WithFileUploads;
+
+    public $name;
+    public $phone;
+    public $email;
+    public $address;
+    public $signature;
 
     public function submit()
     {
@@ -23,9 +29,18 @@ class SalesmanCreate extends Component
             'phone' => 'nullable|string|max:50',
             'email' => 'required|email|max:255|unique:salesmen,email|unique:users,email',
             'address' => 'nullable|string',
+            'signature' => 'required|image|mimes:jpeg,jpg,png,webp|max:2048',
+        ], [
+            'signature.required' => 'Tanda tangan wajib diunggah.',
+            'signature.image' => 'Tanda tangan harus berupa gambar.',
+            'signature.mimes' => 'Tanda tangan harus berformat JPEG, JPG, PNG, atau WebP.',
+            'signature.max' => 'Ukuran gambar tanda tangan maksimal 2MB.',
         ]);
 
-        DB::transaction(function () {
+        $storedPath = $this->signature->store('salesmen/signatures', 'photos');
+        $signatureFile = basename($storedPath);
+
+        DB::transaction(function () use ($signatureFile) {
             // Create user with salesman role
             $user = User::create([
                 'name' => $this->name,
@@ -49,6 +64,7 @@ class SalesmanCreate extends Component
                 'email' => $this->email,
                 'address' => $this->address,
                 'user_id' => $user->id,
+                'signature' => $signatureFile,
             ]);
 
             // Log the creation activity with detailed information
@@ -62,6 +78,7 @@ class SalesmanCreate extends Component
                         'email' => $this->email,
                         'address' => $this->address,
                         'user_id' => $user->id,
+                        'signature' => $signatureFile,
                     ]
                 ])
                 ->log('created salesman');
@@ -70,6 +87,11 @@ class SalesmanCreate extends Component
         session()->flash('success', 'Salesman created.');
 
         return $this->redirect('/salesmen', true);
+    }
+
+    public function removeSignature(): void
+    {
+        $this->signature = null;
     }
 
     public function render()
