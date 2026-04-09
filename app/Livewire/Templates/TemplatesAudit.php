@@ -64,9 +64,7 @@ class TemplatesAudit extends Component
         $activities = Activity::query()
             ->with(['causer', 'subject.wahaSession'])
             ->where('subject_type', Template::class)
-            ->whereHas('subject', function ($query) {
-                $query->where('created_by', Auth::id());
-            })
+            ->whereRaw('EXISTS (SELECT 1 FROM templates WHERE templates.id = activity_log.subject_id AND templates.created_by = ?)', [Auth::id()])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('description', 'like', '%' . $this->search . '%')
@@ -95,28 +93,19 @@ class TemplatesAudit extends Component
         // Get statistics - only for templates created by current user
         $stats = [
             'total_activities' => Activity::where('subject_type', Template::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })->count(),
+                ->whereRaw('EXISTS (SELECT 1 FROM templates WHERE templates.id = activity_log.subject_id AND templates.created_by = ?)', [Auth::id()])
+                ->count(),
             'today_activities' => Activity::where('subject_type', Template::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })
+                ->whereRaw('EXISTS (SELECT 1 FROM templates WHERE templates.id = activity_log.subject_id AND templates.created_by = ?)', [Auth::id()])
                 ->whereDate('created_at', today())->count(),
             'created_count' => Activity::where('subject_type', Template::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })
+                ->whereRaw('EXISTS (SELECT 1 FROM templates WHERE templates.id = activity_log.subject_id AND templates.created_by = ?)', [Auth::id()])
                 ->where('description', 'created a new template')->count(),
             'updated_count' => Activity::where('subject_type', Template::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })
+                ->whereRaw('EXISTS (SELECT 1 FROM templates WHERE templates.id = activity_log.subject_id AND templates.created_by = ?)', [Auth::id()])
                 ->where('description', 'updated template information')->count(),
             'deleted_count' => Activity::where('subject_type', Template::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })
+                ->whereRaw('EXISTS (SELECT 1 FROM templates WHERE templates.id = activity_log.subject_id AND templates.created_by = ?)', [Auth::id()])
                 ->where('description', 'deleted template')->count(),
         ];
 

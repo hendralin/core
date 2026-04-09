@@ -123,9 +123,7 @@ class SessionsAudit extends Component
         $activities = Activity::query()
             ->with(['causer', 'subject'])
             ->where('subject_type', Session::class)
-            ->whereHas('subject', function ($query) {
-                $query->where('created_by', Auth::id());
-            })
+            ->whereRaw('EXISTS (SELECT 1 FROM waha_sessions WHERE waha_sessions.id = activity_log.subject_id AND waha_sessions.created_by = ?)', [Auth::id()])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('description', 'like', '%' . $this->search . '%')

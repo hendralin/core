@@ -50,9 +50,7 @@ class MesssagesAudit extends Component
         $activities = Activity::query()
             ->with(['causer', 'subject.wahaSession', 'subject.template', 'subject.contact', 'subject.group'])
             ->where('subject_type', Message::class)
-            ->whereHas('subject', function ($query) {
-                $query->where('created_by', Auth::id());
-            })
+            ->whereRaw('EXISTS (SELECT 1 FROM messages WHERE messages.id = activity_log.subject_id AND messages.created_by = ?)', [Auth::id()])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('description', 'like', '%' . $this->search . '%')
@@ -78,30 +76,21 @@ class MesssagesAudit extends Component
         // Get statistics - only for messages created by current user
         $stats = [
             'total_activities' => Activity::where('subject_type', Message::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })->count(),
+                ->whereRaw('EXISTS (SELECT 1 FROM messages WHERE messages.id = activity_log.subject_id AND messages.created_by = ?)', [Auth::id()])
+                ->count(),
             'today_activities' => Activity::where('subject_type', Message::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })
+                ->whereRaw('EXISTS (SELECT 1 FROM messages WHERE messages.id = activity_log.subject_id AND messages.created_by = ?)', [Auth::id()])
                 ->whereDate('created_at', today())->count(),
             'sent_count' => Activity::where('subject_type', Message::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })
+                ->whereRaw('EXISTS (SELECT 1 FROM messages WHERE messages.id = activity_log.subject_id AND messages.created_by = ?)', [Auth::id()])
                 ->where('description', 'sent a message')->count(),
             'failed_count' => Activity::where('subject_type', Message::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })
+                ->whereRaw('EXISTS (SELECT 1 FROM messages WHERE messages.id = activity_log.subject_id AND messages.created_by = ?)', [Auth::id()])
                 ->where(function ($query) {
                     $query->where('description', 'like', '%failed%');
                 })->count(),
             'resent_count' => Activity::where('subject_type', Message::class)
-                ->whereHas('subject', function ($query) {
-                    $query->where('created_by', Auth::id());
-                })
+                ->whereRaw('EXISTS (SELECT 1 FROM messages WHERE messages.id = activity_log.subject_id AND messages.created_by = ?)', [Auth::id()])
                 ->where('description', 'resent a message')->count(),
         ];
 
