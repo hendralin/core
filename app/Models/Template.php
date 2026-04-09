@@ -37,6 +37,7 @@ class Template extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'last_used_at' => 'datetime',
+        'created_by' => 'integer',
     ];
 
     /**

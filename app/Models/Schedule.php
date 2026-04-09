@@ -53,6 +53,7 @@ class Schedule extends Model
         'day_of_week' => 'integer',
         'day_of_month' => 'integer',
         'usage_count' => 'integer',
+        'created_by' => 'integer',
     ];
 
     /**
