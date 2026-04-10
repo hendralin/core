@@ -135,9 +135,9 @@
                             @endif
                         </div>
 
-                        <div class="flex-1 flex flex-col p-2 sm:p-3 lg:p-4 min-h-0 sm:min-h-[11rem]">
-                            <div class="flex items-start justify-between gap-1 sm:gap-2 mb-0.5 sm:mb-1 min-w-0">
-                                <p class="min-w-0 text-[8px] sm:text-[10px] font-semibold uppercase tracking-wide sm:tracking-wider text-emerald-600 dark:text-emerald-400 leading-tight line-clamp-2 sm:line-clamp-none">
+                        <div class="flex-1 flex flex-col gap-y-2 sm:gap-y-3 p-2 sm:p-3 lg:p-4 min-h-0 sm:min-h-[11rem]">
+                            <div class="flex items-start justify-between gap-1 sm:gap-2 min-w-0">
+                                <p class="min-w-0 text-[8px] sm:text-[10px] font-semibold uppercase tracking-wide sm:tracking-wider text-emerald-600 dark:text-emerald-400 leading-tight line-clamp-2 sm:line-clamp-3" title="{{ trim(($vehicle->brand?->name ?? '-') . ' · ' . ($vehicle->type?->name ?? '-')) }}">
                                     {{ $vehicle->brand?->name ?? '-' }}
                                     <span class="text-gray-400 dark:text-zinc-500 font-normal">·</span>
                                     {{ $vehicle->type?->name ?? '-' }}
@@ -154,7 +154,7 @@
                                 <span class="text-gray-500 dark:text-zinc-400 font-semibold">{{ $vehicle->year }}</span>
                             </h3>
 
-                            <div class="mt-2 sm:mt-3 rounded-lg sm:rounded-xl border border-emerald-200/90 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-50 via-white to-white dark:from-emerald-950/35 dark:via-zinc-800/90 dark:to-zinc-800 p-2 sm:p-3 shadow-sm shadow-emerald-900/5 dark:shadow-none space-y-1 sm:space-y-2">
+                            <div class="rounded-lg sm:rounded-xl border border-emerald-200/90 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-50 via-white to-white dark:from-emerald-950/35 dark:via-zinc-800/90 dark:to-zinc-800 p-2 sm:p-3 shadow-sm shadow-emerald-900/5 dark:shadow-none space-y-1 sm:space-y-2">
                                 <div>
                                     <p class="text-[8px] sm:text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-zinc-400 mb-0.5">
                                         <span class="sm:hidden">Kredit</span>
@@ -180,7 +180,7 @@
                                         </span>
                                     </div>
                                 @endif
-                                @if ($vehicle->minimun_credit_down_payment)
+                                @if ($vehicle->minimun_credit_down_payment > 0)
                                     <div class="flex flex-wrap items-center gap-1 sm:gap-2 pt-1 sm:pt-2 border-t border-emerald-100/80 dark:border-emerald-900/40">
                                         <span class="shrink-0 inline-flex items-center rounded bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 px-1 py-px sm:rounded-md sm:px-2 sm:py-0.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wide">
                                             <span class="sm:hidden">DP</span>
@@ -194,7 +194,7 @@
                                 @endif
                             </div>
 
-                            <div class="mt-auto pt-2 sm:pt-3 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-1 text-[9px] sm:text-[11px] text-gray-500 dark:text-zinc-400 border-t border-gray-100 dark:border-zinc-700/80">
+                            <div class="mt-auto pt-2 sm:pt-3 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-1 text-[9px] sm:text-[11px] text-gray-500 dark:text-zinc-400 border-t border-gray-100 dark:border-zinc-700/80">
                                 <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 sm:gap-x-2.5 min-w-0">
                                     @if ($vehicle->kilometer)
                                         <span class="inline-flex items-center gap-0.5 sm:gap-1 min-w-0">
@@ -220,7 +220,7 @@
 
             <!-- Pagination -->
             <div class="mt-8">
-                {{ $vehicles->links(data: ['scrollTo' => false]) }}
+                {{ $vehicles->links() }}
             </div>
         @else
             <div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl p-10 text-center">
