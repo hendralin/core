@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Roles;
 
-use App\Services\RoleService;
-use Livewire\Component;
-use Livewire\Attributes\Title;
 use App\Models\Role;
-use Spatie\Permission\Models\Permission;
+use Livewire\Component;
+use App\Services\RoleService;
+use Livewire\Attributes\Title;
+use App\Constants\RoleConstants;
 use Illuminate\Support\Facades\Auth;
 
 #[Title('Create Role')]
@@ -58,7 +58,7 @@ class RoleCreate extends Component
                 'max:50',
                 'regex:/^[a-zA-Z][a-zA-Z0-9_-]*$/',
                 'unique:roles,name',
-                'not_in:' . implode(',', \App\Constants\RoleConstants::PROTECTED_ROLES)
+                'not_in:' . implode(',', RoleConstants::PROTECTED_ROLES)
             ],
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'string|exists:permissions,name'

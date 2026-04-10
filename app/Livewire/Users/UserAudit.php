@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Users;
 
+use App\Models\User;
 use Livewire\Component;
 use App\Models\Activity;
-use App\Models\User;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Livewire\WithoutUrlPagination;

@@ -7,26 +7,20 @@ class RoleConstants
     // System role names
     const SUPERADMIN = 'superadmin';
     const ADMIN = 'admin';
-    const SALESMAN = 'salesman';
-    const CUSTOMER = 'customer';
-    const SUPPLIER = 'supplier';
+    const USER = 'user';
 
     // All system roles that cannot be deleted
     const PROTECTED_ROLES = [
         self::SUPERADMIN,
         self::ADMIN,
-        self::SALESMAN,
-        self::CUSTOMER,
-        self::SUPPLIER,
+        self::USER,
     ];
 
     // Role display names
     const ROLE_DISPLAY_NAMES = [
         self::SUPERADMIN => 'Super Admin',
         self::ADMIN => 'Admin',
-        self::SALESMAN => 'Salesman',
-        self::CUSTOMER => 'Customer',
-        self::SUPPLIER => 'Supplier',
+        self::USER => 'User',
     ];
 
     /**
@@ -53,9 +47,7 @@ class RoleConstants
         return [
             self::SUPERADMIN,
             self::ADMIN,
-            self::SALESMAN,
-            self::CUSTOMER,
-            self::SUPPLIER,
+            self::USER,
         ];
     }
 }

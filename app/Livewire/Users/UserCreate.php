@@ -5,6 +5,7 @@ namespace App\Livewire\Users;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\Attributes\Title;
+use App\Constants\RoleConstants;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +19,7 @@ class UserCreate extends Component
 
     public function mount()
     {
-        $this->allRoles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
+        $this->allRoles = Role::orderBy('name')->get();
     }
 
     public function submit()

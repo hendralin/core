@@ -5,10 +5,10 @@ namespace App\Livewire\Users;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\Attributes\Title;
+use App\Constants\RoleConstants;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Request;
 
 #[Title('Edit User')]
 class UserEdit extends Component
@@ -35,7 +35,7 @@ class UserEdit extends Component
         $this->timezone = $user->timezone;
         $this->status = $user->status;
 
-        $this->allRoles = Role::whereNotIn('name', ['salesman', 'customer', 'supplier', 'cashier'])->get();
+        $this->allRoles = Role::orderBy('name')->get();
         $this->roles = $user->roles()->pluck('name');
     }
 

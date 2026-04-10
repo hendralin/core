@@ -13,6 +13,10 @@
         <x-alert type="success" class="mb-4">{{ $value }}</x-alert>
     @endsession
 
+    @session('error')
+        <x-alert type="error" class="mb-4">{{ $value }}</x-alert>
+    @endsession
+
     <!-- Statistics Overview -->
     @php
         $totalRoles = $roles->total();

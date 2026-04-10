@@ -2,9 +2,8 @@
 
 namespace App\Livewire\Roles;
 
-use App\Services\RoleService;
-use App\Constants\RoleConstants;
 use Livewire\Component;
+use App\Services\RoleService;
 use Livewire\Attributes\Title;
 use Spatie\Permission\Models\Role;
 
