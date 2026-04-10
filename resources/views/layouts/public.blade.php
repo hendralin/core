@@ -146,8 +146,8 @@
                                        class="inline-flex items-center gap-1.5 text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 underline underline-offset-2"
                                        rel="noopener noreferrer">
                                         <span class="font-medium">{{ $contact['phone'] }}</span>
-                                        <span class="text-gray-500 dark:text-zinc-500 no-underline">({{ $contact['name'] }})</span>
                                     </a>
+                                    <span class="text-gray-500 dark:text-zinc-500 no-underline">({{ $contact['name'] }})</span>
                                 </li>
                             @endforeach
                             @if ($company?->email)
