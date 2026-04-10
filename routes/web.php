@@ -1,23 +1,23 @@
 <?php
 
-use App\Livewire\Roles\RoleEdit;
-use App\Livewire\Roles\RoleShow;
-use App\Livewire\Users\UserEdit;
-use App\Livewire\Users\UserShow;
-use App\Livewire\Roles\RoleAudit;
-use App\Livewire\Roles\RoleIndex;
-use App\Livewire\Users\UserAudit;
-use App\Livewire\Users\UserIndex;
 use App\Livewire\About\AboutIndex;
-use App\Livewire\Roles\RoleCreate;
-use App\Livewire\Settings\Profile;
-use App\Livewire\Users\UserCreate;
-use App\Livewire\Settings\Password;
+use App\Livewire\BackupRestore\BackupRestoreIndex;
 use App\Livewire\Company\CompanyEdit;
 use App\Livewire\Company\CompanyShow;
+use App\Livewire\Roles\RoleAudit;
+use App\Livewire\Roles\RoleCreate;
+use App\Livewire\Roles\RoleEdit;
+use App\Livewire\Roles\RoleIndex;
+use App\Livewire\Roles\RoleShow;
 use App\Livewire\Settings\Appearance;
+use App\Livewire\Settings\Password;
+use App\Livewire\Settings\Profile;
+use App\Livewire\Users\UserAudit;
+use App\Livewire\Users\UserCreate;
+use App\Livewire\Users\UserEdit;
+use App\Livewire\Users\UserIndex;
+use App\Livewire\Users\UserShow;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\BackupRestore\BackupRestoreIndex;
 
 // License expired page (accessible even when license is expired)
 Route::get('/license-expired', function () {
@@ -27,9 +27,9 @@ Route::get('/license-expired', function () {
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
-    Route::get('settings/profile', Profile::class)->name('settings.profile');
-    Route::get('settings/password', Password::class)->name('settings.password');
-    Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
+    Route::livewire('settings/profile', Profile::class)->name('settings.profile');
+    Route::livewire('settings/password', Password::class)->name('settings.password');
+    Route::livewire('settings/appearance', Appearance::class)->name('settings.appearance');
 
     Route::get('/', function () {
         return view('dashboard');
@@ -39,15 +39,15 @@ Route::middleware(['auth'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-    Route::get('company/edit', CompanyEdit::class)->name('company.edit')->middleware(['permission:company.edit']);
-    Route::get('company', CompanyShow::class)->name('company.show')->middleware(['permission:company.view']);
+    Route::livewire('company/edit', CompanyEdit::class)->name('company.edit')->middleware(['permission:company.edit']);
+    Route::livewire('company', CompanyShow::class)->name('company.show')->middleware(['permission:company.view']);
 
-    Route::get('users', UserIndex::class)->name('users.index')->middleware(['permission:user.view']);
-    Route::get('users/audit', UserAudit::class)->name('users.audit')->middleware(['permission:user.audit']);
-    Route::get('users/create', UserCreate::class)->name('users.create')->middleware(['permission:user.create']);
-    Route::get('users/{user}/edit', UserEdit::class)->name('users.edit')->middleware(['permission:user.edit']);
-    Route::get('users/{user}', UserShow::class)->name('users.show')->middleware(['permission:user.view']);
-    Route::get('users/download/{filename}', function ($filename) {
+    Route::livewire('users', UserIndex::class)->name('users.index')->middleware(['permission:user.view']);
+    Route::livewire('users/audit', UserAudit::class)->name('users.audit')->middleware(['permission:user.audit']);
+    Route::livewire('users/create', UserCreate::class)->name('users.create')->middleware(['permission:user.create']);
+    Route::livewire('users/{user}/edit', UserEdit::class)->name('users.edit')->middleware(['permission:user.edit']);
+    Route::livewire('users/{user}', UserShow::class)->name('users.show')->middleware(['permission:user.view']);
+    Route::livewire('users/download/{filename}', function ($filename) {
         $path = storage_path('app/temp/' . $filename);
 
         if (!file_exists($path)) {
@@ -59,17 +59,17 @@ Route::middleware(['auth'])->group(function () {
         ])->deleteFileAfterSend(true);
     })->name('users.download')->middleware('auth');
 
-    Route::get('roles', RoleIndex::class)->name('roles.index')->middleware(['permission:role.view|role.create|role.edit|role.delete']);
-    Route::get('roles/audit', RoleAudit::class)->name('roles.audit')->middleware(['permission:role.audit']);
-    Route::get('roles/create', RoleCreate::class)->name('roles.create')->middleware(['permission:role.create']);
-    Route::get('roles/{role}/edit', RoleEdit::class)->name('roles.edit')->middleware(['permission:role.edit']);
-    Route::get('roles/{role}', RoleShow::class)->name('roles.show')->middleware(['permission:role.view']);
+    Route::livewire('roles', RoleIndex::class)->name('roles.index')->middleware(['permission:role.view|role.create|role.edit|role.delete']);
+    Route::livewire('roles/audit', RoleAudit::class)->name('roles.audit')->middleware(['permission:role.audit']);
+    Route::livewire('roles/create', RoleCreate::class)->name('roles.create')->middleware(['permission:role.create']);
+    Route::livewire('roles/{role}/edit', RoleEdit::class)->name('roles.edit')->middleware(['permission:role.edit']);
+    Route::livewire('roles/{role}', RoleShow::class)->name('roles.show')->middleware(['permission:role.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
-        Route::get('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
+        Route::livewire('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
     });
 
-    Route::get('about', AboutIndex::class)->name('about.index');
+    Route::livewire('about', AboutIndex::class)->name('about.index');
 });
 
 require __DIR__ . '/auth.php';
