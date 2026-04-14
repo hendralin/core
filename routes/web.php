@@ -11,6 +11,8 @@ use App\Livewire\Contacts\ContactsShow;
 use App\Livewire\Dashboard\DashboardIndex;
 use App\Livewire\Groups\GroupsIndex;
 use App\Livewire\Groups\GroupsShow;
+use App\Livewire\Manual\ManualAdmin;
+use App\Livewire\Manual\ManualUser;
 use App\Livewire\Roles\RoleAudit;
 use App\Livewire\Roles\RoleCreate;
 use App\Livewire\Roles\RoleEdit;
@@ -66,9 +68,9 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('users/{user}/edit', UserEdit::class)->name('users.edit')->middleware(['permission:user.edit']);
     Route::livewire('users/{user}', UserShow::class)->name('users.show')->middleware(['permission:user.view']);
     Route::livewire('users/download/{filename}', function ($filename) {
-        $path = storage_path('app/temp/' . $filename);
+        $path = storage_path('app/temp/'.$filename);
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             abort(404);
         }
 
@@ -116,7 +118,17 @@ Route::middleware(['auth'])->group(function () {
         Route::livewire('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);
     });
 
+    Route::redirect('api-documentation', '/docs/api')->name('api-documentation');
+
+    Route::livewire('manual/admin', ManualAdmin::class)
+        ->name('manual.admin')
+        ->middleware(['role:admin|superadmin']);
+
+    Route::livewire('manual/pengguna', ManualUser::class)
+        ->name('manual.user')
+        ->middleware(['role:user']);
+
     Route::livewire('about', AboutIndex::class)->name('about.index');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

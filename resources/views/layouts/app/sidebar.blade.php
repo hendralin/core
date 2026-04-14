@@ -121,6 +121,15 @@
                         <flux:navlist.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup and Restore') }}</flux:navlist.item>
                     @endif
 
+                    <flux:navlist.item icon="book-open-text" :href="route('api-documentation')" :current="request()->routeIs('api-documentation')">{{ __('API Documentation') }}</flux:navlist.item>
+
+                    @if (auth()->user()->hasAnyRole(['admin', 'superadmin']))
+                        <flux:navlist.item icon="shield-check" :href="route('manual.admin')" :current="request()->routeIs('manual.admin')" wire:navigate>{{ __('Manual Administrator') }}</flux:navlist.item>
+                    @endif
+                    @if (auth()->user()->hasRole('user'))
+                        <flux:navlist.item icon="user-circle" :href="route('manual.user')" :current="request()->routeIs('manual.user')" wire:navigate>{{ __('Manual Pengguna') }}</flux:navlist.item>
+                    @endif
+
                     <flux:navlist.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:navlist.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
@@ -286,6 +295,16 @@
                     @if (auth()->user()->can('backup-restore.view') || auth()->user()->can('backup-restore.create'))
                         <flux:navlist.item icon="wrench" :href="route('backup-restore.index')" :current="request()->routeIs('backup-restore.index')" wire:navigate>{{ __('Backup & Restore') }}</flux:navlist.item>
                     @endif
+
+                    <flux:navlist.item icon="book-open-text" :href="route('api-documentation')" :current="request()->routeIs('api-documentation')">{{ __('API Documentation') }}</flux:navlist.item>
+
+                    @if (auth()->user()->hasAnyRole(['admin', 'superadmin']))
+                        <flux:navlist.item icon="shield-check" :href="route('manual.admin')" :current="request()->routeIs('manual.admin')" wire:navigate>{{ __('Manual Administrator') }}</flux:navlist.item>
+                    @endif
+                    @if (auth()->user()->hasRole('user'))
+                        <flux:navlist.item icon="user-circle" :href="route('manual.user')" :current="request()->routeIs('manual.user')" wire:navigate>{{ __('Manual Pengguna') }}</flux:navlist.item>
+                    @endif
+
                     <flux:navlist.item icon="information-circle" :href="route('about.index')" :current="request()->routeIs('about.index')" wire:navigate>{{ __('About') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
