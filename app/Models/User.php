@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
-use App\Models\Company;
-use Illuminate\Support\Str;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Shetabit\Visitor\Traits\Visitor as VisitorAnalytics;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, LogsActivity;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, HasRoles, LogsActivity, Notifiable, VisitorAnalytics;
 
     /**
      * The attributes that are mass assignable.
@@ -93,7 +94,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn($word) => Str::substr($word, 0, 1))
+            ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
 
@@ -102,12 +103,12 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getAvatarUrlAttribute(): string
     {
-        if ($this->avatar && \Illuminate\Support\Facades\Storage::disk('avatars')->exists($this->avatar)) {
-            return \Illuminate\Support\Facades\Storage::disk('avatars')->url($this->avatar);
+        if ($this->avatar && Storage::disk('avatars')->exists($this->avatar)) {
+            return Storage::disk('avatars')->url($this->avatar);
         }
 
         // Return initials-based avatar from UI Avatars service
-        return "https://ui-avatars.com/api/?name=" . urlencode($this->name) . "&color=7F9CF5&background=EBF4FF&size=128&font-size=0.6";
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF&size=128&font-size=0.6';
     }
 
     /**
@@ -141,7 +142,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 'status',
                 'timezone',
                 'avatar',
-                'is_email_verified'
+                'is_email_verified',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
@@ -150,24 +151,19 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the description for the activity log
-     *
-     * @param string $eventName
-     * @return string
      */
     public function getDescriptionForEvent(string $eventName): string
     {
-        return match($eventName) {
-            'created' => "User :name was created",
-            'updated' => "User :name was updated",
-            'deleted' => "User :name was deleted",
+        return match ($eventName) {
+            'created' => 'User :name was created',
+            'updated' => 'User :name was updated',
+            'deleted' => 'User :name was deleted',
             default => "User :name was {$eventName}",
         };
     }
 
     /**
      * The warehouses that belong to the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function warehouses(): BelongsToMany
     {
@@ -176,8 +172,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user is active
-     *
-     * @return bool
      */
     public function isActive(): bool
     {
@@ -186,8 +180,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user is inactive
-     *
-     * @return bool
      */
     public function isInactive(): bool
     {
@@ -196,8 +188,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user is pending
-     *
-     * @return bool
      */
     public function isPending(): bool
     {
@@ -206,12 +196,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get status label
-     *
-     * @return string
      */
     public function getStatusLabel(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             0 => 'Inactive',
             1 => 'Active',
             2 => 'Pending',
@@ -221,12 +209,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get status color for UI
-     *
-     * @return string
      */
     public function getStatusColor(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             0 => 'danger',
             1 => 'success',
             2 => 'warning',
@@ -236,8 +222,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Activate the user
-     *
-     * @return void
      */
     public function activate(): void
     {
@@ -246,8 +230,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Deactivate the user
-     *
-     * @return void
      */
     public function deactivate(): void
     {
@@ -256,8 +238,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the company logo URL directly
-     *
-     * @return string|null
      */
     public function getCompanyLogoUrlAttribute(): ?string
     {
@@ -265,24 +245,22 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($company && $company->logo) {
             return Storage::disk('logos')->url($company->logo);
         }
+
         return null;
     }
 
     /**
      * Get the company logo path directly
-     *
-     * @return string|null
      */
     public function getCompanyLogoAttribute(): ?string
     {
         $company = Company::first();
+
         return $company ? $company->logo : null;
     }
 
     /**
      * Get the employee that owns the user
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function employee(): HasOne
     {

@@ -211,7 +211,7 @@
                     </flux:sidebar.group>
                 @endif
 
-                @if (auth()->user()->can('cash-report.view'))
+                @if (auth()->user()->can('cash-report.view') || auth()->user()->can('tax-cash-report.view') || auth()->user()->can('sales-report.view') || auth()->user()->can('analytics.view'))
                     <flux:sidebar.group expandable icon="presentation-chart-line" heading="Report" class="grid">
                         @if (auth()->user()->can('cash-report.view'))
                             <flux:navlist.item icon="document-chart-bar" :href="route('cash-reports.index')" :current="request()->routeIs('cash-reports.*')" wire:navigate>{{ __('Laporan Kas') }}</flux:navlist.item>
@@ -223,6 +223,10 @@
 
                         @if (auth()->user()->can('sales-report.view'))
                             <flux:navlist.item icon="presentation-chart-line" :href="route('sales-reports.index')" :current="request()->routeIs('sales-reports.*')" wire:navigate>{{ __('Laporan Penjualan') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('analytics.view'))
+                            <flux:navlist.item icon="chart-bar-square" :href="route('analytics.index')" :current="request()->routeIs('analytics.*')" wire:navigate>{{ __('Analytics') }}</flux:navlist.item>
                         @endif
                     </flux:sidebar.group>
                 @endif
@@ -493,7 +497,7 @@
                     </flux:navlist.group>
                 @endif
 
-                @if (auth()->user()->can('cash-report.view'))
+                @if (auth()->user()->can('cash-report.view') || auth()->user()->can('tax-cash-report.view') || auth()->user()->can('sales-report.view') || auth()->user()->can('analytics.view'))
                     <flux:navlist.group :heading="__('Report')" class="grid">
                         @if (auth()->user()->can('cash-report.view'))
                             <flux:navlist.item icon="document-chart-bar" :href="route('cash-reports.index')" :current="request()->routeIs('cash-reports.*')" wire:navigate>{{ __('Laporan Kas') }}</flux:navlist.item>
@@ -505,6 +509,10 @@
 
                         @if (auth()->user()->can('sales-report.view'))
                             <flux:navlist.item icon="presentation-chart-line" :href="route('sales-reports.index')" :current="request()->routeIs('sales-reports.*')" wire:navigate>{{ __('Laporan Penjualan') }}</flux:navlist.item>
+                        @endif
+
+                        @if (auth()->user()->can('analytics.view'))
+                            <flux:navlist.item icon="chart-bar-square" :href="route('analytics.index')" :current="request()->routeIs('analytics.*')" wire:navigate>{{ __('Analytics') }}</flux:navlist.item>
                         @endif
                     </flux:navlist.group>
                 @endif

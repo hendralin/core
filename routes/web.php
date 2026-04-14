@@ -60,6 +60,7 @@ use App\Livewire\Position\PositionShow;
 use App\Livewire\Public\VehicleCatalog;
 use App\Livewire\Public\VehiclePublicShow;
 use App\Livewire\PurchasePayment\PurchasePaymentAudit;
+use App\Livewire\Report\Analytics\AnalyticsIndex;
 use App\Livewire\Report\CashReport\CashReportIndex;
 use App\Livewire\Report\SalesReport\SalesReportIndex;
 use App\Livewire\Report\TaxCashReport\TaxCashReportIndex;
@@ -304,6 +305,8 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('cash-reports', CashReportIndex::class)->name('cash-reports.index')->middleware(['permission:cash-report.view']);
     Route::livewire('tax-cash-reports', TaxCashReportIndex::class)->name('tax-cash-reports.index')->middleware(['permission:tax-cash-report.view']);
     Route::livewire('sales-reports', SalesReportIndex::class)->name('sales-reports.index')->middleware(['permission:sales-report.view']);
+
+    Route::livewire('analytics', AnalyticsIndex::class)->name('analytics.index')->middleware(['permission:analytics.view']);
 
     Route::prefix('backup-restore')->name('backup-restore.')->group(function () {
         Route::livewire('/', BackupRestoreIndex::class)->name('index')->middleware(['permission:backup-restore.view']);

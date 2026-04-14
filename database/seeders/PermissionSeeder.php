@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Spatie\Permission\Models\Role;
 
 class PermissionSeeder extends Seeder
 {
@@ -176,7 +175,6 @@ class PermissionSeeder extends Seeder
             'cash-inject.delete',
             'cash-inject.audit',
 
-
             // PAYROLL
             // POSITION
             'position.view',
@@ -231,6 +229,9 @@ class PermissionSeeder extends Seeder
 
             // SALES REPORT
             'sales-report.view',
+
+            // ANALYTICS
+            'analytics.view',
         ];
 
         foreach ($permissions as $key => $value) {
