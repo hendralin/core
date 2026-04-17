@@ -7,13 +7,15 @@ use Livewire\Component;
 use App\Models\Warehouse;
 use Livewire\Attributes\Title;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 
 #[Title('Create User')]
 class UserCreate extends Component
 {
-    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles, $allWarehouses;
+    public $name, $email, $phone, $birth_date, $address, $timezone, $login_redirect_route = 'dashboard', $session_lifetime_minutes = null, $password, $confirm_password, $allRoles, $allWarehouses;
 
     public $roles = [];
 
@@ -21,7 +23,12 @@ class UserCreate extends Component
 
     public function mount()
     {
-        if (auth()->user()->hasRole('superadmin')) {
+        $this->login_redirect_route = 'dashboard';
+
+        /** @var User $authenticatedUser */
+        $authenticatedUser = Auth::user();
+
+        if ($authenticatedUser->hasRole('superadmin')) {
             $this->allRoles = Role::whereNotIn('name', ['employee', 'salesman', 'customer', 'supplier'])->orderBy('name')->get();
         } else {
             $this->allRoles = Role::whereNotIn('name', ['superadmin', 'owner', 'employee', 'salesman', 'customer', 'supplier'])->orderBy('name')->get();
@@ -39,6 +46,15 @@ class UserCreate extends Component
             'birth_date' => 'nullable|date|before:today',
             'address' => 'nullable|string|max:500',
             'timezone' => 'required|string',
+            'login_redirect_route' => [
+                'nullable',
+                'string',
+                'max:255',
+                fn (string $attribute, mixed $value, \Closure $fail) => filled($value) && ! Route::has($value)
+                    ? $fail('Route tujuan login tidak ditemukan.')
+                    : null,
+            ],
+            'session_lifetime_minutes' => 'nullable|integer|min:5|max:43200',
             'roles' => 'required|array',
             'warehouses' => 'required|array|min:1',
             'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/|same:confirm_password',
@@ -63,6 +79,13 @@ class UserCreate extends Component
 
             'timezone.required' => 'Zona waktu wajib dipilih.',
 
+            'login_redirect_route.string' => 'Route tujuan login harus berupa teks.',
+            'login_redirect_route.max' => 'Route tujuan login tidak boleh lebih dari 255 karakter.',
+
+            'session_lifetime_minutes.integer' => 'Durasi session harus berupa angka.',
+            'session_lifetime_minutes.min' => 'Durasi session minimal 5 menit.',
+            'session_lifetime_minutes.max' => 'Durasi session maksimal 43200 menit.',
+
             'roles.required' => 'Setidaknya satu peran harus dipilih.',
             'roles.array' => 'Format peran tidak valid.',
 
@@ -82,6 +105,8 @@ class UserCreate extends Component
             'birth_date' => $this->birth_date,
             'address' => $this->address,
             'timezone' => $this->timezone,
+            'login_redirect_route' => filled($this->login_redirect_route) ? $this->login_redirect_route : 'dashboard',
+            'session_lifetime_minutes' => filled($this->session_lifetime_minutes) ? (int) $this->session_lifetime_minutes : null,
             'password' => Hash::make($this->password),
             'status' => '1',
             'email_verified_at' => now(), // Auto-verify for admin-created users
@@ -91,6 +116,8 @@ class UserCreate extends Component
         $user->syncRoles($this->roles);
 
         $user->warehouses()->sync($this->warehouses);
+
+        Cache::forget('user.session_lifetime_minutes.'.$user->id);
 
         // Log activity with detailed information
         activity()
@@ -104,6 +131,8 @@ class UserCreate extends Component
                     'birth_date' => $this->birth_date,
                     'address' => $this->address,
                     'timezone' => $this->timezone,
+                    'login_redirect_route' => filled($this->login_redirect_route) ? $this->login_redirect_route : 'dashboard',
+                    'session_lifetime_minutes' => filled($this->session_lifetime_minutes) ? (int) $this->session_lifetime_minutes : null,
                     'status' => '1',
                     'roles' => $this->roles,
                     'warehouses' => $this->warehouses,

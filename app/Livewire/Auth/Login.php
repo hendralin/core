@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -41,6 +42,7 @@ class Login extends Component
         }
 
         // Check if user is active
+        /** @var User $user */
         $user = Auth::user();
         if ($user->isInactive()) {
             Auth::logout();
@@ -54,7 +56,12 @@ class Login extends Component
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $redirectRoute = $user->resolveLoginRedirectRoute();
+        config([
+            'session.lifetime' => $user->resolveSessionLifetimeMinutes(),
+        ]);
+
+        $this->redirectIntended(default: route($redirectRoute, absolute: false), navigate: true);
     }
 
     /**

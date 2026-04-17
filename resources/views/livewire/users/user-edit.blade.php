@@ -54,6 +54,14 @@
                     <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
                     <option value="UTC">UTC</option>
                 </flux:select>
+                <div>
+                    <flux:input wire:model="login_redirect_route" label="Login Redirect Route" placeholder="dashboard" />
+                    <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">Isi nama route. Default: <code>dashboard</code>.</p>
+                </div>
+                <div>
+                    <flux:input wire:model="session_lifetime_minutes" label="Session Lifetime (Minutes)" type="number" min="5" max="43200" placeholder="Kosongkan untuk mengikuti setting global" />
+                    <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">Kosongkan agar mengikuti setting global perusahaan.</p>
+                </div>
                 <flux:select wire:model="status" label="Status">
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>

@@ -318,6 +318,16 @@
                                 </div>
                             </div>
 
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <flux:input wire:model="session_lifetime_minutes" label="Session Lifetime (Minutes)" type="number" min="5" max="43200" />
+                                    @error('session_lifetime_minutes') <p class="text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-zinc-400">
+                                        Durasi idle session sebelum logout otomatis. Default saat ini: 480 menit (8 jam).
+                                    </p>
+                                </div>
+                            </div>
+
                             <!-- Features Management -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Enabled Features</label>

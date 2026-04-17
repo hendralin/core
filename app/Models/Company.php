@@ -32,6 +32,7 @@ class Company extends Model
         'license_expires_at',
         'max_users',
         'max_storage_gb',
+        'session_lifetime_minutes',
         'features_enabled',
     ];
 
@@ -45,6 +46,7 @@ class Company extends Model
         'features_enabled' => 'array',
         'license_issued_at' => 'datetime',
         'license_expires_at' => 'datetime',
+        'session_lifetime_minutes' => 'integer',
     ];
 
     /**
@@ -70,6 +72,7 @@ class Company extends Model
                 'license_expires_at',
                 'max_users',
                 'max_storage_gb',
+                'session_lifetime_minutes',
                 'features_enabled'
             ])
             ->logOnlyDirty()
@@ -100,8 +103,19 @@ class Company extends Model
             'license_expires_at',
             'max_users',
             'max_storage_gb',
+            'session_lifetime_minutes',
             'features_enabled'
         ];
+    }
+
+    /**
+     * Resolve the configured session lifetime in minutes.
+     */
+    public function resolveSessionLifetimeMinutes(int $default = 120): int
+    {
+        $value = (int) ($this->session_lifetime_minutes ?: $default);
+
+        return $value >= 5 ? $value : $default;
     }
 
     /**

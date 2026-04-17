@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Shetabit\Visitor\Traits\Visitor as VisitorAnalytics;
@@ -37,6 +38,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'status',
         'last_login_at',
         'timezone',
+        'login_redirect_route',
+        'session_lifetime_minutes',
         'is_email_verified',
     ];
 
@@ -64,6 +67,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_login_at' => 'datetime',
             'is_email_verified' => 'boolean',
             'status' => 'integer',
+            'session_lifetime_minutes' => 'integer',
         ];
     }
 
@@ -128,6 +132,29 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Resolve the default route name after login.
+     */
+    public function resolveLoginRedirectRoute(): string
+    {
+        $routeName = filled($this->login_redirect_route)
+            ? $this->login_redirect_route
+            : 'dashboard';
+
+        return Route::has($routeName) ? $routeName : 'dashboard';
+    }
+
+    /**
+     * Resolve the configured session lifetime in minutes.
+     */
+    public function resolveSessionLifetimeMinutes(?int $default = null): int
+    {
+        $defaultLifetime = $default ?? (int) config('session.lifetime', 120);
+        $value = (int) ($this->session_lifetime_minutes ?: $defaultLifetime);
+
+        return $value >= 5 ? $value : $defaultLifetime;
+    }
+
+    /**
      * Get the options for activity logging
      */
     public function getActivitylogOptions(): LogOptions
@@ -141,6 +168,8 @@ class User extends Authenticatable implements MustVerifyEmail
                 'address',
                 'status',
                 'timezone',
+                'login_redirect_route',
+                'session_lifetime_minutes',
                 'avatar',
                 'is_email_verified',
             ])

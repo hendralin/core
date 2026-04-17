@@ -5,6 +5,7 @@ namespace App\Livewire\Company;
 use App\Models\Company;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +37,7 @@ class CompanyEdit extends Component
     public string $license_expires_at = '';
     public string $max_users = '';
     public string $max_storage_gb = '';
+    public string $session_lifetime_minutes = '480';
     public array $features_enabled = [];
     public string $newFeature = '';
     public bool $showLicenseSection = false;
@@ -61,6 +63,9 @@ class CompanyEdit extends Component
         $this->license_expires_at = $this->company->license_expires_at ? $this->company->license_expires_at->format('Y-m-d') : '';
         $this->max_users = $this->company->max_users ? (string)$this->company->max_users : '';
         $this->max_storage_gb = $this->company->max_storage_gb ? (string)$this->company->max_storage_gb : '';
+        $this->session_lifetime_minutes = $this->company->session_lifetime_minutes
+            ? (string) $this->company->session_lifetime_minutes
+            : (string) config('session.lifetime', 480);
         $this->features_enabled = $this->company->features_enabled ?? [];
 
         // Check for existing draft
@@ -96,6 +101,7 @@ class CompanyEdit extends Component
                 'license_expires_at' => 'nullable|date|after:license_issued_at',
                 'max_users' => 'nullable|integer|min:1',
                 'max_storage_gb' => 'nullable|integer|min:1',
+                'session_lifetime_minutes' => 'required|integer|min:5|max:43200',
                 'features_enabled' => 'nullable|array',
             ]);
 
@@ -146,6 +152,7 @@ class CompanyEdit extends Component
                 'license_expires_at' => $this->license_expires_at ?: null,
                 'max_users' => $this->max_users ? (int)$this->max_users : null,
                 'max_storage_gb' => $this->max_storage_gb ? (int)$this->max_storage_gb : null,
+                'session_lifetime_minutes' => (int) $this->session_lifetime_minutes,
                 'features_enabled' => !empty($this->features_enabled) ? $this->features_enabled : null,
             ];
 
@@ -155,6 +162,8 @@ class CompanyEdit extends Component
 
             // Clear draft after successful save
             session()->forget('company_draft');
+            Cache::forget('app.session_lifetime_minutes');
+            config(['session.lifetime' => (int) $this->session_lifetime_minutes]);
             $this->hasUnsavedChanges = false;
             $this->autoSaveStatus = '';
 
@@ -314,6 +323,7 @@ class CompanyEdit extends Component
                 'license_expires_at' => $this->license_expires_at,
                 'max_users' => $this->max_users,
                 'max_storage_gb' => $this->max_storage_gb,
+                'session_lifetime_minutes' => $this->session_lifetime_minutes,
                 'features_enabled' => $this->features_enabled,
                 'saved_at' => now(),
             ]]);
@@ -352,6 +362,7 @@ class CompanyEdit extends Component
             $this->license_expires_at = $draft['license_expires_at'] ?? $this->license_expires_at;
             $this->max_users = $draft['max_users'] ?? $this->max_users;
             $this->max_storage_gb = $draft['max_storage_gb'] ?? $this->max_storage_gb;
+            $this->session_lifetime_minutes = $draft['session_lifetime_minutes'] ?? $this->session_lifetime_minutes;
             $this->features_enabled = $draft['features_enabled'] ?? $this->features_enabled;
 
             $this->autoSaveStatus = 'Draft restored';

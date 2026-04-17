@@ -7,9 +7,10 @@ use Livewire\Component;
 use App\Models\Warehouse;
 use Livewire\Attributes\Title;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 
 #[Title('Edit User')]
 class UserEdit extends Component
@@ -21,7 +22,7 @@ class UserEdit extends Component
     protected $queryString = [
         'activeTab' => ['except' => 'profile'],
     ];
-    public $name, $email, $phone, $birth_date, $address, $timezone, $password, $confirm_password, $allRoles, $allWarehouses, $status;
+    public $name, $email, $phone, $birth_date, $address, $timezone, $login_redirect_route, $session_lifetime_minutes, $password, $confirm_password, $allRoles, $allWarehouses, $status;
 
     public $roles = [];
 
@@ -36,9 +37,14 @@ class UserEdit extends Component
         $this->birth_date = $user->birth_date?->format('Y-m-d');
         $this->address = $user->address;
         $this->timezone = $user->timezone;
+        $this->login_redirect_route = $user->login_redirect_route ?: 'dashboard';
+        $this->session_lifetime_minutes = $user->session_lifetime_minutes;
         $this->status = $user->status;
 
-        if (auth()->user()->hasRole('superadmin')) {
+        /** @var User $authenticatedUser */
+        $authenticatedUser = Auth::user();
+
+        if ($authenticatedUser->hasRole('superadmin')) {
             if ($this->user->hasRole('salesman')) {
                 $this->allRoles = Role::whereNotIn('name', ['employee', 'customer', 'supplier'])->orderBy('name')->get();
             } else {
@@ -63,6 +69,15 @@ class UserEdit extends Component
             'birth_date' => 'nullable|date|before:today',
             'address' => 'nullable|string|max:500',
             'timezone' => 'required|string',
+            'login_redirect_route' => [
+                'nullable',
+                'string',
+                'max:255',
+                fn (string $attribute, mixed $value, \Closure $fail) => filled($value) && ! Route::has($value)
+                    ? $fail('Route tujuan login tidak ditemukan.')
+                    : null,
+            ],
+            'session_lifetime_minutes' => 'nullable|integer|min:5|max:43200',
             'status' => 'required|integer|in:0,1,2',
             'roles' => 'required|array',
             'warehouses' => 'required|array|min:1',
@@ -88,6 +103,13 @@ class UserEdit extends Component
             'address.max' => 'Alamat tidak boleh lebih dari 500 karakter.',
 
             'timezone.required' => 'Zona waktu wajib dipilih.',
+
+            'login_redirect_route.string' => 'Route tujuan login harus berupa teks.',
+            'login_redirect_route.max' => 'Route tujuan login tidak boleh lebih dari 255 karakter.',
+
+            'session_lifetime_minutes.integer' => 'Durasi session harus berupa angka.',
+            'session_lifetime_minutes.min' => 'Durasi session minimal 5 menit.',
+            'session_lifetime_minutes.max' => 'Durasi session maksimal 43200 menit.',
 
             'status.required' => 'Status pengguna wajib dipilih.',
             'status.integer' => 'Status pengguna harus berupa angka.',
@@ -123,6 +145,8 @@ class UserEdit extends Component
             'birth_date' => $this->user->birth_date,
             'address' => $this->user->address,
             'timezone' => $this->user->timezone,
+            'login_redirect_route' => $this->user->login_redirect_route,
+            'session_lifetime_minutes' => $this->user->session_lifetime_minutes,
             'status' => $this->user->status,
             'roles' => $this->user->roles()->pluck('name')->toArray(),
             'warehouses' => $this->user->warehouses()->pluck('id')->toArray(),
@@ -134,6 +158,8 @@ class UserEdit extends Component
         $this->user->birth_date = $this->birth_date;
         $this->user->address = $this->address;
         $this->user->timezone = $this->timezone;
+        $this->user->login_redirect_route = filled($this->login_redirect_route) ? $this->login_redirect_route : 'dashboard';
+        $this->user->session_lifetime_minutes = filled($this->session_lifetime_minutes) ? (int) $this->session_lifetime_minutes : null;
         $this->user->status = $this->status;
 
         if ($this->password) {
@@ -141,6 +167,8 @@ class UserEdit extends Component
         }
 
         $this->user->save();
+
+        Cache::forget('user.session_lifetime_minutes.'.$this->user->id);
 
         $this->user->syncRoles($this->roles);
 
@@ -159,6 +187,8 @@ class UserEdit extends Component
                     'birth_date' => $this->birth_date,
                     'address' => $this->address,
                     'timezone' => $this->timezone,
+                    'login_redirect_route' => filled($this->login_redirect_route) ? $this->login_redirect_route : 'dashboard',
+                    'session_lifetime_minutes' => filled($this->session_lifetime_minutes) ? (int) $this->session_lifetime_minutes : null,
                     'status' => $this->status,
                     'roles' => $this->roles,
                     'warehouses' => $this->warehouses,
