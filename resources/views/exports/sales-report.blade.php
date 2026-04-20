@@ -52,18 +52,26 @@
         }
         .summary {
             margin-top: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 480px;
         }
-        .summary h3 {
-            margin: 0 0 10px 0;
+        .summary th,
+        .summary td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .summary thead th {
+            background-color: #f5f5f5;
+            font-weight: bold;
             font-size: 14px;
         }
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
+        .summary td:first-child {
+            width: 55%;
+        }
+        .summary .text-right {
+            text-align: right;
         }
     </style>
 </head>
@@ -77,17 +85,17 @@
     <table>
         <thead>
             <tr>
-                <th style="width: 4%;">No</th>
-                <th style="width: 8%;">Tanggal Jual</th>
-                <th style="width: 12%;">Kendaraan</th>
-                <th style="width: 8%;">Nomor Polisi</th>
-                <th style="width: 8%;">Harga Jual</th>
-                <th style="width: 8%;">Modal</th>
-                <th style="width: 8%;">Keuntungan</th>
-                <th style="width: 12%;">Pembeli</th>
-                <th style="width: 8%;">Telepon</th>
-                <th style="width: 8%;">Salesman</th>
-                <th style="width: 8%;">Pembayaran</th>
+                <th>No</th>
+                <th>Tanggal Jual</th>
+                <th>Kendaraan</th>
+                <th>Nomor Polisi</th>
+                <th>Harga Jual</th>
+                <th>Modal</th>
+                <th>Keuntungan</th>
+                <th>Pembeli</th>
+                <th>Telepon</th>
+                <th>Salesman</th>
+                <th>Pembayaran</th>
             </tr>
         </thead>
         <tbody>
@@ -141,25 +149,36 @@
     </table>
 
     @if($vehicles->count() > 0)
-        <div class="summary">
-            <h3>Ringkasan Penjualan</h3>
-            <div class="summary-row">
-                <span>Total Kendaraan Terjual:</span>
-                <strong>{{ $stats['total_vehicles'] }} unit</strong>
-            </div>
-            <div class="summary-row">
-                <span>Total Nilai Penjualan:</span>
-                <strong>Rp {{ number_format($stats['total_sales'], 0) }}</strong>
-            </div>
-            <div class="summary-row">
-                <span>Total Keuntungan:</span>
-                <strong>Rp {{ number_format($stats['total_profit'], 0) }}</strong>
-            </div>
-            <div class="summary-row">
-                <span>Margin Keuntungan:</span>
-                <strong>{{ number_format($stats['profit_margin'], 1) }}%</strong>
-            </div>
-        </div>
+        {{-- Table agar ringkasan ter-import ke Excel (Html reader tidak menulis div biasa ke sel) --}}
+        <table class="summary">
+            <thead>
+                <tr>
+                    <th colspan="2">Ringkasan Penjualan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Kendaraan Terjual:</td>
+                    <td></td>
+                    <td class="text-right"><strong>{{ $stats['total_vehicles'] }} unit</strong></td>
+                </tr>
+                <tr>
+                    <td>Total Nilai Penjualan:</td>
+                    <td></td>
+                    <td class="text-right"><strong>Rp {{ number_format($stats['total_sales'], 0) }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Total Keuntungan:</td>
+                    <td></td>
+                    <td class="text-right"><strong>Rp {{ number_format($stats['total_profit'], 0) }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Margin Keuntungan:</td>
+                    <td></td>
+                    <td class="text-right"><strong>{{ number_format($stats['profit_margin'], 1) }}%</strong></td>
+                </tr>
+            </tbody>
+        </table>
     @endif
 </body>
 </html>

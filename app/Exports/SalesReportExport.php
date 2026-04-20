@@ -5,8 +5,10 @@ namespace App\Exports;
 use App\Models\Vehicle;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 
-class SalesReportExport implements FromView
+class SalesReportExport implements FromView, ShouldAutoSize, WithColumnWidths
 {
     protected $search;
     protected $sortField;
@@ -27,6 +29,14 @@ class SalesReportExport implements FromView
         $this->paymentType = $paymentType;
         $this->salesmanId = $salesmanId;
         $this->policeNumberSearch = $policeNumberSearch;
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 4,   // lebar kolom "No" (satuan ≈ karakter di Excel)
+            'B' => 20,
+        ];
     }
 
     public function view(): View
