@@ -458,7 +458,7 @@
                             <flux:heading size="md">Informasi Pembeli</flux:heading>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <flux:select wire:model="payment_type" label="Metode Pembayaran *" icon="credit-card">
+                            <flux:select wire:model.live="payment_type" label="Metode Pembayaran *" icon="credit-card">
                                 <flux:select.option value="1">💰 Tunai</flux:select.option>
                                 <flux:select.option value="2">💳 Kredit</flux:select.option>
                             </flux:select>

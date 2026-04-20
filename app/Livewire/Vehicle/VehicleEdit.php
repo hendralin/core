@@ -293,7 +293,7 @@ class VehicleEdit extends Component
         $this->buyer_name = $vehicle->buyer_name;
         $this->buyer_phone = $vehicle->buyer_phone;
         $this->buyer_address = $vehicle->buyer_address;
-        $this->payment_type = $vehicle->payment_type;
+        $this->payment_type = $vehicle->payment_type !== null ? (string) $vehicle->payment_type : null;
         $this->leasing_id = $vehicle->leasing_id;
         $this->selling_date = $vehicle->selling_date;
         $this->selling_price = $vehicle->selling_price ? number_format($vehicle->selling_price, 0, ',', '.') : null;
@@ -831,7 +831,7 @@ class VehicleEdit extends Component
         $this->buyer_name = $this->vehicle->buyer_name;
         $this->buyer_phone = $this->vehicle->buyer_phone;
         $this->buyer_address = $this->vehicle->buyer_address;
-        $this->payment_type = $this->vehicle->payment_type;
+        $this->payment_type = $this->vehicle->payment_type !== null ? (string) $this->vehicle->payment_type : null;
         $this->leasing_id = $this->vehicle->leasing_id;
 
         // Reset image properties
